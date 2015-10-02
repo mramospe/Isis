@@ -1,0 +1,36 @@
+#################################################
+#                                               #
+#  Compiling lines for the MakeBDT.cpp file     #
+#                                               #
+# --------------------------------------------- #
+#                                               #
+#  Author: Miguel Ramos Pernas                  #
+#  e-mail: miguel.ramos.pernas@cern.ch		#
+#                                               #
+#  Last update: 08/04/2015	                #
+#     					        #
+# --------------------------------------------- #
+#################################################
+
+CFLAGS  = -Wall
+RCFLAGS = $(shell root-config --cflags)
+RGLIBS  = $(shell root-config --libs) -lTMVA
+
+INCLUDE = include
+SOURCE  = source
+
+CreateBDT : CreateBDT.o BDTAnalysis.o FileManager.o
+	g++ $(CFLAGS) $^ $(RGLIBS) -o CreateBDT
+
+CreateBDT.o : CreateBDT.cpp
+	g++ $(CFLAGS) -c CreateBDT.cpp -I$(INCLUDE) $(RCFLAGS) -o $@
+
+BDTAnalysis.o : $(SOURCE)/BDTAnalysis.cpp
+	g++ $(CFLAGS) -c $^ -I$(INCLUDE) $(RCFLAGS) -o $@
+
+FileManager.o : $(SOURCE)/FileManager.cpp
+	g++ $(CFLAGS) -c $^ -I$(INCLUDE) $(RCFLAGS) -o $@
+
+clean :
+	rm CreateBDT CreateBDT.o
+

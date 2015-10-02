@@ -1,0 +1,5 @@
+*** Isis ***
+
+This set of c++ and python code constitute a tool to perform analysis in High Energy Physics. The environment is built executing the attached script "LoadEnvironment.sh".
+
+The different tools have been tested under C++11, Python v2.7.8 and ROOT v6.02 (see "https://root.cern.ch" for more information).

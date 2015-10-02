@@ -1,0 +1,68 @@
+#################################################
+#						#
+#  Makefile for Root programs			#
+#						#
+# --------------------------------------------- #
+#						#
+#  Author: Miguel Ramos Pernas			#
+#  e-mail: miguel.ramos.pernas@cern.ch	 	#
+#						#
+#  Last update: 13/04/2015			#
+#						#
+# --------------------------------------------- #
+#						#
+#  Description:					#
+#						#
+#  Makefile for compiling a program using root  #
+#  libraries and with source and header files   #
+#  located in two different folders. Object 	#
+#  files, instead of being deleted are saved 	#
+#  in a folder.			                #
+#						#
+# --------------------------------------------- #
+#################################################
+
+
+# Name of the executable file
+EXEC = Main
+
+# Name of the main file
+MAIN = Main.cpp
+
+# Sources', includes' and object files' folders
+INCLUDE = inc
+SOURCE = src
+OBJ_DIR = lib
+
+# Compiler
+COMPILER = g++
+
+# Flags for the compilation
+CFLAGS = -g -Wall
+
+# Root path to includes and libaries
+ROOT_CFLAGS = `root-config --cflags`
+ROOT_LIB = `root-config --libs`
+
+# Objects
+CPP_PATH = $(patsubst %.cpp, %.o, $(wildcard $(SOURCE)/*.cpp))
+OBJECTS = $(subst $(SOURCE), $(OBJ_DIR), $(CPP_PATH))
+
+
+$(EXEC): $(OBJ_DIR) $(EXEC).o $(OBJECTS)
+	@echo " --- Linking object files --- "
+	$(COMPILER) $(CFLAGS) $(EXEC).o $(OBJECTS) $(ROOT_LIB) -o $(EXEC)
+
+$(EXEC).o: $(EXEC).cpp
+	@echo " --- Compiling files --- "
+	$(COMPILER) -c $^ -I$(INCLUDE) $(ROOT_CFLAGS) -o $@	
+
+$(OBJ_DIR)/%.o: $(SOURCE)/%.cpp
+	$(COMPILER) -c $^ -I$(INCLUDE) $(ROOT_CFLAGS) -o $@
+
+$(OBJ_DIR):
+	@echo " --- Making the objects' directory --- "
+	mkdir -p $(OBJ_DIR)
+
+clean:
+	rm -rf $(EXEC) $(EXEC).o $(OBJ_DIR)
