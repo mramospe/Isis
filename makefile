@@ -6,7 +6,7 @@
 # Compiler options
 
 COMPILER = g++
-CFLAGS   = -Wall -shared -fPIC
+CFLAGS   = -Wall -std=c++11 -shared -fPIC
 
 # ------------------------------------------
 # Root flags
