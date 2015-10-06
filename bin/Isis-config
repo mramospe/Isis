@@ -1,0 +1,38 @@
+#=======================================================#
+# Configuration script to compile the Isis c++ packages #
+#-------------------------------------------------------#
+# AUTHOR: Miguel Ramos Pernas		                #
+# e-mail: miguel.ramos.pernas@cern.ch	                #
+#=======================================================#
+
+# C++ flags
+cflags="-Wall -std=c++11 -pthread"
+
+# Paths to the include folders
+ginclude="-I$ISIS/General/include"
+ainclude="-I$ISIS/Analysis/include"
+rinclude=-I`root-config --incdir`
+
+# C++ libraries (both Root and Isis)
+rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lTMVA"
+ilibs=-L$ISIS/lib" "-lGeneral" "-lAnalysis 
+
+out=""
+
+for opt in $@
+do
+    if [ "$opt" == "--cflags" ]; then
+	out+=$cflags
+    elif [ "$opt" == "--incdir" ]; then
+	out+=$rinclude" "$ginclude" "$ainclude
+    elif [ "$opt" == "--rlibs" ]; then
+	out+=$rlibs
+    elif [ "$opt" == "--libs" ]; then
+	out+=$ilibs" "$rlibs
+    else
+	echo " Isis configuration option < $opt > not known"
+	break
+    fi
+
+    echo $out
+done
