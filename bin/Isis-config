@@ -22,17 +22,25 @@ out=""
 for opt in $@
 do
     if [ "$opt" == "--cflags" ]; then
-	out+=$cflags
+	add=$cflags
     elif [ "$opt" == "--incdir" ]; then
-	out+=$rinclude" "$ginclude" "$ainclude
+	add=$rinclude" "$ginclude" "$ainclude
     elif [ "$opt" == "--rlibs" ]; then
-	out+=$rlibs
+	add=$rlibs
     elif [ "$opt" == "--libs" ]; then
-	out+=$ilibs" "$rlibs
+	add=$ilibs" "$rlibs
     else
 	echo " Isis configuration option < $opt > not known"
 	break
     fi
-
-    echo $out
+    
+    if [ "$out" == "" ]; then
+       	 out=$add
+    else
+	 out+=" "$add
+    fi
 done
+
+if [ "$out" != "" ]; then
+   echo $out
+fi
