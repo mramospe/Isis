@@ -32,7 +32,7 @@ ROOT_LIBS = `Isis-config --rlibs`
 
 # ------------------------------------------
 # Include paths
-INCLUDE = `Isis-config --incdir`
+INCLUDE = `Isis-config --incdirs`
 
 # ------------------------------------------
 # Compiles the General package

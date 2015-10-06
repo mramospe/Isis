@@ -23,7 +23,7 @@ for opt in $@
 do
     if [ "$opt" == "--cflags" ]; then
 	add=$cflags
-    elif [ "$opt" == "--incdir" ]; then
+    elif [ "$opt" == "--incdirs" ]; then
 	add=$rinclude" "$ginclude" "$ainclude
     elif [ "$opt" == "--rlibs" ]; then
 	add=$rlibs
