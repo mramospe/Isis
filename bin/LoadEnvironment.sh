@@ -32,7 +32,7 @@ export LD_LIBRARY_PATH=$ISIS/lib:$LD_LIBRARY_PATH
 echo " Exported c++ libraries from: $ISIS/lib"
 
 # Defines the alias to the tools
-alias BDTBrowser='$ISIS_TOOLS/BDTBrowser.C'
+alias BDTBrowser='root -l $ISIS_TOOLS/BDTBrowser.C'
 alias ChangeWords='python $ISIS_TOOLS/ChangeWords.py'
 alias GetLuminosity='$ISIS_TOOLS/./GetLuminosity.out'
 alias MergeFilesByEvents='$ISIS_TOOLS/./MergeFilesByEvents.out'
