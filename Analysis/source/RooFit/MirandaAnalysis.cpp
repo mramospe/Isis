@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 13/07/2015			       //
+//  Last update: 07/10/2015			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////
 
 
-#include "MirandaAnalysis.h"
+#include "RooFit/MirandaAnalysis.h"
 
 #include <cmath>
 

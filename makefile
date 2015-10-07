@@ -13,17 +13,20 @@ SHELL     = /bin/bash
 
 # ------------------------------------------
 # Source path and objects definition
-GENERAL_SOURCE   = General/source
-GENERAL_OBJECTS  = $(patsubst %.cpp, %.o, $(wildcard $(GENERAL_SOURCE)/*.cpp))
-GENERAL_LIB      = lib/libGeneral.so
-ANALYSIS_SOURCE  = Analysis/source
-ANALYSIS_OBJECTS = $(patsubst %.cpp, %.o, $(wildcard $(ANALYSIS_SOURCE)/*.cpp))
-ANALYSIS_LIB     = lib/libAnalysis.so
-TOOLS_EXECS      = $(patsubst %.cpp, %.out, $(wildcard Tools/*.cpp))
+GENERAL_SOURCE     = General/source
+GENERAL_OBJECTS    = $(patsubst %.cpp, %.o, $(wildcard $(GENERAL_SOURCE)/*.cpp))
+GENERAL_LIB        = lib/libGeneral.so
+ANALYSIS_SOURCE    = Analysis/source
+ANALYSIS_OBJECTS   = $(patsubst %.cpp, %.o, $(wildcard $(ANALYSIS_SOURCE)/*.cpp))
+ANALYSIS_LIB       = lib/libAnalysis.so
+RFANALYSIS_SOURCE  = Analysis/source/RooFit
+RFANALYSIS_OBJECTS = $(patsubst %.cpp, %.o, $(wildcard $(RFANALYSIS_SOURCE)/*.cpp))
+RFANALYSIS_LIB     = lib/libRFAnalysis.so
+TOOLS_EXECS        = $(patsubst %.cpp, %.out, $(wildcard Tools/*.cpp))
 
 # ------------------------------------------
 # Main compiling function
-all: $(GENERAL_LIB) $(ANALYSIS_LIB) $(TOOLS_EXECS)
+all: $(GENERAL_LIB) $(ANALYSIS_LIB) $(RFANALYSIS_LIB) $(TOOLS_EXECS)
 	@echo " Installation finished"
 
 # ------------------------------------------
@@ -52,6 +55,15 @@ $(ANALYSIS_LIB): $(ANALYSIS_OBJECTS)
 	@echo " Creating shared library for Analysis package"
 	$(COMPILER) $(CFLAGS) -o $@ $(ANALYSIS_SOURCE)/*.o
 
+# ----------------------------------------------
+# Compiles the RooFit-dependent Analysis package
+$(RFANALYSIS_SOURCE)/%.o: $(RFANALYSIS_SOURCE)/%.cpp
+	$(COMPILER) $(CFLAGS) -c $^ $(INCLUDE) $(ROOT_LIBS) -o $@
+
+$(RFANALYSIS_LIB): $(RFANALYSIS_OBJECTS)
+	@echo " Creating shared library for RooFit-Analysis package"
+	$(COMPILER) $(CFLAGS) -o $@ $(RFANALYSIS_SOURCE)/*.o
+
 # ------------------------------------------
 # Compiles the Tools
 Tools/%.out: Tools/%.cpp
@@ -61,10 +73,12 @@ Tools/%.out: Tools/%.cpp
 # Function to remove all the installation files and folders
 clean:
 	@rm -r lib
-	@echo " Removed library folder at: $ISIS/lib"
+	@echo "Removed library folder at: lib"
 	@rm General/source/*.o
-	@echo " Removed object files at: $ISIS/General/source"
+	@echo " Removed object files at: General/source"
 	@rm Analysis/source/*.o
-	@echo " Removed object fiels at: $ISIS/Analysis/source"
+	@echo " Removed object fiels at: Analysis/source"
+	@rm Analysis/source/RooFit/*.o
+	@echo " Removed object fiels at: Analysis/source/RooFit"
 	@rm Tools/*.out
-	@echo " Removed compiled files at: $ISIS/Tools"
+	@echo " Removed compiled files at: Tools"
