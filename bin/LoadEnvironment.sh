@@ -37,4 +37,5 @@ alias ChangeWords='python $ISIS_TOOLS/ChangeWords.py'
 alias GetLuminosity='$ISIS_TOOLS/./GetLuminosity.out'
 alias MergeFilesByEvents='$ISIS_TOOLS/./MergeFilesByEvents.out'
 alias ReorderTreeByEvents='$ISIS_TOOLS/./ReorderTreeByEvents.out'
+alias SeeDifferences='python $ISIS_TOOLS/SeeDifferences.py'
 echo " Defined alias for tools at: $ISIS_TOOLS"

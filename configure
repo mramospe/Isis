@@ -15,4 +15,4 @@ if [ ! -d "$ISIS/lib" ]; then
     echo " Created library folder at: $ISIS/lib"
 fi
 
-echo " Type < make > to install the Isis package"
+echo " Type < make > to install the Isis project"
