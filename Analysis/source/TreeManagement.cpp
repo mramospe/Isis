@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 30/09/2015                             //
+//  Last update: 16/10/2015                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////
 
 
+#include "TDirectory.h"
 #include "TBranch.h"
 #include "TLeaf.h"
 #include "TObjArray.h"
@@ -161,7 +162,8 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
     exit( 0 );
   }
 
-  std::cout << " Changing variables in tree: < " << inputTree -> GetName() << " >" << std::endl;
+  std::cout << " Changing variables in tree: < "   << inputTree  -> GetName() << " >" << std::endl;
+  std::cout << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << std::endl;
 
   // Deactivates the branches of the input variables
   for ( std::vector<std::string>::iterator it = ivars.begin();
