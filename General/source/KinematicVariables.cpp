@@ -63,6 +63,18 @@ double General::Det( General::LorentzVector vec1,
     vec1.Pz()*( vec2.Px()*vec3.Py() - vec2.Py()*vec3.Px() );
 }
 
+//______________________________________________________________________________
+// Calculates the IP given the momentum and the primary and secondary vertex
+double General::IP( General::Vector3 vec,
+		    General::Vector3 pv,
+		    General::Vector3 sv ) {
+
+  General::Vector3
+    u( vec.Unitary() ),
+    ipvec( pv - sv );
+
+  return ( ipvec - u.Dot( ipvec )*u ) .Mod();
+}
 
 //______________________________________________________________________________
 // DOCA function (distance of closest approach)

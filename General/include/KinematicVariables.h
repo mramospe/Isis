@@ -31,10 +31,11 @@
 
 namespace General {
 
-  double      CTAU( LorentzVector TLV, Vector3 OwnPV, Vector3 EndV );
-  double      Det( Vector3 vec1, Vector3 vec2, Vector3 vec3 );
-  double      Det( LorentzVector vec1, LorentzVector vec2, LorentzVector vec3 );
-  double      DOCA( LorentzVector vec1, LorentzVector vec2, Vector3 EndV1, Vector3 EndV2 );
+  double CTAU( LorentzVector TLV, Vector3 OwnPV, Vector3 EndV );
+  double Det( Vector3 vec1, Vector3 vec2, Vector3 vec3 );
+  double Det( LorentzVector vec1, LorentzVector vec2, LorentzVector vec3 );
+  double IP( Vector3 vec, Vector3 pv, Vector3 sv );
+  double DOCA( LorentzVector vec1, LorentzVector vec2, Vector3 EndV1, Vector3 EndV2 );
 
 }
 
