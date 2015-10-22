@@ -21,7 +21,6 @@
 
 
 #include "HelicityAngles.h"
-#include "KinematicVariables.h"
 
 
 //______________________________________________________________________________
