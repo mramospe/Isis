@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                        //
 //  e-mail: miguel.ramos.pernas@cern.ch                //
 //                                                     //
-//  Last update: 12/06/2015                            //
+//  Last update: 22/10/2015                            //
 //                                                     //
 // --------------------------------------------------- //
 //                                                     //
@@ -34,7 +34,7 @@
 
 //_______________________________________________________________________________
 
-namespace AnalysisPackage {
+namespace Analysis {
 
   class CLsArray {
 
