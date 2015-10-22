@@ -9,8 +9,8 @@
 cflags="-Wall -std=c++11 -pthread"
 
 # Paths to the include folders
-ginclude="-I$ISIS/General/include"
-ainclude="-I$ISIS/Analysis/include"
+ginclude=-I$ISIS/General/include
+ainclude=-I$ISIS/Analysis/include
 rinclude=-I`root-config --incdir`
 
 # C++ libraries (both Root and Isis)
@@ -21,23 +21,23 @@ out=""
 
 for opt in $@
 do
-    if [ "$opt" == "--cflags" ]; then
+    if [ "$opt" = "--cflags" ]; then
 	add=$cflags
-    elif [ "$opt" == "--incdirs" ]; then
+    elif [ "$opt" = "--incdirs" ]; then
 	add=$rinclude" "$ginclude" "$ainclude
-    elif [ "$opt" == "--rlibs" ]; then
+    elif [ "$opt" = "--rlibs" ]; then
 	add=$rlibs
-    elif [ "$opt" == "--libs" ]; then
+    elif [ "$opt" = "--libs" ]; then
 	add=$ilibs" "$rlibs
     else
 	echo " Isis configuration option < $opt > not known"
 	break
     fi
     
-    if [ "$out" == "" ]; then
+    if [ "$out" = "" ]; then
        	 out=$add
     else
-	 out+=" "$add
+	 out="$out $add"
     fi
 done
 

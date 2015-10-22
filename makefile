@@ -82,3 +82,5 @@ clean:
 	@echo " Removed object fiels at: Analysis/source/RooFit"
 	@rm Tools/*.out
 	@echo " Removed compiled files at: Tools"
+	@rm Examples/*.out
+	@echo " Removed compiled files at: Examples"

@@ -1,5 +1,12 @@
-#include <cstring>
+////////////////////////////////////////////////////
+//                                                //
+//  Example to generate a BDT using TMVA package  //
+//                                                //
+////////////////////////////////////////////////////
+
 #include "BDTAnalysis.h"
+
+#include <cstring>
 
 Int_t main( Int_t argc, Char_t *argv[] ) {
 
@@ -67,7 +74,7 @@ Int_t main( Int_t argc, Char_t *argv[] ) {
     if ( !strcmp( argv[1], "classificate" )
 	 or !strcmp( argv[1], "Classificate" ) ) {
 
-      PhysicalProject::BDTClassifier BDTClass( "Factory", "TMVA.root" );
+      Analysis::BDTClassifier BDTClass( "Factory", "TMVA.root" );
 
       // Background file
       BDTClass.AddBackgroundFile( "/scratch07/miguel.ramos/Lb2Kpippi_B2FourBodyLine/TMVA_Samples_2011.root", "Background" );
@@ -96,7 +103,7 @@ Int_t main( Int_t argc, Char_t *argv[] ) {
 
     else if ( !strcmp( argv[1], "apply" ) or !strcmp( argv[1], "Apply" ) ) {
 
-      PhysicalProject::BDTApplier BDTClass( "Applier" , "Factory" );
+      Analysis::BDTApplier BDTClass( "Applier" , "Factory" );
       
       // Input files
       BDTClass.AddFile( "/scratch07/miguel.ramos/Lb2Kpippi_B2FourBodyLine/Lb2Kpippi_B2FourBodyLine_2011_magnetUp_MoreVariables.root"    );

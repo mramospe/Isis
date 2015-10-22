@@ -11,9 +11,6 @@ echo " *** Isis project ***"
 # Gets the path to this file
 currpath=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 
-# Extends the path to bash scripts with this one
-PATH=$PATH:$currpath
-
 # Exports the different folders of the project
 export ISIS=${currpath:0:(${#currpath}-4)}
 export ISIS_MAKEFILES=$ISIS/Makefiles
@@ -23,13 +20,17 @@ export ISIS_TOOLS=$ISIS/Tools
 # Displays the path to the Isis folder
 echo " Loading source from: $ISIS"
 
-# Exports the python modules
-export PYTHONPATH=$PYTHONPATH:$ISIS_PYTHON
-echo " Extended python path from: $ISIS_PYTHON"
+# Extends the path to bash scripts with this one
+PATH=$PATH:$currpath
+echo " Extended shell path to $currpath"
 
 # The library path is updated with the Isis libraries
 export LD_LIBRARY_PATH=$ISIS/lib:$LD_LIBRARY_PATH
 echo " Exported c++ libraries from: $ISIS/lib"
+
+# Exports the python modules
+export PYTHONPATH=$PYTHONPATH:$ISIS_PYTHON
+echo " Extended python path from: $ISIS_PYTHON"
 
 # Defines the alias to the tools
 alias BDTBrowser='root -l $ISIS_TOOLS/BDTBrowser.C'

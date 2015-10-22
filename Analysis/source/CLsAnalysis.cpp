@@ -406,11 +406,11 @@ inline double Analysis::CLsArray::GetPoissonProb( Analysis::CLsArray &values  ) 
 
 //_______________________________________________________________________________
 // Main constructor
-Analysis::CLsAnalyzer::CLsAnalyzer() { }
+Analysis::CLsAnalyser::CLsAnalyser() { }
 
 //_______________________________________________________________________________
 // Constructor that allocates the distribution of the two samples in two vectors
-Analysis::CLsAnalyzer::CLsAnalyzer( Analysis::CLsArray old_hyp,
+Analysis::CLsAnalyser::CLsAnalyser( Analysis::CLsArray old_hyp,
 				    Analysis::CLsArray new_hyp,
 				    int    npoints ) {
 
@@ -430,7 +430,7 @@ Analysis::CLsAnalyzer::CLsAnalyzer( Analysis::CLsArray old_hyp,
 
 //_______________________________________________________________________________
 // Destructor
-Analysis::CLsAnalyzer::~CLsAnalyzer() { }
+Analysis::CLsAnalyser::~CLsAnalyser() { }
 
 //_______________________________________________________________________________
 
@@ -439,7 +439,7 @@ Analysis::CLsAnalyzer::~CLsAnalyzer() { }
 
 //_______________________________________________________________________________
 // Gets the distribution of the old and new hypothesis
-void Analysis::CLsAnalyzer::Evaluate() {
+void Analysis::CLsAnalyser::Evaluate() {
   
   fNewHypArray = std::vector<double>( fNPoints );
   fOldHypArray = std::vector<double>( fNPoints );
@@ -463,49 +463,49 @@ void Analysis::CLsAnalyzer::Evaluate() {
 
 //_______________________________________________________________________________
 // Gets the p-value of the old hypothesis given the test statistics value
-double Analysis::CLsAnalyzer::GetAlpha( double t ) {
+double Analysis::CLsAnalyser::GetAlpha( double t ) {
 
   return this -> GetPValue( fOldHypArray, t, "old" );
 }
 
 //_______________________________________________________________________________
 // Gets the p-value of the old hypothesis given the observation
-double Analysis::CLsAnalyzer::GetAlpha( Analysis::CLsArray obs ) {
+double Analysis::CLsAnalyser::GetAlpha( Analysis::CLsArray obs ) {
 
   return this -> GetAlpha( this -> TestStat( obs ) );
 }
 
 //_______________________________________________________________________________
 // Gets the p-value of the new hypothesis given the test statistics value
-double Analysis::CLsAnalyzer::GetBeta( double t ) {
+double Analysis::CLsAnalyser::GetBeta( double t ) {
 
   return this -> GetPValue( fNewHypArray, t, "new" );
 }
 
 //_______________________________________________________________________________
 // Gets the p-value of the new hypothesis given the observation
-double Analysis::CLsAnalyzer::GetBeta( Analysis::CLsArray obs ) {
+double Analysis::CLsAnalyser::GetBeta( Analysis::CLsArray obs ) {
 
   return this -> GetBeta( this -> TestStat( obs ) );
 }
 
 //_______________________________________________________________________________
 // Gets the CLs
-double Analysis::CLsAnalyzer::GetCLs( Analysis::CLsArray obs ) {
+double Analysis::CLsAnalyser::GetCLs( Analysis::CLsArray obs ) {
 
   return this -> GetBeta( obs )/( 1 - this -> GetAlpha( obs ) );
 }
 
 //_______________________________________________________________________________
 // Gets the new hypothesis test statistics event at position <index>
-double Analysis::CLsAnalyzer::GetNewHypEvt( int index ) {
+double Analysis::CLsAnalyser::GetNewHypEvt( int index ) {
 
   return fNewHypArray[ index ];
 }
 
 //_______________________________________________________________________________
 // Gets the new hypothesis histogram
-TH1D* Analysis::CLsAnalyzer::GetNewHypHist( const char *name, int nbins ) {
+TH1D* Analysis::CLsAnalyser::GetNewHypHist( const char *name, int nbins ) {
 
   double
     step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
@@ -526,14 +526,14 @@ TH1D* Analysis::CLsAnalyzer::GetNewHypHist( const char *name, int nbins ) {
 
 //_______________________________________________________________________________
 // Gets the old hypothesis test statistics event at position <index>
-double Analysis::CLsAnalyzer::GetOldHypEvt( int index ) {
+double Analysis::CLsAnalyser::GetOldHypEvt( int index ) {
 
   return fOldHypArray[ index ];
 }
 
 //_______________________________________________________________________________
 // Gets the old hypothesis histogram
-TH1D* Analysis::CLsAnalyzer::GetOldHypHist( const char *name, int nbins ) {
+TH1D* Analysis::CLsAnalyser::GetOldHypHist( const char *name, int nbins ) {
 
   double
     step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
@@ -554,7 +554,7 @@ TH1D* Analysis::CLsAnalyzer::GetOldHypHist( const char *name, int nbins ) {
 
 //_______________________________________________________________________________
 // Gets the p-value for a given hypothesis
-double Analysis::CLsAnalyzer::GetPValue( std::vector<double> &list,
+double Analysis::CLsAnalyser::GetPValue( std::vector<double> &list,
 					 double              &t0,
 					 const char            *type ) {
 
@@ -579,7 +579,7 @@ double Analysis::CLsAnalyzer::GetPValue( std::vector<double> &list,
 //_______________________________________________________________________________
 // Gets the CLs for a given confidence level ( introduce 0.8413 and 1 - 0.8413
 // to get the region inside 1 sigma ).
-double Analysis::CLsAnalyzer::GetQCLs( double q, const char *type ) {
+double Analysis::CLsAnalyser::GetQCLs( double q, const char *type ) {
 
   double tq;
 
@@ -593,7 +593,7 @@ double Analysis::CLsAnalyzer::GetQCLs( double q, const char *type ) {
 
 //_______________________________________________________________________________
 // Gets the ROC curve
-TGraph* Analysis::CLsAnalyzer::GetROC( int npoints ) {
+TGraph* Analysis::CLsAnalyser::GetROC( int npoints ) {
 
   double
     it_min( fOldHypArray[ 0 ] ),
@@ -611,12 +611,12 @@ TGraph* Analysis::CLsAnalyzer::GetROC( int npoints ) {
 
 //_______________________________________________________________________________
 // Gets the size of the arrays in the class
-int Analysis::CLsAnalyzer::GetSize() { return fNPoints; }
+int Analysis::CLsAnalyser::GetSize() { return fNPoints; }
 
 //_______________________________________________________________________________
 // Sets a new hypothesis. The arrays containing the distributions of the old
 // hypothesis are cleared.
-void Analysis::CLsAnalyzer::SetHypothesis( Analysis::CLsArray old_hyp,
+void Analysis::CLsAnalyser::SetHypothesis( Analysis::CLsArray old_hyp,
 					   Analysis::CLsArray new_hyp,
 					   int    npoints ) {
 
@@ -629,7 +629,7 @@ void Analysis::CLsAnalyzer::SetHypothesis( Analysis::CLsArray old_hyp,
 //_______________________________________________________________________________
 // Sets a new hypothesis. The array containing the distribution of the old new
 // hypothesis is cleared.
-void Analysis::CLsAnalyzer::SetNewHypothesis( Analysis::CLsArray new_hyp ) {
+void Analysis::CLsAnalyser::SetNewHypothesis( Analysis::CLsArray new_hyp ) {
 
   fNewHyp = new_hyp;
   fNewHypArray.clear();
@@ -642,12 +642,12 @@ void Analysis::CLsAnalyzer::SetNewHypothesis( Analysis::CLsArray new_hyp ) {
 
 //_______________________________________________________________________________
 // Sets a new number of points for the distributions
-void Analysis::CLsAnalyzer::SetNPoints( int npoints ) { fNPoints = npoints; }
+void Analysis::CLsAnalyser::SetNPoints( int npoints ) { fNPoints = npoints; }
 
 //_______________________________________________________________________________
 // Sets a new hypothesis. The array containing the distribution of the old old
 // hypothesis is cleared.
-void Analysis::CLsAnalyzer::SetOldHypothesis( Analysis::CLsArray old_hyp ) {
+void Analysis::CLsAnalyser::SetOldHypothesis( Analysis::CLsArray old_hyp ) {
 
   fOldHyp = old_hyp;
   fOldHypArray.clear();
@@ -660,7 +660,7 @@ void Analysis::CLsAnalyzer::SetOldHypothesis( Analysis::CLsArray old_hyp ) {
 
 //_______________________________________________________________________________
 // Gets the test statistics value for a given observation
-double Analysis::CLsAnalyzer::TestStat( Analysis::CLsArray obs ) {
+double Analysis::CLsAnalyser::TestStat( Analysis::CLsArray obs ) {
 
   return -2*std::log( ( fOldHyp.*GetOldHypProb )( obs )/
 		      ( fNewHyp.*GetNewHypProb )( obs ) );

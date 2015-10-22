@@ -38,7 +38,7 @@ namespace Analysis {
 
   class CLsArray {
 
-    friend class CLsAnalyzer;
+    friend class CLsAnalyser;
   
   public:
   
@@ -80,18 +80,18 @@ namespace Analysis {
   };
 
 
-  class CLsAnalyzer {
+  class CLsAnalyser {
 
   public:
 
     // Constructors
-    CLsAnalyzer();
-    CLsAnalyzer( CLsArray,
+    CLsAnalyser();
+    CLsAnalyser( CLsArray,
 		 CLsArray,
 		 int npoints = 10000 );
 
     // Destructor
-    ~CLsAnalyzer();
+    ~CLsAnalyser();
 
     // Methods
     void    Evaluate();
