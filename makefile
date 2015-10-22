@@ -72,15 +72,34 @@ Tools/%.out: Tools/%.cpp
 # ---------------------------------------------------------
 # Function to remove all the installation files and folders
 clean:
-	@rm -r lib
-	@echo "Removed library folder at: lib"
-	@rm General/source/*.o
-	@echo " Removed object files at: General/source"
-	@rm Analysis/source/*.o
-	@echo " Removed object fiels at: Analysis/source"
-	@rm Analysis/source/RooFit/*.o
-	@echo " Removed object fiels at: Analysis/source/RooFit"
-	@rm Tools/*.out
-	@echo " Removed compiled files at: Tools"
-	@rm Examples/*.out
-	@echo " Removed compiled files at: Examples"
+	@if [ -a lib ]; \
+	then \
+		rm -r lib; \
+		echo " Removed library folder: lib"; \
+	fi;
+	@if [ "$(wildcard $(GENERAL_SOURCE)/*.o)" != "" ]; \
+	then \
+		rm $(GENERAL_SOURCE)/*.o; \
+		echo " Removed compiled files at: $(GENERAL_SOURCE)"; \
+	fi;
+	@if [ "$(wildcard $(ANALYSIS_SOURCE)/*.o)" != "" ]; \
+	then \
+		rm $(ANALYSIS_SOURCE)/*.o; \
+		echo " Removed compiled files at: $(ANALYSIS_SOURCE)"; \
+	fi;
+	@if [ "$(wildcard $(RFANALYSIS_SOURCE)/*.o)" != "" ]; \
+	then \
+		rm $(RFANALYSIS_SOURCE)/*.o; \
+		echo " Removed compiled files at: $(RFANALYSIS_SOURCE)"; \
+	fi;
+	@if [ "$(wildcard Tools/*.out)" != "" ]; \
+	then \
+		rm Tools/*.out; \
+		echo " Removed compiled files at: Tools"; \
+	fi;
+	@if [ "$(wildcard Examples/*.out)" != "" ]; \
+	then \
+		rm Examples/*.out; \
+		echo " Removed compiled files at: Examples"; \
+	fi;
+
