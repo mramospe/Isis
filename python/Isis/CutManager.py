@@ -45,7 +45,7 @@ class CutManager:
         self.CutFile = []
         self.CutList = OrderedDict()
 
-        ifile = open("Cut.dat")
+        ifile = open(file_name)
         for line in ifile:
             self.CutFile += [ filter( lambda x: x != '',
                                       [ el.replace( '\n', '' ) for el in line.split( '\t' ) ] ) ]
