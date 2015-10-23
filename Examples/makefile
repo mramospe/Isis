@@ -15,9 +15,11 @@ DIRSLIBS = `Isis-config --incdirs --libs`
 help:
 	@echo " Usage: make < example name >"
 
-MakeBDT: MakeBDT.cpp
-	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
-
 CLsScan: CLsScan.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
 
+MakeBDT: MakeBDT.cpp
+	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
+
+ProgBar: ProgBar.cpp
+	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out

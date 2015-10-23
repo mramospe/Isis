@@ -1,13 +1,13 @@
 #//////////////////////////////////////////////////////////
 #//                                                      //
-#//  Python modules                                      //
+#//  General package                                     //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 24/07/2015                             //
+#//  Last update: 23/10/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -37,55 +37,45 @@ from collections import OrderedDict
 
 class CutManager:
 
+    #_______________________________________________________________________________
+    # Constructor given the name of the cuts file
     def __init__( self, file_name ):
-
-        ''' Constructor given the name of the cuts file '''
 
         self.Options = { "and": "&&", "or": "||" }
         self.CutFile = []
         self.CutList = OrderedDict()
 
         ifile = open("Cut.dat")
-
         for line in ifile:
             self.CutFile += [ filter( lambda x: x != '',
                                       [ el.replace( '\n', '' ) for el in line.split( '\t' ) ] ) ]
 
-            
+    #_______________________________________________________________________________
+    # Gets the cut related to the key given
     def __getitem__( self, key ):
-
-        ''' Gets the cut related to the key '''
-
         return self.CutList[ index ]
 
-    
+    #_______________________________________________________________________________
+    # Clears the content obtained from the file as well as the cuts booked
     def Clear( self ):
-
-        ''' Clears the content obtained from the file as well as the cuts booked '''
-
         self.CutList = OrderedDict()
         self.CutFile = []
         
-
+    #_______________________________________________________________________________
+    # Clears the content obtained from the file
     def ClearFile( self ):
-        
-        ''' Clears the content obtained from the file '''
-
         self.CutFile = []
 
-
+    #_______________________________________________________________________________
+    # Books a new cut and returns it
     def BookCut( self, name ):
-
-        ''' Books a new cut and returns it '''
-
         self.CutList[ name ] = self.GetCut( name )
-
+        print " Booked new cut <", name, ">:", self.CutList[ name ]
         return self.CutList[ name ]
 
-
+    #_______________________________________________________________________________
+    # Gets the Cut named < name > in the file atached to this class
     def GetCut( self, name ):
-
-        ''' Gets the Cut named <name> in the file atached to this class '''
 
         total_cuts = ""
         condition  = False
@@ -96,22 +86,40 @@ class CutManager:
 
                 if condition:
 
+                    ''' In the < Cuts > space, the entire line is added '''
                     if line[ 0 ] == "Cuts":
                         total_cuts += line[ 1 ]
 
+                    ''' In the < Sets > space, a search is made to find all the different sets
+                    of cuts to be added. The first loop is to allow writing spaces after and
+                    before parentheses. '''
                     if line[ 0 ] == "Sets":
+
+                        lsplit = []
                         for el in line[ 1 ].split():
-                            if el == "(":
-                                total_cuts += "( "
-                            elif el == ")":
-                                total_cuts += " )"
-                            elif el in self.Options:
-                                total_cuts += el
+                            if   '(' in el[ 0 ]:
+                                lsplit.append( '(' )
+                                if len( el[ 1: ] ) > 0:
+                                    lsplit.append( el[ 1: ] )
+                            elif ')' in el[ -1 ]:
+                                if len( el[ :-1 ] ) > 0:
+                                    lsplit.append( el[ :-1 ] )
+                                lsplit.append( ')' )
                             else:
-                                total_cuts += self.GetCut( el )
+                                lsplit.append( el )
+
+                        for el in lsplit:
+                            if el == "(":
+                                total_cuts += "("
+                            elif el == ")":
+                                total_cuts += ")"
+                            elif el in self.Options:
+                                total_cuts += " " + el + " "
+                            else:
+                                total_cuts += "(" + self.GetCut( el ) + ")"
 
                     if line[ 0 ] in self.Options:
-                        total_cuts += ( " " + line[ 0 ] + " " )
+                        total_cuts += " " + line[ 0 ] + " "
 
                     if line[ 0 ] == "End":
                         condition = False
@@ -122,25 +130,19 @@ class CutManager:
             for el in self.Options:
                 total_cuts = total_cuts.replace( el, self.Options[ el ] )
 
-        return "( " + total_cuts + " )"
+        return total_cuts
 
-
+    #_______________________________________________________________________________
+    # Opens a new file and gets its content
     def Open( self, file_name ):
-
-        ''' Opens a new file and gets its content '''
-
         self.CutFile = []
-
         ifile = open( file_name )
-
         for line in ifile:
             self.CutFile += [ filter( lambda x: x != '',
                                       [ el.replace( '\n', '' ) for el in line.split( '\t' ) ] ) ]
 
-
+    #_______________________________________________________________________________
+    # Prints the cuts booked in the class
     def Print( self ):
-
-        ''' Prints the cuts booked in the class '''
-
         for key in self.CutList:
             print key, "->", self.CutList[ key ]

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 24/07/2015                             //
+//  Last update: 23/10/2015                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -71,6 +71,8 @@ const char* General::CutManager::BookCut( std::string key ) {
   if ( key.size() > fSize )
     fSize = key.size();
 
+  std::cout << " Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+
   return fCuts[ key ].c_str();
 }
 
@@ -100,13 +102,26 @@ const char* General::CutManager::GetCut( std::string key ) {
 
 	  std::getline( fFile, line );
 
-	  result += ( "( " + line + " )" );
+	  result += line;
 	}
 	
 	// Option <Sets>
 	else if ( !line.compare( "Sets" ) ) {
 
 	  std::getline( fFile, line );
+
+	  // Checks for parentheses and includes a whitespace ( necessary to load the cut
+	  // successfully
+	  size_t pos = 0;
+	  while ( ( pos = line.find( "(", pos ) ) != std::string::npos ) {
+	    line.replace( pos, 1, "( " );
+	    pos += 2;
+	  }
+	  pos = 0;
+	  while ( ( pos = line.find( ")", pos ) ) != std::string::npos ) {
+	    line.replace( pos, 1, " )" );
+	    pos += 2;
+	  }
 	  
 	  std::stringstream stream( line );
 
@@ -115,14 +130,14 @@ const char* General::CutManager::GetCut( std::string key ) {
 	    if ( fOptions.find( line ) != fOptions.end() )
 	      result += ( " " + line + " " );
 	    else if ( ! line.compare( "(" ) )
-	      result += ( line + " " );
+	      result += ( line );
 	    else if ( ! line.compare( ")" ) )
-	      result += ( " " + line );
+	      result += ( line );
 	    else {
 
 	      unsigned int fpos( fFile.tellg() );
 
-	      result += std::string( this -> GetCut( line ) );
+	      result += ( "(" + std::string( this -> GetCut( line ) ) + ")" );
 
 	      fFile.seekg( fpos );
 	    }
@@ -183,5 +198,3 @@ void General::CutManager::Print() {
       "\t=>\t"     <<
       it -> second << std::endl;
 }
-
-//_______________________________________________________________________________
