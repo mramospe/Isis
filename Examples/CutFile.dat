@@ -1,0 +1,15 @@
+////////////////////////////////////////////////
+//                                            //
+//  Example of cut file to be used together   //
+//  with CutManager class		      //
+//					      //
+////////////////////////////////////////////////
+
+# This is a comment
+Cut1 = a > 0 || b == 1
+
+Cut2 = $Cut1 or h < 9
+
+Cut3 = h > 0 and $Cut1
+
+Cut4 = ( j > 0 and b < 4 ) or c == 1 and $Cut2

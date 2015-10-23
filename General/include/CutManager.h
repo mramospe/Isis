@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 24/07/2015                             //
+//  Last update: 23/10/2015                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -16,15 +16,15 @@
 //  Class to storage cuts present in a cuts-file. This  //
 //  files have to be written in the way:                //
 //                                                      //
-//  Define cut_name                                     //
+//  cut1 = j > 0 and b > 1                              //
 //                                                      //
-//  Cuts   some_cut and another_cut                     //
+//  cut2 = $cut1 or c == 0                              //
 //                                                      //
-//  or                                                  //
-//                                                      //
-//  Sets   cut_set_1 or cut_set_2                       //
-//                                                      //
-//  End                                                 //
+//  The symbol < $ > after a word means that this word  //
+//  is a cut, so the class is going to read that and    //
+//  place it instead. This class is going to search     //
+//  for the given keys, so one can comment anything as  //
+//  long as no key has the same string value as it.     //
 //                                                      //
 // ---------------------------------------------------- //
 //////////////////////////////////////////////////////////

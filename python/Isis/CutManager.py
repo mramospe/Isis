@@ -16,15 +16,15 @@
 #//  Class to storage cuts present in a cuts-file. This  //
 #//  files have to be written in the way:                //
 #//                                                      //
-#//  Define cut_name                                     //
+#//  cut1 = j > 0 and b > 1                              //
 #//                                                      //
-#//  Cuts   some_cut and another_cut                     //
+#//  cut2 = $cut1 or c == 0                              //
 #//                                                      //
-#//  or                                                  //
-#//                                                      //
-#//  Sets   cut_set_1 or cut_set_2                       //
-#//                                                      //
-#//  End                                                 //
+#//  The symbol < $ > after a word means that this word  //
+#//  is a cut, so the class is going to read that and    //
+#//  place it instead. This class is going to search     //
+#//  for the given keys, so one can comment anything as  //
+#//  long as no key has the same string value as it.     //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//////////////////////////////////////////////////////////
@@ -39,16 +39,19 @@ class CutManager:
 
     #_______________________________________________________________________________
     # Constructor given the name of the cuts file
-    def __init__( self, file_name ):
+    def __init__( self, file_name = False ):
 
         self.Options = { "and": "&&", "or": "||" }
         self.CutFile = []
         self.CutList = OrderedDict()
 
-        ifile = open(file_name)
-        for line in ifile:
-            self.CutFile += [ filter( lambda x: x != '',
-                                      [ el.replace( '\n', '' ) for el in line.split( '\t' ) ] ) ]
+        if file_name:
+            ifile = open(file_name)
+            for line in ifile:
+                while "\t" in line: line = line.replace( "\t", ' ' )
+                while "\n" in line: line = line.replace( "\n", '' )
+                if line != "":
+                    self.CutFile.append( [ line ] )
 
     #_______________________________________________________________________________
     # Gets the cut related to the key given
@@ -69,66 +72,70 @@ class CutManager:
     #_______________________________________________________________________________
     # Books a new cut and returns it
     def BookCut( self, name ):
-        self.CutList[ name ] = self.GetCut( name )
-        print " Booked new cut <", name, ">:", self.CutList[ name ]
-        return self.CutList[ name ]
+        if name in self.CutList:
+            print "Cut with name <", name, "> already booked"
+            return False
+        cut = self.GetCut( name )
+        if cut:
+            self.CutList[ name ] = cut
+            print "Booked new cut <", name, ">:", self.CutList[ name ]
+        return cut
 
     #_______________________________________________________________________________
     # Gets the Cut named < name > in the file atached to this class
     def GetCut( self, name ):
 
         total_cuts = ""
-        condition  = False
-
         for line in self.CutFile:
-        
             if line != []:
 
-                if condition:
+                spline = line[ 0 ].split()
+                if spline[ 0 ] == name:
 
-                    ''' In the < Cuts > space, the entire line is added '''
-                    if line[ 0 ] == "Cuts":
-                        total_cuts += line[ 1 ]
+                    ''' The cuts are taking after the second string in < spline > ( usually an
+                    < = > symbol '''
+                    spline = spline[ 2: ]
+                    lsplit = []
 
-                    ''' In the < Sets > space, a search is made to find all the different sets
-                    of cuts to be added. The first loop is to allow writing spaces after and
-                    before parentheses. '''
-                    if line[ 0 ] == "Sets":
+                    for el in spline:
+                        if   '(' in el[ 0 ]:
+                            lsplit.append( '(' )
+                            if len( el[ 1: ] ) > 0:
+                                lsplit.append( el[ 1: ] )
+                        elif ')' in el[ -1 ]:
+                            if len( el[ :-1 ] ) > 0:
+                                lsplit.append( el[ :-1 ] )
+                            lsplit.append( ')' )
+                        else:
+                            lsplit.append( el )
 
-                        lsplit = []
-                        for el in line[ 1 ].split():
-                            if   '(' in el[ 0 ]:
-                                lsplit.append( '(' )
-                                if len( el[ 1: ] ) > 0:
-                                    lsplit.append( el[ 1: ] )
-                            elif ')' in el[ -1 ]:
-                                if len( el[ :-1 ] ) > 0:
-                                    lsplit.append( el[ :-1 ] )
-                                lsplit.append( ')' )
+                    for el in lsplit:
+                        if   el in ( "(", ")" ):
+                            total_cuts += el
+                        elif el in self.Options:
+                            total_cuts += " " + el + " "
+                        else:
+                            if el[ 0 ] == '$':
+                                new_cut    =  self.GetCut( el[ 1: ] )
+                                if new_cut:
+                                    total_cuts += "(" + new_cut + ")"
+                                else:
+                                    return total_cuts
                             else:
-                                lsplit.append( el )
-
-                        for el in lsplit:
-                            if el == "(":
-                                total_cuts += "("
-                            elif el == ")":
-                                total_cuts += ")"
-                            elif el in self.Options:
                                 total_cuts += " " + el + " "
-                            else:
-                                total_cuts += "(" + self.GetCut( el ) + ")"
-
-                    if line[ 0 ] in self.Options:
-                        total_cuts += " " + line[ 0 ] + " "
-
-                    if line[ 0 ] == "End":
-                        condition = False
-
-                elif line[ 0 ] == "Define" and line[ 1 ] == name:
-                    condition = True
 
             for el in self.Options:
                 total_cuts = total_cuts.replace( el, self.Options[ el ] )
+
+        if total_cuts:
+            ''' Formats the output string '''
+            while "  " in total_cuts: total_cuts = total_cuts.replace( "  ", " " )
+            while "( " in total_cuts: total_cuts = total_cuts.replace( "( ", "(" )
+            while " )" in total_cuts: total_cuts = total_cuts.replace( " )", ")" )
+            if total_cuts[ 0 ]  == " ": total_cuts = total_cuts[ 1:  ]
+            if total_cuts[ -1 ] == " ": total_cuts = total_cuts[ :-1 ]
+        else:
+            print "WARNING: cut with name <", name, "> does not exist."
 
         return total_cuts
 
@@ -136,10 +143,12 @@ class CutManager:
     # Opens a new file and gets its content
     def Open( self, file_name ):
         self.CutFile = []
-        ifile = open( file_name )
+        ifile = open(file_name)
         for line in ifile:
-            self.CutFile += [ filter( lambda x: x != '',
-                                      [ el.replace( '\n', '' ) for el in line.split( '\t' ) ] ) ]
+            while "\t" in line: line = line.replace( "\t", ' ' )
+            while "\n" in line: line = line.replace( "\n", '' )
+            if line != "":
+                self.CutFile.append( [ line ] )
 
     #_______________________________________________________________________________
     # Prints the cuts booked in the class

@@ -16,18 +16,18 @@
 //  Class to storage cuts present in a cuts-file. This  //
 //  files have to be written in the way:                //
 //                                                      //
-//  Define cut_name                                     //
+//  cut1 = j > 0 and b > 1                              //
 //                                                      //
-//  Cuts   some_cut and another_cut                     //
+//  cut2 = $cut1 or c == 0                              //
 //                                                      //
-//  or                                                  //
-//                                                      //
-//  Sets   cut_set_1 or cut_set_2                       //
-//                                                      //
-//  End                                                 //
+//  The symbol < $ > after a word means that this word  //
+//  is a cut, so the class is going to read that and    //
+//  place it instead. This class is going to search     //
+//  for the given keys, so one can comment anything as  //
+//  long as no key has the same string value as it.     //
 //                                                      //
 // ---------------------------------------------------- //
-////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////
 
 
 #include "CutManager.h"
@@ -65,108 +65,98 @@ General::CutManager::~CutManager() { if ( fFile.is_open() ) fFile.close(); }
 //_______________________________________________________________________________       
 // Almacenates a new cut from the cuts-file
 const char* General::CutManager::BookCut( std::string key ) {
+
+  if ( fCuts.find( key ) != fCuts.end() ) {
+    std::cout << "Cut with name < " << key << " > already booked" << std::endl;
+    return 0;
+  }
+
+  const char *cut = this -> GetCut( key );
+
+  if ( cut ) {
   
-  fCuts.insert( std::pair<std::string, std::string>( key, this -> GetCut( key ) ) );
+    fCuts.insert( std::pair<std::string, std::string>( key, cut ) );
 
-  if ( key.size() > fSize )
-    fSize = key.size();
+    if ( key.size() > fSize )
+      fSize = key.size();
 
-  std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+    std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+  }
 
-  return fCuts[ key ].c_str();
+  return cut;
 }
 
 //_______________________________________________________________________________       
 // Functions that gets a cut from the cuts-file
 const char* General::CutManager::GetCut( std::string key ) {
 
+  if ( fFile.eof() )
+    fFile.clear();
+
   fFile.seekg( 0 );
 
+  bool cond( true );
+
   std::string line, result;
-  
-  bool condition( false );
 
   std::string::size_type pos;
 
-  while ( !fFile.eof() ) {
-
-    fFile >> line;
+  while ( std::getline( fFile, line ) && cond ) {
 
     // Checks whether the line is empty
     if ( !line.empty() ) {
 
-      if ( condition ) {
+      if ( !line.compare( 0, key.size(), key ) ) {
 
-	// Option <Cuts>
-	if ( !line.compare( "Cuts" ) ) {
+	line = line.substr( line.find( "=" ) + 1, line.size() );
 
-	  std::getline( fFile, line );
-
-	  result += line;
+	// Checks for parentheses and includes a whitespace ( necessary to load the cut
+	// successfully
+	size_t pos = 0;
+	while ( ( pos = line.find( "(", pos ) ) != std::string::npos ) {
+	  line.replace( pos, 1, "( " );
+	  pos += 2;
 	}
-	
-	// Option <Sets>
-	else if ( !line.compare( "Sets" ) ) {
-
-	  std::getline( fFile, line );
-
-	  // Checks for parentheses and includes a whitespace ( necessary to load the cut
-	  // successfully
-	  size_t pos = 0;
-	  while ( ( pos = line.find( "(", pos ) ) != std::string::npos ) {
-	    line.replace( pos, 1, "( " );
-	    pos += 2;
-	  }
-	  pos = 0;
-	  while ( ( pos = line.find( ")", pos ) ) != std::string::npos ) {
-	    line.replace( pos, 1, " )" );
-	    pos += 2;
-	  }
-	  
-	  std::stringstream stream( line );
-
-	  while ( stream >> line ) {
-
-	    if ( fOptions.find( line ) != fOptions.end() )
-	      result += ( " " + line + " " );
-	    else if ( ! line.compare( "(" ) )
-	      result += ( line );
-	    else if ( ! line.compare( ")" ) )
-	      result += ( line );
-	    else {
-
-	      unsigned int fpos( fFile.tellg() );
-
-	      result += ( "(" + std::string( this -> GetCut( line ) ) + ")" );
-
-	      fFile.seekg( fpos );
-	    }
-	  }
+	pos = 0;
+	while ( ( pos = line.find( ")", pos ) ) != std::string::npos ) {
+	  line.replace( pos, 1, " )" );
+	  pos += 2;
 	}
 
-	// Option <End>
-	else if ( !line.compare( "End" ) ) {
+	std::stringstream stream( line );
 
-	  condition = false;
-	  break;
+	// Adds the different conditions to the output cut
+	while ( stream >> line ) {
+	  if ( fOptions.find( line ) != fOptions.end() )
+	    result += " " + line + " ";
+	  else if ( !line.compare( "(" ) or !line.compare( ")" ) )
+	    result += line;
+	  else if ( line[ 0 ] == '$' ) {
+	    
+	    size_t fpos( fFile.tellg() );
+	    line = line.substr( 1, line.size() );
+
+	    const char *new_cut = this -> GetCut( line );
+
+	    if ( new_cut )
+	      result += "(" + std::string( new_cut ) + ")";
+	    else
+	      return 0;
+
+	    fFile.seekg( fpos );
+	  }
+	  else
+	    result += " " + line + " ";
 	}
 
-	// Adds the line to the string if it is a conditional word
-	else if ( fOptions.find( line ) != fOptions.end() )
-	  result += ( " " + line + " " );
-      }
-
-      // Option <Define>
-      else if ( !line.compare( "Define" ) ) {
-
-	fFile >> line;
-
-	if ( !line.compare( key ) )
-	  condition = true; 
+	cond = false;
       }
     }
 
-    fFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if ( fFile.eof() && cond ) {
+      std::cout << "WARNING: cut with name < " << key << " > does not exist." << std::endl;
+      return 0;
+    }
   }
 
   // Changes the name of the conditionals in the cuts set
@@ -175,14 +165,12 @@ const char* General::CutManager::GetCut( std::string key ) {
     while ( ( pos = result.find( it -> first ) ) != std::string::npos )
       result.replace( pos, ( it -> first ).size(), it -> second );
 
-  result.erase( remove( result.begin(), result.end(), '\t'), result.end());
-
-  // If the cut does not exist, it sends a warning
-  if ( result.empty() ) {
-
-    std::cout << "WARNING: cut with name <" << key << "> does not exist." << std::endl;
-    return 0;
-  }
+  // Formats the output string
+  while ( ( pos = result.find( "  " ) ) != std::string::npos ) result.replace( pos, 2, " " );
+  while ( ( pos = result.find( " )" ) ) != std::string::npos ) result.replace( pos, 2, ")" );
+  while ( ( pos = result.find( "( " ) ) != std::string::npos ) result.replace( pos, 2, "(" );
+  if ( *result.begin()     == ' ' ) result.erase( result.begin()  , result.begin() + 1 );
+  if ( *(result.end() - 1) == ' ' ) result.erase( result.end() - 1, result.end()       );
 
   return result.c_str();
 }
