@@ -71,7 +71,7 @@ const char* General::CutManager::BookCut( std::string key ) {
   if ( key.size() > fSize )
     fSize = key.size();
 
-  std::cout << " Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+  std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
 
   return fCuts[ key ].c_str();
 }
@@ -180,7 +180,7 @@ const char* General::CutManager::GetCut( std::string key ) {
   // If the cut does not exist, it sends a warning
   if ( result.empty() ) {
 
-    std::cout << " WARNING: cut with name <" << key << "> does not exist." << std::endl;
+    std::cout << "WARNING: cut with name <" << key << "> does not exist." << std::endl;
     return 0;
   }
 
