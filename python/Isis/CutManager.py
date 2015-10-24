@@ -1,33 +1,33 @@
-#//////////////////////////////////////////////////////////
-#//                                                      //
-#//  General package                                     //
-#//                                                      //
-#// ---------------------------------------------------- //
-#//                                                      //
-#//  AUTHOR: Miguel Ramos Pernas                         //
-#//  e-mail: miguel.ramos.pernas@cern.ch                 //
-#//                                                      //
-#//  Last update: 23/10/2015                             //
-#//                                                      //
-#// ---------------------------------------------------- //
-#//                                                      //
-#//  Description:                                        //
-#//                                                      //
-#//  Class to storage cuts present in a cuts-file. This  //
-#//  files have to be written in the way:                //
-#//                                                      //
-#//  cut1 = j > 0 and b > 1                              //
-#//                                                      //
-#//  cut2 = $cut1 or c == 0                              //
-#//                                                      //
-#//  The symbol < $ > after a word means that this word  //
-#//  is a cut, so the class is going to read that and    //
-#//  place it instead. This class is going to search     //
-#//  for the given keys, so one can comment anything as  //
-#//  long as no key has the same string value as it.     //
-#//                                                      //
-#// ---------------------------------------------------- //
-#//////////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////
+#//                                                       //
+#//  Python modules                                       //
+#//                                                       //
+#// ----------------------------------------------------- //
+#//                                                       //
+#//  AUTHOR: Miguel Ramos Pernas                          //
+#//  e-mail: miguel.ramos.pernas@cern.ch                  //
+#//                                                       //
+#//  Last update: 24/10/2015                              //
+#//                                                       //
+#// ----------------------------------------------------- //
+#//                                                       //
+#//  Description:                                         //
+#//                                                       //
+#//  Class to storage cuts present in a cuts-file. This   //
+#//  files have to be written in the way:                 //
+#//                                                       //
+#//  cut1 = j > 0 and b > 1                               //
+#//                                                       //
+#//  cut2 = $cut1$ or c == 0                              //
+#//                                                       //
+#//  The symbol < $ > before and after a word means that  //
+#//  is a cut, so the class is going to get that and      //
+#//  place it instead. This class is going to search      //
+#//  long as no key has the same string value as it,      //
+#//  being situated at the beginning of the line.         //
+#//                                                       //
+#// ----------------------------------------------------- //
+#///////////////////////////////////////////////////////////
 
 
 from collections import OrderedDict
@@ -82,62 +82,29 @@ class CutManager:
         return cut
 
     #_______________________________________________________________________________
-    # Gets the Cut named < name > in the file atached to this class
+    # Gets the Cut named < name > in the file attached to this class
     def GetCut( self, name ):
-
-        total_cuts = ""
+        cuts = False
         for line in self.CutFile:
             if line != []:
-
-                spline = line[ 0 ].split()
-                if spline[ 0 ] == name:
-
-                    ''' The cuts are taking after the second string in < spline > ( usually an
-                    < = > symbol '''
-                    spline = spline[ 2: ]
-                    lsplit = []
-
-                    for el in spline:
-                        if   '(' in el[ 0 ]:
-                            lsplit.append( '(' )
-                            if len( el[ 1: ] ) > 0:
-                                lsplit.append( el[ 1: ] )
-                        elif ')' in el[ -1 ]:
-                            if len( el[ :-1 ] ) > 0:
-                                lsplit.append( el[ :-1 ] )
-                            lsplit.append( ')' )
-                        else:
-                            lsplit.append( el )
-
-                    for el in lsplit:
-                        if   el in ( "(", ")" ):
-                            total_cuts += el
-                        elif el in self.Options:
-                            total_cuts += " " + el + " "
-                        else:
-                            if el[ 0 ] == '$':
-                                new_cut    =  self.GetCut( el[ 1: ] )
-                                if new_cut:
-                                    total_cuts += "(" + new_cut + ")"
-                                else:
-                                    return total_cuts
-                            else:
-                                total_cuts += " " + el + " "
-
-            for el in self.Options:
-                total_cuts = total_cuts.replace( el, self.Options[ el ] )
-
-        if total_cuts:
-            ''' Formats the output string '''
-            while "  " in total_cuts: total_cuts = total_cuts.replace( "  ", " " )
-            while "( " in total_cuts: total_cuts = total_cuts.replace( "( ", "(" )
-            while " )" in total_cuts: total_cuts = total_cuts.replace( " )", ")" )
-            if total_cuts[ 0 ]  == " ": total_cuts = total_cuts[ 1:  ]
-            if total_cuts[ -1 ] == " ": total_cuts = total_cuts[ :-1 ]
-        else:
+                if line[ 0 ].split()[ 0 ] == name:
+                    cuts = line[ 0 ]
+                    cuts = cuts[ cuts.find( '=' ) + 1: ]
+                    while cuts[ 0 ] == " ": cuts = cuts[ 1: ]
+                    ifirst = 0
+                    while '$' in cuts:
+                        ifirst = cuts.find( '$', ifirst )
+                        ilast  = cuts.find( '$', ifirst + 1 )
+                        newcut = cuts[ ifirst : ilast + 1 ]
+                        cuts   = cuts.replace( newcut, "(" + self.GetCut( newcut[ 1:-1 ] ) + ")" )
+                    for el in self.Options:
+                        while el in cuts:
+                            cuts = cuts.replace( el, self.Options[ el ] )
+                    break
+        if not cuts:
             print "WARNING: cut with name <", name, "> does not exist."
 
-        return total_cuts
+        return cuts
 
     #_______________________________________________________________________________
     # Opens a new file and gets its content

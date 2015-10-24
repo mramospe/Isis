@@ -1,39 +1,41 @@
-//////////////////////////////////////////////////////////
-//                                                      //
-//  General package                                     //
-//                                                      //
-// ---------------------------------------------------- //
-//                                                      //
-//  AUTHOR: Miguel Ramos Pernas                         //
-//  e-mail: miguel.ramos.pernas@cern.ch                 //
-//                                                      //
-//  Last update: 23/10/2015                             //
-//                                                      //
-// ---------------------------------------------------- //
-//                                                      //
-//  Description:                                        //
-//                                                      //
-//  Class to storage cuts present in a cuts-file. This  //
-//  files have to be written in the way:                //
-//                                                      //
-//  cut1 = j > 0 and b > 1                              //
-//                                                      //
-//  cut2 = $cut1 or c == 0                              //
-//                                                      //
-//  The symbol < $ > after a word means that this word  //
-//  is a cut, so the class is going to read that and    //
-//  place it instead. This class is going to search     //
-//  for the given keys, so one can comment anything as  //
-//  long as no key has the same string value as it.     //
-//                                                      //
-// ---------------------------------------------------- //
-//////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+//                                                       //
+//  General package                                      //
+//                                                       //
+// ----------------------------------------------------- //
+//                                                       //
+//  AUTHOR: Miguel Ramos Pernas                          //
+//  e-mail: miguel.ramos.pernas@cern.ch                  //
+//                                                       //
+//  Last update: 24/10/2015                              //
+//                                                       //
+// ----------------------------------------------------- //
+//                                                       //
+//  Description:                                         //
+//                                                       //
+//  Class to storage cuts present in a cuts-file. This   //
+//  files have to be written in the way:                 //
+//                                                       //
+//  cut1 = j > 0 and b > 1                               //
+//                                                       //
+//  cut2 = $cut1$ or c == 0                              //
+//                                                       //
+//  The symbol < $ > before and after a word means that  //
+//  is a cut, so the class is going to get that and      //
+//  place it instead. This class is going to search      //
+//  for the given keys, so one can comment anything as   //
+//  long as no key has the same string value as it,      //
+//  being situated at the beginning of the line.         //
+//                                                       //
+// ----------------------------------------------------- //
+///////////////////////////////////////////////////////////
 
 
 #include "CutManager.h"
 
 #include <iomanip>
 #include <sstream>
+#include <cstring>
 #include <algorithm>
 #include <limits>
 
@@ -90,63 +92,43 @@ const char* General::CutManager::BookCut( std::string key ) {
 // Functions that gets a cut from the cuts-file
 const char* General::CutManager::GetCut( std::string key ) {
 
+  // Each time a cut is obtained the pointer to the file is set to its start
   if ( fFile.eof() )
     fFile.clear();
-
   fFile.seekg( 0 );
 
-  bool cond( true );
+  std::string cuts, newcut, sstr;
+  std::string::size_type pos, ifirst, ilast;
+  size_t fpos;
+  bool   cond( true );
 
-  std::string line, result;
-
-  std::string::size_type pos;
-
-  while ( std::getline( fFile, line ) && cond ) {
+  while ( cond && std::getline( fFile, cuts ) ) {
 
     // Checks whether the line is empty
-    if ( !line.empty() ) {
+    if ( !cuts.empty() ) {
 
-      if ( !line.compare( 0, key.size(), key ) ) {
+      // If there are whitespaces before the keyword, they are omitted
+      while ( cuts[ 0 ] == ' ' ) cuts.erase( 0, 1 );
 
-	line = line.substr( line.find( "=" ) + 1, line.size() );
+      if ( !cuts.compare( 0, key.size(), key ) ) {
 
-	// Checks for parentheses and includes a whitespace ( necessary to load the cut
-	// successfully
-	size_t pos = 0;
-	while ( ( pos = line.find( "(", pos ) ) != std::string::npos ) {
-	  line.replace( pos, 1, "( " );
-	  pos += 2;
-	}
-	pos = 0;
-	while ( ( pos = line.find( ")", pos ) ) != std::string::npos ) {
-	  line.replace( pos, 1, " )" );
-	  pos += 2;
-	}
+	cuts = cuts.substr( cuts.find( '=' ) + 1 );
 
-	std::stringstream stream( line );
+	while ( cuts[ 0 ] == ' ' ) cuts.erase( 0, 1 );
 
-	// Adds the different conditions to the output cut
-	while ( stream >> line ) {
-	  if ( fOptions.find( line ) != fOptions.end() )
-	    result += " " + line + " ";
-	  else if ( !line.compare( "(" ) or !line.compare( ")" ) )
-	    result += line;
-	  else if ( line[ 0 ] == '$' ) {
-	    
-	    size_t fpos( fFile.tellg() );
-	    line = line.substr( 1, line.size() );
+	// If another cut is found it is replaced by its content. The position at the file
+	// is saved and retrieved, in order to properly scan the file.
+	while ( ( ifirst = cuts.find( '$' ) ) != std::string::npos ) {
+	  ilast = cuts.find( '$', ifirst + 1 );
+	  sstr  = cuts.substr( ifirst + 1, key.size() );
+	  fpos  = fFile.tellg();
 
-	    const char *new_cut = this -> GetCut( line );
-
-	    if ( new_cut )
-	      result += "(" + std::string( new_cut ) + ")";
-	    else
-	      return 0;
-
-	    fFile.seekg( fpos );
-	  }
-	  else
-	    result += " " + line + " ";
+	  // The new cut is introduced between parentheses
+	  newcut = "()";
+	  newcut.insert( 1, std::string( this -> GetCut( sstr ) ) );
+	  
+	  cuts.replace( ifirst, ilast + 1, newcut );
+	  fFile.seekg( fpos );
 	}
 
 	cond = false;
@@ -158,25 +140,17 @@ const char* General::CutManager::GetCut( std::string key ) {
       return 0;
     }
   }
-
   // Changes the name of the conditionals in the cuts set
   for ( std::map<std::string, std::string>::iterator it = fOptions.begin();
 	it != fOptions.end(); it++ )
-    while ( ( pos = result.find( it -> first ) ) != std::string::npos )
-      result.replace( pos, ( it -> first ).size(), it -> second );
+    while ( ( pos = cuts.find( it -> first ) ) != std::string::npos )
+      cuts.replace( pos, ( it -> first ).size(), it -> second );
 
-  // Formats the output string
-  while ( ( pos = result.find( "  " ) ) != std::string::npos ) result.replace( pos, 2, " " );
-  while ( ( pos = result.find( " )" ) ) != std::string::npos ) result.replace( pos, 2, ")" );
-  while ( ( pos = result.find( "( " ) ) != std::string::npos ) result.replace( pos, 2, "(" );
-  if ( *result.begin()     == ' ' ) result.erase( result.begin()  , result.begin() + 1 );
-  if ( *(result.end() - 1) == ' ' ) result.erase( result.end() - 1, result.end()       );
-
-  return result.c_str();
+  return cuts.c_str();
 }
 
 //_______________________________________________________________________________       
-// Prints the cuts atached to this class
+// Prints the cuts attached to this class
 void General::CutManager::Print() {
 
   for ( std::map<std::string, std::string>::iterator it = fCuts.begin();
