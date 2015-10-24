@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                    //
 //  e-mail: miguel.ramos.pernas@cern.ch                                            //
 //                                                                                 //
-//  Last update: 07/10/2015                                                        //
+//  Last update: 24/10/2015                                                        //
 //                                                                                 //
 // ------------------------------------------------------------------------------- //
 //                                                                                 //
@@ -99,7 +99,7 @@ namespace Analysis {
     fParticles.push_back( &particle );
     fNdaughters++;
   }
-  // Clears the list of particles atached to this one
+  // Clears the list of particles attached to this one
   inline void DecayParticle::Clear() { fParticles.clear(); }
   // Returns the name of the particle
   inline std::string DecayParticle::Name() const  { return fName; }

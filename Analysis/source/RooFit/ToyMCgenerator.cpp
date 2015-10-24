@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                    //
 //  e-mail: miguel.ramos.pernas@cern.ch                                            //
 //                                                                                 //
-//  Last update: 07/10/2015                                                        //
+//  Last update: 24/10/2015                                                        //
 //                                                                                 //
 // ------------------------------------------------------------------------------- //
 //                                                                                 //
@@ -175,7 +175,7 @@ double Analysis::DecayParticle::GetMass() {
 }
 
 //_______________________________________________________________________________
-// Returns the number of particles atached to this one
+// Returns the number of particles attached to this one
 unsigned int Analysis::DecayParticle::GetNparticles() {
 
   unsigned int np( 1 );
@@ -207,7 +207,7 @@ void Analysis::DecayParticle::Remove( Analysis::DecayParticle &particle ) {
 
 //_______________________________________________________________________________
 // Sets the branches for a given tree, with the kinematic information of every
-// particle atached to this one
+// particle attached to this one
 void Analysis::DecayParticle::SetBranches( TTree *tree ) {
 
   std::string
@@ -385,7 +385,7 @@ void Analysis::ToyMCgenerator::Generate( long int nevts ) {
   std::cout << "\n  - Output tree name:    " << fOutputTree -> GetName();
   std::cout << std::endl;
 
-  std::cout << "\n Branches atached to the output tree:\n" << std::endl;
+  std::cout << "\n Branches attached to the output tree:\n" << std::endl;
   fMother -> SetBranches( fOutputTree );
 
   if ( fInputTree ) {

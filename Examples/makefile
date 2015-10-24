@@ -23,3 +23,6 @@ MakeBDT: MakeBDT.cpp
 
 ProgBar: ProgBar.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
+
+ToyMC: ToyMC.cpp
+	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
