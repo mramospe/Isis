@@ -26,3 +26,6 @@ ProgBar: ProgBar.cpp
 
 ToyMC: ToyMC.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
+
+AdapBin: AdapBin.cpp
+	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
