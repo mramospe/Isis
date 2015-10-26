@@ -3,11 +3,11 @@
 //  General package                                                              //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
-//                                                                               //       
+//                                                                               //
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 29/07/2015                                                      //
+//  Last update: 26/10/2015                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -25,7 +25,7 @@
 
 #include <limits>
 
-#include "Vector3.h"
+#include "Vector.h"
 
 
 //_______________________________________________________________________________
@@ -39,7 +39,7 @@ namespace General {
     // Constructor
     LorentzVector();
     LorentzVector( double px, double py, double pz, double pe );
-    LorentzVector( Vector3 vec, double pe );
+    LorentzVector( Vector vec, double pe );
     LorentzVector( const LorentzVector &vec );
 
     // Destructor
@@ -51,19 +51,19 @@ namespace General {
     double          ArmPt( LorentzVector vec );
     double          ArmPl( LorentzVector vec );
     inline double   Beta();
-    inline Vector3  VBeta();
+    inline Vector   VBeta();
     inline double   CosAngle( LorentzVector vec );
-    inline double   CosAngle( Vector3 vec );
-    double          CosHelAngle( LorentzVector vec, Vector3 dir );
+    inline double   CosAngle( Vector vec );
+    double          CosHelAngle( LorentzVector vec, Vector dir );
     inline double   CosHelAngle( LorentzVector vec, LorentzVector dir );
     inline double   CosPhi();
     inline double   CosTheta();
     inline double   Gamma();
-    inline Vector3  GetLong( LorentzVector vec );
-    inline Vector3  GetLong( Vector3 vec );
-    inline Vector3  GetTran( LorentzVector vec );
-    inline Vector3  GetTran( Vector3 vec );
-    inline double   HelAngle( LorentzVector vec, Vector3 dir );
+    inline Vector   GetLong( LorentzVector vec );
+    inline Vector   GetLong( Vector vec );
+    inline Vector   GetTran( LorentzVector vec );
+    inline Vector   GetTran( Vector vec );
+    inline double   HelAngle( LorentzVector vec, Vector dir );
     inline double   HelAngle( LorentzVector vec, LorentzVector dir );
     LorentzVector   LorentzTransf( LorentzVector vec );
     inline double   Mass();
@@ -83,7 +83,7 @@ namespace General {
     inline void     SetPxPyPzE( double px, double py, double pz, double pe );
     inline void     SetPxPyPzM( double px, double py, double pz, double m );
     inline double   Theta();
-    inline Vector3  Unitary();
+    inline Vector   Unitary();
     inline double   Px() const;
     inline double*  PathToPx();
     inline double   Py() const;
@@ -92,8 +92,8 @@ namespace General {
     inline double*  PathToPz();
     inline double   E() const;
     inline double*  PathToE();
-    inline Vector3  Momentum() const;
-    inline Vector3* PathToMomentum();
+    inline Vector   Momentum() const;
+    inline Vector*  PathToMomentum();
 
     // Operators
     inline LorentzVector& operator += ( LorentzVector vec );
@@ -105,8 +105,8 @@ namespace General {
   protected:
     
     // Attributes
-    Vector3 fP;
-    double  fE;
+    Vector fP;
+    double fE;
     
   };
 
@@ -120,12 +120,12 @@ namespace General {
   // Gets the value of beta for the particle
   inline double   LorentzVector::Beta()     { return fP.Mod()/fE; }
   // Gets the vector concerning the parameter beta
-  inline Vector3  LorentzVector::VBeta()    { return fP/fE; }
+  inline Vector  LorentzVector::VBeta()    { return fP/fE; }
   // Gets the cosine of the angle between two vectors
   inline double   LorentzVector::CosAngle( LorentzVector vec ) {
     return fP.CosAngle( vec.fP );
   }
-  inline double   LorentzVector::CosAngle( Vector3 vec ) {
+  inline double   LorentzVector::CosAngle( Vector vec ) {
     return fP.CosAngle( vec );
   }
   // Gets the value of the cosine of the helicity angle of the particle <vec>
@@ -139,21 +139,21 @@ namespace General {
   // Gets the value of gamma for the particle
   inline double   LorentzVector::Gamma()    { return fE/std::sqrt( fE*fE - fP.Mod2() ); }
   // Gets the longitudinal component of the given vector regarding to this one
-  inline Vector3  LorentzVector::GetLong( LorentzVector vec ) {
+  inline Vector   LorentzVector::GetLong( LorentzVector vec ) {
     return fP.GetLong( vec.fP );
   }
-  inline Vector3  LorentzVector::GetLong( Vector3 vec ) {
+  inline Vector   LorentzVector::GetLong( Vector vec ) {
     return fP.GetLong( vec );
   }
   // Gets the transversal component of the given vector regarding to this one
-  inline Vector3  LorentzVector::GetTran( LorentzVector vec ) {
+  inline Vector   LorentzVector::GetTran( LorentzVector vec ) {
     return fP.GetTran( vec.fP );
   }
-  inline Vector3  LorentzVector::GetTran( Vector3 vec ) {
+  inline Vector   LorentzVector::GetTran( Vector vec ) {
     return fP.GetTran( vec );
   }
   // Gets the value of the helicity angle of the particle <vec> in the direction <dir>
-  inline double   LorentzVector::HelAngle( LorentzVector vec, Vector3 dir ) {
+  inline double   LorentzVector::HelAngle( LorentzVector vec, Vector dir ) {
     return std::acos( this -> CosHelAngle( vec, dir ) ); }
   inline double   LorentzVector::HelAngle( LorentzVector vec, LorentzVector dir ) {
     return std::acos( this -> CosHelAngle( vec, dir ) ); }
@@ -189,7 +189,7 @@ namespace General {
   // Gets the value of the theta angle in the x, y, z coordinate system
   inline double   LorentzVector::Theta()    { return fP.Theta(); }
   // Gets the unitary vector
-  inline Vector3  LorentzVector::Unitary()  { return fP.Unitary(); }
+  inline Vector   LorentzVector::Unitary()  { return fP.Unitary(); }
   // Gets the module of the momentum
   inline double   LorentzVector::P()        { return fP.Mod(); }
   // Methods to get the value or the path of the different components of the vector
@@ -201,8 +201,8 @@ namespace General {
   inline double*  LorentzVector::PathToPz()   { return fP.PathToZ();   }
   inline double   LorentzVector::E() const  { return fE;           }
   inline double*  LorentzVector::PathToE()    { return &fE;          }
-  inline Vector3  LorentzVector::Momentum() const { return fP; }
-  inline Vector3* LorentzVector::PathToMomentum() { return &fP; }
+  inline Vector   LorentzVector::Momentum() const { return fP; }
+  inline Vector*  LorentzVector::PathToMomentum() { return &fP; }
   // Gets the rapidity of the particle
   inline double   LorentzVector::Rapidity() {
     return fE - fP.Z() != 0 ?

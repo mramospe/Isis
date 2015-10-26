@@ -8,7 +8,7 @@
 //  AUTHOR : Miguel Ramos Pernas		                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch		                                 //
 //                                                                               //
-//  Last Update: 22/10/2015			                                 //
+//  Last Update: 26/10/2015			                                 //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -29,8 +29,8 @@
 //______________________________________________________________________________
 // CTAU function
 double General::CTAU( General::LorentzVector vec,
-		      General::Vector3       OwnPV,
-		      General::Vector3       EndV ) {
+		      General::Vector        OwnPV,
+		      General::Vector        EndV ) {
 
   double
     beta2( vec.E()*vec.E()/( vec.P()*vec.P() ) ),
@@ -40,10 +40,10 @@ double General::CTAU( General::LorentzVector vec,
 }
 
 //______________________________________________________________________________
-// Calculates the determinant of three Vector3
-double General::Det( General::Vector3 vec1,
-		     General::Vector3 vec2,
-		     General::Vector3 vec3 ) {
+// Calculates the determinant of three Vector
+double General::Det( General::Vector vec1,
+		     General::Vector vec2,
+		     General::Vector vec3 ) {
    
   return 
     vec1.X()*( vec2.Y()*vec3.Z() - vec2.Z()*vec3.Y() ) - 
@@ -65,11 +65,11 @@ double General::Det( General::LorentzVector vec1,
 
 //______________________________________________________________________________
 // Calculates the IP given the momentum and the primary and secondary vertex
-double General::IP( General::Vector3 vec,
-		    General::Vector3 pv,
-		    General::Vector3 sv ) {
+double General::IP( General::Vector vec,
+		    General::Vector pv,
+		    General::Vector sv ) {
 
-  General::Vector3
+  General::Vector
     u( vec.Unitary() ),
     ipvec( pv - sv );
 
@@ -80,10 +80,10 @@ double General::IP( General::Vector3 vec,
 // DOCA function (distance of closest approach)
 double General::DOCA( General::LorentzVector vec1,
 		      General::LorentzVector vec2,
-		      General::Vector3       EndV1,
-		      General::Vector3       EndV2 ) {
+		      General::Vector        EndV1,
+		      General::Vector        EndV2 ) {
 
-  General::Vector3
+  General::Vector
     u1( vec1.Unitary() ),
     u2( vec2.Unitary() );
 

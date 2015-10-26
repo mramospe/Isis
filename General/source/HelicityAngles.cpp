@@ -3,11 +3,11 @@
 //  General package                                                              //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
-//                                                                               //       
+//                                                                               //
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/07/2015                                                      //
+//  Last update: 26/10/2015                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -67,7 +67,7 @@ void General::HelicityAngles::CalculateAngles( General::LorentzVector &Mother,
 					       General::LorentzVector &P21,
 					       General::LorentzVector &P22 ) {
   
-  General::Vector3 
+  General::Vector 
     P1_MRF( Mother.LorentzTransf( P1 ).Unitary() ),
     P2_MRF( Mother.LorentzTransf( P2 ).Unitary() ),
     P11_P1RF( P1.LorentzTransf( P11 ).Unitary() ),

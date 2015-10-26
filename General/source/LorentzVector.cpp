@@ -3,11 +3,11 @@
 //  General package                                                              //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
-//                                                                               //       
+//                                                                               //
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/07/2015                                                      //
+//  Last update: 26/10/2015                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -41,7 +41,7 @@ General::LorentzVector::LorentzVector( double px, double py, double pz, double p
 
 //_______________________________________________________________________________
 // Contructor given the momentum and the energy
-General::LorentzVector::LorentzVector( Vector3 vec, double pe ) :
+General::LorentzVector::LorentzVector( Vector vec, double pe ) :
   fP( vec ), fE( pe ) { }
 
 //_______________________________________________________________________________
@@ -90,7 +90,7 @@ double  General::LorentzVector::ArmPl( General::LorentzVector vec ) {
 //_______________________________________________________________________________
 // Calculates the value of the cosine of the helicity angle of the particle
 // given by <vec> in the direction <dir>
-double General::LorentzVector::CosHelAngle( LorentzVector vec, Vector3 dir ) {
+double General::LorentzVector::CosHelAngle( LorentzVector vec, Vector dir ) {
 
   General::LorentzVector vec_transf( this -> LorentzTransf( vec ) );
 
@@ -113,7 +113,7 @@ double General::LorentzVector::PseudoRapidity() {
 // class vector
 General::LorentzVector General::LorentzVector::LorentzTransf( General::LorentzVector vec ) {
 
-  General::Vector3 
+  General::Vector 
     vec_long( this -> GetLong( vec ) ),
     vec_tran( this -> GetTran( vec ) ),
     u       ( vec_long.Unitary() );
