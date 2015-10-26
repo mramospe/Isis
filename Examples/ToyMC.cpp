@@ -4,12 +4,51 @@
 
 #include "RooFit/ToyMCgenerator.h"
 #include "TFile.h"
+#include "TRandom.h"
+
+#include <cmath>
 
 int main() {
 
-  // Gets the input tree
-  TFile *ifile = TFile::Open( "files/ToyMCin.root" );
-  TTree *itree = (TTree*) ifile -> Get( "DecayTree" );
+  // Generates the input sample
+  TFile *ifile = TFile::Open( "files/ToyMCin.root", "RECREATE" );
+  TTree *itree = new TTree( "DecayTree", "DecayTree", 0 );
+  
+  double B0_M, B0_PX, B0_PY, B0_PZ, B0_PE;
+
+  itree -> Branch( "B0_M" , &B0_M , "B0_M/D"  );
+  itree -> Branch( "B0_PX", &B0_PX, "B0_PX/D" );
+  itree -> Branch( "B0_PY", &B0_PY, "B0_PY/D" );
+  itree -> Branch( "B0_PZ", &B0_PZ, "B0_PZ/D" );
+  itree -> Branch( "B0_PE", &B0_PE, "B0_PE/D" );
+
+  for ( size_t i = 0; i < 10000; i++ ) {
+
+    B0_M = gRandom -> Gaus( 5279.53, 20 );
+    
+    if   ( gRandom -> Uniform() < 0.5 )
+      B0_PX = gRandom -> Gaus( +10, 5 );
+    else
+      B0_PX = gRandom -> Gaus( -10, 5 );
+
+    if   ( gRandom -> Uniform() < 0.5 )
+      B0_PY = gRandom -> Gaus( +10, 5 );
+    else
+      B0_PY = gRandom -> Gaus( -10, 5 );
+
+    B0_PZ = gRandom -> Exp( 1000 );
+
+    B0_PE = std::sqrt( B0_M*B0_M + B0_PX*B0_PX + B0_PY*B0_PY + B0_PZ*B0_PZ );
+
+    itree -> Fill();
+  }
+  itree -> Write();
+
+  ifile -> Close();
+
+  // Creates the toy-montecarlo sample
+  ifile = TFile::Open( "files/ToyMCin.root", "READ" );
+  itree = (TTree*) ifile -> Get( "DecayTree" );
 
   // Creates the different particles of the taking part of the generation
   Analysis::DecayParticle
@@ -21,7 +60,7 @@ int main() {
     piplus( "pi+" );
 
   // Opens the output file
-  TFile *ofile = TFile::Open( "ToyMCout.root", "RECREATE" );
+  TFile *ofile = TFile::Open( "files/ToyMCout.root", "RECREATE" );
 
   // Initializes the class
   Analysis::ToyMCgenerator gen( Bs0,

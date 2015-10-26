@@ -102,4 +102,9 @@ clean:
 		rm Examples/*.out; \
 		echo " Removed compiled files at: Examples"; \
 	fi;
+	@if [ "$(wildcard Examples/files/*.root)" != "" ]; \
+	then \
+		rm Examples/files/*.root; \
+		echo " Removed root files at: Examples/files"; \
+	fi;
 
