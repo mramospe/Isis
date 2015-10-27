@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 28/09/2015                             //
+#//  Last update: 27/10/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -20,7 +20,7 @@
 #//////////////////////////////////////////////////////////
 
 
-from ROOT import TFile, TTree, TDirectory
+from ROOT import TFile, TTree, TDirectory, TH1D, TH2D, TGraph
 from copy import deepcopy
 from numpy import array, bool_
 
@@ -50,7 +50,7 @@ class DataManager:
         if nargs >= 2:
             self.AddTarget( *args )
         elif nargs and nargs < 2:
-            print " Arguments for DataManager class are file_name and tree_name"
+            print "Arguments for DataManager class are file_name and tree_name"
             exit()
 
     #_______________________________________________________________________________
@@ -106,12 +106,12 @@ class DataManager:
             ifile = TFile.Open( args[ 0 ], "READ" )
             tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
             self.Targets[ ifile ]  = tlist
-            print " Added target <", args[ 0 ], "> and trees", list( args[ 1: ] )
+            print "Added target <", args[ 0 ], "> and trees", list( args[ 1: ] )
         else:
             ifile = [ ifile for ifile in self.Targets if ifile.GetName() == args[ 0 ] ][ 0 ]
             tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
             self.Targets[ ifile ] += tlist
-            print " Added trees", list( tlist ), "to target <", ifile.GetName()
+            print "Added trees", list( tlist ), "to target <", ifile.GetName()
 
         for name in self.Variables:
             vvals = self.Variables[ name ]
@@ -135,7 +135,7 @@ class DataManager:
             if len( el[ 1 ] ) == self.Nentries:
                 self.Variables[ el[ 0 ] ] = el[ 1 ]
             else:
-                print " Variable", el[ 0 ], "to be added to the manager has different length."
+                print "Variable", el[ 0 ], "to be added to the manager has different length."
                 exit()
             
     #_______________________________________________________________________________
@@ -171,10 +171,10 @@ class DataManager:
                             tree.GetEntry( ievt )
                             vvals.append( getattr( tree, name ) )
                 else:
-                    print " Variable", name, "already booked"
+                    print "Variable", name, "already booked"
             self.Nentries = len( vvals )
         else:
-            print " No targets added to the manager, could not book variables:", var_names
+            print "No targets added to the manager, could not book variables:", var_names
             exit()
 
     #_______________________________________________________________________________
@@ -225,7 +225,7 @@ class DataManager:
                 if el in self.Variables:
                     var_list.append( el )
                 else:
-                    print " Cut in variable", el, "not valid, variable does not exist"
+                    print "Cut in variable", el, "not valid, variable does not exist"
         values = [ self.Variables[ var ] for var in var_list ]
         nvars  = len( var_list )
         for ivar in range( nvars ):
@@ -290,6 +290,43 @@ class DataManager:
         return [ var for var in self.Variables ]
 
     #_______________________________________________________________________________
+    # Makes the histogram of the given variable. A selection can be applied
+    # introducing < cuts >, as well as the name and the title can be defined in a
+    # similar way too.
+    def MakeHistogram( self, var, nbins = 100, **kwargs ):
+        if "name" in kwargs: name = kwargs[ "name" ]
+        else: name = var
+        if "title" in kwargs: title = kwargs[ "title" ]
+        else: title = var
+        if "cuts" in kwargs: vvar = self.GetVarEvents( var, kwargs[ "cuts" ] )
+        else: vvar = self.Variables[ var ]
+        hist = TH1D( name, title, nbins, min( vvar ), max( vvar ) )
+        for el in vvar:
+            hist.Fill( el )
+        return hist
+
+    #_______________________________________________________________________________
+    # Creates a TGraph object with the points corresponding to two variables.
+    def MakeScatterPlot( self, var1, var2, **kwargs ):
+        if "name" in kwargs: name = kwargs[ "name" ]
+        else: name = var1 + "vs" + var2
+        if "title" in kwargs: title = kwargs[ "title" ]
+        else: title = var1 + "vs" + var2
+        if "cuts" in kwargs:
+            vvar1 = self.GetVarEvents( var1, kwargs[ "cuts" ] )
+            vvar2 = self.GetVarEvents( var2, kwargs[ "cuts" ] )
+        else:
+            vvar1 = self.Variables[ var1 ]
+            vvar2 = self.Variables[ var2 ]
+        graph = TGraph()
+        for ip, v1, v2 in zip( range( len( vvar1 ) ), vvar1, vvar2 ):
+            graph.SetPoint( ip, v1, v2 )
+        graph.SetNameTitle( name, title )
+        graph.GetXaxis().SetTitle( var1 )
+        graph.GetYaxis().SetTitle( var2 )
+        return graph
+
+    #_______________________________________________________________________________
     # Makes another variable using those in the class. There have to be specified:
     # the new variable name, the name of the variables used by the function
     # ( ordered in a list ) and the function itself. The computation of the new
@@ -317,9 +354,12 @@ class DataManager:
         if "cut" not in kwargs:
             kwargs[ "cut" ] = False
         if "events" not in kwargs:
-            kwargs[ "events" ] = 20
+            kwargs[ "events" ] = False
         if "name" not in kwargs:
-            kwargs[ "name" ] = "Manager"
+            if hasattr( self, "name" ):
+                kwargs[ "name" ] = self.name
+            else:
+                kwargs[ "name" ] = "Manager"
         if "variables" not in kwargs:
             kwargs[ "variables" ] = [ var for var in self.Variables ]
             kwargs[ "variables" ].sort()
@@ -331,19 +371,19 @@ class DataManager:
                 max_length = lvar
 
         ''' Prints the name of the manager '''
-        lname = len( kwargs[ "name" ] ) + 2
-        print "\n " + lname*'*' + "\n  " + kwargs[ "name" ] + "  \n " + lname*'*'
+        lname = len( kwargs[ "name" ] )
+        print "\n" + 3*lname*'*' + "\n" + lname*" " + kwargs[ "name" ] + "\n" + 3*lname*'*'
         
         ''' Prints the targets '''
         if len( self.Targets ):
-            print "\n Files atached:"
+            print "\nFiles attached:"
             for ifile in self.Targets:
-                print " - " + ifile.GetName() + ":"
+                out = " - " + ifile.GetName() + ": "
                 for tree in self.Targets[ ifile ]:
-                    print "\t" + tree.GetName()
+                    out += tree.GetName() + ", "
+                print out[ :-2 ]
 
         ''' Prints the variables '''
-        print "\n Variables: "
         vout      = " "
         variables = []
         if len( args ):
@@ -354,7 +394,7 @@ class DataManager:
             for var in kwargs[ "variables" ]:
                 variables.append( var )
                 vout      += var + ", "
-        print vout[ :-2 ] + "\n"
+        print "\nVariables:" + vout[ :-2 ] + "\n"
 
         ''' Prints the values of the variables '''
         vout = " "
@@ -363,14 +403,22 @@ class DataManager:
         vout = vout[ :-2 ]
 
         if kwargs[ "cut" ]:
+            evlist = self.GetCutList( kwargs[ "cut" ] )
+        else:
+            evlist = range( self.Nentries )
+
+        if kwargs[ "events" ]:
             i = 0
-            for ievt in self.GetCutList( kwargs[ "cut" ] ):
+            for ievt in evlist:
                 if i == kwargs[ "events" ]: break
                 i += 1
                 print vout % self.GetEvent( ievt, *variables )
         else:
-            for ievt in range( self.Nentries ):
-                if ievt == kwargs[ "events" ]: break
+            for ievt in evlist:
+                if ievt and ievt % 20 == 0:
+                    if raw_input(
+                        "< Introduce q to exit, and any other input to continue printing >: "
+                        ) == "q": break
                 print vout % self.GetEvent( ievt, *variables )
 
     #_______________________________________________________________________________
@@ -390,10 +438,10 @@ class DataManager:
         if len( args ) == 2:
             output_file = TFile.Open( args[ 0 ], "RECREATE" )
             output_tree = TTree( args[ 1 ], args[ 1 ], 0 )
-            print " Saving tree with name <", args[ 1 ], "> in <", args[ 0 ], ">"
+            print "Saving tree with name <", args[ 1 ], "> in <", args[ 0 ], ">"
         else:
             output_tree = TTree( args[ 0 ], args[ 0 ], 0 )
-            print ( " Saving tree with name <", args[ 1 ], "> in <", gDirectory.GetName(), ">" )
+            print ( "Saving tree with name <", args[ 1 ], "> in <", gDirectory.GetName(), ">" )
 
         variables = [ var for var in self.Variables ].sort()
             
@@ -416,7 +464,7 @@ class DataManager:
             var_tensor.append( self.Variables[ var ] )
 
         ''' Begins the loop to fill the tree '''
-        print " Writing", self.Nentries, "events"
+        print "Writing", self.Nentries, "events"
         rvars = range( len( variables ) )
         for ievt in range( self.Nentries ):
             for iv in rvars:
