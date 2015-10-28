@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 27/10/2015                             //
+#//  Last update: 28/10/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -20,7 +20,7 @@
 #//////////////////////////////////////////////////////////
 
 
-from ROOT import TCanvas, TH1D, TGraph
+from ROOT import gStyle, TCanvas, TH1D, TGraph
 import numpy
 from math import sqrt
 
@@ -34,18 +34,18 @@ class FisherDiscriminant:
 
     #_______________________________________________________________________________
     # Constructor
-    def __init__( self, sampleA, sampleB ):
+    def __init__( self, SigSample, BkgSample ):
 
-        self.SampleA = numpy.matrix( sampleA )
-        self.SampleB = numpy.matrix( sampleB )
+        self.SigSample = numpy.matrix( SigSample )
+        self.BkgSample = numpy.matrix( BkgSample )
 
-        cmatrix1 = numpy.matrix( CovMatrix( self.SampleA.A ) )
-        cmatrix2 = numpy.matrix( CovMatrix( self.SampleB.A ) )
-        invscm   = numpy.linalg.inv( cmatrix1 + cmatrix2 )
-        means1   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.SampleA.A ] )
-        means2   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.SampleB.A ] )
+        cmatrixSig = numpy.matrix( CovMatrix( self.SigSample.A ) )
+        cmatrixBkg = numpy.matrix( CovMatrix( self.BkgSample.A ) )
+        invscm     = numpy.linalg.inv( cmatrixSig + cmatrixBkg )
+        meansSig   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.SigSample.A ] )
+        meansBkg   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.BkgSample.A ] )
 
-        self.ProjVect = invscm.dot( means1 - means2 )
+        self.ProjVect = invscm.dot( meansSig - meansBkg )
 
     #_______________________________________________________________________________
     # Applies the fisher discriminant to a given sample
@@ -62,11 +62,11 @@ class FisherDiscriminant:
     #_______________________________________________________________________________
     # Returns the values for the fisher discriminant of the two training samples
     def GetTrainFisherValues( self ):
-        sampleA  = self.SampleA.T
-        sampleB  = self.SampleB.T
-        fisherA  = [ float(self.ProjVect.dot( sampleA.A[ i ] ).A) for i in range( len( sampleA ) ) ]
-        fisherB  = [ float(self.ProjVect.dot( sampleB.A[ i ] ).A) for i in range( len( sampleB ) ) ]
-        return fisherA, fisherB
+        SigSample  = self.SigSample.T
+        BkgSample  = self.BkgSample.T
+        fisherSig  = [ float(self.ProjVect.dot( SigSample.A[ i ] ).A) for i in range( len( SigSample ) ) ]
+        fisherBkg  = [ float(self.ProjVect.dot( BkgSample.A[ i ] ).A) for i in range( len( BkgSample ) ) ]
+        return fisherSig, fisherBkg
 
     #_______________________________________________________________________________
     # Plots the histograms of the fisher discriminant values for the two training
@@ -76,44 +76,51 @@ class FisherDiscriminant:
         else: nbins = 100
         if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
         else: npoints = 100
+        if "nsig" in kwargs: nsig = kwargs[ "nsig" ]
+        else: nsig = 1000
+        if "nbkg" in kwargs: nbkg = kwargs[ "nbkg" ]
+        else: nbkg = 1000
         if "offset" in kwargs: offset = kwargs[ "offset" ]
         else: offset = 0
 
         ''' Gets the fisher discriminant values for the samples '''
-        fisherA, fisherB = self.GetTrainFisherValues()
-        fisherTot        = fisherA + fisherB
-        minv, maxv       = min( fisherTot ) - offset, max( fisherTot ) + offset
+        fisherSig, fisherBkg = self.GetTrainFisherValues()
+        fisherTot  = fisherSig + fisherBkg
+        minv, maxv = min( fisherTot ) - offset, max( fisherTot ) + offset
 
         ''' Makes the histograms with the aforementioned variables '''
         histA = TH1D( "Signal", "", nbins, minv, maxv )
         histB = TH1D( "Background", "", nbins, minv, maxv )
-        for el in fisherA: histA.Fill( el )
-        for el in fisherB: histB.Fill( el )
+        for el in fisherSig: histA.Fill( el )
+        for el in fisherBkg: histB.Fill( el )
+        histA.Scale( nsig*1./histA.GetEntries() )
+        histB.Scale( nbkg*1./histB.GetEntries() )
         histA.SetLineColor( 2 )
         histB.SetLineColor( 4 )
 
         ''' Makes the ROC, significance/cut and efficiency/cut graphs '''
         step = ( maxv - minv )*1./( npoints - 1 )
-        fisherA.sort()
-        fisherB.sort()
-        la , lb  = len( fisherA ), len( fisherB )
+        fisherSig.sort()
+        fisherBkg.sort()
+        la , lb  = len( fisherSig ), len( fisherBkg )
         roc, sig, eff, rej = TGraph(), TGraph(), TGraph(), TGraph()
         for i in range( npoints ):
             cut    = minv + i*step
             nA, nB = 0, 0
-            for el in reversed( fisherA ):
+            for el in reversed( fisherSig ):
                 if el > cut: nA += 1
                 else: break
-            for el in reversed( fisherB ):
+            for el in reversed( fisherBkg ):
                 if el > cut: nB += 1
                 else: break
-            roc.SetPoint( i, nA*1./la, 1 - nB*1./lb )
-            if nA == 0 and nB == 0:
-                sig.SetPoint( i, cut, 1. )
-            else:
-                sig.SetPoint( i, cut, nA*1./sqrt( nA + nB ) )
-            eff.SetPoint( i, cut, nA*1./la )
-            rej.SetPoint( i, cut, 1 - nB*1./lb )
+            sigeff = nA*1./la
+            bkgeff = nB*1./lb
+            bkgrej = 1 - bkgeff
+            roc.SetPoint( i, sigeff, bkgrej )
+            if ( sigeff + bkgeff ) != 0:
+                sig.SetPoint( sig.GetN(), cut, sigeff*nsig*1./sqrt( sigeff*nsig + bkgeff*nbkg ) )
+            eff.SetPoint( i, cut, sigeff )
+            rej.SetPoint( i, cut, bkgrej )
 
         ''' Defines the name, title, line style and marker style of the graphs '''
         roc.SetNameTitle( "ROC", "" )
@@ -133,22 +140,32 @@ class FisherDiscriminant:
 
         ''' Draws all the plots in a canvas and returns them '''
         canvas = TCanvas()
-        canvas.Divide( 2, 2 )      
+        canvas.Divide( 2, 2 )
+        gStyle.SetOptStat( 0 )
         canvas.cd( 1 )
         if histA.GetMaximum() > histB.GetMaximum():
             histA.GetXaxis().SetTitle( "Fisher linear discriminant" )
-            histA.DrawNormalized()
-            histB.DrawNormalized( "SAME" )
+            histA.Draw()
+            histB.Draw( "SAME" )
         else:
             histB.GetXaxis().SetTitle( "Fisher linear discriminant" )
-            histB.DrawNormalized()
-            histA.DrawNormalized( "SAME" )
+            histB.Draw()
+            histA.Draw( "SAME" )
         canvas.cd( 2 ); eff.Draw( "APC" ); rej.Draw( "SAMEPC" );
         canvas.cd( 3 ); roc.Draw( "APC" )
         canvas.cd( 4 ); sig.Draw( "APC" )
 
         canvas.cd( 1 ).BuildLegend( 0.15, 0.75, 0.35, 0.85 )
         canvas.cd( 2 ).BuildLegend( 0.15, 0.75, 0.45, 0.85 )
+
+        ''' Prints the maximum significance point and the cut value '''
+        lst = sig.GetY()
+        maxv, maxi = max( [ ( lst[ i ], i ) for i in range( sig.GetN() ) ] )
+
+        print "----------------------------"
+        print "Fisher discriminant analysis"
+        print "Maximum significance:", maxv, "when cutting at", minv + maxi*step
+        print "----------------------------"
 
         return { "canvas" : canvas,
                  "histA"  : histA,
