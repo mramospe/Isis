@@ -164,6 +164,9 @@ class FisherDiscriminant:
 
         print "----------------------------"
         print "Fisher discriminant analysis"
+        print "----------------------------"
+        print "Number of Background events:", nbkg
+        print "Number of Signal events:    ", nsig
         print "Maximum significance:", maxv, "when cutting at", minv + maxi*step
         print "----------------------------"
 

@@ -27,7 +27,7 @@ TOOLS_EXECS        = $(patsubst %.cpp, %.out, $(wildcard Tools/*.cpp))
 # ------------------------------------------
 # Main compiling function
 all: $(GENERAL_LIB) $(ANALYSIS_LIB) $(RFANALYSIS_LIB) $(TOOLS_EXECS)
-	@echo " Installation finished"
+	@echo "Installation finished"
 
 # ------------------------------------------
 # Root flags
@@ -43,8 +43,8 @@ $(GENERAL_SOURCE)/%.o: $(GENERAL_SOURCE)/%.cpp
 	$(COMPILER) $(CFLAGS) -c $^ $(INCLUDE) -o $@
 
 $(GENERAL_LIB): $(GENERAL_OBJECTS)
-	@echo " Creating shared library for General package"
 	$(COMPILER) $(CFLAGS) -o $@ $(GENERAL_SOURCE)/*.o
+	@echo "Created shared library for General package"
 
 # ------------------------------------------
 # Compiles the Analysis package
@@ -52,8 +52,8 @@ $(ANALYSIS_SOURCE)/%.o: $(ANALYSIS_SOURCE)/%.cpp
 	$(COMPILER) $(CFLAGS) -c $^ $(INCLUDE) $(ROOT_LIBS) -o $@
 
 $(ANALYSIS_LIB): $(ANALYSIS_OBJECTS)
-	@echo " Creating shared library for Analysis package"
 	$(COMPILER) $(CFLAGS) -o $@ $(ANALYSIS_SOURCE)/*.o
+	@echo "Created shared library for Analysis package"
 
 # ----------------------------------------------
 # Compiles the RooFit-dependent Analysis package
@@ -61,8 +61,8 @@ $(RFANALYSIS_SOURCE)/%.o: $(RFANALYSIS_SOURCE)/%.cpp
 	$(COMPILER) $(CFLAGS) -c $^ $(INCLUDE) $(ROOT_LIBS) -o $@
 
 $(RFANALYSIS_LIB): $(RFANALYSIS_OBJECTS)
-	@echo " Creating shared library for RooFit-Analysis package"
 	$(COMPILER) $(CFLAGS) -o $@ $(RFANALYSIS_SOURCE)/*.o
+	@echo "Created shared library for RooFit-Analysis package"
 
 # ------------------------------------------
 # Compiles the Tools
