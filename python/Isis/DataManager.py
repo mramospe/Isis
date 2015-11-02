@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 27/10/2015                                //
+#//  Last update: 02/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -20,9 +20,9 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import TFile, TTree, TDirectory, TH1D, TH2D, TGraph
+from ROOT import TFile, TTree, gDirectory, TH1D, TH2D, TGraph
+from array import array
 from copy import deepcopy
-from numpy import array, bool_
 import math
 
 
@@ -463,35 +463,36 @@ class DataManager:
             output_tree = TTree( args[ 0 ], args[ 0 ], 0 )
             print ( "Saving tree with name <", args[ 1 ], "> in <", gDirectory.GetName(), ">" )
 
-        variables = [ var for var in self.Variables ].sort()
-            
+        variables = [ var for var in self.Variables ]
+
         ''' Constructs the list of variables to make the branches, and fills the tensor of
         variables to fill the tree '''
         var_values = []
         var_tensor = []
         for var in variables:
-            if isinstance( self.Variables[ var ][ 0 ], float ):
+            if   all( isinstance( self.Variables[ var ][ i ], float )
+                      for i in range( self.Nentries ) ):
                 vtype = "/D"
-                var_values.append( array( [ 0. ] ) )
-            elif all( isinstance( self.Variables[ var ][ i ], bool_ ) 
+                var_values.append( array( 'd', [ 0 ] ) )
+            elif all( isinstance( self.Variables[ var ][ i ], bool ) 
                       for i in range( self.Nentries ) ):
                 vtype = "/O"
-                var_values.append( array( [ 0 ], dtype = bool_ ) )
+                var_values.append( array( 'b', [ 0 ] ) )
             else:
                 vtype = "/I"
-                var_values.append( array( [ 0 ] ) )
+                var_values.append( array( 'i', [ 0 ] ) )
             output_tree.Branch( var, var_values[ -1 ], var + vtype )
             var_tensor.append( self.Variables[ var ] )
 
         ''' Begins the loop to fill the tree '''
-        print "Writing", self.Nentries, "events"
+        print "Written", self.Nentries, "events"
         rvars = range( len( variables ) )
         for ievt in range( self.Nentries ):
             for iv in rvars:
                 var_values[ iv ][ 0 ] = var_tensor[ iv ][ ievt ]
             output_tree.Fill()
 
-            if ievt % 10000 == 0:
+            if ievt % 100000 == 0:
                 output_tree.AutoSave()
 
         output_tree.AutoSave()
