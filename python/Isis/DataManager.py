@@ -23,6 +23,7 @@
 from ROOT import TFile, TTree, TDirectory, TH1D, TH2D, TGraph
 from copy import deepcopy
 from numpy import array, bool_
+import math
 
 
 #_______________________________________________________________________________
@@ -210,22 +211,29 @@ class DataManager:
     def GetCutList( self, cut ):
         cut       = cut.replace( "&&", " and " )
         cut       = cut.replace( "||", " or "  )
+        cut       = cut.replace( "abs", "fabs" )
         variables = cut
-        for el in [ '==', '!=', '<=', '>=', '>', '<', 'and', 'or', '(', ')' ]:
+        for el in [ '==', '!=', '<=', '>=', '>', '<',
+                    'and', 'or', '(', ')',
+                    "+", "-", "*", "/" ]:
             variables = variables.replace( el, '|' )
         variables = variables.replace( ' ', '' )
         variables = variables.split( '|' )
         while '' in variables:
             variables.remove( '' )
         var_list = []
+        flist = dir( math )
         for el in variables:
-            try:
-                float( el )
-            except:
-                if el in self.Variables:
-                    var_list.append( el )
-                else:
-                    print "Cut in variable", el, "not valid, variable does not exist"
+            if el not in flist:
+                try:
+                    float( el )
+                except:
+                    if el in self.Variables:
+                        var_list.append( el )
+                    else:
+                        print "Cut in variable", el, "not valid, variable does not exist"
+            else:
+                cut = cut.replace( el, "math." + el )
         values = [ self.Variables[ var ] for var in var_list ]
         nvars  = len( var_list )
         for ivar in range( nvars ):
