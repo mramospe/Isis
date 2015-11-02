@@ -1,23 +1,23 @@
-#///////////////////////////////////////////////////////////
-#//                                                       //
-#//  Python modules                                       //
-#//                                                       //
-#// ----------------------------------------------------- //
-#//                                                       //
-#//  AUTHOR: Miguel Ramos Pernas                          //
-#//  e-mail: miguel.ramos.pernas@cern.ch                  //
-#//                                                       //
-#//  Last update: 27/10/2015                              //
-#//                                                       //
-#// ----------------------------------------------------- //
-#//                                                       //
-#//  Description:                                         //
-#//                                                       //
-#//  Defines the class to manage data from/to Root files  //
-#//  and trees.                                           //
-#//                                                       //
-#// ----------------------------------------------------- //
-#///////////////////////////////////////////////////////////
+#/////////////////////////////////////////////////////////////
+#//                                                         //
+#//  Python modules                                         //
+#//                                                         //
+#// ------------------------------------------------------- //
+#//                                                         //
+#//  AUTHOR: Miguel Ramos Pernas                            //
+#//  e-mail: miguel.ramos.pernas@cern.ch                    //
+#//                                                         //
+#//  Last update: 27/10/2015                                //
+#//                                                         //
+#// ------------------------------------------------------- //
+#//                                                         //
+#//  Description:                                           //
+#//                                                         //
+#//  Defines classes and functions to manage data from/to   //
+#//  Root files and trees.                                  //
+#//                                                         //
+#// ------------------------------------------------------- //
+#/////////////////////////////////////////////////////////////
 
 
 from ROOT import TFile, TTree, TDirectory, TH1D, TH2D, TGraph
@@ -27,7 +27,8 @@ import math
 
 
 #_______________________________________________________________________________
-
+# Class to manage data, specially designed to work together with Root files
+# and trees
 class DataManager:
 
     #_______________________________________________________________________________
@@ -50,7 +51,7 @@ class DataManager:
         ''' Error output for bad construction '''
         if nargs >= 2:
             self.AddTarget( *args )
-        elif nargs and nargs < 2:
+        elif nargs == 1:
             print "Arguments for DataManager class are file_name and tree_name"
             exit()
 
@@ -103,25 +104,24 @@ class DataManager:
     #_______________________________________________________________________________
     # Adds a new target file and/or tree to the class
     def AddTarget( self, *args ):
+        if not self.OwnsTargets: self.OwnsTargets = True
         if args[ 0 ] not in [ ifile.GetName() for ifile in self.Targets ]:
             ifile = TFile.Open( args[ 0 ], "READ" )
             tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
             self.Targets[ ifile ]  = tlist
-            print "Added target <", args[ 0 ], "> and trees", list( args[ 1: ] )
+            print "Added target <", args[ 0 ], "> and trees:", list( args[ 1: ] )
         else:
             ifile = [ ifile for ifile in self.Targets if ifile.GetName() == args[ 0 ] ][ 0 ]
             tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
             self.Targets[ ifile ] += tlist
-            print "Added trees", list( tlist ), "to target <", ifile.GetName()
-
+            print "Added trees: ", list( tlist ), "to target <", ifile.GetName(), ">"
         for name in self.Variables:
             vvals = self.Variables[ name ]
             for tree in tlist:
                 for ievt in range( tree.GetEntries() ):
                     tree.GetEntry( ievt )
                     vvals.append( getattr( tree, name ) )
-
-        if not self.Nentries and len( self.Variables ):
+        if not self.Nentries and self.Variables:
             self.Nentries = len( vvals )
 
     #_______________________________________________________________________________
@@ -180,9 +180,17 @@ class DataManager:
 
     #_______________________________________________________________________________
     # Returns a copy of this class that does not own the targets.
-    def Copy( self ):
-        mngr = deepcopy( self )
-        mngr.OwnsTargets = False
+    def Copy( self, *args, **kwargs ):
+        if "cuts" in kwargs: cmngr = self.CutSample( kwargs[ "cuts" ] )
+        else: cmngr = self
+        if args:
+            mngr = DataManager()
+            mngr.OwnsTargets = False
+            for v in args:
+                mngr.Variables[ v ] = deepcopy( cmngr.Variables[ v ] )
+        else:
+            mngr = deepcopy( cmngr )
+            mngr.OwnsTargets = False
         return mngr
 
     #_______________________________________________________________________________
@@ -308,7 +316,11 @@ class DataManager:
         else: title = var
         if "cuts" in kwargs: vvar = self.GetVarEvents( var, kwargs[ "cuts" ] )
         else: vvar = self.Variables[ var ]
-        hist = TH1D( name, title, nbins, min( vvar ), max( vvar ) )
+        if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+        else: vmin = min( vvar )
+        if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
+        else: vmax = max( vvar )
+        hist = TH1D( name, title, nbins, vmin, vmax )
         for el in vvar:
             hist.Fill( el )
         return hist
