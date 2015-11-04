@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 28/09/2015                                                  //
+#//  Last update: 04/11/2015                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -42,12 +42,12 @@ class Trigger:
 
         self.Cuts       = {}
         self.CutList    = []
-        self.SigMngr    = False
+        self.SigMngr    = {}
         self.MiBMngr    = False
-        self.CutSigMngr = False
+        self.CutSigMngr = {}
         self.CutMiBMngr = False
-        self.FuncList   = []
         self.MiBrate    = mib_rate
+        self.Prepared   = False
 
         if "nMiBevts" not in kwargs:
             self.nMiBevts = 0
@@ -64,20 +64,20 @@ class Trigger:
     # manager. All cuts specified after using the BookCut and ApplyCuts methods are
     # going to be applied.
     def __call__( self, mngr ):
-        total_cut = ""
         old_nevts = self.GetTrueEvents( mngr )
         for cut in self.CutList:
-            total_cut += cut
-            new_mngr  = mngr.CutSample( total_cut )
-            new_nevts = self.GetTrueEvents( new_mngr )
-            print " Efficiency after cut:", cut, "=>", new_nevts*1./old_nevts
-        return new_mngr
+            cut       = self.Cuts[ cut ]
+            mngr      = mngr.CutSample( cut )
+            new_nevts = self.GetTrueEvents( mngr )
+            print "Efficiency after cut:", cut, "=>", new_nevts*1./old_nevts
+        return mngr
 
     #_______________________________________________________________________________
     # Internal method to get the list of events that pass a certain cut during a scan
     def get_scan_cut( self, var, cond, cut ):
         lists = []
-        for mngr in [ self.CutSigMngr, self.CutMiBMngr ]:
+        sigmngrs = [ self.CutSigMngr[ el ] for el in self.CutSigMngr ]
+        for mngr in sigmngrs + [ self.CutMiBMngr ]:
             var_vals = mngr.Variables[ var ]
             add_list = []
             if   cond == '<':
@@ -100,8 +100,9 @@ class Trigger:
         return lists
 
     #_______________________________________________________________________________
-    # Adds a new manager to the class. The type has to be specified and it will
-    # auto-merge the sets stored.
+    # Adds a new manager to the class. The type has to be specified. If it is a
+    # minimum bias sample, it will auto-merge the sets stored. In other case the
+    # manager will be storaged as a signal file.
     def AddManager( self, mngr, dtype ):
         if   dtype in ( "mib", "MiB", "MIB" ):
             if self.MiBMngr:
@@ -110,13 +111,8 @@ class Trigger:
                 self.MiBMngr  = mngr
             if self.SelfNorm :
                 self.nMiBevts += len( mngr )
-        elif dtype in ( "sig", "Sig", "SIG" ):
-            if self.SigMngr:
-                self.SigMngr += mngr
-            else:
-                self.SigMngr  = mngr
         else:
-            print " Error when loading manager"
+            self.SigMngr[ dtype ] = mngr
 
     #_______________________________________________________________________________
     # Books a new cut with the id given by < cut_id >
@@ -138,13 +134,13 @@ class Trigger:
     # Returns the efficiency for signal or minimum bias samples. This quantity is refered
     # to the total number of events in the main sample. The input parameter < arg > can be
     # a cut string or a list of events.
-    def GetEfficiency( self, arg, dtype = "sig" ):
-        if   dtype in ( "mib", "MiB", "MIB" ):
+    def GetEfficiency( self, arg, dtype ):
+        if dtype in ( "mib", "MiB", "MIB" ):
             cmngr = self.CutMiBMngr
             mngr  = self.MiBMngr
-        elif dtype in ( "sig", "Sig", "SIG" ):
-            cmngr = self.CutSigMngr
-            mngr  = self.SigMngr
+        else:
+            cmngr = self.CutSigMngr[ dtype ]
+            mngr  = self.SigMngr[ dtype ]
         if isinstance( arg, str ):
             arg = cmngr.GetCutList( arg )
         return self.GetTrueEvents( cmngr, arg )*1./self.GetTrueEvents( mngr )
@@ -188,10 +184,14 @@ class Trigger:
         cut = self.GetCutLine()
         if cut == "":
             self.CutMiBMngr = self.MiBMngr.Copy()
-            self.CutSigMngr = self.SigMngr.Copy()
+            for el in self.SigMngr:
+                self.CutSigMngr[ el ] = self.SigMngr[ el ].Copy()
         else:
             self.CutMiBMngr = self.MiBMngr.CutSample( cut )
-            self.CutSigMngr = self.SigMngr.CutSample( cut )
+            for el in self.SigMngr:
+                self.CutSigMngr[ el ] = self.SigMngr[ el ].CutSample( cut )
+        self.Prepared = True
+        print "Trigger prepared"
 
     #_______________________________________________________________________________
     # Removes a cut booked in the class. After using this method, ApplyCuts has to
@@ -199,45 +199,6 @@ class Trigger:
     def RemoveCut( self, cut_id ):
         self.CutList.remove( cut_id )
         del self.Cuts[ cut_id ]
-
-    #_______________________________________________________________________________
-    # Performs a scan over the variable < var > from < first > to < last > in
-    # < npoints > steps. Both end-points are included. The task performed during the
-    # scan is defined by the functions storaged in < self.FuncList > using the
-    # method < SetScanFunctions >. One can add a new function to this class ( see 
-    # its structure requirements in the method description ). The graphs are
-    # returned in the same order as the functions are booked.
-    def ScanVariable( self, var, cond, first, last, npoints ):
-        step    = ( last - first )*1./( npoints - 1 )
-        graphs  = [ TGraph() for func in self.FuncList ]
-        grfuncs = zip( self.FuncList, graphs )
-        nsig    = self.GetTrueEvents( self.SigMngr )
-        nmib    = self.GetTrueEvents( self.MiBMngr )
-        for i in range( npoints ):
-            cut_val   = first + i*step
-            siglist, miblist = self.get_scan_cut( var, cond, cut_val )
-            sig_eff   = self.GetTrueEvents( self.CutSigMngr, siglist )*1./nsig
-            true_nmib = self.GetTrueEvents( self.CutMiBMngr, miblist )
-            mib_eff   = true_nmib*1./nmib
-            rate      = self.MiBrate*true_nmib*1./self.nMiBevts
-            print true_nmib
-            for func, graph in grfuncs:
-                func( graph, i, cut_val, sig_eff, mib_eff, rate )
-        return graphs
-
-    #_______________________________________________________________________________
-    # Definition of the different functions that can be booked in the class for the
-    # scans
-    def ROC_point( self, graph, ipoint, *args ):
-        graph.SetPoint( ipoint, 1. - args[ 2 ], args[ 1 ] )
-    def MiBVScut_point( self, graph, ipoint, *args ):
-        graph.SetPoint( ipoint, args[ 0 ], 1. - args[ 2 ] )
-    def SigVScut_point( self, graph, ipoint, *args ):
-        graph.SetPoint( ipoint, args[ 0 ], args[ 1 ] )
-    def SigVSrate_point( self, graph, ipoint, *args ):
-        graph.SetPoint( ipoint, args[ 3 ], args[ 1 ] )
-    def RateVScut_point( self, graph, ipoint, *args ):
-        graph.SetPoint( ipoint, args[ 0 ], args[ 3 ] )
 
     #_______________________________________________________________________________
     # Sets the number of minimum bias events
@@ -255,30 +216,27 @@ class Trigger:
         self.MiBrate = val
 
     #_______________________________________________________________________________
-    # Sets the scan functions. Together with the default functions specified here:
-    # ROC, MiBVScut, SigVScut, ... one can add a user-defined function if it takes
-    # as arguments six parameters: a TGraph, number of the point, cut value, signal
-    # efficiency, minimum bias efficiency and the rate. This function has to set a
-    # new point to the TGraph. The graphs are returned in the same order as they
-    # are booked.
-    def SetScanFunctions( self, *args ):
-        self.FuncList = []
-        for func in args:
-            if isinstance( func, str ):
-                if   func == "ROC":
-                    self.FuncList.append( self.ROC_point )
-                elif func == "MiBVScut":
-                    self.FuncList.append( self.MiBVScut_point )
-                elif func == "SigVScut":
-                    self.FuncList.append( self.SigVScut_point )
-                elif func == "SigVSrate":
-                    self.FuncList.append( self.SigVSrate_point )
-                elif func == "RateVScut":
-                    self.FuncList.append( self.RateVScut_point )
-                else:
-                    print " Graph", func, "not valid"
-                    print " Available graph functions are:"
-                    print " ROC, MiBVScut, SigVScut, MiBVSrate, SigVSrate, RateVScut"
-                    exit()
-            else:
-                self.FuncList.append( func )
+    # Performs a scan over the variable < var > from < first > to < last > in
+    # < npoints > steps. Both end-points are included. The number of entries for
+    # the signal, minimum bias, cut and rate are returned in a dictionary, together
+    # with the initial number of minimum bias and signal events.
+    def ScanVariable( self, var, cond, first, last, npoints ):
+        if not self.Prepared: self.PrepareTrigger()
+        step    = ( last - first )*1./( npoints - 1 )
+        results = { "oldnmib" : self.GetTrueEvents( self.MiBMngr ),
+                    "cut"     : npoints*[ 0 ],
+                    "nmib"    : npoints*[ 0 ],
+                    "rate"    : npoints*[ 0 ] }
+        for el in self.SigMngr:
+            results[ "n"    + el ] = npoints*[ 0 ]
+            results[ "oldn" + el ] = [ self.GetTrueEvents( self.SigMngr[ el ] ) for el in self.SigMngr ]
+        for i in range( npoints ):
+            cut = first + i*step
+            sigmiblist = self.get_scan_cut( var, cond, cut )
+            nmib = self.GetTrueEvents( self.CutMiBMngr, sigmiblist[ -1 ] )
+            results[ "cut"  ][ i ] = cut
+            results[ "nmib" ][ i ] = nmib
+            results[ "rate" ][ i ] = self.MiBrate*nmib*1./self.nMiBevts
+            for el, imngr in zip( self.CutSigMngr, range( len( self.CutSigMngr ) ) ):
+                results[ "n" + el ][ i ] = sigmiblist[ imngr ]
+        return results
