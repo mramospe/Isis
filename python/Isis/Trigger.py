@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 04/11/2015                                                  //
+#//  Last update: 06/11/2015                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -238,5 +238,5 @@ class Trigger:
             results[ "nmib" ][ i ] = nmib
             results[ "rate" ][ i ] = self.MiBrate*nmib*1./self.nMiBevts
             for el, imngr in zip( self.CutSigMngr, range( len( self.CutSigMngr ) ) ):
-                results[ "n" + el ][ i ] = sigmiblist[ imngr ]
+                results[ "n" + el ][ i ] = sigmiblist[ imngr ][ i ]
         return results
