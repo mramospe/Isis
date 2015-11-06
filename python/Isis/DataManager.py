@@ -413,42 +413,45 @@ class DataManager:
                 print out[ :-2 ]
 
         ''' Prints the variables '''
-        vout      = " "
-        variables = []
-        if len( args ):
-            variables = args
-            for var in args:
-                vout      += var + ", "
-        else:
-            for var in kwargs[ "variables" ]:
-                variables.append( var )
-                vout      += var + ", "
-        print "\nVariables:" + vout[ :-2 ] + "\n"
+        if self.Variables:
+            vout      = " "
+            variables = []
+            if len( args ):
+                variables = args
+                for var in args:
+                    vout      += var + ", "
+            else:
+                for var in kwargs[ "variables" ]:
+                    variables.append( var )
+                    vout      += var + ", "
+            print "\nVariables:" + vout[ :-2 ] + "\n"
 
-        ''' Prints the values of the variables '''
-        vout = " "
-        for var in variables:
-            vout += "%.7g" + "\t|\t"
-        vout = vout[ :-2 ]
+            ''' Prints the values of the variables '''
+            vout = " "
+            for var in variables:
+                vout += "%.3e" + "\t|\t"
+            vout = vout[ :-2 ]
 
-        if kwargs[ "cut" ]:
-            evlist = self.GetCutList( kwargs[ "cut" ] )
-        else:
-            evlist = range( self.Nentries )
+            if kwargs[ "cut" ]:
+                evlist = self.GetCutList( kwargs[ "cut" ] )
+            else:
+                evlist = range( self.Nentries )
 
-        if kwargs[ "events" ]:
-            i = 0
-            for ievt in evlist:
-                if i == kwargs[ "events" ]: break
-                i += 1
-                print vout % self.GetEvent( ievt, *variables )
+            if kwargs[ "events" ]:
+                i = 0
+                for ievt in evlist:
+                    if i == kwargs[ "events" ]: break
+                    i += 1
+                    print vout % self.GetEvent( ievt, *variables )
+            else:
+                for ievt in evlist:
+                    if ievt and ievt % 20 == 0:
+                        if raw_input(
+                            "< Introduce q to exit, and any other input to continue printing >: "
+                            ) == "q": break
+                    print vout % self.GetEvent( ievt, *variables )
         else:
-            for ievt in evlist:
-                if ievt and ievt % 20 == 0:
-                    if raw_input(
-                        "< Introduce q to exit, and any other input to continue printing >: "
-                        ) == "q": break
-                print vout % self.GetEvent( ievt, *variables )
+            print "No variables booked in this manager"
 
     #_______________________________________________________________________________
     # Removes a booked variable
