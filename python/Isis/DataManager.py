@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 02/11/2015                                //
+#//  Last update: 06/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -24,6 +24,7 @@ from ROOT import TFile, TTree, gDirectory, TH1D, TH2D, TGraph
 from array import array
 from copy import deepcopy
 import math
+from Isis.Utils import MergeDicts
 
 
 #_______________________________________________________________________________
@@ -162,18 +163,18 @@ class DataManager:
             self.BookVariables( *var_names )
             return
         if len( self.Targets ):
-            tlist = self.GetListOfTrees()
+            truevars = []
+            dictlist = []
+            tlist    = self.GetListOfTrees()
             for name in var_names:
                 if name not in self.Variables:
-                    self.Variables[ name ] = []
-                    vvals = self.Variables[ name ]
-                    for tree in tlist:
-                        for ievt in range( tree.GetEntries() ):
-                            tree.GetEntry( ievt )
-                            vvals.append( getattr( tree, name ) )
+                    truevars.append( name )
                 else:
                     print "Variable", name, "already booked"
-            self.Nentries = len( vvals )
+            for tree in tlist:
+                dictlist.append( DictFromTree( tree, *truevars ) )
+            self.Variables = MergeDicts( *dictlist )
+            self.Nentries  = len( self.Variables[ name ] )
         else:
             print "No targets added to the manager, could not book variables:", var_names
             exit()
@@ -364,6 +365,14 @@ class DataManager:
         self.Variables[ var_name ] = new_variable
 
     #_______________________________________________________________________________
+    # Adds a new event to the manager. A value for all the variables has to be
+    # provided.
+    def NewEvent( self, dic ):
+        for key in self.Variables:
+            self.Variables[ key ].append( dic[ key ) )
+        self.Nentries += 1
+
+    #_______________________________________________________________________________
     # Prints the information of the class as well as the values for the first 20
     #  events. If < events > is introduced as an input, the number of events showed
     # would be that specified by the user. If < cut > is specified only will be
@@ -454,50 +463,14 @@ class DataManager:
     # < close > is provided, and if its value is false, this method will return
     # the output file. 
     def Save( self, *args, **kwargs ):
-        
         if len( args ) == 2:
             output_file = TFile.Open( args[ 0 ], "RECREATE" )
-            output_tree = TTree( args[ 1 ], args[ 1 ], 0 )
             print "Saving tree with name <", args[ 1 ], "> in <", args[ 0 ], ">"
+            TreeFromDict( args[ 1 ], self.Variables )
         else:
-            output_tree = TTree( args[ 0 ], args[ 0 ], 0 )
             print ( "Saving tree with name <", args[ 1 ], "> in <", gDirectory.GetName(), ">" )
-
-        variables = [ var for var in self.Variables ]
-
-        ''' Constructs the list of variables to make the branches, and fills the tensor of
-        variables to fill the tree '''
-        var_values = []
-        var_tensor = []
-        for var in variables:
-            if   all( isinstance( self.Variables[ var ][ i ], float )
-                      for i in range( self.Nentries ) ):
-                vtype = "/D"
-                var_values.append( array( 'd', [ 0 ] ) )
-            elif all( isinstance( self.Variables[ var ][ i ], bool ) 
-                      for i in range( self.Nentries ) ):
-                vtype = "/O"
-                var_values.append( array( 'b', [ 0 ] ) )
-            else:
-                vtype = "/I"
-                var_values.append( array( 'i', [ 0 ] ) )
-            output_tree.Branch( var, var_values[ -1 ], var + vtype )
-            var_tensor.append( self.Variables[ var ] )
-
-        ''' Begins the loop to fill the tree '''
+            TreeFromDict( args[ 0 ], self.Variables )
         print "Written", self.Nentries, "events"
-        rvars = range( len( variables ) )
-        for ievt in range( self.Nentries ):
-            for iv in rvars:
-                var_values[ iv ][ 0 ] = var_tensor[ iv ][ ievt ]
-            output_tree.Fill()
-
-            if ievt % 100000 == 0:
-                output_tree.AutoSave()
-
-        output_tree.AutoSave()
-
-        ''' Depending on the input conditions the output file is returned  '''
         if "close" in kwargs:
             if kwargs[ "close" ]:
                 output_file.Close()
@@ -505,3 +478,107 @@ class DataManager:
                 return output_file
         else:
             output_file.Close()
+
+#_______________________________________________________________________________
+# If the input is a string, returns an array with values of a certain type
+# depending on the identifier located in the title. If the input is a list, it
+# finds the type of values located on it, and returns the apropiated array.
+def ArrayType( branch ):
+    if isinstance( branch, str ):
+        if   "/F" in branch:
+            return array( 'f', [ 0 ] )
+        elif "/D" in branch:
+            return array( 'd', [ 0 ] )
+        elif "/I" in branch:
+            return array( 'i', [ 0 ] )
+        elif "/O" in branch:
+            return array( 'b', [ 0 ] )
+        else:
+            print "Type not found in <", branch, ">"
+            exit( 0 )
+    else:
+        if   isinstance( branch[ 0 ], float ):
+            return array( 'd', [ 0 ] )
+        elif isinstance( branch[ 0 ], int ):
+            return array( 'i', [ 0 ] )
+        elif isinstance( branch[ 0 ], bool ):
+            return array( 'b', [ 0 ] )
+        else:
+            print "Could not extract the type in <", branch[ 0 ], ">"
+            exit( 0 )
+    
+#_______________________________________________________________________________
+# This function creates a new branch in the given tree using the values stored
+# in a list
+def BranchFromList( brname, tree, lst ):
+    if len( lst ) != tree.GetEntries():
+        print "The size of the input list and the tree are not the same"
+        return 0
+    var    = ArrayType( lst )
+    branch = tree.Branch( brname, var, brname + '/' + var.typecode.upper() )
+    for ievt in range( tree.GetEntries() ):
+        tree.GetEntry( ievt )
+        var[ 0 ] = lst[ ievt ]
+        branch.Fill()
+    branch.Write()
+
+#_______________________________________________________________________________
+# Creates a new dictionary containing the values of the variables stored in a
+# TTree object. The input is composed by the tree and the variables to be
+# stored.
+def DictFromTree( tree, *args ):
+    avars = []
+    tvals = []
+    for var in args:
+        avars.append( ArrayType( tree.GetBranch( var ).GetTitle() ) )
+        tvals.append( [] )
+        tree.SetBranchAddress( var, avars[ -1 ] )
+    rvars = range( len( args ) )
+    for ievt in range( tree.GetEntries() ):
+        tree.GetEntry( ievt )
+        for i in rvars:
+            tvals[ i ].append( avars[ i ][ 0 ] )
+    tree.ResetBranchAddresses()
+    dic = {}
+    for var, i in zip( args, rvars ):
+        dic[ var ] = tvals[ i ]
+    return dic
+
+#_______________________________________________________________________________
+# This function almacenates the values of a leaf in a TTree into a list, given
+# the tree and the branch name
+def ListFromBranch( brname, tree ):
+    branch  = tree.GetBranch( brname )
+    var     = ArrayType( branch.GetTitle() )
+    tree.SetBranchAddress( brname, var )
+    lst = []
+    for ievt in range( tree.GetEntries() ):
+        tree.GetEntry( ievt )
+        lst.append( var[ 0 ] )
+    tree.ResetBranchAddresses()
+    return lst
+
+#_______________________________________________________________________________
+# Creates a new tree with the lists stored in a dictionary. The name of the
+# branches are given by the keys in the dictionary. The names are sorted.
+def TreeFromDict( name, dic, **kwargs ):
+    if "level" not in kwargs: kwargs[ "level" ] = 0
+    if "title" not in kwargs: kwargs[ "title" ] = name
+    tree      = TTree( name, kwargs[ "title" ], kwargs[ "level" ] )
+    variables = [ key for key in dic ]
+    variables.sort()
+    avars = []
+    tvals = []
+    for var in variables:
+        avars.append( ArrayType( dic[ var ] ) )
+        tvals.append( dic[ var ] )
+        tree.Branch( var, avars[ -1 ], var + '/' + avars[ -1 ].typecode.upper() )
+    rvars = range( len( tvals ) )
+    for ievt in range( len( dic[ var ] ) ):
+        for i in rvars:
+            avars[ i ] = tvals[ i ][ ievt ]
+        tree.Fill()
+        if ievt % 100000 == 0:
+            tree.AutoSave()
+    tree.AutoSave()
+    return tree
