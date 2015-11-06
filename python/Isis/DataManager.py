@@ -369,7 +369,7 @@ class DataManager:
     # provided.
     def NewEvent( self, dic ):
         for key in self.Variables:
-            self.Variables[ key ].append( dic[ key ) )
+            self.Variables[ key ].append( dic[ key ] )
         self.Nentries += 1
 
     #_______________________________________________________________________________
