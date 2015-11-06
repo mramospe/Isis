@@ -44,7 +44,7 @@ class DataManager:
 
         nargs = len( args )
 
-        self.OwnsTargets = True
+        self.OwnsTargets = False
         self.Nentries    = 0
         self.Targets     = {}
         self.Variables   = {}
@@ -184,14 +184,12 @@ class DataManager:
     def Copy( self, *args, **kwargs ):
         if "cuts" in kwargs: cmngr = self.CutSample( kwargs[ "cuts" ] )
         else: cmngr = self
-        if args:
-            mngr = DataManager()
-            mngr.OwnsTargets = False
-            for v in args:
-                mngr.Variables[ v ] = deepcopy( cmngr.Variables[ v ] )
-        else:
-            mngr = deepcopy( cmngr )
-            mngr.OwnsTargets = False
+        if args: variables = args
+        else: variables = cmngr.Variables.keys()
+        mngr = DataManager()
+        for v in variables:
+            mngr.Variables[ v ] = deepcopy( cmngr.Variables[ v ] )
+        mngr.Nentries = cmngr.Nentries
         return mngr
 
     #_______________________________________________________________________________
