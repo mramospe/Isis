@@ -229,7 +229,7 @@ class Trigger:
                     "rate"    : npoints*[ 0 ] }
         for el in self.SigMngr:
             results[ "n"    + el ] = npoints*[ 0 ]
-            results[ "oldn" + el ] = [ self.GetTrueEvents( self.SigMngr[ el ] ) for el in self.SigMngr ]
+            results[ "oldn" + el ] = self.GetTrueEvents( self.SigMngr[ el ] )
         for i in range( npoints ):
             cut = first + i*step
             sigmiblist = self.get_scan_cut( var, cond, cut )
@@ -238,5 +238,5 @@ class Trigger:
             results[ "nmib" ][ i ] = nmib
             results[ "rate" ][ i ] = self.MiBrate*nmib*1./self.nMiBevts
             for el, imngr in zip( self.CutSigMngr, range( len( self.CutSigMngr ) ) ):
-                results[ "n" + el ][ i ] = sigmiblist[ imngr ][ i ]
+                results[ "n" + el ][ i ] = len( sigmiblist[ imngr ] )
         return results
