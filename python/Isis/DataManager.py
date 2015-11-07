@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 06/11/2015                                //
+#//  Last update: 08/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -20,11 +20,12 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import TFile, TTree, gDirectory, TH1D, TH2D, TGraph
+from ROOT import TFile, TTree, gDirectory
 from array import array
 from copy import deepcopy
 import math
 from Isis.Utils import MergeDicts
+from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 
 
 #_______________________________________________________________________________
@@ -315,35 +316,60 @@ class DataManager:
         else: title = var
         if "cuts" in kwargs: vvar = self.GetVarEvents( var, kwargs[ "cuts" ] )
         else: vvar = self.Variables[ var ]
-        if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
-        else: vmin = min( vvar )
-        if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
-        else: vmax = max( vvar )
-        hist = TH1D( name, title, nbins, vmin, vmax )
-        for el in vvar:
-            hist.Fill( el )
-        return hist
+        return MakeHistogram( vvar, nbins, **kwargs )
 
     #_______________________________________________________________________________
-    # Creates a TGraph object with the points corresponding to two variables.
-    def MakeScatterPlot( self, var1, var2, **kwargs ):
+    # Makes the 2-dimensional histogram of the given variables.
+    def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         if "name" in kwargs: name = kwargs[ "name" ]
-        else: name = var1 + "vs" + var2
+        else: kwargs[ "name" ] = xvar + "vs" + yvar
         if "title" in kwargs: title = kwargs[ "title" ]
-        else: title = var1 + "vs" + var2
+        else: kwargs[ "title" ] = xvar + "vs" + yvar
+        vwvar = False
         if "cuts" in kwargs:
-            vvar1 = self.GetVarEvents( var1, kwargs[ "cuts" ] )
-            vvar2 = self.GetVarEvents( var2, kwargs[ "cuts" ] )
+            if wvar:
+                vwvar = self.GetVarEvents( wvar, kwargs[ "cuts" ] )
+            vxvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
+            vyvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
         else:
-            vvar1 = self.Variables[ var1 ]
-            vvar2 = self.Variables[ var2 ]
-        graph = TGraph()
-        for ip, v1, v2 in zip( range( len( vvar1 ) ), vvar1, vvar2 ):
-            graph.SetPoint( ip, v1, v2 )
-        graph.SetNameTitle( name, title )
-        graph.GetXaxis().SetTitle( var1 )
-        graph.GetYaxis().SetTitle( var2 )
-        return graph
+            if wvar:
+                vwvar = self.Variables[ wvar ]
+            vxvar = self.Variables[ xvar ]
+            vyvar = self.Variables[ yvar ]
+        if "xbins" in kwargs: xbins = kwargs[ "xbins" ]
+        else: xbins = 100
+        if "ybins" in kwargs: ybins = kwargs[ "ybins" ]
+        else: ybins = 100
+        if "xmax" in kwargs: xmax = kwargs[ "xmax" ]
+        else: xmax = min( xvar )
+        if "ymax" in kwargs: ymax = kwargs[ "ymax" ]
+        else: ymax = min( yvar )
+        if "xmin" in kwargs: xmin = kwargs[ "xmin" ]
+        else: xmin = min( xvar )
+        if "ymin" in kwargs: ymin = kwargs[ "ymin" ]
+        else: ymin = min( yvar )
+        if "vtype" in kwargs: tp = kwargs[ "vtype" ]
+        else: tp = "double"
+        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
+        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
+        return MakeHistogram2D( vxvar, vyvar, vwvar, **kwargs )
+
+    #_______________________________________________________________________________
+    # Creates a graph object with the points corresponding to two variables
+    def MakeScatterPlot( self, xvar, yvar, **kwargs ):
+        if "name" in kwargs: name = kwargs[ "name" ]
+        else: kwargs[ "name" ] = xvar + "vs" + yvar
+        if "title" in kwargs: title = kwargs[ "title" ]
+        else: kwargs[ "title" ] = xvar + "vs" + yvar
+        if "cuts" in kwargs:
+            vxvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
+            vyvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
+        else:
+            vxvar = self.Variables[ xvar ]
+            vyvar = self.Variables[ yvar ]
+        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
+        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
+        return MakeScatterPlot( vxvar, vyvar, **kwargs )
 
     #_______________________________________________________________________________
     # Makes another variable using those in the class. There have to be specified:
