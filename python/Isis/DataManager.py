@@ -242,6 +242,10 @@ class DataManager:
                         print "Cut in variable", el, "not valid, variable does not exist"
             else:
                 cut = cut.replace( el, "math." + el )
+        ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
+        the variables '''
+        var_list.sort()
+        var_list.reverse()
         values = [ self.Variables[ var ] for var in var_list ]
         nvars  = len( var_list )
         for ivar in range( nvars ):

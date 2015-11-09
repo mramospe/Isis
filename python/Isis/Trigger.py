@@ -73,29 +73,29 @@ class Trigger:
         return mngr
 
     #_______________________________________________________________________________
-    # Internal method to get the list of events that pass a certain cut during a scan
-    def get_scan_cut( self, var, cond, cut ):
+    # Internal method to get the list of events that pass a certain cut during a
+    # scan
+    def get_scan_cut( self, var_lst, cond, cut ):
         lists = []
         sigmngrs = [ self.CutSigMngr[ el ] for el in self.CutSigMngr ]
         for mngr in sigmngrs + [ self.CutMiBMngr ]:
-            var_vals = mngr.Variables[ var ]
-            add_list = []
+            var_vals = [ mngr.Variables[ var ] for var in var_lst ]
             if   cond == '<':
-                for ievt in range( mngr.Nentries ):
-                    if var_vals[ ievt ] < cut:
-                        add_list.append( ievt )
+                add_list = [ ievt for ievt in range( mngr.Nentries )
+                             if all( var_vals[ j ][ ievt ] < cut
+                                     for j in range( len( var_vals ) ) ) ]
             elif cond == '>':
-                for ievt in range( mngr.Nentries ):
-                    if var_vals[ ievt ] > cut:
-                        add_list.append( ievt )
+                add_list = [ ievt for ievt in range( mngr.Nentries )
+                             if all( var_vals[ j ][ ievt ] > cut
+                                     for j in range( len( var_vals ) ) ) ]
             elif cond == '<=':
-                for ievt in range( mngr.Nentries ):
-                    if var_vals[ ievt ] <= cut:
-                        add_list.append( ievt )
+                add_list = [ ievt for ievt in range( mngr.Nentries )
+                             if all( var_vals[ j ][ ievt ] <= cut
+                                     for j in range( len( var_vals ) ) ) ]
             elif cond == '>=':
-                for ievt in range( mngr.Nentries ):
-                    if var_vals[ ievt ] >= cut:
-                        add_list.append( ievt )
+                add_list = [ ievt for ievt in range( mngr.Nentries )
+                             if all( var_vals[ j ][ ievt ] >= cut
+                                     for j in range( len( var_vals ) ) ) ]
             lists.append( add_list )
         return lists
 
@@ -104,6 +104,7 @@ class Trigger:
     # minimum bias sample, it will auto-merge the sets stored. In other case the
     # manager will be storaged as a signal file.
     def AddManager( self, mngr, dtype ):
+        self.Prepared = False
         if   dtype in ( "mib", "MiB", "MIB" ):
             if self.MiBMngr:
                 self.MiBMngr += mngr
@@ -117,8 +118,12 @@ class Trigger:
     #_______________________________________________________________________________
     # Books a new cut with the id given by < cut_id >
     def BookCut( self, cut_id, cut ):
-        self.CutList.append( cut_id )
-        self.Cuts[ cut_id ] = cut
+        self.Prepared = False
+        if cut_id in self.CutList:
+            print "CutID <", cut_id, "> already used, cut <", cut, "> not booked"
+        else:
+            self.CutList.append( cut_id )
+            self.Cuts[ cut_id ] = cut
 
     #_______________________________________________________________________________
     # Gets all the cuts. Cuts located in < self.Cuts > will be concatenated with an 
@@ -150,6 +155,8 @@ class Trigger:
     def GetRate( self, arg = False ):
         if isinstance( arg, str ):
             arg = self.CutMiBMngr.GetCutList( arg )
+        if not arg:
+            arg = self.CutMiBMngr.GetCutList( self.GetCutLine() )
         return self.MiBrate*self.GetTrueEvents( self.CutMiBMngr, arg )*1./self.nMiBevts
 
     #_______________________________________________________________________________
@@ -181,15 +188,16 @@ class Trigger:
     # managers to work with. This method creates two new managers, conserving the
     # old ones.
     def PrepareTrigger( self ):
+        if self.Prepared: return
         cut = self.GetCutLine()
         if cut == "":
             self.CutMiBMngr = self.MiBMngr.Copy()
-            for el in self.SigMngr:
-                self.CutSigMngr[ el ] = self.SigMngr[ el ].Copy()
+            for kw in self.SigMngr:
+                self.CutSigMngr[ kw ] = self.SigMngr[ kw ].Copy()
         else:
             self.CutMiBMngr = self.MiBMngr.CutSample( cut )
-            for el in self.SigMngr:
-                self.CutSigMngr[ el ] = self.SigMngr[ el ].CutSample( cut )
+            for kw in self.SigMngr:
+                self.CutSigMngr[ kw ] = self.SigMngr[ kw ].CutSample( cut )
         self.Prepared = True
         print "Trigger prepared"
 
@@ -197,12 +205,14 @@ class Trigger:
     # Removes a cut booked in the class. After using this method, ApplyCuts has to
     # be called again in order to generate the cut samples.
     def RemoveCut( self, cut_id ):
+        self.Prepared = False
         self.CutList.remove( cut_id )
         del self.Cuts[ cut_id ]
 
     #_______________________________________________________________________________
     # Sets the number of minimum bias events
     def SetMiBevts( self, val ):
+        self.Prepared = False
         if val != 0:
             self.SelfNorm = False
             self.nMiBevts = val
@@ -213,7 +223,8 @@ class Trigger:
     #_______________________________________________________________________________
     # Sets the minimum bias rate
     def SetMiBrate( self, val ):
-        self.MiBrate = val
+        self.Prepared = False
+        self.MiBrate  = val
 
     #_______________________________________________________________________________
     # Performs a scan over the variable < var > from < first > to < last > in
@@ -227,6 +238,9 @@ class Trigger:
                     "cut"     : npoints*[ 0 ],
                     "nmib"    : npoints*[ 0 ],
                     "rate"    : npoints*[ 0 ] }
+        ''' The get_scan_cut method works with a list of variables '''
+        if not type( var ) in ( list, tuple ):
+            var = [ var ]
         for el in self.SigMngr:
             results[ "n"    + el ] = npoints*[ 0 ]
             results[ "oldn" + el ] = self.GetTrueEvents( self.SigMngr[ el ] )
