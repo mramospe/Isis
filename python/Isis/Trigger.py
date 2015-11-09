@@ -75,29 +75,21 @@ class Trigger:
     #_______________________________________________________________________________
     # Internal method to get the list of events that pass a certain cut during a
     # scan
-    def get_scan_cut( self, var_lst, cond, cut ):
-        lists = []
+    def get_scan_cut( self, var_lst, func, cut ):
         sigmngrs = [ self.CutSigMngr[ el ] for el in self.CutSigMngr ]
-        for mngr in sigmngrs + [ self.CutMiBMngr ]:
+        result   = ( len( sigmngrs ) + 1 )*[ 0 ]
+        for i, mngr in enumerate( sigmngrs ):
             var_vals = [ mngr.Variables[ var ] for var in var_lst ]
-            if   cond == '<':
-                add_list = [ ievt for ievt in range( mngr.Nentries )
-                             if all( var_vals[ j ][ ievt ] < cut
-                                     for j in range( len( var_vals ) ) ) ]
-            elif cond == '>':
-                add_list = [ ievt for ievt in range( mngr.Nentries )
-                             if all( var_vals[ j ][ ievt ] > cut
-                                     for j in range( len( var_vals ) ) ) ]
-            elif cond == '<=':
-                add_list = [ ievt for ievt in range( mngr.Nentries )
-                             if all( var_vals[ j ][ ievt ] <= cut
-                                     for j in range( len( var_vals ) ) ) ]
-            elif cond == '>=':
-                add_list = [ ievt for ievt in range( mngr.Nentries )
-                             if all( var_vals[ j ][ ievt ] >= cut
-                                     for j in range( len( var_vals ) ) ) ]
-            lists.append( add_list )
-        return lists
+            condlist = zip( *[ map( func, vals ) for vals in var_vals ] )
+            for ievt in range( mngr.Nentries ):
+                if all( condlist[ ievt ] ):
+                    result[ i ] += 1
+        var_vals     = [ self.CutMiBMngr.Variables[ var ] for var in var_lst ]
+        condlist     = zip( *[ map( func, vals ) for vals in var_vals ] )
+        result[ -1 ] = self.GetTrueEvents( self.CutMiBMngr,
+                                           [ ievt for ievt, el in enumerate( condlist ) 
+                                             if all( el ) ] )
+        return result
 
     #_______________________________________________________________________________
     # Adds a new manager to the class. The type has to be specified. If it is a
@@ -204,10 +196,15 @@ class Trigger:
     #_______________________________________________________________________________
     # Removes a cut booked in the class. After using this method, ApplyCuts has to
     # be called again in order to generate the cut samples.
-    def RemoveCut( self, cut_id ):
+    def RemoveCuts( self, *args ):
         self.Prepared = False
-        self.CutList.remove( cut_id )
-        del self.Cuts[ cut_id ]
+        if '*' in args:
+            self.CutList = []
+            self.Cuts    = {}
+        else:
+            for cut_id in args:
+                del self.CutList[ self.CutList.index( cut_id ) ]
+                del self.Cuts[ cut_id ]
 
     #_______________________________________________________________________________
     # Sets the number of minimum bias events
@@ -238,19 +235,24 @@ class Trigger:
                     "cut"     : npoints*[ 0 ],
                     "nmib"    : npoints*[ 0 ],
                     "rate"    : npoints*[ 0 ] }
+        ''' Defines the lambda function to perform the comparison '''
+        if   cond == '<' : func = lambda x: x < cut
+        elif cond == '>' : func = lambda x: x > cut
+        elif cond == '<=': func = lambda x: x <= cut
+        elif cond == '>=': func = lambda x: x >= cut
         ''' The get_scan_cut method works with a list of variables '''
         if not type( var ) in ( list, tuple ):
             var = [ var ]
         for el in self.SigMngr:
             results[ "n"    + el ] = npoints*[ 0 ]
-            results[ "oldn" + el ] = self.GetTrueEvents( self.SigMngr[ el ] )
+            results[ "oldn" + el ] = len( self.SigMngr[ el ] )
         for i in range( npoints ):
-            cut = first + i*step
-            sigmiblist = self.get_scan_cut( var, cond, cut )
-            nmib = self.GetTrueEvents( self.CutMiBMngr, sigmiblist[ -1 ] )
+            cut    = first + i*step
+            lenlst = self.get_scan_cut( var, func, cut )
+            nmib   = lenlst[ -1 ]
             results[ "cut"  ][ i ] = cut
             results[ "nmib" ][ i ] = nmib
             results[ "rate" ][ i ] = self.MiBrate*nmib*1./self.nMiBevts
-            for el, imngr in zip( self.CutSigMngr, range( len( self.CutSigMngr ) ) ):
-                results[ "n" + el ][ i ] = len( sigmiblist[ imngr ] )
+            for imngr, el in enumerate( self.CutSigMngr.keys() ):
+                results[ "n" + el ][ i ] = lenlst[ imngr ]
         return results
