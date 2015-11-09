@@ -34,7 +34,10 @@ def FormatTime( itime ):
         val = vals[ kw ]
         if val:
             strout += str( vals[ kw ] ) + kw + " "
-    return strout[ :-1 ]
+    if strout:
+        return strout[ :-1 ]
+    else:
+        return "0s"
 
 #_______________________________________________________________________________
 # Joins dictionaries with different keys into one. If some of them have the
