@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 06/11/2015                                                  //
+#//  Last update: 09/11/2015                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -69,7 +69,7 @@ class Trigger:
             cut       = self.Cuts[ cut ]
             mngr      = mngr.CutSample( cut )
             new_nevts = self.GetTrueEvents( mngr )
-            print "Efficiency after cut:", cut, "=>", new_nevts*1./old_nevts
+            print cut, "=>", new_nevts*1./old_nevts
         return mngr
 
     #_______________________________________________________________________________
