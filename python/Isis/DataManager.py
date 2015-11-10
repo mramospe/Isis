@@ -45,8 +45,9 @@ class DataManager:
 
         nargs = len( args )
 
-        self.OwnsTargets = False
+        self.Iterator    = 0
         self.Nentries    = 0
+        self.OwnsTargets = False
         self.Targets     = {}
         self.Variables   = {}
 
@@ -99,9 +100,25 @@ class DataManager:
         return self.Variables[ var ]
 
     #_______________________________________________________________________________
+    # Definition of the iterator
+    def __iter__( self ):
+        self.Iterator = 0
+        return self
+
+    #_______________________________________________________________________________
     # Gets the number of entries in the class
     def __len__( self ):
         return self.Nentries
+
+    #_______________________________________________________________________________
+    # Sets the new value for the iteration. If it reaches the limit the exception is
+    # raised.
+    def next( self ):
+        if self.Iterator == self.Nentries:
+            raise StopIteration
+        else:
+            self.Iterator += 1
+            return self.GetEventDict( self.Iterator - 1 )
 
     #_______________________________________________________________________________
     # Adds a new target file and/or tree to the class
@@ -260,6 +277,11 @@ class DataManager:
             return len( self.GetCutList( selection ) )
         else:
             return self.Nentries
+
+    #_______________________________________________________________________________
+    # Returns a dictionary with the values of the variables at the given entry
+    def GetEventDict( self, ievt ):
+        return dict( ( var, self.Variables[ var ][ ievt ] ) for var in self.Variables )
 
     #_______________________________________________________________________________
     # Gets the event at position ievt. Allows to get only the variables in < args >
