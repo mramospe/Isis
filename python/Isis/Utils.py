@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 09/11/2015                                //
+#//  Last update: 11/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -52,6 +52,24 @@ def JoinDicts( *args ):
             else:
                 rdict[ key ] = dic[ key ]
     return rdict
+
+#_______________________________________________________________________________
+# If the input is a list, it gets the length of the maximum string located
+# inside it. If it is a dictionary, it gets the maximum value of the strings
+# associated to the keys of it ( it has to be a dictionary of strings ).
+def LargestString( lstdic ):
+    maxlen = 0
+    if isinstance( lstdic, list ):
+        for el in lstdic:
+            newlen = len( el )
+            if newlen > maxlen: maxlen = newlen
+    elif isinstance( lstdic, dict ):
+        for kw in lstdic:
+            newlen = len( lstdic[ kw ] )
+            if newlen > maxlen: maxlen = newlen
+    else:
+        print "The input parameter is not a list nor a dictionary, returned 0"
+    return maxlen
 
 #_______________________________________________________________________________
 # This function merges the values in various dictionaries into one

@@ -21,6 +21,7 @@
 
 
 from Isis.DataManager import DataManager
+from Isis.Utils import LargestString
 from ROOT import TGraph
 
 
@@ -66,6 +67,7 @@ class Trigger:
     def __call__( self, mngr = False ):
         old_nevts = self.GetTrueEvents( mngr )
         new_nevts = old_nevts
+        strsize   = LargestString( self.Cuts )
         for cut in self.CutList:
             cut       = self.Cuts[ cut ]
             toceff    = new_nevts
@@ -73,7 +75,8 @@ class Trigger:
             new_nevts = self.GetTrueEvents( mngr )
             ''' This print corresponds to the cut, the efficiency of the trigger
             after it and the efficiency of the cut '''
-            print cut, "=>", new_nevts*1./old_nevts, "(", new_nevts*100./toceff, "% )"
+            nwsp = strsize - len( cut )
+            print cut, nwsp*" " + "=>", new_nevts*1./old_nevts, "(", new_nevts*100./toceff, "% )"
         return mngr
 
     #_______________________________________________________________________________
