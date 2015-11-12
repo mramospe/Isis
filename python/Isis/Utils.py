@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 11/11/2015                                //
+#//  Last update: 12/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -137,7 +137,8 @@ class SmartFile:
             print "File option <", option, "> not known"
             return
 
-        self.FileDict = { "dir": TFile.Open( fname, option ), "folders": {} }
+        self.File  = TFile.Open( fname, option )
+        self.Paths = []
 
         ''' If the file is in read or update mode, the structure is taken '''
         if read:
@@ -147,9 +148,8 @@ class SmartFile:
                     if isinstance( obj, TDirectoryFile ):
                         self.NewFolder( path, obj )
                         recread( obj, path + '/' + key.GetName() )
-            f = self.FileDict[ "dir" ]
-            for key in f.GetListOfKeys():
-                obj = f.Get( key.GetName() )
+            for key in self.File.GetListOfKeys():
+                obj = self.File.Get( key.GetName() )
                 if isinstance( obj, TDirectoryFile ):
                     self.NewFolder( '', obj )
                     recread( obj, obj.GetName() )
@@ -158,29 +158,12 @@ class SmartFile:
     # Defines the function to delete the class. Since this class owns the file it
     # closes it.
     def __del__( self ):
-        self.FileDict[ "dir" ].Close()
+        self.File.Close()
 
     #_______________________________________________________________________________
     # Gets the object at the path provided
     def __getitem__( self, path ):
-        return self.FileDict[ "dir" ].Get( path )
-
-    #_______________________________________________________________________________
-    # Transforms the hierarchy of the file on a string of a list
-    def __str__( self ):
-        lst = []
-        def recread( dic, path = '/' ):
-            name = dic[ "dir" ].GetName()
-            flst = dic[ "folders" ]
-            for el in flst:
-                newpath = path + name + '/'
-                lst.append( newpath + el )
-                recread( flst[ el ], newpath )
-        fdict = self.FileDict[ "folders" ]
-        for el in fdict:
-            lst.append( el )
-            recread( fdict[ el ], '' )
-        return str( ( self.GetFileName(), lst ) )
+        return self.File.Get( path )
 
     #_______________________________________________________________________________
     # The print of this class is its string representation
@@ -188,9 +171,39 @@ class SmartFile:
         return self.__str__()
 
     #_______________________________________________________________________________
+    # Transforms the hierarchy of the file on a string of a list
+    def __str__( self ):
+        return str( self.Paths )
+
+    #_______________________________________________________________________________
     # Changes the current directory to the given path
-    def cd( self, path ):
-        self.FileDict[ "dir" ].cd( path )
+    def cd( self, path = False ):
+        folder = self.GetFolder( path )
+        if folder:
+            folder.cd()
+
+    #_______________________________________________________________________________
+    # Gets the TObject following the path given
+    def Get( self, path ):
+        return self.File.Get( path )
+
+    #_______________________________________________________________________________
+    # Returns the name of the file
+    def GetFileName( self ):
+        return self.File.GetName()
+
+    #_______________________________________________________________________________
+    # Gets the folder in the path given
+    def GetFolder( self, path ):
+        if path:
+            folder = self.File.Get( path )
+            if folder:
+                return folder
+            else:
+                print "Could not access folder with path <", path, ">"
+                return 0
+        else:
+            return self.File
 
     #_______________________________________________________________________________
     # Creates a new folder at the given path. If now < newfolder > is providen, it
@@ -206,55 +219,32 @@ class SmartFile:
                 path  = path.split( '/' )
                 fname = path[ -1 ]
                 path  = '/'.join( path[ :-1 ] )
+            else:
+                print "New folder type not known"
+                return
             pfolder = self.GetFolder( path )
             if path: path += '/' + fname
             else:    path  = fname
             if self.Get( path ):
                 print "Folder <", path, "> already exists"
                 return
-            pfolder[ "dir" ].cd()
+            self.Paths.append( path )
+            pfolder.cd()
             newfolder = TDirectoryFile( fname, fname )
             newfolder.Write()
             print "Created new folder in file <", self.GetFileName(), ">:", path
         else:
-            pfolder = self.GetFolder( path )
-            fname   = newfolder.GetName()
+            fname = newfolder.GetName()
             if path: path += '/' + fname
             else:    path  = fname
+            self.Paths.append( path )
             print "Booked new folder from file <", self.GetFileName(), ">:", path
-
-        pfolder[ "folders" ][ fname ] = { "dir"     : newfolder,
-                                          "folders" : {} }
-
-    #_______________________________________________________________________________
-    # Gets the TObject following the path given
-    def Get( self, path ):
-        return self.FileDict[ "dir" ].Get( path )
-
-    #_______________________________________________________________________________
-    # Gets the folder in the path given
-    def GetFolder( self, path ):
-        folder = self.FileDict
-        if path:
-            spath = path.split( '/' )
-            for el in spath:
-                try:
-                    folder = folder[ "folders" ][ el ]
-                except:
-                    print "Could not access path <", path, ">"
-                    return 0
-        return folder
-
-    #_______________________________________________________________________________
-    # Returns the name of the file
-    def GetFileName( self ):
-        return self.FileDict[ "dir" ].GetName()
 
     #_______________________________________________________________________________
     # Saves recursively the folders in the file since the path given
     def Save( self, path = '*' ):
         if path == '*':
-            self.FileDict[ "dir" ].Save()
+            self.File.Save()
         else:
             self.GetFolder( path ).Save()
 
@@ -264,9 +254,5 @@ class SmartFile:
     def Write( self, obj, path = False, **kwargs ):
         if "name" in kwargs: name = kwargs[ "name" ]
         else: name = 0
-        if path:
-            self.cd( path )
-            obj.Write( name )
-        else:
-            self.FileDict[ "dir" ].cd()
-            obj.Write()
+        self.cd( path )
+        obj.Write( name )
