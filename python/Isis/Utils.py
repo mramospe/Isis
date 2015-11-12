@@ -109,18 +109,20 @@ class SmartFile:
 
         option = option.upper()
 
+        ''' Here the different possibilities to read and write the file are processed '''
         if option in ( "NEW", "CREATE", "RECREATE", "FRECREATE", "RECREATEF" ):
             if option == "RECREATE":
-                while os.path.isfile( fname ):
-                    dec = raw_input( "File with name < %s > already exists" % fname +
-                                     "\nAre you sure you want to recreate it? (y/n): " )
-                    if   dec == 'y': break
-                    elif dec == 'n': fname = raw_input( "Select another name: " )
+                while not fname or os.path.isfile( fname ):
+                    if fname:
+                        dec = raw_input( "File with name < %s > already exists" % fname +
+                                         "\nAre you sure you want to recreate it? (y/n): " )
+                        if   dec == 'y': break
+                        elif dec == 'n': fname = raw_input( "Select another name: " )
             elif option == "FRECREATE" or option == "RECREATEF":
                 option = "RECREATE"
             else:
                 option = "NEW"
-                while os.path.isfile( fname ):
+                while not fname or os.path.isfile( fname ):
                     fname = raw_input( "File with name < %s > already exists" % fname +
                                        "\nSelect another name: " )
             read = False
@@ -137,6 +139,7 @@ class SmartFile:
 
         self.FileDict = { "dir": TFile.Open( fname, option ), "folders": {} }
 
+        ''' If the file is in read or update mode, the structure is taken '''
         if read:
             def recread( df, path ):
                 for key in df.GetListOfKeys():
