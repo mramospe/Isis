@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 10/11/2015                                //
+#//  Last update: 12/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -24,7 +24,7 @@ from ROOT import TFile, TTree, gDirectory
 from array import array
 from copy import deepcopy
 import math
-from Isis.Utils import MergeDicts
+from Isis.Utils import JoinDicts, MergeDicts
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 
 
@@ -191,7 +191,7 @@ class DataManager:
                     print "Variable", name, "already booked"
             for tree in tlist:
                 dictlist.append( DictFromTree( tree, *truevars ) )
-            self.Variables = MergeDicts( *dictlist )
+            self.Variables = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
             self.Nentries  = len( self.Variables[ name ] )
         else:
             print "No targets added to the manager, could not book variables:", var_names
