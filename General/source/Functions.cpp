@@ -8,7 +8,7 @@
 //  AUTHOR : Miguel Ramos Pernas		                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch		                                 //
 //                                                                               //
-//  Last Update: 26/10/2015			                                 //
+//  Last Update: 13/11/2015			                                 //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -73,7 +73,7 @@ double General::IP( General::Vector vec,
     u( vec.Unitary() ),
     ipvec( pv - sv );
 
-  return ( ipvec - u.Dot( ipvec )*u ) .Mod();
+  return ( ipvec - u.Dot( ipvec )*u ).Mod();
 }
 
 //______________________________________________________________________________

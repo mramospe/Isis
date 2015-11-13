@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                        //
 //  e-mail: miguel.ramos.pernas@cern.ch                //
 //                                                     //
-//  Last update: 13/07/2015                            //
+//  Last update: 13/11/2015                            //
 //                                                     //
 // --------------------------------------------------- //
 //                                                     //
@@ -43,10 +43,10 @@
 //_______________________________________________________________________________
 // Main constructor
 Analysis::BDTClassifier::BDTClassifier() :
-  fBackgroundFile(0),
-  fFactory(0),
-  fSignalFile(0),
-  fStoreFile(0) { 
+  fBackgroundFile( 0 ),
+  fFactory( 0 ),
+  fSignalFile( 0 ),
+  fStoreFile( 0 ) { 
 
   TMVA::Tools::Instance();
 
@@ -197,34 +197,6 @@ void Analysis::BDTClassifier::AddSignalFile( TFile *file,
 }
 
 //_______________________________________________________________________________
-// Adds a spectator variable to the reader
-void Analysis::BDTClassifier::AddSpectator( const char *name,
-					    const char *title,
-					    const char *unit ) {
-
-  fFactory -> AddSpectator( name, title, unit );
-}
-
-//_______________________________________________________________________________
-// Adds a variable to the reader
-void Analysis::BDTClassifier::AddVariable( const char *name,
-					   const char *title,
-					   char dtype ) {
-
-  this -> AddVariable( name, title, "", dtype );
-}
-
-//_______________________________________________________________________________
-// Adds a variable to the reader
-void Analysis::BDTClassifier::AddVariable( const char *name,
-					   const char *title,
-					   const char *unit,
-					   char dtype ) {
-
-  fFactory -> AddVariable( name, title, unit, dtype );
-}
-
-//_______________________________________________________________________________
 // Performs the classification
 void Analysis::BDTClassifier::Classificate( const char *opts ) {
 
@@ -242,22 +214,6 @@ void Analysis::BDTClassifier::Classificate( const char *opts ) {
   delete fStoreFile;   fStoreFile = 0;
   delete fFactory;     fFactory   = 0;
 }
-
-//_______________________________________________________________________________
-// Returns the input background file
-TFile *Analysis::BDTClassifier::GetBackgroundFile() { return fBackgroundFile; }
-
-//_______________________________________________________________________________
-// Returns the factory
-TMVA::Factory *Analysis::BDTClassifier::GetFactory() { return fFactory; }
-
-//_______________________________________________________________________________
-// Returns the input signal file
-TFile *Analysis::BDTClassifier::GetSignalFile() { return fSignalFile; }
-
-//_______________________________________________________________________________
-// Returns the input store file
-TFile *Analysis::BDTClassifier::GetStoreFile() { return fStoreFile; }
 
 //_______________________________________________________________________________
 // Adds an option to the book method
@@ -434,13 +390,6 @@ void Analysis::BDTClassifier::BookMethod( const char *method, const char *opts )
 }
 
 //_______________________________________________________________________________
-// Sets the background cuts
-void Analysis::BDTClassifier::SetBackgroundCuts( const char *cuts ) {
-
-  fBackgroundCuts = cuts;
-}
-
-//_______________________________________________________________________________
 // Creates the factory
 void Analysis::BDTClassifier::SetFactory( const char *name, const char *opts ) {
 
@@ -450,13 +399,6 @@ void Analysis::BDTClassifier::SetFactory( const char *name, const char *opts ) {
     opts = "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification";
 
   fFactory = new TMVA::Factory( name, fStoreFile, opts );
-}
-
-//_______________________________________________________________________________
-// Sets the signal cuts
-void Analysis::BDTClassifier::SetSignalCuts( const char *cuts ) {
-
-  fSignalCuts = cuts;
 }
 
 //_______________________________________________________________________________
@@ -492,7 +434,7 @@ void Analysis::BDTClassifier::SetStoreFile( const char *file_name,
 //_______________________________________________________________________________
 // Main constructor
 Analysis::BDTApplier::BDTApplier() : 
-  fReader(0) { }
+  fReader( 0 ) { }
 
 //_______________________________________________________________________________
 // Constructor given a name
@@ -513,20 +455,6 @@ Analysis::BDTApplier::~BDTApplier() { if ( fReader ) delete fReader; }
 
 
 // -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Adds a new spectator variable to the reader
-void Analysis::BDTApplier::AddSpectator( const char *name ) {
-
-  fSpectators.push_back( name );
-}
-
-//_______________________________________________________________________________
-// Adds a new variable to the reader
-void Analysis::BDTApplier::AddVariable( const char *name ) {
-
-  fVariables.push_back( name );
-}
 
 //_______________________________________________________________________________
 // Applies the methods to the data
@@ -604,17 +532,6 @@ void Analysis::BDTApplier::Apply() {
 }
 
 //_______________________________________________________________________________
-// Gets the reader
-TMVA::Reader *Analysis::BDTApplier::GetReader() { return fReader; }
-
-//_______________________________________________________________________________
-// Sets the factory name
-void Analysis::BDTApplier::SetFactoryName( const char *name ) {
-  
-  fFactoryName = name;
-}
-
-//_______________________________________________________________________________
 // Sets the path to the input tree of file in <ifile>
 void Analysis::BDTApplier::SetInputTreePath( Int_t ifile, const char *path ) {
 
@@ -635,19 +552,3 @@ void Analysis::BDTApplier::SetReader( const char *opts ) {
   else
     fReader = new TMVA::Reader( opts );
 }
-
-//_______________________________________________________________________________
-// Sets the name of the output tree
-void Analysis::BDTApplier::SetOutputTreeName( const char *name ) {
-  
-  fTreeName = name;
-}
-
-//_______________________________________________________________________________
-// Adds a method to this class
-void Analysis::BDTApplier::UseMethod( const char *method ) {
-  
-  fMethods.push_back( method );
-}
-
-//_______________________________________________________________________________
