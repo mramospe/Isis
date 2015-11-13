@@ -5,7 +5,8 @@
 # e-mail: miguel.ramos.pernas@cern.ch	                #
 #=======================================================#
 
-if [ "$1" = "-help" ]; then
+
+if [ $# -lt 3 ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
    echo "Type Isis-comp < output file > < main input file > < extra files ( dirs, libs, etc... ) >"
 else
    echo "Compiling file using Isis libraries"
