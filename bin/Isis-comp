@@ -6,7 +6,7 @@
 #=======================================================#
 
 
-if [ $# -lt 3 ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
+if [ $# -lt 2 ] || [ "$1" = "-help" ] || [ "$1" = "-h" ]; then
    echo "Type Isis-comp < output file > < main input file > < extra files ( dirs, libs, etc... ) >"
 else
    echo "Compiling file using Isis libraries"
@@ -16,6 +16,9 @@ else
       echo "- Extra files: "${@:3}
    fi
    echo "Compiling..."
-   g++ `Isis-config --cflags` ${@:2} `Isis-config --incdirs --libs` -o $1
-   echo "Done!"
+   if g++ `Isis-config --cflags` ${@:2} `Isis-config --incdirs --libs` -o $1; then
+      echo "Done!"
+   else
+      echo "Failed to compile"
+   fi
 fi
