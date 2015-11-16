@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 28/10/2015                             //
+#//  Last update: 16/11/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -26,52 +26,43 @@ from math import sqrt
 
 
 #_______________________________________________________________________________
-# --- CLASSES ---
-
-#_______________________________________________________________________________
-# Fisher discriminant class
+# This class allows to generate the linear Fisher discriminant variable given
+# a signal and a background samples.
 class FisherDiscriminant:
 
-    #_______________________________________________________________________________
-    # Constructor
     def __init__( self, SigSample, BkgSample ):
-
+        ''' This class works with a signal and a background samples given as a
+        list of lists. Each one corresponds to one variable.'''
         self.SigSample = numpy.matrix( SigSample )
         self.BkgSample = numpy.matrix( BkgSample )
-
         cmatrixSig = numpy.matrix( CovMatrix( self.SigSample.A ) )
         cmatrixBkg = numpy.matrix( CovMatrix( self.BkgSample.A ) )
         invscm     = numpy.linalg.inv( cmatrixSig + cmatrixBkg )
         meansSig   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.SigSample.A ] )
         meansBkg   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.BkgSample.A ] )
-
         self.ProjVect = invscm.dot( meansSig - meansBkg )
 
-    #_______________________________________________________________________________
-    # Applies the fisher discriminant to a given sample
     def __eval__( self, sample ):
+        ''' Applies the fisher discriminant to a given sample '''
         fisherVar  = [ self.ProjVect.dot( sample.A[ i ] ) for i in range( len( sample ) ) ]
         return fisherVar
 
-    #_______________________________________________________________________________
-    # Applies the fisher discriminant to a given sample
     def Apply( self, sample ):
+        ''' Applies the fisher discriminant to a given sample '''
         fisherVar  = [ self.ProjVect.dot( sample.A[ i ] ) for i in range( len( sample ) ) ]
         return fisherVar
 
-    #_______________________________________________________________________________
-    # Returns the values for the fisher discriminant of the two training samples
     def GetTrainFisherValues( self ):
+        ''' Returns the values for the fisher discriminant of the two training samples '''
         SigSample  = self.SigSample.T
         BkgSample  = self.BkgSample.T
         fisherSig  = [ float(self.ProjVect.dot( SigSample.A[ i ] ).A) for i in range( len( SigSample ) ) ]
         fisherBkg  = [ float(self.ProjVect.dot( BkgSample.A[ i ] ).A) for i in range( len( BkgSample ) ) ]
         return fisherSig, fisherBkg
 
-    #_______________________________________________________________________________
-    # Plots the histograms of the fisher discriminant values for the two training
-    # samples
     def PlotFisherQuality( self, **kwargs ):
+        ''' Plots the histograms of the fisher discriminant values for the two training
+        samples '''
         if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
         else: nbins = 100
         if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
@@ -177,9 +168,6 @@ class FisherDiscriminant:
                  "rej"    : rej,
                  "roc"    : roc,
                  "sig"    : sig }
-
-#_______________________________________________________________________________
-# --- FUNCTIONS ---
 
 #_______________________________________________________________________________
 # Calculates the covariance between two lists ( with the same size )

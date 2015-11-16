@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 12/11/2015                                //
+#//  Last update: 16/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -33,13 +33,11 @@ from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 # and trees
 class DataManager:
 
-    #_______________________________________________________________________________
-    # Constructor given a name for the manager and arguments. The variable < args > 
-    # has to contain the name of the input file and the trees inside. Attributes
-    # can be added as well.
     def __init__( self, *args, **kwargs ):
+        ''' Constructor given a name for the manager and arguments. The variable
+        < args > has to contain the name of the input file and the trees inside.
+        Attributes can be added as well.'''
 
-        ''' For each entry in kwargs, another attribute with the same name is created '''
         for kw in kwargs:
             setattr( self, kw, kwargs[ kw ] )
 
@@ -58,9 +56,9 @@ class DataManager:
             print "Arguments for DataManager class are file_name and tree_name"
             exit()
 
-    #_______________________________________________________________________________
-    # Allows merging two objects of this class. The new manager owns all the targets.
     def __add__( self, other ):
+        ''' Allows merging two objects of this class. The new manager owns all the
+        targets. '''
         mngr          = DataManager()
         mngr.Nentries = self.Nentries + other.Nentries
         mngr.Targets.update( self.Targets  )
@@ -72,10 +70,9 @@ class DataManager:
         other.OwnsTargets = False
         return mngr
 
-    #_______________________________________________________________________________
-    # Allows adding another manager variables to this class. The manager added
-    # looses the possession of the targets.
     def __iadd__( self, other ):
+        ''' Allows adding another manager variables to this class. The manager added
+        looses the possession of the targets. '''
         if self.Nentries:
             mngr = self + other
             other.OwnsTargets = False
@@ -84,45 +81,39 @@ class DataManager:
             self = deepcopy( other )
             other.OwnsTargets = False
 
-    #_______________________________________________________________________________
-    # Definition of the delete destructor. If this class owns the target files they
-    # are closed.
     def __del__( self ):
+        ''' Definition of the delete destructor. If this class owns the target files
+        they are closed. '''
         if self.OwnsTargets:
             for tgt in self.Targets:
                 for tree in self.Targets[ tgt ]:
                     tree = 0
                 tgt.Close()
 
-    #_______________________________________________________________________________
-    # Gets the values for variable < var >
     def __getitem__( self, var ):
+        ''' Gets the values for variable < var > '''
         return self.Variables[ var ]
 
-    #_______________________________________________________________________________
-    # Definition of the iterator
     def __iter__( self ):
+        ''' Definition of the iterator '''
         self.Iterator = 0
         return self
 
-    #_______________________________________________________________________________
-    # Gets the number of entries in the class
     def __len__( self ):
+        ''' Gets the number of entries in the class '''
         return self.Nentries
 
-    #_______________________________________________________________________________
-    # Sets the new value for the iteration. If it reaches the limit the exception is
-    # raised.
     def next( self ):
+        ''' Sets the new value for the iteration. If it reaches the limit the exception
+        is raised. '''
         if self.Iterator == self.Nentries:
             raise StopIteration
         else:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
 
-    #_______________________________________________________________________________
-    # Adds a new target file and/or tree to the class
     def AddTarget( self, *args ):
+        ''' Adds a new target file and/or tree to the class '''
         if not self.OwnsTargets: self.OwnsTargets = True
         if args[ 0 ] not in [ ifile.GetName() for ifile in self.Targets ]:
             ifile = TFile.Open( args[ 0 ], "READ" )
@@ -143,12 +134,11 @@ class DataManager:
         if not self.Nentries and self.Variables:
             self.Nentries = len( vvals )
 
-    #_______________________________________________________________________________
-    # Adds a new  variable(s) to the class given a name and a list. This method
-    # checks that all the variables' lists have the same lengths, otherwise it
-    # exits he program. The input has to be formated as [ var1_name, list1 ],
-    # [ var2_name, list2 ], ...
     def AddVariables( self, *fvars ):
+        ''' Adds a new  variable(s) to the class given a name and a list. This method
+        checks that all the variables' lists have the same lengths, otherwise it
+        exits he program. The input has to be formated as [ var1_name, list1 ],
+        [ var2_name, list2 ], ... '''
         if self.Nentries == 0:
             self.Nentries = len( fvars[ 0 ][ 1 ] )
         for el in fvars:
@@ -158,12 +148,11 @@ class DataManager:
                 print "Variable", el[ 0 ], "to be added to the manager has different length."
                 exit()
             
-    #_______________________________________________________________________________
-    # Books a new variable(s) to the class. The variable's values list is filled
-    # with the variable's values contained in the targets. If a variable already
-    # exists in the class the process is omited. If < * > is specified, the
-    # variables are set as those that are common for all the trees.
     def BookVariables( self, *var_names ):
+        ''' Books a new variable(s) to the class. The variable's values list is filled
+        with the variable's values contained in the targets. If a variable already
+        exists in the class the process is omited. If < * > is specified, the
+        variables are set as those that are common for all the trees. '''
         if len( var_names ) == 1 and '*' in var_names[ 0 ]:
             tlist     = self.GetListOfTrees()
             brlist    = tlist[ 0 ].GetListOfBranches()
@@ -197,9 +186,8 @@ class DataManager:
             print "No targets added to the manager, could not book variables:", var_names
             exit()
 
-    #_______________________________________________________________________________
-    # Returns a copy of this class that does not own the targets.
     def Copy( self, *args, **kwargs ):
+        ''' Returns a copy of this class that does not own the targets. '''
         if "cuts" in kwargs: cmngr = self.CutSample( kwargs[ "cuts" ] )
         else: cmngr = self
         if args: variables = args
@@ -210,10 +198,9 @@ class DataManager:
         mngr.Nentries = cmngr.Nentries
         return mngr
 
-    #_______________________________________________________________________________
-    # Returns another DataManager based on the events that satisfy the cuts given.
-    # The targets are not transfered to the new class.
     def CutSample( self, cut ):
+        ''' Returns another DataManager based on the events that satisfy the cuts given.
+        The targets are not transfered to the new class. '''
         mngr     = DataManager()
         add_list = self.GetCutList( cut )
         for kwvar in self.Variables:
@@ -222,18 +209,17 @@ class DataManager:
         mngr.Nentries = len( add_list )
         return mngr
 
-    #_______________________________________________________________________________
-    # Closes all the target files owned by the class
     def CloseFiles( self ):
+        ''' Closes all the target files owned by the class '''
         for ifile in self.Targets:
             for itree in self.Targets[ ifile ]:
                 itree = 0
             ifile.Close()
             del self.Targets[ ifile ]
 
-    #_______________________________________________________________________________
-    # This method allows to obtain a list with the events that satisfy the cuts given
     def GetCutList( self, cut ):
+        ''' This method allows to obtain a list with the events that satisfy the cuts
+        given '''
         cut       = cut.replace( "&&", " and " )
         cut       = cut.replace( "||", " or "  )
         cut       = cut.replace( "abs", "fabs" )
@@ -269,54 +255,47 @@ class DataManager:
             cut = cut.replace( var_list[ ivar ], "values[ %i ][ ievt ]" %ivar )
         return eval( "[ ievt for ievt in range( self.Nentries ) if " + cut + " ]" )
 
-    #_______________________________________________________________________________
-    # Gets the number of entries of the class. If a cut selection is given, it is
-    # calculated the number of events that satisfy those cuts.
     def GetEntries( self, selection = False ):
+        ''' Gets the number of entries of the class. If a cut selection is given, it is
+        calculated the number of events that satisfy those cuts. '''
         if selection:
             return len( self.GetCutList( selection ) )
         else:
             return self.Nentries
 
-    #_______________________________________________________________________________
-    # Returns a dictionary with the values of the variables at the given entry
     def GetEventDict( self, ievt ):
+        ''' Returns a dictionary with the values of the variables at the given entry '''
         return dict( ( var, self.Variables[ var ][ ievt ] ) for var in self.Variables )
 
-    #_______________________________________________________________________________
-    # Gets the event at position ievt. Allows to get only the variables in < args >
-    # in the order specified.
     def GetEvent( self, ievt, *args ):
+        ''' Gets the event at position ievt. Allows to get only the variables in < args >
+        in the order specified. '''
         if len( args ):
             return tuple( [ self.Variables[ var ][ ievt ] for var in args ] )
         else:
             return tuple( [ self.Variables[ var ][ ievt ] for var in self.Variables ] )
 
-    #_______________________________________________________________________________
-    # Returns a list with the trees attached to the class
     def GetListOfTrees( self ):
+        ''' Returns a list with the trees attached to the class '''
         tlist   = []
         rawlist = [ self.Targets[ ifile ] for ifile in self.Targets ]
         for el in rawlist:
             tlist += el
         return tlist
 
-    #_______________________________________________________________________________
-    # Gets the number of variables in the class
     def GetNvars( self ):
+        ''' Gets the number of variables in the class '''
         return len( self.Variables )
 
-    #_______________________________________________________________________________
-    # Gets the targets directory of the class. If this method is called, the class
-    # automatically frees the targets, so their destruction are left to the new owner.
     def GetTargets( self ):
+        ''' Gets the targets directory of the class. If this method is called, the class
+        automatically frees the targets, so their destruction are left to the new owner. '''
         self.OwnsTargets = False
         return self.Targets
 
-    #_______________________________________________________________________________
-    # Gets the list of values for a given variable. If a cut is specified it returns
-    # the values concerning the sample which satisfies them.
     def GetVarEvents( self, variable, cut = False ):
+        ''' Gets the list of values for a given variable. If a cut is specified it returns
+        the values concerning the sample which satisfies them. '''
         res_list = []
         if cut:
             for ievt in self.GetCutList( cut ):
@@ -326,16 +305,14 @@ class DataManager:
                 res_list.append( self.Variables[ variable ][ ievt ] )
         return res_list
 
-    #_______________________________________________________________________________
-    # Gets the name of the variables in the class
     def GetVarNames( self ):
+        ''' Gets the name of the variables in the class '''
         return [ var for var in self.Variables ]
 
-    #_______________________________________________________________________________
-    # Makes the histogram of the given variable. A selection can be applied
-    # introducing < cuts >, as well as the name and the title can be defined in a
-    # similar way too.
     def MakeHistogram( self, var, nbins = 100, **kwargs ):
+        ''' Makes the histogram of the given variable. A selection can be applied
+        introducing < cuts >, as well as the name and the title can be defined in a
+        similar way too. '''
         if "name" in kwargs: name = kwargs[ "name" ]
         else: name = var
         if "title" in kwargs: title = kwargs[ "title" ]
@@ -344,9 +321,8 @@ class DataManager:
         else: vvar = self.Variables[ var ]
         return MakeHistogram( vvar, nbins, **kwargs )
 
-    #_______________________________________________________________________________
-    # Makes the 2-dimensional histogram of the given variables.
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
+        ''' Makes the 2-dimensional histogram of the given variables '''
         if "name" in kwargs: name = kwargs[ "name" ]
         else: kwargs[ "name" ] = xvar + "vs" + yvar
         if "title" in kwargs: title = kwargs[ "title" ]
@@ -380,9 +356,8 @@ class DataManager:
         if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         return MakeHistogram2D( vxvar, vyvar, vwvar, **kwargs )
 
-    #_______________________________________________________________________________
-    # Creates a graph object with the points corresponding to two variables
     def MakeScatterPlot( self, xvar, yvar, **kwargs ):
+        ''' Creates a graph object with the points corresponding to two variables '''
         if "name" in kwargs: name = kwargs[ "name" ]
         else: kwargs[ "name" ] = xvar + "vs" + yvar
         if "title" in kwargs: title = kwargs[ "title" ]
@@ -397,13 +372,12 @@ class DataManager:
         if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         return MakeScatterPlot( vxvar, vyvar, **kwargs )
 
-    #_______________________________________________________________________________
-    # Makes another variable using those in the class. There have to be specified:
-    # the new variable name, the name of the variables used by the function
-    # ( ordered in a list ) and the function itself. The computation of the new
-    # variable is going to be performed passing the function the variables as normal
-    # entries ( *args, where args is the list of values ).
     def MakeVariable( self, var_name, arg_list, function ):
+        ''' Makes another variable using those in the class. There have to be specified:
+        the new variable name, the name of the variables used by the function
+        ( ordered in a list ) and the function itself. The computation of the new
+        variable is going to be performed passing the function the variables as normal
+        entries ( *args, where args is the list of values ). '''
         new_variable = self.Nentries*[ 0. ]
         var_tensor   = [ self.Variables[ vname ] for vname in arg_list ]
 
@@ -414,21 +388,19 @@ class DataManager:
 
         self.Variables[ var_name ] = new_variable
 
-    #_______________________________________________________________________________
-    # Adds a new event to the manager. A value for all the variables has to be
-    # provided.
     def NewEvent( self, dic ):
+        ''' Adds a new event to the manager. A value for all the variables has to be
+        provided. '''
         for key in self.Variables:
             self.Variables[ key ].append( dic[ key ] )
         self.Nentries += 1
 
-    #_______________________________________________________________________________
-    # Prints the information of the class as well as the values for the first 20
-    #  events. If < events > is introduced as an input, the number of events showed
-    # would be that specified by the user. If < cut > is specified only will be
-    # showed the events that statisfy the given cut. If < name > is specified this
-    # name is going to be printed before the other information.
     def Print( self, *args, **kwargs ):
+        ''' Prints the information of the class as well as the values for the first 20
+        events. If < events > is introduced as an input, the number of events showed
+        would be that specified by the user. If < cut > is specified only will be
+        showed the events that statisfy the given cut. If < name > is specified this
+        name is going to be printed before the other information. '''
 
         if "cut" not in kwargs:
             kwargs[ "cut" ] = False
@@ -503,19 +475,17 @@ class DataManager:
         else:
             print "No variables booked in this manager"
 
-    #_______________________________________________________________________________
-    # Removes a booked variable
     def RemoveVariable( self, var ):
+        ''' Removes a booked variable '''
         del self.Variables[ var ]
 
-    #_______________________________________________________________________________
-    # Saves the given class values in a TTree. If args has only one name, it is
-    # considered as the tree name, so its written in the external directory ( to
-    # be constructed and accesible in the main program ), if two names are provided
-    # the first one is considered as the file name and the second the tree name. If
-    # < close > is provided, and if its value is false, this method will return
-    # the output file. 
     def Save( self, *args, **kwargs ):
+        ''' Saves the given class values in a TTree. If args has only one name, it is
+        considered as the tree name, so its written in the external directory ( to
+        be constructed and accesible in the main program ), if two names are provided
+        the first one is considered as the file name and the second the tree name. If
+        < close > is provided, and if its value is false, this method will return
+        the output file.  '''
         if len( args ) == 2:
             output_file = TFile.Open( args[ 0 ], "RECREATE" )
             print "Saving tree with name <", args[ 1 ], "> in <", args[ 0 ], ">"

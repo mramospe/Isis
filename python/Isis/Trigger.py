@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 13/11/2015                                                  //
+#//  Last update: 16/11/2015                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -29,14 +29,13 @@ from ROOT import TGraph
 # Class Trigger
 class Trigger:
 
-    #_______________________________________________________________________________
-    # Constructor given the minimum bias rate. Optionally there can be given the
-    # number of minimum bias events as well as the < event > variable, in order to
-    # get the proper value of the rate. If this last argument is not specified, it
-    # will be taken as the number of events in the associated DataManager class. If 
-    # < EvtVar > is not specified, the efficiencies are computated with the number
-    # of events in the managers.
     def __init__( self, mib_rate, **kwargs ):
+        ''' Constructor given the minimum bias rate. Optionally there can be given the
+        number of minimum bias events as well as the < event > variable, in order to
+        get the proper value of the rate. If this last argument is not specified, it
+        will be taken as the number of events in the associated DataManager class. If 
+        < EvtVar > is not specified, the efficiencies are computated with the number
+        of events in the managers. '''
 
         for kw in kwargs:
             setattr( self, kw, kwargs[ kw ] )
@@ -60,11 +59,10 @@ class Trigger:
         else:
             self.SelfNorm = True
         
-    #_______________________________________________________________________________
-    # Defines the class method to evaluate the efficiency of the cut over a given 
-    # manager. All cuts specified after using the BookCut and ApplyCuts methods are
-    # going to be applied.
     def __call__( self, mngr ):
+        ''' Defines the class method to evaluate the efficiency of the cut over a given 
+        manager. All cuts specified after using the BookCut and ApplyCuts methods are
+        going to be applied. '''
         old_nevts = self.GetTrueEvents( mngr )
         new_nevts = old_nevts
         strsize   = LargestString( self.Cuts )
@@ -79,11 +77,10 @@ class Trigger:
             print cut, nwsp*" " + "=>", new_nevts*1./old_nevts, "(", new_nevts*100./toceff, "% )"
         return mngr
 
-    #_______________________________________________________________________________
-    # Adds a new manager to the class. The type has to be specified. If it is a
-    # minimum bias sample, it will auto-merge the sets stored. In other case the
-    # manager will be storaged as a signal file.
     def AddManager( self, mngr, dtype ):
+        ''' Adds a new manager to the class. The type has to be specified. If it is a
+        minimum bias sample, it will auto-merge the sets stored. In other case the
+        manager will be storaged as a signal file. '''
         self.Prepared = False
         if   dtype in ( "mib", "MiB", "MIB" ):
             if self.MiBMngr:
@@ -95,9 +92,8 @@ class Trigger:
         else:
             self.SigMngr[ dtype ] = mngr
 
-    #_______________________________________________________________________________
-    # Books a new cut with the id given by < cut_id >
     def BookCut( self, cut_id, cut ):
+        ''' Books a new cut with the id given by < cut_id > '''
         self.Prepared = False
         if cut_id in self.CutList:
             print "CutID <", cut_id, "> already used, cut <", cut, "> not booked"
@@ -105,21 +101,19 @@ class Trigger:
             self.CutList.append( cut_id )
             self.Cuts[ cut_id ] = cut
 
-    #_______________________________________________________________________________
-    # Gets all the cuts. Cuts located in < self.Cuts > will be concatenated with an 
-    # < and >
     def GetCutLine( self ):
+        ''' Gets all the cuts. Cuts located in < self.Cuts > will be concatenated with an 
+        < and > '''
         cut = ""
         for cut_id in self.CutList:
             cut += self.Cuts[ cut_id ] + " and "
         cut = cut[ :-5 ]
         return cut
 
-    #_______________________________________________________________________________
-    # Returns the efficiency for signal or minimum bias samples. This quantity is refered
-    # to the total number of events in the main sample. The input parameter < arg > can be
-    # a cut string or a list of events.
     def GetEfficiency( self, arg, dtype ):
+        ''' Returns the efficiency for signal or minimum bias samples. This quantity is refered
+        to the total number of events in the main sample. The input parameter < arg > can be
+        a cut string or a list of events. '''
         if dtype in ( "mib", "MiB", "MIB" ):
             cmngr = self.CutMiBMngr
             mngr  = self.MiBMngr
@@ -130,24 +124,21 @@ class Trigger:
             arg = cmngr.GetCutList( arg )
         return self.GetTrueEvents( cmngr, arg )*1./self.GetTrueEvents( mngr )
 
-    #_______________________________________________________________________________
-    # Gets the rate for a given cut string or list
     def GetRate( self, arg = False ):
+        ''' Gets the rate for a given cut string or list '''
         if isinstance( arg, str ):
             arg = self.CutMiBMngr.GetCutList( arg )
         if not arg:
             arg = self.CutMiBMngr.GetCutList( self.GetCutLine() )
         return self.MiBrate*self.GetTrueEvents( self.CutMiBMngr, arg )*1./self.nMiBevts
 
-    #_______________________________________________________________________________
-    # Gets the rejection for a given cut string or list
     def GetRejection( self, arg, dtype = "mib" ):
+        ''' Gets the rejection for a given cut string or list '''
         return 1. - self.GetEfficiency( arg, dtype )
 
-    #_______________________________________________________________________________
-    # Method to get the number of true events in a given manager. If a list of
-    # events is specified this task is only performed on them.
     def GetTrueEvents( self, mngr, lst = False ):
+        ''' Method to get the number of true events in a given manager. If a list of
+        events is specified this task is only performed on them. '''
         if self.EvtVar:
             event_list = mngr.Variables[ self.EvtVar ]
             ''' If < lst > is a void list it is maintained as it is '''
@@ -163,11 +154,10 @@ class Trigger:
             else:
                 return len( lst )
 
-    #_______________________________________________________________________________
-    # Applies the cuts booked in the class ( if they exist ), and prepares the
-    # managers to work with. This method creates two new managers, conserving the
-    # old ones.
     def PrepareTrigger( self ):
+        ''' Applies the cuts booked in the class ( if they exist ), and prepares the
+        managers to work with. This method creates two new managers, conserving the
+        old ones. '''
         if self.Prepared: return
         cut = self.GetCutLine()
         if cut == "":
@@ -181,10 +171,9 @@ class Trigger:
         self.Prepared = True
         print "Trigger prepared"
 
-    #_______________________________________________________________________________
-    # Removes a cut booked in the class. After using this method, ApplyCuts has to
-    # be called again in order to generate the cut samples.
     def RemoveCuts( self, *args ):
+        ''' Removes a cut booked in the class. After using this method, ApplyCuts has to
+        be called again in order to generate the cut samples. '''
         self.Prepared = False
         if '*' in args:
             self.CutList = []
@@ -194,12 +183,11 @@ class Trigger:
                 del self.CutList[ self.CutList.index( cut_id ) ]
                 del self.Cuts[ cut_id ]
 
-    #_______________________________________________________________________________
-    # Performs a scan over the variable < var > from < first > to < last > in
-    # < npoints > steps. Both end-points are included. The number of entries for
-    # the signal, minimum bias, cut and rate are returned in a dictionary, together
-    # with the initial number of minimum bias and signal events.
     def ScanVariable( self, varlst, cond, first, last, npoints ):
+        ''' Performs a scan over the variable < var > from < first > to < last > in
+        < npoints > steps. Both end-points are included. The number of entries for
+        the signal, minimum bias, cut and rate are returned in a dictionary, together
+        with the initial number of minimum bias and signal events. '''
         if not self.Prepared: self.PrepareTrigger()
         step    = ( last - first )*1./( npoints - 1 )
         results = { "oldnmib" : self.GetTrueEvents( self.MiBMngr ),
@@ -240,9 +228,8 @@ class Trigger:
                 results[ "n" + el ][ i ] = lenlst[ imngr ]
         return results
 
-    #_______________________________________________________________________________
-    # Sets the number of minimum bias events
     def SetMiBevts( self, val ):
+        ''' Sets the number of minimum bias events '''
         self.Prepared = False
         if val != 0:
             self.SelfNorm = False
@@ -251,8 +238,7 @@ class Trigger:
             self.SelfNorm = True
             self.nMiBevts = self.GetTrueEvents( self.MiBMngr )
 
-    #_______________________________________________________________________________
-    # Sets the minimum bias rate
     def SetMiBrate( self, val ):
+        ''' Sets the minimum bias rate '''
         self.Prepared = False
         self.MiBrate  = val

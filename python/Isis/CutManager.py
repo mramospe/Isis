@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                          //
 #//  e-mail: miguel.ramos.pernas@cern.ch                  //
 #//                                                       //
-#//  Last update: 24/10/2015                              //
+#//  Last update: 16/11/2015                              //
 #//                                                       //
 #// ----------------------------------------------------- //
 #//                                                       //
@@ -37,14 +37,11 @@ from collections import OrderedDict
 
 class CutManager:
 
-    #_______________________________________________________________________________
-    # Constructor given the name of the cuts file
     def __init__( self, file_name = False ):
-
+        ''' Constructor given the name of the cuts file '''
         self.Options = { "and": "&&", "or": "||" }
         self.CutFile = []
         self.CutList = OrderedDict()
-
         if file_name:
             ifile = open(file_name)
             for line in ifile:
@@ -53,25 +50,21 @@ class CutManager:
                 if line != "":
                     self.CutFile.append( [ line ] )
 
-    #_______________________________________________________________________________
-    # Gets the cut related to the key given
     def __getitem__( self, key ):
+        ''' Gets the cut related to the key given '''
         return self.CutList[ index ]
 
-    #_______________________________________________________________________________
-    # Clears the content obtained from the file as well as the cuts booked
     def Clear( self ):
+        ''' Clears the content obtained from the file as well as the cuts booked '''
         self.CutList = OrderedDict()
         self.CutFile = []
         
-    #_______________________________________________________________________________
-    # Clears the content obtained from the file
     def ClearFile( self ):
+        ''' Clears the content obtained from the file '''
         self.CutFile = []
 
-    #_______________________________________________________________________________
-    # Books a new cut and returns it
     def BookCut( self, name ):
+        ''' Books a new cut and returns it '''
         if name in self.CutList:
             print "Cut with name <", name, "> already booked"
             return False
@@ -81,9 +74,8 @@ class CutManager:
             print "Booked new cut <", name, ">:", self.CutList[ name ]
         return cut
 
-    #_______________________________________________________________________________
-    # Gets the Cut named < name > in the file attached to this class
     def GetCut( self, name ):
+        ''' Gets the Cut named < name > in the file attached to this class '''
         cuts = False
         for line in self.CutFile:
             if line != []:
@@ -106,9 +98,8 @@ class CutManager:
 
         return cuts
 
-    #_______________________________________________________________________________
-    # Opens a new file and gets its content
     def Open( self, file_name ):
+        ''' Opens a new file and gets its content '''
         self.CutFile = []
         ifile = open(file_name)
         for line in ifile:
@@ -117,8 +108,7 @@ class CutManager:
             if line != "":
                 self.CutFile.append( [ line ] )
 
-    #_______________________________________________________________________________
-    # Prints the cuts booked in the class
     def Print( self ):
+        ''' Prints the cuts booked in the class '''
         for key in self.CutList:
             print key, "->", self.CutList[ key ]
