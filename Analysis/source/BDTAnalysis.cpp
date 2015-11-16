@@ -433,8 +433,7 @@ void Analysis::BDTClassifier::SetStoreFile( const char *file_name,
 
 //_______________________________________________________________________________
 // Main constructor
-Analysis::BDTApplier::BDTApplier() : 
-  fReader( 0 ) { }
+Analysis::BDTApplier::BDTApplier() : fReader( 0 ) { }
 
 //_______________________________________________________________________________
 // Constructor given a name
@@ -451,7 +450,7 @@ Analysis::BDTApplier::BDTApplier( const char *name,
 // Destructor
 Analysis::BDTApplier::~BDTApplier() { if ( fReader ) delete fReader; }
 
-//_______________________________________________________________________________           
+//_______________________________________________________________________________
 
 
 // -- PUBLIC METHODS
