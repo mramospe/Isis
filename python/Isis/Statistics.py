@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 16/11/2015                             //
+#//  Last update: 18/11/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -21,7 +21,7 @@
 
 
 from ROOT import gStyle, TCanvas, TH1D, TGraph
-import numpy
+from Isis.Algebra import *
 from math import sqrt
 
 
@@ -30,34 +30,38 @@ from math import sqrt
 # a signal and a background samples.
 class FisherDiscriminant:
 
-    def __init__( self, SigSample, BkgSample ):
-        ''' This class works with a signal and a background samples given as a
-        list of lists. Each one corresponds to one variable.'''
-        self.SigSample = numpy.matrix( SigSample )
-        self.BkgSample = numpy.matrix( BkgSample )
-        cmatrixSig = numpy.matrix( CovMatrix( self.SigSample.A ) )
-        cmatrixBkg = numpy.matrix( CovMatrix( self.BkgSample.A ) )
-        invscm     = numpy.linalg.inv( cmatrixSig + cmatrixBkg )
-        meansSig   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.SigSample.A ] )
-        meansBkg   = numpy.array( [ Mean( numpy.array( row ) ) for row in self.BkgSample.A ] )
-        self.ProjVect = invscm.dot( meansSig - meansBkg )
+    def __init__( self, SigSample, BkgSample, EvtsInRows = True ):
+        ''' This class works with a signal and a background sample given as a
+        list of lists. They can be provided with the events disposed as rows
+        < EvtsInRows = True > or in columns ( more common ) < EvtsInRows = False > '''
+        if EvtsInRows:
+            self.SigSample = Matrix( SigSample ).Transpose()
+            self.BkgSample = Matrix( BkgSample ).Transpose()
+        else:
+            self.SigSample = Matrix( SigSample )
+            self.BkgSample = Matrix( BkgSample )
+        cmatrixSig     = Matrix( CovMatrix( self.SigSample ) )
+        cmatrixBkg     = Matrix( CovMatrix( self.BkgSample ) )
+        invscm         = Inv( cmatrixSig + cmatrixBkg )
+        meansSig       = Matrix( [ [ Mean( row ) for row in self.SigSample ] ] )
+        meansBkg       = Matrix( [ [ Mean( row ) for row in self.BkgSample ] ] )
+        self.ProjVect  = invscm.Dot( ( meansSig - meansBkg ).Transpose() ).Transpose()[ 0 ]
 
     def __eval__( self, sample ):
         ''' Applies the fisher discriminant to a given sample '''
-        fisherVar  = [ self.ProjVect.dot( sample.A[ i ] ) for i in range( len( sample ) ) ]
-        return fisherVar
+        return self.Apply( sample )
 
     def Apply( self, sample ):
         ''' Applies the fisher discriminant to a given sample '''
-        fisherVar  = [ self.ProjVect.dot( sample.A[ i ] ) for i in range( len( sample ) ) ]
+        fisherVar  = [ self.ProjVect.Dot( sample[ i ] ) for i in xrange( len( sample ) ) ]
         return fisherVar
 
     def GetTrainFisherValues( self ):
         ''' Returns the values for the fisher discriminant of the two training samples '''
-        SigSample  = self.SigSample.T
-        BkgSample  = self.BkgSample.T
-        fisherSig  = [ float(self.ProjVect.dot( SigSample.A[ i ] ).A) for i in range( len( SigSample ) ) ]
-        fisherBkg  = [ float(self.ProjVect.dot( BkgSample.A[ i ] ).A) for i in range( len( BkgSample ) ) ]
+        SigSample  = self.SigSample.Transpose()
+        BkgSample  = self.BkgSample.Transpose()
+        fisherSig  = self.Apply( SigSample )
+        fisherBkg  = self.Apply( BkgSample )
         return fisherSig, fisherBkg
 
     def PlotFisherQuality( self, **kwargs ):
@@ -95,7 +99,7 @@ class FisherDiscriminant:
         fisherBkg.sort()
         la , lb  = len( fisherSig ), len( fisherBkg )
         roc, sig, eff, rej = TGraph(), TGraph(), TGraph(), TGraph()
-        for i in range( npoints ):
+        for i in xrange( npoints ):
             cut    = minv + i*step
             nA, nB = 0, 0
             for el in reversed( fisherSig ):
@@ -151,7 +155,7 @@ class FisherDiscriminant:
 
         ''' Prints the maximum significance point and the cut value '''
         lst = sig.GetY()
-        maxv, maxi = max( [ ( lst[ i ], i ) for i in range( sig.GetN() ) ] )
+        maxv, maxi = max( [ ( lst[ i ], i ) for i in xrange( sig.GetN() ) ] )
 
         print "----------------------------"
         print "Fisher discriminant analysis"
@@ -182,9 +186,9 @@ def Covariance( lst1, lst2 ):
 # data set have to correspond to the values of one of the variables.
 def CovMatrix( data ):
     nvars     = len( data )
-    covmatrix = [ nvars*[ 0. ] for i in range( nvars ) ]
-    for i in range( nvars ):
-        for j in range( nvars ):
+    covmatrix = Matrix( [ nvars*[ 0. ] for i in xrange( nvars ) ] )
+    for i in xrange( nvars ):
+        for j in xrange( nvars ):
             covmatrix[ i ][ j ] = Covariance( data[ i ], data[ j ] )
     return covmatrix
 
