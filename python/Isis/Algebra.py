@@ -48,22 +48,6 @@ class LongVector( list ):
         else:
             return LongVector( [ el/float( obj ) for el in self ] )
 
-    def __mul__( self, obj ):
-        ''' Computes the multiplication between two objects. If a LongVector
-        class is provided, it will compute it element by element '''
-        if isinstance( obj, LongVector ):
-            return LongVector( [ el1*el2 for el1, el2 in zip( self, obj ) ] )
-        else:
-            return LongVector( [ el*obj for el in self ] )
-
-    def __rdiv__( self, obj ):
-        ''' See __div__ '''
-        return self.__div__( obj )
-
-    def __rmul__( self, obj ):
-        ''' See __mul__ '''
-        return self.__mul__( obj )
-
     def __iadd__( self, obj ):
         ''' Computes the __add__ method setting the result to itself '''
         if isinstance( obj, LongVector ):
@@ -81,6 +65,30 @@ class LongVector( list ):
         else:
             for i in xrange( self.Nrows() ):
                 self[ i ] -= obj
+
+    def __mul__( self, obj ):
+        ''' Computes the multiplication between two objects. If a LongVector
+        class is provided, it will compute it element by element '''
+        if isinstance( obj, LongVector ):
+            return LongVector( [ el1*el2 for el1, el2 in zip( self, obj ) ] )
+        else:
+            return LongVector( [ el*obj for el in self ] )
+
+    def __rdiv__( self, obj ):
+        ''' See __div__ '''
+        return self.__div__( obj )
+
+    def __rmul__( self, obj ):
+        ''' See __mul__ '''
+        return self.__mul__( obj )
+
+    def __sub__( self, obj ):
+        ''' Computes the substraction of two objects. If a LongVector class is provided,
+        the substraction element by element will be computed '''
+        if isinstance( obj, LongVector ):
+            return LongVector( [ el1 - el2 for el1, el2 in zip( self, obj ) ] )
+        else:
+            return LongVector( [ el - obj for el in self ] )
 
     def Dot( self, obj ):
         ''' Computes the dot product between two LongVector classes '''
@@ -181,25 +189,6 @@ class Matrix( LongVector ):
     def GetRowList( self, index ):
         ''' Returns a list with the elements of the row at the given index '''
         return list( self[ index ] )
-
-    def Inverse( self ):
-        ''' Calculates the inverse of the matrix using the LU decomposition. The
-        solution for the inverse of L and U is obtained by forward and backward
-        substitution with the columns of the identity matrix. '''
-        L, U, P, Q = LU( self )
-        dim  = len( self )
-        I    = UnitaryMatrix( dim )
-        Linv = Zeros( dim, dim )
-        Uinv = Zeros( dim, dim )
-        for i in xrange( dim ):
-            icol      = I.GetCol( i )
-            Linv[ i ] = ForwardSubs( L, icol ).Transpose()[ 0 ]
-            Uinv[ i ] = BackwardSubs( U, icol ).Transpose()[ 0 ]
-        Linv = Linv.Transpose()
-        Uinv = Uinv.Transpose()
-        ''' Since L and U are triangular, it is satisfied ( Uinv.Dot( Linv ) =
-        Linv.Dot( Uinv ) '''
-        return Q.Dot( Linv.Dot( Uinv.Dot( P ) ) )
     
     def Ncols( self ):
         ''' Returns the number of columns of the matrix '''
@@ -279,6 +268,26 @@ def ForwardSubs( B, b ):
         y[ i ][ 0 ] = ( b[ i ][ 0 ] -
                         sum( B[ i ][ j ]*y[ j ][ 0 ] for j in xrange( i ) ) )/float( B[ i ][ i ] )
     return y
+
+#_______________________________________________________________________________
+# Calculates the inverse of the matrix using the LU decomposition. The
+# solution for the inverse of L and U is obtained by forward and backward
+# substitution with the columns of the identity matrix.
+def Inv( matrix ):
+    L, U, P, Q = LU( matrix )
+    dim  = len( matrix )
+    I    = UnitaryMatrix( dim )
+    Linv = Zeros( dim, dim )
+    Uinv = Zeros( dim, dim )
+    for i in xrange( dim ):
+        icol      = I.GetCol( i )
+        Linv[ i ] = ForwardSubs( L, icol ).Transpose()[ 0 ]
+        Uinv[ i ] = BackwardSubs( U, icol ).Transpose()[ 0 ]
+    Linv = Linv.Transpose()
+    Uinv = Uinv.Transpose()
+    ''' Since L and U are triangular, it is satisfied ( Uinv.Dot( Linv ) =
+    Linv.Dot( Uinv ) '''
+    return Q.Dot( Uinv.Dot( Linv.Dot( P ) ) )
 
 #_______________________________________________________________________________
 # Performs the LU decomposition, returning L, U and the two pivote matrices

@@ -61,8 +61,8 @@ M = Matrix( [
 Mpiv = PivoteMatrices( M )
 
 print "Initial matrix:", M
-print "Inverse matrix:", M.Inverse()
-print "Product of both:", M.Dot( M.Inverse() )
+print "Inverse matrix:", Inv( M )
+print "Product of both:", M.Dot( Inv( M ) )
 print "The determinant should be -1"
 print "Determinant:", Det( M )
 
@@ -77,7 +77,7 @@ print "Initial matrix:", M
 print "The determinant should be 0"
 print "Determinant:", Det( M )
 try:
-    print "Inverse matrix:", M.Inverse()
+    print "Inverse matrix:", Inv( M )
 except:
     print "The inverse can not be computed since determinant is zero"
 
