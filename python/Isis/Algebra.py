@@ -126,6 +126,64 @@ class Matrix( LongVector ):
             for el in obj: 
                 self.append( LongVector( el ) )
 
+    def __add__( self, obj ):
+        ''' Computes the sum of two objects. If a Matrix class is provided,
+        the sum element by element will be computed '''
+        if isinstance( obj, Matrix ):
+            return Matrix( [ el1 + el2 for el1, el2 in zip( self, obj ) ] )
+        else:
+            return Matrix( [ el + obj for el in self ] )
+
+    def __div__( self, obj ):
+        ''' Computes the division between this class and an object. If a
+        Matrix class is provided, it will compute it element by element '''
+        if isinstance( obj, Matrix ):
+            return Matrix( [ el1/float( el2 ) for el1, el2 in zip( self, obj ) ] )
+        else:
+            return Matrix( [ el/float( obj ) for el in self ] )
+
+    def __iadd__( self, obj ):
+        ''' Computes the __add__ method setting the result to itself '''
+        if isinstance( obj, Matrix ):
+            for i in xrange( self.Nrows() ):
+                self[ i ] += obj[ i ]
+        else:
+            for i in xrange( self.Nrows() ):
+                self[ i ] += obj
+
+    def __isub__( self, obj ):
+        ''' Computes the __sub__ method setting the result to itself '''
+        if isinstance( obj, Matrix ):
+            for i in xrange( self.Nrows() ):
+                self[ i ] -= obj[ i ]
+        else:
+            for i in xrange( self.Nrows() ):
+                self[ i ] -= obj
+
+    def __mul__( self, obj ):
+        ''' Computes the multiplication between two objects. If a Matrix
+        class is provided, it will compute it element by element '''
+        if isinstance( obj, Matrix ):
+            return Matrix( [ el1*el2 for el1, el2 in zip( self, obj ) ] )
+        else:
+            return Matrix( [ el*obj for el in self ] )
+
+    def __rdiv__( self, obj ):
+        ''' See __div__ '''
+        return self.__div__( obj )
+
+    def __rmul__( self, obj ):
+        ''' See __mul__ '''
+        return self.__mul__( obj )
+
+    def __sub__( self, obj ):
+        ''' Computes the substraction of two objects. If a Matrix class is provided,
+        the substraction element by element will be computed '''
+        if isinstance( obj, Matrix ):
+            return Matrix( [ el1 - el2 for el1, el2 in zip( self, obj ) ] )
+        else:
+            return Matrix( [ el - obj for el in self ] )
+
     def Dimensions( self ):
         ''' Returns the dimensions of the matrix '''
         return len( self ), len( self[ 0 ] )
