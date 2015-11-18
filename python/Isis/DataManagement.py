@@ -24,8 +24,9 @@ from ROOT import TFile, TTree, gDirectory
 from array import array
 from copy import deepcopy
 import math
-from Isis.Utils import JoinDicts, MergeDicts
+from Isis.Algebra import LongVector, Matrix
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
+from Isis.Utils import JoinDicts, MergeDicts
 
 
 #_______________________________________________________________________________
@@ -53,7 +54,7 @@ class DataManager:
         if nargs >= 2:
             self.AddTarget( *args )
         elif nargs == 1:
-            print "Arguments for DataManager class are file_name and tree_name"
+            print "Arguments for DataManager class are < file path > and  < tree name >"
             exit()
 
     def __add__( self, other ):
@@ -282,6 +283,24 @@ class DataManager:
         for el in rawlist:
             tlist += el
         return tlist
+
+    def GetMatrix( self, *args, **kwargs ):
+        ''' Returns a matrix containing the values of the variables specified in < args >.
+        If the option < EvtsInRows > is set to False, the matrix will be created as a list
+        containing a list for each of the variables. Otherwise the matrix will be a list
+        containing a list for each event, with the variables same order as in < args >. If
+        '*' appears in < args >, there will be taken all the variables in the manager
+        ordered by name '''
+        if "EvtsInRows" in kwargs: trans = kwargs[ "EvtsInRows" ]
+        else: trans = True
+        if "*" in args:
+            args = self.Variables.keys()
+            args.sort()
+        matrix = Matrix( [ self.Variables[ var ] for var in args ] )
+        if trans:
+            return matrix.Transpose()
+        else:
+            return matrix
 
     def GetNvars( self ):
         ''' Gets the number of variables in the class '''
