@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 16/11/2015                                                  //
+#//  Last update: 18/11/2015                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -20,7 +20,7 @@
 #///////////////////////////////////////////////////////////////////////////////
 
 
-from Isis.DataManager import DataManager
+from Isis.DataManagement import DataManager
 from Isis.Utils import LargestString
 from ROOT import TGraph
 
