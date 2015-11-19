@@ -171,14 +171,10 @@ class DataManager:
             tlist = [ ifile.Get( tname ) for tname in tnames ]
             self.Targets[ ifile ] += tlist
             print "Added trees: ", list( tlist ), "to target <", ifile.GetName(), ">"
-        for name in self.Variables:
-            vvals = self.Variables[ name ]
-            for tree in tlist:
-                for ievt in range( tree.GetEntries() ):
-                    tree.GetEntry( ievt )
-                    vvals.append( getattr( tree, name ) )
-        if not self.Nentries and self.Variables:
-            self.Nentries = len( vvals )
+        if self.Variables:
+            dictlist        = [ DictFromTree( tree, self.Variables.keys() ) for tree in tlist ]
+            self.Variables  = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
+            self.Nentries   = len( self.Variables[ self.Variables.keys()[ 0 ] ] )
 
     def AddVariables( self, *fvars ):
         ''' Adds a new  variable(s) to the class given a name and a list. This method
@@ -217,15 +213,13 @@ class DataManager:
             return
         if len( self.Targets ):
             truevars = []
-            dictlist = []
             tlist    = self.GetListOfTrees()
             for name in var_names:
                 if name not in self.Variables:
                     truevars.append( name )
                 else:
                     print "Variable", name, "already booked"
-            for tree in tlist:
-                dictlist.append( DictFromTree( tree, *truevars ) )
+            dictlist       = [ DictFromTree( tree, *truevars ) for tree in tlist ]
             self.Variables = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
             self.Nentries  = len( self.Variables[ name ] )
         else:
