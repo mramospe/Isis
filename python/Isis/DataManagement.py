@@ -113,17 +113,18 @@ class DataManager:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
 
-    def AddTarget( self, *args ):
-        ''' Adds a new target file and/or tree to the class '''
+    def AddTarget( self, fname, *args ):
+        ''' Adds a new target file and/or tree to the class. One has to provide the file
+        name and the tree names. '''
         if not self.OwnsTargets: self.OwnsTargets = True
-        if args[ 0 ] not in [ ifile.GetName() for ifile in self.Targets ]:
-            ifile = TFile.Open( args[ 0 ], "READ" )
-            tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
+        if fname not in [ ifile.GetName() for ifile in self.Targets ]:
+            ifile = TFile.Open( fname, "READ" )
+            tlist = [ ifile.Get( tname ) for tname in args ]
             self.Targets[ ifile ]  = tlist
-            print "Added target <", args[ 0 ], "> and trees:", list( args[ 1: ] )
+            print "Added target <", fname, "> and trees:", list( args )
         else:
-            ifile = [ ifile for ifile in self.Targets if ifile.GetName() == args[ 0 ] ][ 0 ]
-            tlist = [ ifile.Get( tname ) for tname in args[ 1: ] ]
+            ifile = [ ifile for ifile in self.Targets if ifile.GetName() == fname ][ 0 ]
+            tlist = [ ifile.Get( tname ) for tname in args ]
             self.Targets[ ifile ] += tlist
             print "Added trees: ", list( tlist ), "to target <", ifile.GetName(), ">"
         for name in self.Variables:
@@ -498,21 +499,21 @@ class DataManager:
         ''' Removes a booked variable '''
         del self.Variables[ var ]
 
-    def Save( self, *args, **kwargs ):
-        ''' Saves the given class values in a TTree. If args has only one name, it is
-        considered as the tree name, so its written in the external directory ( to
+    def Save( self, name, tree_name = False, **kwargs ):
+        ''' Saves the given class values in a TTree. If only < name > is defined, it is
+        considered as the tree name, so it is written in the external directory ( to
         be constructed and accesible in the main program ), if two names are provided
         the first one is considered as the file name and the second the tree name. If
         < close > is provided, and if its value is false, this method will return
-        the output file.  '''
-        if len( args ) == 2:
-            output_file = TFile.Open( args[ 0 ], "RECREATE" )
-            print "Saving tree with name <", args[ 1 ], "> in <", args[ 0 ], ">"
-            TreeFromDict( args[ 1 ], self.Variables )
+        the output file. '''
+        if tree_name:
+            output_file = TFile.Open( name, "RECREATE" )
+            print "Saving tree with name <", tree_name, "> in <", name, ">"
+            TreeFromDict( tree_name, self.Variables )
         else:
-            print ( "Saving tree with name <", args[ 1 ], "> in <", gDirectory.GetName(), ">" )
-            TreeFromDict( args[ 0 ], self.Variables )
-        print "Written", self.Nentries, "events"
+            print ( "Saving tree with name <", name, "> in <", gDirectory.GetName(), ">" )
+            TreeFromDict( name, self.Variables )
+        print "Written", self.Nentries, "entries"
         if "close" in kwargs:
             if kwargs[ "close" ]:
                 output_file.Close()
@@ -618,7 +619,7 @@ def TreeFromDict( name, dic, **kwargs ):
     rvars = range( len( tvals ) )
     for ievt in range( len( dic[ var ] ) ):
         for i in rvars:
-            avars[ i ] = tvals[ i ][ ievt ]
+            avars[ i ][ 0 ] = tvals[ i ][ ievt ]
         tree.Fill()
         if ievt % 100000 == 0:
             tree.AutoSave()
