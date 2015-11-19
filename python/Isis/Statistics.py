@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 18/11/2015                             //
+#//  Last update: 19/11/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -47,7 +47,7 @@ class FisherDiscriminant:
         meansBkg       = Matrix( [ [ Mean( row ) for row in self.BkgSample ] ] )
         self.ProjVect  = invscm.Dot( ( meansSig - meansBkg ).Transpose() ).Transpose()[ 0 ]
 
-    def __eval__( self, sample ):
+    def __call__( self, sample ):
         ''' Applies the fisher discriminant to a given sample '''
         return self.Apply( sample )
 
