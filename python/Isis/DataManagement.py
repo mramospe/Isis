@@ -68,8 +68,11 @@ class DataManager:
             ''' This is the constructor for txt files '''
             ifile = open( fname, "rt" )
             line  = ifile.readline().split()
-            if "colIndex" in kwargs: columns = kwargs[ "colIndex" ]
-            else: columns = range( len( line ) )
+            if "colIndex" in kwargs:
+                columns = kwargs[ "colIndex" ]
+                del kwargs[ "colIndex" ]
+            else:
+                columns = range( len( line ) )
             print "Storing", len( columns ), "variables from txt file <", fname, ">"
             convfuncs, varvalues = [], []
             for index, icol in enumerate( columns ):
@@ -219,7 +222,7 @@ class DataManager:
                     truevars.append( name )
                 else:
                     print "Variable", name, "already booked"
-            dictlist       = [ DictFromTree( tree, *truevars ) for tree in tlist ]
+            dictlist       = [ DictFromTree( tree, truevars ) for tree in tlist ]
             self.Variables = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
             self.Nentries  = len( self.Variables[ name ] )
         else:
@@ -250,12 +253,15 @@ class DataManager:
         return mngr
 
     def CloseFiles( self ):
-        ''' Closes all the target files owned by the class '''
-        for ifile in self.Targets:
-            for itree in self.Targets[ ifile ]:
-                itree = 0
-            ifile.Close()
-            del self.Targets[ ifile ]
+        ''' Closes all the target files if they are owned by the class '''
+        if self.OwnsTargets:
+            for ifile in self.Targets:
+                for itree in self.Targets[ ifile ]:
+                    itree = 0
+                ifile.Close()
+                del self.Targets[ ifile ]
+        else:
+            print "This DataManager does not own his targets"
 
     def GetCutList( self, cut ):
         ''' This method allows to obtain a list with the events that satisfy the cuts
@@ -354,14 +360,11 @@ class DataManager:
     def GetVarEvents( self, variable, cut = False ):
         ''' Gets the list of values for a given variable. If a cut is specified it returns
         the values concerning the sample which satisfies them. '''
-        res_list = []
+        values = self.Variables[ variable ]
         if cut:
-            for ievt in self.GetCutList( cut ):
-                res_list.append( self.Variables[ variable ][ ievt ] )
+            return [ values[ ievt ] for ievt in self.GetCutList( cut ) ]
         else:
-            for ievt in xrange( self.Nentries ):
-                res_list.append( self.Variables[ variable ][ ievt ] )
-        return res_list
+            return [ values[ ievt ] for ievt in xrange( self.Nentries ) ]
 
     def GetVarNames( self ):
         ''' Gets the name of the variables in the class '''
@@ -410,19 +413,19 @@ class DataManager:
             vyvar = self.Variables[ yvar ]
         return MakeScatterPlot( vxvar, vyvar, **kwargs )
 
-    def MakeVariable( self, var_name, arg_list, function ):
+    def MakeVariable( self, varname, arglist, function ):
         ''' Makes another variable using those in the class. There have to be specified:
         the new variable name, the name of the variables used by the function
         ( ordered in a list ) and the function itself. The computation of the new
         variable is going to be performed passing the function the variables as normal
         entries ( *args, where args is the list of values ). '''
         new_variable = self.Nentries*[ 0. ]
-        var_tensor   = [ self.Variables[ vname ] for vname in arg_list ]
-        lvars        = range( len( arg_list ) )
+        var_tensor   = [ self.Variables[ vname ] for vname in arglist ]
+        lvars        = range( len( arglist ) )
         for ievt in xrange( self.Nentries ):
             values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
             new_variable[ ievt ] = function( *values )
-        self.Variables[ var_name ] = new_variable
+        self.Variables[ varname ] = new_variable
 
     def NewEvent( self, dic ):
         ''' Adds a new event to the manager. A value for all the variables has to be
@@ -600,24 +603,20 @@ def BranchFromList( brname, tree, lst ):
 #_______________________________________________________________________________
 # Creates a new dictionary containing the values of the variables stored in a
 # TTree object. The input is composed by the tree and the variables to be
-# stored.
-def DictFromTree( tree, *args ):
-    avars = []
-    tvals = []
-    for var in args:
+# stored ( given in a list ).
+def DictFromTree( tree, varlist ):
+    avars, tvals = [], []
+    for var in varlist:
         avars.append( ArrayType( tree.GetBranch( var ).GetTitle() ) )
         tvals.append( [] )
         tree.SetBranchAddress( var, avars[ -1 ] )
-    rvars = range( len( args ) )
+    rvars = range( len( varlist ) )
     for ievt in xrange( tree.GetEntries() ):
         tree.GetEntry( ievt )
         for i in rvars:
             tvals[ i ].append( avars[ i ][ 0 ] )
     tree.ResetBranchAddresses()
-    dic = {}
-    for var, i in zip( args, rvars ):
-        dic[ var ] = tvals[ i ]
-    return dic
+    return dict( ( var, tvals[ i ] ) for var, i in zip( varlist, rvars ) )
 
 #_______________________________________________________________________________
 # This function almacenates the values of a leaf in a TTree into a list, given
@@ -642,8 +641,7 @@ def TreeFromDict( name, dic, **kwargs ):
     tree      = TTree( name, kwargs[ "title" ], kwargs[ "level" ] )
     variables = [ key for key in dic ]
     variables.sort()
-    avars = []
-    tvals = []
+    avars, tvals = [], []
     for var in variables:
         avars.append( ArrayType( dic[ var ] ) )
         tvals.append( dic[ var ] )
