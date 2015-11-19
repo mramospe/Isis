@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 18/11/2015                                //
+#//  Last update: 19/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -34,28 +34,71 @@ from Isis.Utils import JoinDicts, MergeDicts
 # and trees
 class DataManager:
 
-    def __init__( self, *args, **kwargs ):
-        ''' Constructor given a name for the manager and arguments. The variable
-        < args > has to contain the name of the input file and the trees inside.
-        Attributes can be added as well.'''
+    def __init__( self, fname = False, tnames = [], **kwargs ):
+        ''' The constructor works in two different ways. By default it is considered that
+        the input file, whose name is set in < fname >, is a Root file, and < tnames >
+        should be the list of TTree names in the file. In < kwargs >, you can specify
+        the file type ( fileType = "root"/"txt" ). If it is set to "txt", then < tnames >
+        should be a list containing the names of the different variables. The number of
+        variables specified should match the number of columns in the file. Otherwise one
+        has to specify via < colIndex = [ 1, 3, 6, ... ] > the index for the columns to be
+        stored. Other attributes can be added too.'''
 
-        for kw in kwargs:
-            setattr( self, kw, kwargs[ kw ] )
+        if "fileType" in kwargs:
+            fileType = kwargs[ "fileType" ]
+            del kwargs[ "fileType" ]
+        else:
+            fileType = "root"
 
-        nargs = len( args )
-
+        ''' These are the main attributes that this class has '''
         self.Iterator    = 0
         self.Nentries    = 0
         self.OwnsTargets = False
         self.Targets     = {}
         self.Variables   = {}
 
-        ''' Error output for bad construction '''
-        if nargs >= 2:
-            self.AddTarget( *args )
-        elif nargs == 1:
-            print "Arguments for DataManager class are < file path > and  < tree name >"
+        if fileType in ( "root", "Root", "ROOT" ):
+            ''' This is the constructor for Root files '''
+            if fname and tnames:
+                self.AddTarget( fname, tnames )
+            elif fname and not tnames:
+                print "Arguments for DataManager class are < file path > and  < tree name >"
+                exit()
+        elif fileType in ( "txt", "TXT" ):
+            ''' This is the constructor for txt files '''
+            ifile = open( fname, "rt" )
+            line  = ifile.readline().split()
+            if "colIndex" in kwargs: columns = kwargs[ "colIndex" ]
+            else: columns = range( len( line ) )
+            print "Storing", len( columns ), "variables from txt file <", fname, ">"
+            convfuncs, varvalues = [], []
+            for index, icol in enumerate( columns ):
+                value = line[ icol ]
+                try:
+                    int( value )
+                    convfuncs.append( int )
+                except:
+                    pass
+                try:
+                    float( value )
+                    convfuncs.append( float )
+                except:
+                    print "Format for column <", i, "> not recognised"
+                    exit()
+                varvalues.append( [ convfuncs[ -1 ]( value ) ] )
+            for line in ifile:
+                line = line.split()
+                for index, icol in enumerate( columns ):
+                    varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
+            for index, name in enumerate( tnames ):
+                self.Variables[ name ] = varvalues[ index ]
+        else:
+            ''' If the type specified is not recognised an error is shown and exits the program '''
+            print "File format <", fileType, "> for DataManager class not known"
             exit()
+
+        for kw in kwargs:
+            setattr( self, kw, kwargs[ kw ] )            
 
     def __add__( self, other ):
         ''' Allows merging two objects of this class. The new manager owns all the
@@ -113,18 +156,18 @@ class DataManager:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
 
-    def AddTarget( self, fname, *args ):
+    def AddTarget( self, fname, tnames ):
         ''' Adds a new target file and/or tree to the class. One has to provide the file
         name and the tree names. '''
         if not self.OwnsTargets: self.OwnsTargets = True
         if fname not in [ ifile.GetName() for ifile in self.Targets ]:
             ifile = TFile.Open( fname, "READ" )
-            tlist = [ ifile.Get( tname ) for tname in args ]
+            tlist = [ ifile.Get( tname ) for tname in tnames ]
             self.Targets[ ifile ]  = tlist
-            print "Added target <", fname, "> and trees:", list( args )
+            print "Added target <", fname, "> and trees:", tnames
         else:
             ifile = [ ifile for ifile in self.Targets if ifile.GetName() == fname ][ 0 ]
-            tlist = [ ifile.Get( tname ) for tname in args ]
+            tlist = [ ifile.Get( tname ) for tname in tnames ]
             self.Targets[ ifile ] += tlist
             print "Added trees: ", list( tlist ), "to target <", ifile.GetName(), ">"
         for name in self.Variables:

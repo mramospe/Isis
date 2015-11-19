@@ -21,7 +21,7 @@
 
 
 from ROOT import gStyle, TCanvas, TH1D, TGraph
-from Isis.Algebra import Matrix
+from Isis.Algebra import Matrix, Inv
 from math import sqrt
 
 
