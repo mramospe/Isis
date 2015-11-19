@@ -92,6 +92,7 @@ class DataManager:
                     varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
             for index, name in enumerate( tnames ):
                 self.Variables[ name ] = varvalues[ index ]
+            self.Nentries = len( self.Variables[ name ] )
         else:
             ''' If the type specified is not recognised an error is shown and exits the program '''
             print "File format <", fileType, "> for DataManager class not known"
@@ -527,22 +528,38 @@ class DataManager:
         be constructed and accesible in the main program ), if two names are provided
         the first one is considered as the file name and the second the tree name. If
         < close > is provided, and if its value is false, this method will return
-        the output file. '''
-        if tree_name:
-            output_file = TFile.Open( name, "RECREATE" )
-            print "Saving tree with name <", tree_name, "> in <", name, ">"
-            TreeFromDict( tree_name, self.Variables )
-        else:
-            print ( "Saving tree with name <", name, "> in <", gDirectory.GetName(), ">" )
-            TreeFromDict( name, self.Variables )
-        print "Written", self.Nentries, "entries"
-        if "close" in kwargs:
-            if kwargs[ "close" ]:
-                output_file.Close()
+        the output file. If in < kwargs > the < fileType > key is set to "txt", then the
+        output will be considered as a txt where the columns correspond to each variable in
+        alphabetical order. In any case the variables to be stored can be specified using
+        the keyword < variables >, providing a list with them. '''
+        if "fileType" in kwargs: fileType = kwargs[ "fileType" ]
+        else: fileType = "root"
+        if "variables" in kwargs: variables = kwargs[ "variables" ]
+        else: variables = self.Variables.keys()
+        if "close" in kwargs: close = kwargs[ "close" ]
+        else: close = True
+        if fileType in ( "root", "Root", "ROOT" ):
+            if tree_name:
+                ofile = TFile.Open( name, "RECREATE" )
+                print "Saving tree with name <", tree_name, "> in <", name, ">"
+                TreeFromDict( tree_name, self.Variables )
             else:
-                return output_file
-        else:
-            output_file.Close()
+                print ( "Saving tree with name <", name, "> in <", gDirectory.GetName(), ">" )
+                TreeFromDict( name, self.Variables )
+            print "Written", self.Nentries, "entries"
+            if close: ofile.Close()
+            else: return ofile
+        elif fileType in ( "txt", "TXT" ):
+            ofile = open( name, "wt" )
+            print "Saving txt data in file <", name, ">"
+            varvalues = [ self.Variables[ var ] for var in variables ]
+            for ievt in xrange( self.Nentries ):
+                out = ""
+                for var in varvalues:
+                    out += str( var[ ievt ] ) + "\t"
+                ofile.write( out[ :-2 ] + "\n" )
+            if close: ofile.close()
+            else: return ofile
 
 #_______________________________________________________________________________
 # If the input is a string, returns an array with values of a certain type
