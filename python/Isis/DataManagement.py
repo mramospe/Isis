@@ -376,20 +376,18 @@ class DataManager:
         ''' Makes the histogram of the given variable. A selection can be applied
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
-        if "name" in kwargs: name = kwargs[ "name" ]
-        else: name = var
-        if "title" in kwargs: title = kwargs[ "title" ]
-        else: title = var
+        if "name"  not in kwargs: kwargs[ "name"  ] = var
+        if "title" not in kwargs: kwargs[ "title" ] = var
         if "cuts" in kwargs: vvar = self.GetVarEvents( var, kwargs[ "cuts" ] )
         else: vvar = self.Variables[ var ]
         return MakeHistogram( vvar, nbins, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''
-        if "name" in kwargs: name = kwargs[ "name" ]
-        else: kwargs[ "name" ] = xvar + "vs" + yvar
-        if "title" in kwargs: title = kwargs[ "title" ]
-        else: kwargs[ "title" ] = xvar + "vs" + yvar
+        if "name"   not in kwargs: kwargs[ "name"   ] = xvar + "vs" + yvar
+        if "title"  not in kwargs: kwargs[ "title"  ] = xvar + "vs" + yvar
+        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
+        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         vwvar = False
         if "cuts" in kwargs:
             if wvar:
@@ -401,38 +399,20 @@ class DataManager:
                 vwvar = self.Variables[ wvar ]
             vxvar = self.Variables[ xvar ]
             vyvar = self.Variables[ yvar ]
-        if "xbins" in kwargs: xbins = kwargs[ "xbins" ]
-        else: xbins = 100
-        if "ybins" in kwargs: ybins = kwargs[ "ybins" ]
-        else: ybins = 100
-        if "xmax" in kwargs: xmax = kwargs[ "xmax" ]
-        else: xmax = min( xvar )
-        if "ymax" in kwargs: ymax = kwargs[ "ymax" ]
-        else: ymax = min( yvar )
-        if "xmin" in kwargs: xmin = kwargs[ "xmin" ]
-        else: xmin = min( xvar )
-        if "ymin" in kwargs: ymin = kwargs[ "ymin" ]
-        else: ymin = min( yvar )
-        if "vtype" in kwargs: tp = kwargs[ "vtype" ]
-        else: tp = "double"
-        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
-        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         return MakeHistogram2D( vxvar, vyvar, vwvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''
-        if "name" in kwargs: name = kwargs[ "name" ]
-        else: kwargs[ "name" ] = xvar + "vs" + yvar
-        if "title" in kwargs: title = kwargs[ "title" ]
-        else: kwargs[ "title" ] = xvar + "vs" + yvar
+        if "name"   not in kwargs: kwargs[ "name"   ] = xvar + "vs" + yvar
+        if "title"  not in kwargs: kwargs[ "title"  ] = xvar + "vs" + yvar
+        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
+        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         if "cuts" in kwargs:
             vxvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
             vyvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
         else:
             vxvar = self.Variables[ xvar ]
             vyvar = self.Variables[ yvar ]
-        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
-        if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         return MakeScatterPlot( vxvar, vyvar, **kwargs )
 
     def MakeVariable( self, var_name, arg_list, function ):
@@ -443,8 +423,7 @@ class DataManager:
         entries ( *args, where args is the list of values ). '''
         new_variable = self.Nentries*[ 0. ]
         var_tensor   = [ self.Variables[ vname ] for vname in arg_list ]
-
-        lvars = range( len( arg_list ) )
+        lvars        = range( len( arg_list ) )
         for ievt in range( self.Nentries ):
             values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
             new_variable[ ievt ] = function( *values )
