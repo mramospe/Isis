@@ -198,11 +198,11 @@ class DataManager:
         if len( var_names ) == 1 and '*' in var_names[ 0 ]:
             tlist     = self.GetListOfTrees()
             brlist    = tlist[ 0 ].GetListOfBranches()
-            var_names = [ brlist.At( i ).GetName() for i in range( brlist.GetSize() ) ]
+            var_names = [ brlist.At( i ).GetName() for i in xrange( brlist.GetSize() ) ]
             for tree in tlist[ 1: ]:
                 brlist        = tree.GetListOfBranches()
                 new_var_names = []
-                for i in range( brlist.GetSize() ):
+                for i in xrange( brlist.GetSize() ):
                     brname = brlist.At( i ).GetName()
                     if brname in var_names:
                         new_var_names.append( brname )
@@ -291,9 +291,9 @@ class DataManager:
         var_list.reverse()
         values = [ self.Variables[ var ] for var in var_list ]
         nvars  = len( var_list )
-        for ivar in range( nvars ):
+        for ivar in xrange( nvars ):
             cut = cut.replace( var_list[ ivar ], "values[ %i ][ ievt ]" %ivar )
-        return eval( "[ ievt for ievt in range( self.Nentries ) if " + cut + " ]" )
+        return eval( "[ ievt for ievt in xrange( self.Nentries ) if " + cut + " ]" )
 
     def GetEntries( self, selection = False ):
         ''' Gets the number of entries of the class. If a cut selection is given, it is
@@ -359,7 +359,7 @@ class DataManager:
             for ievt in self.GetCutList( cut ):
                 res_list.append( self.Variables[ variable ][ ievt ] )
         else:
-            for ievt in range( self.Nentries ):
+            for ievt in xrange( self.Nentries ):
                 res_list.append( self.Variables[ variable ][ ievt ] )
         return res_list
 
@@ -419,10 +419,9 @@ class DataManager:
         new_variable = self.Nentries*[ 0. ]
         var_tensor   = [ self.Variables[ vname ] for vname in arg_list ]
         lvars        = range( len( arg_list ) )
-        for ievt in range( self.Nentries ):
+        for ievt in xrange( self.Nentries ):
             values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
             new_variable[ ievt ] = function( *values )
-
         self.Variables[ var_name ] = new_variable
 
     def NewEvent( self, dic ):
@@ -592,7 +591,7 @@ def BranchFromList( brname, tree, lst ):
         return 0
     var    = ArrayType( lst )
     branch = tree.Branch( brname, var, brname + '/' + var.typecode.upper() )
-    for ievt in range( tree.GetEntries() ):
+    for ievt in xrange( tree.GetEntries() ):
         tree.GetEntry( ievt )
         var[ 0 ] = lst[ ievt ]
         branch.Fill()
@@ -610,7 +609,7 @@ def DictFromTree( tree, *args ):
         tvals.append( [] )
         tree.SetBranchAddress( var, avars[ -1 ] )
     rvars = range( len( args ) )
-    for ievt in range( tree.GetEntries() ):
+    for ievt in xrange( tree.GetEntries() ):
         tree.GetEntry( ievt )
         for i in rvars:
             tvals[ i ].append( avars[ i ][ 0 ] )
@@ -628,7 +627,7 @@ def ListFromBranch( brname, tree ):
     var     = ArrayType( branch.GetTitle() )
     tree.SetBranchAddress( brname, var )
     lst = []
-    for ievt in range( tree.GetEntries() ):
+    for ievt in xrange( tree.GetEntries() ):
         tree.GetEntry( ievt )
         lst.append( var[ 0 ] )
     tree.ResetBranchAddresses()
@@ -650,7 +649,7 @@ def TreeFromDict( name, dic, **kwargs ):
         tvals.append( dic[ var ] )
         tree.Branch( var, avars[ -1 ], var + '/' + avars[ -1 ].typecode.upper() )
     rvars = range( len( tvals ) )
-    for ievt in range( len( dic[ var ] ) ):
+    for ievt in xrange( len( dic[ var ] ) ):
         for i in rvars:
             avars[ i ][ 0 ] = tvals[ i ][ ievt ]
         tree.Fill()
