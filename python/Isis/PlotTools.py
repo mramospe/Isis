@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 08/11/2015                                   //
+#//  Last update: 23/11/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -23,6 +23,7 @@
 from ROOT import ( TGraph,
                    TH1F, TH1D, TH1I,
                    TH2F, TH2D, TH2I )
+from array import array
 
 
 #_______________________________________________________________________________
@@ -89,7 +90,6 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
             hist.Fill( x, y )
     return hist
 
-
 #_______________________________________________________________________________
 # Generates a scatter plot given two lists of data
 def MakeScatterPlot( xvar, yvar, **kwargs ):
@@ -101,9 +101,7 @@ def MakeScatterPlot( xvar, yvar, **kwargs ):
     else: xtitle = "X"
     if "ytitle" in kwargs: ytitle = kwargs[ "ytitle" ]
     else: ytitle = "Y"
-    graph = TGraph()
-    for ip, vx, vy in zip( range( len( xvar ) ), xvar, yvar ):
-        graph.SetPoint( ip, vx, vy )
+    graph = TGraph( len( xvar ), array( 'd', xvar ), array( 'd', yvar ) )
     if name:
         graph.SetName( name )
     if title:
@@ -111,4 +109,3 @@ def MakeScatterPlot( xvar, yvar, **kwargs ):
     graph.GetXaxis().SetTitle( xtitle )
     graph.GetYaxis().SetTitle( ytitle )
     return graph
-
