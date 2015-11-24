@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 23/11/2015                                   //
+#//  Last update: 24/11/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -20,7 +20,7 @@
 #////////////////////////////////////////////////////////////////
 
 
-from ROOT import ( TGraph,
+from ROOT import ( TGraph, TGraphErrors,
                    TH1F, TH1D, TH1I,
                    TH2F, TH2D, TH2I )
 from array import array
@@ -92,7 +92,7 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
 
 #_______________________________________________________________________________
 # Generates a scatter plot given two lists of data
-def MakeScatterPlot( xvar, yvar, **kwargs ):
+def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
     if "name" in kwargs: name = kwargs[ "name" ]
     else: name = False
     if "title" in kwargs: title = kwargs[ "title" ]
@@ -101,7 +101,22 @@ def MakeScatterPlot( xvar, yvar, **kwargs ):
     else: xtitle = "X"
     if "ytitle" in kwargs: ytitle = kwargs[ "ytitle" ]
     else: ytitle = "Y"
-    graph = TGraph( len( xvar ), array( 'd', xvar ), array( 'd', yvar ) )
+    npoints = len( xvar )
+    xvar    = array( 'd', xvar )
+    yvar    = array( 'd', yvar )
+    if xerr or yerr:
+        if   not xerr:
+            xerr = array( 'd', npoints*[ 0 ] )
+            yerr = array( 'd', yerr )
+        elif not yerr:
+            xerr = array( 'd', yerr )
+            yerr = array( 'd', npoints*[ 0 ] )
+        else:
+            xerr = array( 'd', xerr )
+            yerr = array( 'd', yerr )
+        graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
+    else:
+        graph = TGraph( npoints, xvar, yvar )
     if name:
         graph.SetName( name )
     if title:

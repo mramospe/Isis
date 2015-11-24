@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 19/11/2015                                //
+#//  Last update: 24/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -399,19 +399,23 @@ class DataManager:
             vyvar = self.Variables[ yvar ]
         return MakeHistogram2D( vxvar, vyvar, vwvar, **kwargs )
 
-    def MakeScatterPlot( self, xvar, yvar, **kwargs ):
+    def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''
         if "name"   not in kwargs: kwargs[ "name"   ] = xvar + "vs" + yvar
         if "title"  not in kwargs: kwargs[ "title"  ] = xvar + "vs" + yvar
         if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
         if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
         if "cuts" in kwargs:
-            vxvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
-            vyvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
+            xvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
+            yvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
+            if xerr: xerr = self.GetVarEvents( xerr, kwargs[ "cuts" ] )
+            if yerr: yerr = self.GetVarEvents( yerr, kwargs[ "cuts" ] )
         else:
-            vxvar = self.Variables[ xvar ]
-            vyvar = self.Variables[ yvar ]
-        return MakeScatterPlot( vxvar, vyvar, **kwargs )
+            xvar = self.Variables[ xvar ]
+            yvar = self.Variables[ yvar ]
+            if xerr: xerr = self.Variables[ xerr ]
+            if yerr: yerr = self.Variables[ yerr ]
+        return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 
     def MakeVariable( self, varname, arglist, function ):
         ''' Makes another variable using those in the class. There have to be specified:
