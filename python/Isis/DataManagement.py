@@ -370,15 +370,19 @@ class DataManager:
         ''' Gets the name of the variables in the class '''
         return [ var for var in self.Variables ]
 
-    def MakeHistogram( self, var, nbins = 100, **kwargs ):
+    def MakeHistogram( self, var, wvar = False, **kwargs ):
         ''' Makes the histogram of the given variable. A selection can be applied
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
         if "name"  not in kwargs: kwargs[ "name"  ] = var
         if "title" not in kwargs: kwargs[ "title" ] = var
-        if "cuts" in kwargs: vvar = self.GetVarEvents( var, kwargs[ "cuts" ] )
-        else: vvar = self.Variables[ var ]
-        return MakeHistogram( vvar, nbins, **kwargs )
+        if "cuts" in kwargs:
+            var = self.GetVarEvents( var, kwargs[ "cuts" ] )
+            if wvar:
+                wvar = self.GetVarEvents( wvar, kwargs[ "cuts" ] )
+        else:
+            var = self.Variables[ var ]
+        return MakeHistogram( var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''

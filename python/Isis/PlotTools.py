@@ -28,11 +28,13 @@ from array import array
 
 #_______________________________________________________________________________
 # Function to generate a Root histogram given a list
-def MakeHistogram( var, nbins = 100, **kwargs ):
+def MakeHistogram( var, wvar = False, **kwargs ):
     if "name" in kwargs: name = kwargs[ "name" ]
     else: name = "hist"
     if "title" in kwargs: title = kwargs[ "title" ]
     else: title = "hist"
+    if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+    else: nbins = 100
     if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
     else: vmin = min( var )
     if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
@@ -48,8 +50,12 @@ def MakeHistogram( var, nbins = 100, **kwargs ):
     else:
         print "Histogram type", tp, "not known"
         return
-    for el in var:
-        hist.Fill( el )
+    if wvar:
+        for el, w in zip( var, wvar ):
+            hist.Fill( el, w )
+    else:
+        for el in var:
+            hist.Fill( el )
     return hist
 
 #_______________________________________________________________________________
