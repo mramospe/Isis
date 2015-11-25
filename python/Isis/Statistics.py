@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 19/11/2015                             //
+#//  Last update: 24/11/2015                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -194,8 +194,8 @@ def CovMatrix( data ):
 
 #_______________________________________________________________________________
 # Calculates the linear correlation coefficient between two lists of values
-def LinearCorrCoef( lst1, lst2 ):
-    return Covariance( lst1, lst2 )*1./( StdDev( lst1 )*StdDev( lst2 ) )
+def LinearCorrCoeff( lst1, lst2 ):
+    return Covariance( lst1, lst2 )*1./sqrt( StdDev2( lst1 )*StdDev2( lst2 ) )
 
 #_______________________________________________________________________________
 # Calculates the mean of the values in a list of values

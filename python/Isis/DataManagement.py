@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 24/11/2015                                //
+#//  Last update: 25/11/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -37,18 +37,19 @@ class DataManager:
     def __init__( self, fname = False, tnames = [], **kwargs ):
         ''' The constructor works in two different ways. By default it is considered that
         the input file, whose name is set in < fname >, is a Root file, and < tnames >
-        should be the list of TTree names in the file. In < kwargs >, you can specify
-        the file type ( fileType = "root"/"txt" ). If it is set to "txt", then < tnames >
-        should be a list containing the names of the different variables. The number of
-        variables specified should match the number of columns in the file. Otherwise one
-        has to specify via < colIndex = [ 1, 3, 6, ... ] > the index for the columns to be
-        stored. Other attributes can be added too.'''
+        has to be the list of TTree names in the file. In < kwargs >, you can specify
+        the file type ( ftype = "root"/"txt" ). If it is set to "txt", then < tnames >
+        could be a list containing the names of the different variables or, if it is left 
+        in blanck, it will take the names of the variables situated in the first line of
+        the file. The number of variables specified should match the number of columns in
+        the file. Otherwise one has to specify via < colidx = [ 1, 3, 6, ... ] > the index 
+        for the columns to be stored. Other attributes can be added too. '''
 
-        if "fileType" in kwargs:
-            fileType = kwargs[ "fileType" ]
-            del kwargs[ "fileType" ]
+        if "ftype" in kwargs:
+            ftype = kwargs[ "ftype" ]
+            del kwargs[ "ftype" ]
         else:
-            fileType = "root"
+            ftype = "root"
 
         ''' These are the main attributes that this class has '''
         self.Iterator    = 0
@@ -57,22 +58,29 @@ class DataManager:
         self.Targets     = {}
         self.Variables   = {}
 
-        if fileType in ( "root", "Root", "ROOT" ):
+        if ftype in ( "root", "Root", "ROOT" ):
             ''' This is the constructor for Root files '''
             if fname and tnames:
                 self.AddTarget( fname, tnames )
             elif fname and not tnames:
                 print "Arguments for DataManager class are < file path > and  < tree name >"
                 exit()
-        elif fileType in ( "txt", "TXT" ):
+        elif ftype in ( "txt", "TXT" ):
             ''' This is the constructor for txt files '''
             ifile = open( fname, "rt" )
             line  = ifile.readline().split()
-            if "colIndex" in kwargs:
-                columns = kwargs[ "colIndex" ]
-                del kwargs[ "colIndex" ]
+            if "colidx" in kwargs:
+                columns = kwargs[ "colidx" ]
+                del kwargs[ "colidx" ]
             else:
                 columns = range( len( line ) )
+            if all( isinstance( line[ i ], str ) for i in columns ):
+                if not tnames:
+                    tnames = [ line[ i ] for i in columns ]
+                line = ifile.readline().split()
+            else:
+                print "The first line of the input file has not the correct format"
+                exit()
             print "Storing", len( columns ), "variables from txt file <", fname, ">"
             convfuncs, varvalues = [], []
             for index, icol in enumerate( columns ):
@@ -80,14 +88,14 @@ class DataManager:
                 try:
                     int( value )
                     convfuncs.append( int )
+                    isint = True
                 except:
-                    pass
-                try:
-                    float( value )
-                    convfuncs.append( float )
-                except:
-                    print "Format for column <", i, "> not recognised"
-                    exit()
+                    try:
+                        float( value )
+                        convfuncs.append( float )
+                    except:
+                        print "Format for column <", i, "> not recognised"
+                        exit()
                 varvalues.append( [ convfuncs[ -1 ]( value ) ] )
             for line in ifile:
                 line = line.split()
@@ -98,7 +106,7 @@ class DataManager:
             self.Nentries = len( self.Variables[ name ] )
         else:
             ''' If the type specified is not recognised an error is shown and exits the program '''
-            print "File format <", fileType, "> for DataManager class not known"
+            print "File format <", ftype, "> for DataManager class not known"
             exit()
 
         for kw in kwargs:
@@ -382,6 +390,8 @@ class DataManager:
                 wvar = self.GetVarEvents( wvar, kwargs[ "cuts" ] )
         else:
             var = self.Variables[ var ]
+            if wvar:
+                wvar = self.Variables[ wvar ]
         return MakeHistogram( var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
@@ -532,17 +542,17 @@ class DataManager:
         be constructed and accesible in the main program ), if two names are provided
         the first one is considered as the file name and the second the tree name. If
         < close > is provided, and if its value is false, this method will return
-        the output file. If in < kwargs > the < fileType > key is set to "txt", then the
+        the output file. If in < kwargs > the < ftype > key is set to "txt", then the
         output will be considered as a txt where the columns correspond to each variable in
         alphabetical order. In any case the variables to be stored can be specified using
         the keyword < variables >, providing a list with them. '''
-        if "fileType" in kwargs: fileType = kwargs[ "fileType" ]
-        else: fileType = "root"
+        if "ftype" in kwargs: ftype = kwargs[ "ftype" ]
+        else: ftype = "root"
         if "variables" in kwargs: variables = kwargs[ "variables" ]
         else: variables = self.Variables.keys()
         if "close" in kwargs: close = kwargs[ "close" ]
         else: close = True
-        if fileType in ( "root", "Root", "ROOT" ):
+        if ftype in ( "root", "Root", "ROOT" ):
             if tree_name:
                 ofile = TFile.Open( name, "RECREATE" )
                 print "Saving tree with name <", tree_name, "> in <", name, ">"
@@ -553,15 +563,19 @@ class DataManager:
             print "Written", self.Nentries, "entries"
             if close: ofile.Close()
             else: return ofile
-        elif fileType in ( "txt", "TXT" ):
+        elif ftype in ( "txt", "TXT" ):
             ofile = open( name, "wt" )
             print "Saving txt data in file <", name, ">"
             varvalues = [ self.Variables[ var ] for var in variables ]
+            out = ""
+            for var in variables:
+                out += var + "\t"
+            ofile.write( out[ :-1 ] + "\n" )
             for ievt in xrange( self.Nentries ):
                 out = ""
                 for var in varvalues:
                     out += str( var[ ievt ] ) + "\t"
-                ofile.write( out[ :-2 ] + "\n" )
+                ofile.write( out[ :-1 ] + "\n" )
             if close: ofile.close()
             else: return ofile
 
