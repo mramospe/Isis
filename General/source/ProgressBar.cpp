@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                         //
 //  e-mail: miguel.ramos.pernas@cern.ch		                 //
 //						                 //
-//  Last update: 08/07/2015			                 //
+//  Last update: 27/11/2015			                 //
 //   						                 //
 // ------------------------------------------------------------- //
 //						                 //
@@ -112,7 +112,7 @@ void General::ProgressBar::End() {
 
   if ( fBarWidth ) {
 
-    std::cout << " \033[" << fColors[ "Bar" ] << "m[";
+    std::cout << "\033[" << fColors[ "Bar" ] << "m[";
   
     for ( size_t i = 0; i < fBarWidth; i++ )
 	std::cout << "|";
@@ -146,7 +146,7 @@ void General::ProgressBar::Print( size_t &entry ) {
     
     if ( fBarWidth ) {
 
-      std::cout << " \033[" << fColors[ "Bar" ] << "m[";
+      std::cout << "\033[" << fColors[ "Bar" ] << "m[";
   
       for ( size_t i = 0; i < fBarWidth; i++ ){
     
