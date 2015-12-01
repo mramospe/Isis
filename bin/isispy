@@ -1,0 +1,19 @@
+#==============================================================#
+# Function to load the python environment for the Isis package #
+#--------------------------------------------------------------#
+# AUTHOR: Miguel Ramos Pernas				       #
+# e-mail: miguel.ramos.pernas@cern.ch	                       #
+#==============================================================#
+
+# Checks if any of ipython or python exists and initializes it with the Isis
+# and Root modules. It will prioritize initializing ipython first. If none of
+# them are accesible the process is aborted. When calling ipython, since it
+# does not support the < import * > for the ROOT modules one has to pass
+# one argument to the < __init__.py > script.
+if   hash ipython 2>/dev/null; then
+     ipython $@ $ISIS_PYTHON/Isis/__init__.py NoRootAll
+elif hash python  2>/dev/null; then
+     python  $@ $ISIS_PYTHON/Isis/__init__.py
+else
+     echo "No ipython nor python exist. Aborted."
+fi
