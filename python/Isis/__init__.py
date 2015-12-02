@@ -4,7 +4,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 01/12/2015                                //
+#//  Last update: 02/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #/////////////////////////////////////////////////////////////
@@ -22,16 +22,18 @@ if __name__ == "__main__":
         import ROOT
     else:
         from ROOT import *
-# All the classes can be initialized from Isis directly, without having to specify the
-# module. However it is recommended to use the complete path of modules to avoid
-# confusions. Obviously, when importing all from Isis, there will be imported all the
-# modules in the python folder.
+# All the classes and functions located in the main Isis directory will be loaded, so they 
+# can be initialized directly. However it is recommended to use the complete path of modules
+# to avoid confusions. Obviously, when importing all from Isis, there will be imported all
+# the modules in the python folder.
 else:
     __all__ = []
-    for loader, name, is_pkg in pkgutil.walk_packages( __path__ ):
-        module = loader.find_module( name ).load_module( name )
+    for loader, modname, is_pkg in pkgutil.walk_packages( __path__ ):
+        module = loader.find_module( modname ).load_module( modname )
+        globals()[ modname ] = module
+        __all__.append( modname )
         for name, value in inspect.getmembers( module ):
-            if name.startswith( '__' ):
-                continue
-            globals()[ name ] = value
-            __all__.append( name )
+            if not inspect.ismodule( value ) and not name.startswith( '__' ):
+                if value.__module__ == modname:
+                    globals()[ name ] = value
+                    __all__.append( name )
