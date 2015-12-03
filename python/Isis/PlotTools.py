@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 24/11/2015                                   //
+#//  Last update: 03/12/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -24,7 +24,30 @@ from ROOT import ( TGraph, TGraphErrors,
                    TH1F, TH1D, TH1I,
                    TH2F, TH2D, TH2I )
 from array import array
+import sys
 
+
+#_______________________________________________________________________________
+# This function imports different plot modules from Root
+def ImportPlotModules():
+    glob = sys._getframe( 1 ).f_globals
+    loc  = sys._getframe( 1 ).f_locals
+    modlist = [ "gROOT", "TBrowser", 
+                "TDirectory", "TDirectoryFile", "gDirectory", "TFile",
+                "TTree", "TBranch", "TLeaf",
+                "TCanvas", "TPave", "TPaveText", "TLegend",
+                "TH1D", "TH1F", "TH1I",
+                "TH2D", "TH2F", "TH2I",
+                "TGraph", "TGraphErrors",
+                "TF1", "TF2", "TLine",
+                "TColor",
+                "kBlue", "kViolet", "kMagenta", "kPink",
+                "kRed", "kOrange", "kYellow",
+                "kSpring", "kGreen", "kTeal", "kCyan", "kAzure",
+                "kWhite", "kBlack", "kGray" ]
+    glob[ "ROOT" ] = __import__( "ROOT" )
+    for el in modlist:
+        glob[ el ] = __import__( "ROOT." + el, glob, loc, [ '*' ] )
 
 #_______________________________________________________________________________
 # Function to generate a Root histogram given a list
