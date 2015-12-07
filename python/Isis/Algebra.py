@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 18/11/2015                                //
+#//  Last update: 07/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -184,6 +184,10 @@ class Matrix( LongVector ):
         else:
             return Matrix( [ el - obj for el in self ] )
 
+    def Diagonal( self ):
+        ''' Returns a row Matrix with the elements in the diagonal of this one '''
+        return Matrix( [ [ self[ i ][ i ] for i in xrange( len( self ) ) ] ] )
+
     def Dimensions( self ):
         ''' Returns the dimensions of the matrix '''
         return len( self ), len( self[ 0 ] )
@@ -334,7 +338,7 @@ def ForwardSubs( B, b ):
 def Inv( matrix ):
     L, U, P, Q = LU( matrix )
     dim  = len( matrix )
-    I    = UnitaryMatrix( dim )
+    I    = Identity( dim )
     Linv = Zeros( dim, dim )
     Uinv = Zeros( dim, dim )
     for i in xrange( dim ):
@@ -375,8 +379,8 @@ def LU( matrix ):
 # previous one.
 def PivoteMatrices( matrix ):
     dim = len( matrix )
-    P   = UnitaryMatrix( dim ); P.Swaps = 0
-    Q   = UnitaryMatrix( dim ); Q.Swaps = 0
+    P   = Identity( dim ); P.Swaps = 0
+    Q   = Identity( dim ); Q.Swaps = 0
     A   = Matrix( matrix )
     for n in xrange( dim - 1 ):
         stit  = n + 1
@@ -451,8 +455,8 @@ def SolveLU( matrix, idpt ):
     return Q.Dot( BackwardSubs( U, Y ) )
 
 #_______________________________________________________________________________
-# Generates an unitary squared matrix with dimensions dim x dim
-def UnitaryMatrix( dim ):
+# Generates an identity matrix with dimensions dim x dim
+def Identity( dim ):
     return Matrix( [ [ float( i == j ) for i in xrange( dim ) ]
                       for j in xrange( dim ) ] )
 
