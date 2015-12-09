@@ -35,6 +35,7 @@ echo " Extended python path from: $ISIS_PYTHON"
 # Defines the alias to the tools
 alias BDTBrowser='root -l $ISIS_TOOLS/BDTBrowser.C'
 alias ChangeWords='python $ISIS_TOOLS/ChangeWords.py'
+alias ConvertVars='$ISIS_TOOLS/./ConvertVars.out'
 alias GetLuminosity='$ISIS_TOOLS/./GetLuminosity.out'
 alias MergeFilesByEvents='$ISIS_TOOLS/./MergeFilesByEvents.out'
 alias ReorderTreeByEvents='$ISIS_TOOLS/./ReorderTreeByEvents.out'

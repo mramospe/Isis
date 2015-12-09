@@ -1,26 +1,26 @@
-/////////////////////////////////////////////////////////////////
-// ----------------------------------------------------------- //
-//                                                             //
-//  Tool that allows to modify the event identifiers of a      //
-//  given set of trees, merging all trees in the files into    //
-//  one.                                                       //
-//                                                             //
-// ----------------------------------------------------------- //
-//                                                             //
-//  AUTHOR : Miguel Ramos Pernas                               //
-//  e-mail: miguel.ramos.pernas@cern.ch                        //
-//                                                             //
-//  Last Update: 25/09/2015                                    //
-//                                                             //
-// ----------------------------------------------------------- //
-//                                                             //
-// Usage:                                                      //
-//                                                             //
-// >> ./MergeFilesByEvents OutputFileName TreePath EvtVarName  //
-//    InputFileName_1 InputFileName_2 ...                      //
-//                                                             //
-// ----------------------------------------------------------- //
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------- //
+//                                                                 //
+//  Tool that allows to modify the event identifiers of a          //
+//  given set of trees, merging all trees in the files into        //
+//  one.                                                           //
+//                                                                 //
+// --------------------------------------------------------------- //
+//                                                                 //
+//  AUTHOR : Miguel Ramos Pernas                                   //
+//  e-mail: miguel.ramos.pernas@cern.ch                            //
+//                                                                 //
+//  Last Update: 09/12/2015                                        //
+//                                                                 //
+// --------------------------------------------------------------- //
+//                                                                 //
+// Usage:                                                          //
+//                                                                 //
+// >> ./MergeFilesByEvents.out OutputFileName TreePath EvtVarName  //
+//    InputFileName_1 InputFileName_2 ...                          //
+//                                                                 //
+// --------------------------------------------------------------- //
+/////////////////////////////////////////////////////////////////////
 
 
 #include <iostream>
@@ -32,8 +32,6 @@
 #include "TLeaf.h"
 #include "TList.h"
 
-
-// ===================================== MAIN FUNCTION
 
 int main( int argc, const char *argv[] ) {
 

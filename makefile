@@ -67,7 +67,7 @@ $(RFANALYSIS_LIB): $(RFANALYSIS_OBJECTS)
 # ------------------------------------------
 # Compiles the Tools
 Tools/%.out: Tools/%.cpp
-	$(COMPILER) `Isis-config --cflags` $< $(INCLUDE) $(ROOT_LIBS) -o $@
+	$(COMPILER) `Isis-config --cflags --incdirs` $< `Isis-config --libs` -o $@
 
 # ---------------------------------------------------------
 # Function to remove all the installation files and folders
