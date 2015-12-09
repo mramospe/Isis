@@ -8,7 +8,7 @@
 //  AUTHOR : Miguel Ramos Pernas		                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch		                                 //
 //                                                                               //
-//  Last Update: 13/11/2015			                                 //
+//  Last Update: 09/12/2015			                                 //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -79,8 +79,8 @@ double General::IP( General::Vector vec,
 //______________________________________________________________________________
 // DOCA function (distance of closest approach)
 double General::DOCA( General::LorentzVector vec1,
-		      General::LorentzVector vec2,
 		      General::Vector        EndV1,
+		      General::LorentzVector vec2,
 		      General::Vector        EndV2 ) {
 
   General::Vector

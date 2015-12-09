@@ -8,7 +8,7 @@
 //  AUTHOR : Miguel Ramos Pernas		                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch		                                 //
 //                                                                               //
-//  Last Update: 26/10/2015			                                 //
+//  Last Update: 09/12/2015			                                 //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -35,7 +35,7 @@ namespace General {
   double Det( Vector vec1, Vector vec2, Vector vec3 );
   double Det( LorentzVector vec1, LorentzVector vec2, LorentzVector vec3 );
   double IP( Vector vec, Vector pv, Vector sv );
-  double DOCA( LorentzVector vec1, LorentzVector vec2, Vector EndV1, Vector EndV2 );
+  double DOCA( LorentzVector vec1, Vector EndV1, LorentzVector vec2, Vector EndV2 );
 
 }
 
