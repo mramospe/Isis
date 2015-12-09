@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 30/09/2015                             //
+//  Last update: 09/12/2015                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -45,6 +45,7 @@ namespace Analysis {
   void                     MakeTreeChangingNames( TTree *input_tree,
 						  std::vector< std::string > ivars,
 						  std::vector< std::string > ovars );
+  TTree*                   MakeTreeConvertingVars( TTree *inputTree, char itype = 'F' );
 
 }
 

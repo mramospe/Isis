@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 16/10/2015                             //
+//  Last update: 09/12/2015                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -28,6 +28,8 @@
 #include "TreeManagement.h"
 
 #include <iostream>
+#include <map>
+#include <utility>
 
 
 //_______________________________________________________________________________
@@ -266,4 +268,113 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   // Writes the output tree in the current directory
   outputTree -> AutoSave();
   std::cout << " Output tree < " << outputTree -> GetName() << " > saved" << std::endl;
+}
+
+//_______________________________________________________________________________
+// Creates and saves a clone of the input tree where all the input variables of
+// the given type, specified by 'F' ( float ) or 'D' ( double ), are changed to
+// the other one
+TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, char itype ) {
+
+  TObjArray *brList = inputTree -> GetListOfBranches();
+
+  std::map<std::string, std::pair<float, double> > vars;
+  std::string brname, brtitle, vtype, tail;
+  size_t nvars = 0;
+
+  // Checks the type of conversion that is going to be made
+  if ( itype == 'F' ) {
+    std::cout << "Converting variables from float to double in tree < " <<
+      inputTree -> GetName() << " >" << std::endl;
+    tail = "/F";
+    vtype = "float";
+  }
+  else {
+    std::cout << "Converting variables from double to float in tree < " <<
+      inputTree -> GetName() << " >" << std::endl;
+    tail = "/D";
+    vtype = "double";
+  }
+
+  // Searches for the variables of the input type
+  for ( size_t ibr = 0; ibr < (size_t) brList -> GetSize(); ibr++ ) {
+    brname  = brList -> At( ibr ) -> GetName();
+    brtitle = brList -> At( ibr ) -> GetTitle();
+    if ( brtitle.find( tail ) != std::string::npos ) {
+      inputTree -> SetBranchStatus( brname.c_str(), false );
+      vars[ brname ] = std::make_pair( 0, 0 );
+      nvars++;
+    }
+  }
+  std::cout << "Found " << nvars << " " << vtype << " variables" << std::endl;
+
+  std::cout << "Cloning input tree" << std::endl;
+  TTree *outputTree = inputTree -> CloneTree( 0 );
+  
+  if ( !nvars )
+    std::cout << "WARNING: Number of " << vtype <<
+      " variables is zero. It will be saved a clone of the input tree." << std::endl;
+
+  inputTree -> SetBranchStatus( "*", true );
+  
+  // Depending on the input type the address from the TTree is changed
+  if ( itype == 'F' )
+    for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+      brname  = it -> first;
+      brtitle = brname + "/D";
+      inputTree  ->
+	SetBranchAddress( brname.c_str(), &( it -> second ).first );
+      outputTree ->
+	Branch( brname.c_str(), &( it -> second ).second, brtitle.c_str() );
+    }
+  else
+    for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+      brname  = it -> first;
+      brtitle = brname + "/F";
+      inputTree  ->
+	SetBranchAddress( brname.c_str(), &( it -> second ).second );
+      outputTree ->
+	Branch( brname.c_str(), &( it -> second ).first, brtitle.c_str() );
+    }
+
+  std::cout << "Constructing the double variables" << std::endl;
+  std::pair<float, double> *pair;
+
+  // Performs the loop over the input tree to fill the output variables depending on the input
+  // variable type
+  if ( itype == 'F' )
+    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
+
+      inputTree -> GetEntry( ievt );
+
+      for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+	pair = &( it -> second );
+	pair -> second = pair -> first;
+      }
+
+      outputTree -> Fill();
+
+      if ( ievt % 100000 == 0 )
+	outputTree -> AutoSave();
+    }
+  else
+    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
+
+      inputTree -> GetEntry( ievt );
+
+      for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+	pair = &( it -> second );
+	pair -> first = pair -> second;
+      }
+
+      outputTree -> Fill();
+
+      if ( ievt % 100000 == 0 )
+	outputTree -> AutoSave();
+    }
+  outputTree -> AutoSave();
+  std::cout << "Saved output tree < " << outputTree -> GetName() << " > in directory < "
+	    << gDirectory -> GetName() << " >" << std::endl;
+
+  return outputTree;
 }
