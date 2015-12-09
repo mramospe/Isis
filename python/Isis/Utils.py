@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 16/11/2015                                //
+#//  Last update: 09/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -17,6 +17,9 @@
 #//                                                         //
 #// ------------------------------------------------------- //
 #/////////////////////////////////////////////////////////////
+
+
+from Isis.Algebra import Matrix, SolveLU
 
 
 #_______________________________________________________________________________
@@ -38,6 +41,59 @@ def FormatTime( itime ):
         return strout[ :-1 ]
     else:
         return "0s"
+
+#_______________________________________________________________________________
+# Given two lists < x > and < y >, performs the inter(extra)polation of the
+# < y > value in the given point < x0 > using a polynomial of order < nord >.
+# If no order is providen it will use all the points to perform the calculation.
+def InferValue( x, y, x0, nord = False ):
+
+    srtlst = sorted( zip( x, y ) )
+    x = [ el[ 0 ] for el in srtlst ]
+    y = [ el[ 1 ] for el in srtlst ]
+
+    ''' If no order is specified, it will be taken as the number of points. If it is greater
+    than the number of points it is set to this number, and a warning message is sent. '''
+    lp = len( x )
+    if nord:
+        if nord < lp:
+            nord += 1
+        else:
+            nord = lp
+            print "WARNING: Order greater than the number of points. Value set to", lp
+    else:
+        nord = lp
+
+    ''' Gets the index whose element is the first greater than the given point '''
+    for i, xi in enumerate( x ):
+        if xi >= x0: break
+
+    ''' Stablishes the points to use for the interpolation '''
+    if   i + nord/2 >= lp:
+        imax = lp; imin = imax - nord
+    elif i - nord/2 <= 0:
+        imin = 0; imax = nord
+    else:
+        imin = i - nord/2; imax = imin + nord
+
+    xsol = Matrix( [ x[ imin : imax ] ] )
+    ysol = Matrix( [ y[ imin : imax ] ] )
+
+    ''' Because of the degrees of freedom, the polinomial order is one unit smaller than the
+    number of points '''
+    nord -= 1
+
+    ''' Generates the matrix of equations '''
+    X = Matrix( [ [ el**n for n in xrange( nord, -1, -1 ) ] for el in xsol[ 0 ] ] )
+
+    ''' Solves the lineal equation problem '''
+    a = reversed( SolveLU( X, ysol.Transpose() ).Transpose()[ 0 ] )
+
+    ''' Evaluates the polinomial at the point given '''
+    y0 = 0.
+    for n, el in enumerate( a ):
+        y0 += el * x0**n
+    return y0
 
 #_______________________________________________________________________________
 # Joins dictionaries with different keys into one. If some of them have the
