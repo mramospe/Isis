@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 25/11/2015                                //
+#//  Last update: 10/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -34,7 +34,7 @@ from Isis.Utils import JoinDicts, MergeDicts
 # and trees
 class DataManager:
 
-    def __init__( self, fname = False, tnames = [], **kwargs ):
+    def __init__( self, name = False, fname = False, tnames = [], **kwargs ):
         ''' The constructor works in two different ways. By default it is considered that
         the input file, whose name is set in < fname >, is a Root file, and < tnames >
         has to be the list of TTree names in the file. In < kwargs >, you can specify
@@ -53,61 +53,64 @@ class DataManager:
 
         ''' These are the main attributes that this class has '''
         self.Iterator    = 0
+        self.Name        = ""
         self.Nentries    = 0
         self.OwnsTargets = False
         self.Targets     = {}
         self.Variables   = {}
 
-        if ftype in ( "root", "Root", "ROOT" ):
-            ''' This is the constructor for Root files '''
-            if fname and tnames:
-                self.AddTarget( fname, tnames )
-            elif fname and not tnames:
-                print "Arguments for DataManager class are < file path > and  < tree name >"
-                exit()
-        elif ftype in ( "txt", "TXT" ):
-            ''' This is the constructor for txt files '''
-            ifile = open( fname, "rt" )
-            line  = ifile.readline().split()
-            if "colidx" in kwargs:
-                columns = kwargs[ "colidx" ]
-                del kwargs[ "colidx" ]
-            else:
-                columns = range( len( line ) )
-            if all( isinstance( line[ i ], str ) for i in columns ):
-                if not tnames:
-                    tnames = [ line[ i ] for i in columns ]
-                line = ifile.readline().split()
-            else:
-                print "The first line of the input file has not the correct format"
-                exit()
-            print "Storing", len( columns ), "variables from txt file <", fname, ">"
-            convfuncs, varvalues = [], []
-            for index, icol in enumerate( columns ):
-                value = line[ icol ]
-                try:
-                    int( value )
-                    convfuncs.append( int )
-                    isint = True
-                except:
-                    try:
-                        float( value )
-                        convfuncs.append( float )
-                    except:
-                        print "Format for column <", i, "> not recognised"
-                        exit()
-                varvalues.append( [ convfuncs[ -1 ]( value ) ] )
-            for line in ifile:
-                line = line.split()
+        if name:
+            self.Name = name
+            if ftype in ( "root", "Root", "ROOT" ):
+                ''' This is the constructor for Root files '''
+                if fname and tnames:
+                    self.AddTarget( fname, tnames )
+                else:
+                    print "Arguments for DataManager class are < file path > and  < tree name >"
+                    exit()
+            elif ftype in ( "txt", "TXT" ):
+                ''' This is the constructor for txt files '''
+                ifile = open( fname, "rt" )
+                line  = ifile.readline().split()
+                if "colidx" in kwargs:
+                    columns = kwargs[ "colidx" ]
+                    del kwargs[ "colidx" ]
+                else:
+                    columns = range( len( line ) )
+                if all( isinstance( line[ i ], str ) for i in columns ):
+                    if not tnames:
+                        tnames = [ line[ i ] for i in columns ]
+                    line = ifile.readline().split()
+                else:
+                    print "The first line of the input file has not the correct format"
+                    exit()
+                print "Storing", len( columns ), "variables from txt file <", fname, ">"
+                convfuncs, varvalues = [], []
                 for index, icol in enumerate( columns ):
-                    varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
-            for index, name in enumerate( tnames ):
-                self.Variables[ name ] = varvalues[ index ]
-            self.Nentries = len( self.Variables[ name ] )
-        else:
-            ''' If the type specified is not recognised an error is shown and exits the program '''
-            print "File format <", ftype, "> for DataManager class not known"
-            exit()
+                    value = line[ icol ]
+                    try:
+                        int( value )
+                        convfuncs.append( int )
+                        isint = True
+                    except:
+                        try:
+                            float( value )
+                            convfuncs.append( float )
+                        except:
+                            print "Format for column <", i, "> not recognised"
+                            exit()
+                    varvalues.append( [ convfuncs[ -1 ]( value ) ] )
+                for line in ifile:
+                    line = line.split()
+                    for index, icol in enumerate( columns ):
+                        varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
+                for index, name in enumerate( tnames ):
+                    self.Variables[ name ] = varvalues[ index ]
+                self.Nentries = len( self.Variables[ name ] )
+            else:
+                ''' If the type specified is not recognised an error is shown and exits the program '''
+                print "File format <", ftype, "> for DataManager class not known"
+                exit()
 
         for kw in kwargs:
             setattr( self, kw, kwargs[ kw ] )            
@@ -124,6 +127,7 @@ class DataManager:
             mngr.Variables[ var ] = self.Variables[ var ] + other.Variables[ var ]
         self.OwnsTargets  = False
         other.OwnsTargets = False
+        mngr.Name = self.Name + "+" + other.Name
         return mngr
 
     def __iadd__( self, other ):
@@ -176,12 +180,12 @@ class DataManager:
             ifile = TFile.Open( fname, "READ" )
             tlist = [ ifile.Get( tname ) for tname in tnames ]
             self.Targets[ ifile ]  = tlist
-            print "Added target <", fname, "> and trees:", tnames
+            print self.Name, "=> Added target <", fname, "> and trees:", tnames
         else:
             ifile = [ ifile for ifile in self.Targets if ifile.GetName() == fname ][ 0 ]
             tlist = [ ifile.Get( tname ) for tname in tnames ]
             self.Targets[ ifile ] += tlist
-            print "Added trees: ", list( tlist ), "to target <", ifile.GetName(), ">"
+            print self.Name, "=> Added trees: ", list( tlist ), "from target <", ifile.GetName(), ">"
         if self.Variables:
             dictlist        = [ DictFromTree( tree, self.Variables.keys() ) for tree in tlist ]
             self.Variables  = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
@@ -463,11 +467,6 @@ class DataManager:
             kwargs[ "cut" ] = False
         if "events" not in kwargs:
             kwargs[ "events" ] = False
-        if "name" not in kwargs:
-            if hasattr( self, "name" ):
-                kwargs[ "name" ] = self.name
-            else:
-                kwargs[ "name" ] = "Manager"
         if "variables" not in kwargs:
             kwargs[ "variables" ] = [ var for var in self.Variables ]
             kwargs[ "variables" ].sort()
@@ -479,8 +478,8 @@ class DataManager:
                 max_length = lvar
 
         ''' Prints the name of the manager '''
-        lname = len( kwargs[ "name" ] )
-        print "\n" + 3*lname*'*' + "\n" + lname*" " + kwargs[ "name" ] + "\n" + 3*lname*'*'
+        lname = len( self.Name )
+        print "\n" + 3*lname*'*' + "\n" + lname*" " + self.Name + "\n" + 3*lname*'*'
         
         ''' Prints the targets '''
         if len( self.Targets ):

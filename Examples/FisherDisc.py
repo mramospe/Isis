@@ -6,8 +6,8 @@ from Isis.DataManagement import *
 from Isis.Statistics import *
 
 ''' Loads the txt data '''
-sigMngr = DataManager( "files/FisherSig.dat", [ "V1", "V2", "V3", "V4" ], ftype = "txt", colidx = range( 1, 5 ) )
-bkgMngr = DataManager( "files/FisherBkg.dat", [ "V1", "V2", "V3", "V4" ], ftype = "txt", colidx = range( 1, 5 ) )
+sigMngr = DataManager( "Signal", "files/FisherSig.dat", [ "V1", "V2", "V3", "V4" ], ftype = "txt", colidx = range( 1, 5 ) )
+bkgMngr = DataManager( "Background", "files/FisherBkg.dat", [ "V1", "V2", "V3", "V4" ], ftype = "txt", colidx = range( 1, 5 ) )
 
 ''' Gets the matrix with all the variables booked in the managers '''
 sigMatrix = sigMngr.GetMatrix( '*' )
