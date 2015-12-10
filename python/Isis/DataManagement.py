@@ -59,54 +59,24 @@ class DataManager:
         self.Targets     = {}
         self.Variables   = {}
 
+        ''' A search for the file type will be made. If the < name > and < fnames > are providen 
+        but not < tnames >, it will send an error message. '''
         if name:
             self.Name = name
             if ftype in ( "root", "Root", "ROOT" ):
                 ''' This is the constructor for Root files '''
                 if fname and tnames:
                     self.AddTarget( fname, tnames )
-                else:
+                elif fname and not tnames:
                     print "Arguments for DataManager class are < file path > and  < tree name >"
                     exit()
             elif ftype in ( "txt", "TXT" ):
                 ''' This is the constructor for txt files '''
-                ifile = open( fname, "rt" )
-                line  = ifile.readline().split()
-                if "colidx" in kwargs:
-                    columns = kwargs[ "colidx" ]
-                    del kwargs[ "colidx" ]
-                else:
-                    columns = range( len( line ) )
-                if all( isinstance( line[ i ], str ) for i in columns ):
-                    if not tnames:
-                        tnames = [ line[ i ] for i in columns ]
-                    line = ifile.readline().split()
-                else:
-                    print "The first line of the input file has not the correct format"
+                if fname and tnames:
+                    self.StoreTxtData( fname, tnames, **kwargs )
+                elif fname and not tnames:
+                    print "Arguments for DataManager class are < file path > and < variables names >"
                     exit()
-                print "Storing", len( columns ), "variables from txt file <", fname, ">"
-                convfuncs, varvalues = [], []
-                for index, icol in enumerate( columns ):
-                    value = line[ icol ]
-                    try:
-                        int( value )
-                        convfuncs.append( int )
-                        isint = True
-                    except:
-                        try:
-                            float( value )
-                            convfuncs.append( float )
-                        except:
-                            print "Format for column <", i, "> not recognised"
-                            exit()
-                    varvalues.append( [ convfuncs[ -1 ]( value ) ] )
-                for line in ifile:
-                    line = line.split()
-                    for index, icol in enumerate( columns ):
-                        varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
-                for index, name in enumerate( tnames ):
-                    self.Variables[ name ] = varvalues[ index ]
-                self.Nentries = len( self.Variables[ name ] )
             else:
                 ''' If the type specified is not recognised an error is shown and exits the program '''
                 print "File format <", ftype, "> for DataManager class not known"
@@ -577,6 +547,61 @@ class DataManager:
                 ofile.write( out[ :-1 ] + "\n" )
             if close: ofile.close()
             else: return ofile
+
+    def StoreTxtData( self, fname, tnames, **kwargs ):
+        ''' Method to store the values almacenated on a txt file. The file path is specified in
+        < fname >, while the names of the variables are given as a list in < tnames >. In
+        < kwargs > the column index to be read has to be given as colidx = [ 1, 3, 5, ... ]. '''
+        ifile = open( fname, "rt" )
+        line  = ifile.readline().split()
+        if "colidx" in kwargs:
+            columns = kwargs[ "colidx" ]
+            del kwargs[ "colidx" ]
+        else:
+            columns = range( len( line ) )
+        if all( isinstance( line[ i ], str ) for i in columns ):
+            if not tnames:
+                tnames = [ line[ i ] for i in columns ]
+            else:
+                ''' Checks if this manager is not empty. If true it checks for the given variables that
+                exist inside it. '''
+                if self.Variables:
+                    truevars, truecols = [], []
+                    for col, var in zip( columns, tnames ):
+                        if var in self.Variables:
+                            truevars.append( var )
+                            truecols.append( col )
+                        else:
+                            print self.Name, "=> Variable <", var, "> not in the manager, not stored"
+                    tnames, columns = truevars, truecols
+            line = ifile.readline().split()
+        else:
+            print "The first line of the input file has not the correct format"
+            exit()
+        print "Storing", len( columns ), "variables from txt file <", fname, ">"
+        convfuncs, varvalues = [], []
+        for index, icol in enumerate( columns ):
+            value = line[ icol ]
+            try:
+                int( value )
+                convfuncs.append( int )
+                isint = True
+            except:
+                try:
+                    float( value )
+                    convfuncs.append( float )
+                except:
+                    print "Format for column <", i, "> not recognised"
+                    exit()
+            varvalues.append( [ convfuncs[ -1 ]( value ) ] )
+        for line in ifile:
+            line = line.split()
+            for index, icol in enumerate( columns ):
+                varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
+            for index, name in enumerate( tnames ):
+                self.Variables[ name ] = varvalues[ index ]
+        self.Nentries = len( self.Variables[ name ] )
+        ifile.close()
 
 #_______________________________________________________________________________
 # If the input is a string, returns an array with values of a certain type
