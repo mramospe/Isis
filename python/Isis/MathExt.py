@@ -31,6 +31,17 @@ def GreaterComDiv( number ):
     return cnt
 
 #_______________________________________________________________________________
+# Checks if the given number is a pure square number
+def IsSquare( number ):
+    cnt, number = 0, int( number )
+    while cnt*cnt < number:
+        cnt += 1
+    if cnt*cnt == number:
+        return True
+    else:
+        return False
+
+#_______________________________________________________________________________
 # Calculates the least common multiple of two numbers. If no number is found it
 # returns one.
 def LeastComMult( na, nb ):
@@ -41,14 +52,3 @@ def LeastComMult( na, nb ):
         return 1
     else:
         return cnt
-
-#_______________________________________________________________________________
-# Checks if the given number is a pure square number
-def IsSquare( number ):
-    cnt, number = 0, int( number )
-    while cnt*cnt < number:
-        cnt += 1
-    if cnt*cnt == number:
-        return True
-    else:
-        return False

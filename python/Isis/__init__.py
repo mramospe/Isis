@@ -4,7 +4,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 02/12/2015                                //
+#//  Last update: 11/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #/////////////////////////////////////////////////////////////
@@ -34,6 +34,6 @@ else:
         __all__.append( modname )
         for name, value in inspect.getmembers( module ):
             if not inspect.ismodule( value ) and not name.startswith( '__' ):
-                if value.__module__ == modname:
+                if hasattr( value, "__module__" ) and value.__module__ == modname:
                     globals()[ name ] = value
                     __all__.append( name )

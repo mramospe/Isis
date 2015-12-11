@@ -23,7 +23,8 @@
 from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
                    TGraph, TGraphErrors,
                    TH1F, TH1D, TH1I,
-                   TH2F, TH2D, TH2I )
+                   TH2F, TH2D, TH2I,
+                   kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
 from array import array
 from math import sqrt
 import sys
@@ -39,7 +40,6 @@ class ColorList:
 
     def __init__( self, *args ):
         ''' A set of colors can be specified in the constructor as < args > '''
-        from ROOT import kBlue, kRed, kOrange, kGreen, kMagenta, kCyan
         self.Iter = 0
         if args: self.Colors = args
         else:    self.Colors = [ kBlue, kRed, kOrange, kGreen, kMagenta, kCyan ]
@@ -206,7 +206,6 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
 def MultiPlot( mngrs, variables, **kwargs):
-
     if "colors" in kwargs: colors = ColorList( kwargs[ "colors" ] )
     else: colors = ColorList()
     if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
