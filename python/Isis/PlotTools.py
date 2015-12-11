@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 03/12/2015                                   //
+#//  Last update: 11/12/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -20,12 +20,47 @@
 #////////////////////////////////////////////////////////////////
 
 
-from ROOT import ( TGraph, TGraphErrors,
+from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
+                   TGraph, TGraphErrors,
                    TH1F, TH1D, TH1I,
                    TH2F, TH2D, TH2I )
 from array import array
+from math import sqrt
 import sys
+from Isis.MathExt import IsSquare, GreaterComDiv
 
+
+#_______________________________________________________________________________
+# This class allows to generate a color list to iter over. The colors are given
+# by < __getitem__ > method or in an iteration process. The number of times the
+# given index is greater than the number of colors in the list, corresponds to
+# the number that is added to the remainder that araises from the division.
+class ColorList:
+
+    def __init__( self, *args ):
+        ''' A set of colors can be specified in the constructor as < args > '''
+        from ROOT import kBlue, kRed, kOrange, kGreen, kMagenta, kCyan
+        self.Iter = 0
+        if args: self.Colors = args
+        else:    self.Colors = [ kBlue, kRed, kOrange, kGreen, kMagenta, kCyan ]
+
+    def __getitem__( self, idx ):
+        ''' Gets the color for the given index '''
+        return self.Colors[ idx % len( self.Colors ) ] + idx/len( self.Colors )
+
+    def __iter__( self ):
+        ''' Definition of the iterator '''
+        self.Iter = 0
+        return self
+
+    def next( self ):
+        ''' Sets the new value for the iteration. In order to use this class in an
+        iterative mode, another iterable object has to be the one that raises the
+        exception to stop the iteration. '''
+        nloop = self.Iter / len( self.Colors )
+        niter = self.Iter % len( self.Colors )
+        self.Iter += 1
+        return self.Colors[ niter ] + nloop
 
 #_______________________________________________________________________________
 # This function imports different plot modules from Root
@@ -50,7 +85,8 @@ def ImportPlotModules():
         glob[ el ] = __import__( "ROOT." + el, glob, loc, [ '*' ] )
 
 #_______________________________________________________________________________
-# Function to generate a Root histogram given a list
+# Function to generate a Root histogram given a list. By default no ytitle is drawn, but it
+# can be set with the < ytitle > option
 def MakeHistogram( var, wvar = False, **kwargs ):
     if "name" in kwargs: name = kwargs[ "name" ]
     else: name = "hist"
@@ -58,10 +94,12 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     else: title = "hist"
     if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
     else: nbins = 100
-    if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
-    else: vmin = min( var )
+    if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
+    else: xtitle = name
     if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
     else: vmax = max( var )
+    if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+    else: vmin = min( var )
     if "vtype" in kwargs: tp = kwargs[ "vtype" ]
     else: tp = "double"
     if tp == "float":
@@ -79,6 +117,9 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     else:
         for el in var:
             hist.Fill( el )
+    hist.GetXaxis().SetTitle( xtitle )
+    if "ytitle" in kwargs:
+        hist.GetYaxis().SetTitle( kwargs[ "ytitle" ] )
     return hist
 
 #_______________________________________________________________________________
@@ -92,6 +133,10 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
     else: xbins = 100
     if "ybins" in kwargs: ybins = kwargs[ "ybins" ]
     else: ybins = 100
+    if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
+    else: xtitle = "X"
+    if "ytitle" in kwargs: ytitle = kwargs[ "ytitle" ]
+    else: ytitle = "Y"
     if "xmax" in kwargs: xmax = kwargs[ "xmax" ]
     else: xmax = min( xvar )
     if "ymax" in kwargs: ymax = kwargs[ "ymax" ]
@@ -117,6 +162,8 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
     else:
         for x, y in zip( xvar, yvar ):
             hist.Fill( x, y )
+    hist.GetXaxis().SetTitle( xtitle )
+    hist.GetYaxis().SetTitle( ytitle )
     return hist
 
 #_______________________________________________________________________________
@@ -153,3 +200,100 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
     graph.GetXaxis().SetTitle( xtitle )
     graph.GetYaxis().SetTitle( ytitle )
     return graph
+
+#_______________________________________________________________________________
+# This function plots in the same canvas the distributions of the given
+# variables from different DataManager classes. Different options can
+# also been provided to modify the canvas and the information displayed.
+def MultiPlot( mngrs, variables, **kwargs):
+
+    if "colors" in kwargs: colors = ColorList( kwargs[ "colors" ] )
+    else: colors = ColorList()
+    if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
+    else: cuts = False
+    if "legend" in kwargs: legend = kwargs[ "legend" ]
+    else: legend = True
+    if "name" in kwargs: name = kwargs[ "name" ]
+    else: name = "canvas"
+    if "title" in kwargs: title = kwargs[ "title" ]
+    else: title = "canvas"
+    if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+    else: nbins = 100
+    if "norm" in kwargs: norm = kwargs[ "norm" ]
+    else: norm = 1
+
+    nvars   = len( variables ) + 1
+    results = {}
+    if all( var in mngr.Variables for mngr in mngrs for var in variables ):
+        ''' Checks if the number of variables is a square number '''
+        if IsSquare( nvars ):
+            nyvars = int( round( sqrt( nvars ) ) )
+            nxvars = nyvars
+        else:
+            nyvars = GreaterComDiv( nvars )
+            nxvars = nvars/nyvars
+
+        ''' Generates and divides the canvas '''
+        canvas = TCanvas( name, title )
+        canvas.Divide( nxvars, nyvars )
+
+        nmngrs = len( mngrs )
+        ''' If cuts are specified it calculates the true managers '''
+        if cuts:
+            for i in xrange( nmngrs ):
+                mngrs[ i ], mngrs[ i ].Name = mngrs[ i ].CutSample( cuts ), mngrs[ i ].Name
+
+        ''' Disables the stat box of the histograms '''
+        gStyle.SetOptStat( 0 )
+
+        ''' Constructs the legend and the information panel if specified '''
+        if legend:
+            rlegend = TLegend( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
+            rlegend.SetHeader( "#bf{-- Legend --}" )
+            rlegend.SetTextAlign( 22 )
+            rlegend.SetFillColor( 17 )
+            rtxtinf = TPaveText( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
+            rtxtinf.AddText( "-- Number of entries --" )
+            rtxtinf.SetFillColor( 42 )
+            rtxtinf.SetShadowColor( 0 )
+
+        ''' Generates and draws the histograms '''
+        for iv, var in enumerate( variables ):
+            canvas.cd( iv + 1 )
+            totlst = [ el for mngr in mngrs for el in mngr[ var ]  ]
+            vmin, vmax, hists = min( totlst ), max( totlst ), []
+            for im, mngr in enumerate( mngrs ):
+                hname = mngr.Name + "_" + var
+                hists.append( mngr.MakeHistogram( var,
+                                                  name  = hname,
+                                                  title = var,
+                                                  nbins = nbins,
+                                                  vmin  = vmin,
+                                                  vmax  = vmax, 
+                                                  cuts  = cuts ) )
+                h = hists[ -1 ]
+                if norm:
+                    h.Scale( float( norm )/h.GetEntries() )
+                h.SetLineColor( colors[ im ] )
+                if legend and iv == 0:
+                    ''' In the first iteration adds the entries to the legend '''
+                    rlegend.AddEntry( h, "#bf{" + mngr.Name + "}", "L" )
+                    rtxtinf.AddText( mngr.Name + ": %i" % h.GetEntries() )
+                results[ hname ] = h
+            ''' The maximum of the y-axis in the pad is set to the 110% of the maximum
+            value for all the histograms to be drawn '''
+            hists[ 0 ].SetMaximum( 1.1*max( h.GetMaximum() for h in hists ) )
+            for h in hists: h.Draw( "SAME" )
+        if legend:
+            pad = canvas.cd( nvars )
+            pad.Divide( 2, 1 )
+            pad.cd( 1 ); rlegend.Draw()
+            pad.cd( 2 ); rtxtinf.Draw()
+            results[ "legend" ] = rlegend
+            results[ "info" ]   = rtxtinf
+        canvas.Update()
+        results[ name ] = canvas
+        return results
+    else:
+        print "Any of the managers does not have access to some of the variables"
+        return

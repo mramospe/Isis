@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 10/12/2015                                //
+#//  Last update: 11/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -356,8 +356,9 @@ class DataManager:
         ''' Makes the histogram of the given variable. A selection can be applied
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
-        if "name"  not in kwargs: kwargs[ "name"  ] = var
-        if "title" not in kwargs: kwargs[ "title" ] = var
+        if "name"  not in kwargs:  kwargs[ "name"  ]  = var
+        if "title" not in kwargs:  kwargs[ "title" ]  = var
+        if "xtitle" not in kwargs: kwargs[ "xtitle" ] = var
         if "cuts" in kwargs:
             var = self.GetVarEvents( var, kwargs[ "cuts" ] )
             if wvar:
