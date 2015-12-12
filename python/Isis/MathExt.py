@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 11/12/2015                                   //
+#//  Last update: 12/12/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -23,10 +23,10 @@ from math import sqrt
 
 
 #_______________________________________________________________________________
-# Calculates the greater common divisor of a number
-def GreaterComDiv( number ):
-    cnt = number - 1
-    while number % cnt:
+# Calculates the greater common divisor of a set of numbers
+def GreaterComDiv( *args ):
+    cnt = min( args )
+    while any( el % cnt for el in args ):
         cnt -= 1
     return cnt
 
