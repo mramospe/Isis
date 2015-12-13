@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 11/12/2015                                   //
+#//  Last update: 13/12/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -28,7 +28,7 @@ from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
 from array import array
 from math import sqrt
 import sys
-from Isis.MathExt import IsSquare, GreaterComDiv
+from Isis.MathExt import Decompose, GreaterComDiv, IsPrime, IsSquare
 
 
 #_______________________________________________________________________________
@@ -210,6 +210,8 @@ def MultiPlot( mngrs, variables, **kwargs):
     else: colors = ColorList()
     if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
     else: cuts = False
+    if "errors" in kwargs: errors = kwargs[ "errors" ]
+    else: errors = False
     if "legend" in kwargs: legend = kwargs[ "legend" ]
     else: legend = True
     if "name" in kwargs: name = kwargs[ "name" ]
@@ -226,15 +228,19 @@ def MultiPlot( mngrs, variables, **kwargs):
     if all( var in mngr.Variables for mngr in mngrs for var in variables ):
         ''' Checks if the number of variables is a square number '''
         if IsSquare( nvars ):
-            nyvars = int( round( sqrt( nvars ) ) )
-            nxvars = nyvars
+            nxvars = int( round( sqrt( nvars ) ) )
+            nyvars = nxvars
         else:
-            nyvars = GreaterComDiv( nvars )
-            nxvars = nvars/nyvars
+            nxvars, nyvars = 1, 1
+            if IsPrime( nvars ): decvars = Decompose( nvars + 1 )
+            else:                decvars = Decompose( nvars )
+            for i in xrange( len( decvars ) ):
+                if i % 2: nxvars *= decvars[ i ]
+                else:     nyvars *= decvars[ i ]
 
         ''' Generates and divides the canvas '''
-        canvas = TCanvas( name, title )
-        canvas.Divide( nxvars, nyvars )
+        canvas = TCanvas( name, title, 300*nyvars, 300*nxvars )
+        canvas.Divide( nyvars, nxvars )
 
         nmngrs = len( mngrs )
         ''' If cuts are specified it calculates the true managers '''
@@ -250,9 +256,11 @@ def MultiPlot( mngrs, variables, **kwargs):
             rlegend = TLegend( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
             rlegend.SetHeader( "#bf{-- Legend --}" )
             rlegend.SetTextAlign( 22 )
+            rlegend.SetTextSize( 0.075 )
             rlegend.SetFillColor( 17 )
             rtxtinf = TPaveText( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
             rtxtinf.AddText( "-- Number of entries --" )
+            rtxtinf.SetTextSize( 0.075 )
             rtxtinf.SetFillColor( 42 )
             rtxtinf.SetShadowColor( 0 )
 
@@ -274,6 +282,7 @@ def MultiPlot( mngrs, variables, **kwargs):
                 if norm:
                     h.Scale( float( norm )/h.GetEntries() )
                 h.SetLineColor( colors[ im ] )
+                h.SetMarkerColor( colors[ im ] )
                 if legend and iv == 0:
                     ''' In the first iteration adds the entries to the legend '''
                     rlegend.AddEntry( h, "#bf{" + mngr.Name + "}", "L" )
@@ -282,7 +291,9 @@ def MultiPlot( mngrs, variables, **kwargs):
             ''' The maximum of the y-axis in the pad is set to the 110% of the maximum
             value for all the histograms to be drawn '''
             hists[ 0 ].SetMaximum( 1.1*max( h.GetMaximum() for h in hists ) )
-            for h in hists: h.Draw( "SAME" )
+            for h in hists:
+                if errors: h.Draw( "SAMEE" )
+                else:      h.Draw( "SAME"  )
         if legend:
             pad = canvas.cd( nvars )
             pad.Divide( 2, 1 )
