@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 12/12/2015                                   //
+#//  Last update: 13/12/2015                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -21,6 +21,20 @@
 
 from math import sqrt
 
+
+#_______________________________________________________________________________
+# Decomposes the given number in the smallest multiples. The result is given in
+# a list, which is automatically ordered from the minimum multiple to the
+# maximum.
+def Decompose( number ):
+    cnt, result = 1, []
+    while number != 1:
+        cnt += 1
+        if number % cnt == 0:
+            number /= cnt
+            result.append( cnt )
+            cnt = 1
+    return result
 
 #_______________________________________________________________________________
 # Calculates the greater common divisor of a set of numbers
@@ -53,13 +67,9 @@ def IsSquare( number ):
         return False
 
 #_______________________________________________________________________________
-# Calculates the least common multiple of a set of numbers. If no number is
-# found it returns one.
+# Calculates the least common multiple of a set of numbers
 def LeastComMult( *args ):
-    cnt = 2
-    while any( el % cnt for el in args ) and all( cnt <= el for el in args ):
+    cnt = max( args )
+    while any( cnt % el for el in args ):
         cnt += 1
-    if any( el < cnt for el in args ):
-        return 1
-    else:
-        return cnt
+    return cnt
