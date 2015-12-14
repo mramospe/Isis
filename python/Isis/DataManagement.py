@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 11/12/2015                                //
+#//  Last update: 14/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -68,7 +68,7 @@ class DataManager:
                 if fname and tnames:
                     self.AddTarget( fname, tnames )
                 elif fname and not tnames:
-                    print "Arguments for DataManager class are < file path > and  < tree name >"
+                    print "Arguments for DataManager class are < name > < file path > and  < tree name >"
                     exit()
             elif ftype in ( "txt", "TXT" ):
                 ''' This is the constructor for txt files '''
