@@ -60,7 +60,7 @@ class DataManager:
         self.Variables   = {}
 
         ''' A search for the file type will be made. If the < name > and < fnames > are providen 
-        but not < tnames >, it will send an error message. '''
+        but not < tnames >, it will send a warning message. '''
         if name:
             self.Name = name
             if ftype in ( "root", "Root", "ROOT" ):
@@ -68,19 +68,16 @@ class DataManager:
                 if fname and tnames:
                     self.AddTarget( fname, tnames )
                 elif fname and not tnames:
-                    print "Arguments for DataManager class are < name > < file path > and  < tree name >"
-                    exit()
+                    print "WARNING: Arguments for DataManager class using root files are < name > < file path > and  < tree name >"
             elif ftype in ( "txt", "TXT" ):
                 ''' This is the constructor for txt files '''
                 if fname and tnames:
                     self.StoreTxtData( fname, tnames, **kwargs )
                 elif fname and not tnames:
-                    print "Arguments for DataManager class are < file path > and < variables names >"
-                    exit()
+                    print "WARNING: Arguments for DataManager class using txt files are < file path > and < variables names >"
             else:
-                ''' If the type specified is not recognised an error is shown and exits the program '''
-                print "File format <", ftype, "> for DataManager class not known"
-                exit()
+                ''' If the type specified is not recognised a warning message is sent '''
+                print "WARNING: File format <", ftype, "> for DataManager class not known"
 
         for kw in kwargs:
             setattr( self, kw, kwargs[ kw ] )            
@@ -163,17 +160,15 @@ class DataManager:
 
     def AddVariables( self, *fvars ):
         ''' Adds a new  variable(s) to the class given a name and a list. This method
-        checks that all the variables' lists have the same lengths, otherwise it
-        exits he program. The input has to be formated as [ var1_name, list1 ],
-        [ var2_name, list2 ], ... '''
+        checks that all the variables' lists have the same lengths, The input has to
+        be formated as [ var1_name, list1 ], [ var2_name, list2 ], ... '''
         if self.Nentries == 0:
             self.Nentries = len( fvars[ 0 ][ 1 ] )
         for el in fvars:
             if len( el[ 1 ] ) == self.Nentries:
                 self.Variables[ el[ 0 ] ] = el[ 1 ]
             else:
-                print "Variable", el[ 0 ], "to be added to the manager has different length."
-                exit()
+                print "WARNING: Variable <", el[ 0 ], "> to be added to the manager has different length; not stored."
             
     def BookVariables( self, *var_names ):
         ''' Books a new variable(s) to the class. The variable's values list is filled
@@ -208,8 +203,7 @@ class DataManager:
             self.Variables = JoinDicts( self.Variables, MergeDicts( *dictlist ) )
             self.Nentries  = len( self.Variables[ name ] )
         else:
-            print "No targets added to the manager, could not book variables:", var_names
-            exit()
+            print "WARNING: No targets added to the manager, could not book variables:", var_names
 
     def Copy( self, *args, **kwargs ):
         ''' Returns a copy of this class that does not own the targets. '''
@@ -243,7 +237,7 @@ class DataManager:
                 ifile.Close()
                 del self.Targets[ ifile ]
         else:
-            print "This DataManager does not own his targets"
+            print "WARNING: This DataManager does not own its targets"
 
     def GetCutList( self, cut ):
         ''' This method allows to obtain a list with the events that satisfy the cuts
@@ -270,7 +264,7 @@ class DataManager:
                     if el in self.Variables:
                         var_list.append( el )
                     else:
-                        print "Cut in variable", el, "not valid, variable does not exist"
+                        print "ERROR: Cut on variable", el, "not valid, variable does not exist"
             else:
                 cut = cut.replace( el, "math." + el )
         ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
@@ -500,7 +494,7 @@ class DataManager:
                             ) == "q": break
                     print vout % self.GetEvent( ievt, *variables )
         else:
-            print "No variables booked in this manager"
+            print "ERROR: No variables booked in this manager"
 
     def RemoveVariable( self, var ):
         ''' Removes a booked variable '''
@@ -573,12 +567,11 @@ class DataManager:
                             truevars.append( var )
                             truecols.append( col )
                         else:
-                            print self.Name, "=> Variable <", var, "> not in the manager, not stored"
+                            print "WARNING:", self.Name, "=> Variable <", var, "> not in the manager; not stored"
                     tnames, columns = truevars, truecols
             line = ifile.readline().split()
         else:
-            print "The first line of the input file has not the correct format"
-            exit()
+            print "ERROR: The first line of the input file has not the correct format"
         print "Storing", len( columns ), "variables from txt file <", fname, ">"
         convfuncs, varvalues = [], []
         for index, icol in enumerate( columns ):
@@ -592,8 +585,7 @@ class DataManager:
                     float( value )
                     convfuncs.append( float )
                 except:
-                    print "Format for column <", i, "> not recognised"
-                    exit()
+                    print "ERROR: Format for column <", i, "> not recognised"
             varvalues.append( [ convfuncs[ -1 ]( value ) ] )
         for line in ifile:
             line = line.split()
@@ -619,8 +611,7 @@ def ArrayType( branch ):
         elif "/O" in branch:
             return array( 'b', [ 0 ] )
         else:
-            print "Type not found in <", branch, ">"
-            exit( 0 )
+            print "ERROR: Type not found in <", branch, ">"
     else:
         if   isinstance( branch[ 0 ], float ):
             return array( 'd', [ 0 ] )
@@ -629,16 +620,14 @@ def ArrayType( branch ):
         elif isinstance( branch[ 0 ], bool ):
             return array( 'b', [ 0 ] )
         else:
-            print "Could not extract the type in <", branch[ 0 ], ">"
-            exit( 0 )
+            print "ERROR: Could not extract the type in <", branch[ 0 ], ">"
     
 #_______________________________________________________________________________
 # This function creates a new branch in the given tree using the values stored
 # in a list
 def BranchFromList( brname, tree, lst ):
     if len( lst ) != tree.GetEntries():
-        print "The size of the input list and the tree are not the same"
-        return 0
+        print "ERROR: The size of the input list and the tree is not the same"
     var    = ArrayType( lst )
     branch = tree.Branch( brname, var, brname + '/' + var.typecode.upper() )
     for ievt in xrange( tree.GetEntries() ):
