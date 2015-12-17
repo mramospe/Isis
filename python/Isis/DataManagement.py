@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 14/12/2015                                //
+#//  Last update: 17/12/2015                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -628,6 +628,7 @@ def ArrayType( branch ):
 def BranchFromList( brname, tree, lst ):
     if len( lst ) != tree.GetEntries():
         print "ERROR: The size of the input list and the tree is not the same"
+    tree.SetBranchStatus( "*", False )
     var    = ArrayType( lst )
     branch = tree.Branch( brname, var, brname + '/' + var.typecode.upper() )
     for ievt in xrange( tree.GetEntries() ):
@@ -635,14 +636,17 @@ def BranchFromList( brname, tree, lst ):
         var[ 0 ] = lst[ ievt ]
         branch.Fill()
     branch.Write()
+    tree.SetBranchStatus( "*", True )
 
 #_______________________________________________________________________________
 # Creates a new dictionary containing the values of the variables stored in a
 # TTree object. The input is composed by the tree and the variables to be
 # stored ( given in a list ).
 def DictFromTree( tree, varlist ):
+    tree.SetBranchStatus( "*", False )
     avars, tvals = [], []
     for var in varlist:
+        tree.SetBranchStatus( var, True )
         avars.append( ArrayType( tree.GetBranch( var ).GetTitle() ) )
         tvals.append( [] )
         tree.SetBranchAddress( var, avars[ -1 ] )
@@ -652,20 +656,24 @@ def DictFromTree( tree, varlist ):
         for i in rvars:
             tvals[ i ].append( avars[ i ][ 0 ] )
     tree.ResetBranchAddresses()
+    tree.SetBranchStatus( "*", True )
     return dict( ( var, tvals[ i ] ) for var, i in zip( varlist, rvars ) )
 
 #_______________________________________________________________________________
 # This function almacenates the values of a leaf in a TTree into a list, given
 # the tree and the branch name
 def ListFromBranch( brname, tree ):
-    branch  = tree.GetBranch( brname )
-    var     = ArrayType( branch.GetTitle() )
+    tree.SetBranchStatus( "*", False )
+    tree.SetBranchStatus( brname, True )
+    branch = tree.GetBranch( brname )
+    var    = ArrayType( branch.GetTitle() )
     tree.SetBranchAddress( brname, var )
     lst = []
     for ievt in xrange( tree.GetEntries() ):
         tree.GetEntry( ievt )
         lst.append( var[ 0 ] )
     tree.ResetBranchAddresses()
+    tree.SetBranchStatus( "*", True )
     return lst
 
 #_______________________________________________________________________________
