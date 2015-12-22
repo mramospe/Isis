@@ -29,3 +29,6 @@ ToyMC: ToyMC.cpp
 
 AdapBin: AdapBin.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
+
+ParseStr: ParseStr.cpp
+	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
