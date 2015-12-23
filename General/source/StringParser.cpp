@@ -269,17 +269,15 @@ bool General::StringParser::BareEvaluate( std::string expr ) {
 // This function manages the parts of a boolean expression separated by < && >
 // and < || > operators
 inline bool General::StringParser::BoolTerm( std::string::iterator &it ) {
-  if ( ( *it >= '0' && *it <= '9' ) || *it == '.' || std::isalpha( *it ) )
-    if ( ( *it == '1' || *it == '0' ) && ( *( it + 1 ) == '&' || *( it + 1 ) == '|' ) )
-      return *it++ - '0';
-    else
-      return Inequation( it );
-  else if ( *it == '(' )
+  if ( *it == '(' )
     return BoolExpression( ++it );
   else if ( *it == '!' )
     return !BoolTerm( ++it );
   else
-    return false;
+    if ( ( *it == '1' || *it == '0' ) && ( *( it + 1 ) == '&' || *( it + 1 ) == '|' ) )
+      return *it++ - '0';
+    else
+      return Inequation( it );
 }
 
 //_______________________________________________________________________________
@@ -399,7 +397,7 @@ bool General::StringParser::CheckCalcExpression( std::string expr ) {
 // make the check.
 bool General::StringParser::CheckCalcExpression( std::string expr, std::string key ) {
   size_t pos = 0;
-  while ( ( pos == expr.find( key ) ) != std::string::npos )
+  while ( ( pos = expr.find( key ) ) != std::string::npos )
     expr.replace( pos, key.size(), "1" );
   return CheckCalcExpression( expr );
 }
@@ -411,7 +409,7 @@ bool General::StringParser::CheckCalcExpression( std::string expr, std::string k
 bool General::StringParser::CheckCalcExpression( std::string expr, std::vector<std::string> &keys ) {
   size_t pos = 0;
   for ( auto it = keys.begin(); it != keys.end(); it++ )
-    while ( ( pos == expr.find( *it ) ) != std::string::npos )
+    while ( ( pos = expr.find( *it ) ) != std::string::npos )
       expr.replace( pos, it -> size(), "1" );
   return CheckCalcExpression( expr );
 }
@@ -487,7 +485,7 @@ bool General::StringParser::CheckEvalExpression( std::string expr ) {
 // make the check.
 bool General::StringParser::CheckEvalExpression( std::string expr, std::string key ) {
   size_t pos = 0;
-  while ( ( pos == expr.find( key ) ) != std::string::npos )
+  while ( ( pos = expr.find( key ) ) != std::string::npos )
     expr.replace( pos, key.size(), "1" );
   return CheckEvalExpression( expr );
 }
@@ -499,7 +497,7 @@ bool General::StringParser::CheckEvalExpression( std::string expr, std::string k
 bool General::StringParser::CheckEvalExpression( std::string expr, std::vector<std::string> &keys ) {
   size_t pos = 0;
   for ( auto it = keys.begin(); it != keys.end(); it++ )
-    while ( ( pos == expr.find( *it ) ) != std::string::npos )
+    while ( ( pos = expr.find( *it ) ) != std::string::npos )
       expr.replace( pos, it -> size(), "1" );
   return CheckEvalExpression( expr );
 }
