@@ -42,6 +42,7 @@ namespace Analysis {
     
     // Constructor
     TreeCategory( std::string name, TTree *itree, std::string cuts = "" );
+    TreeCategory( std::string name, TreeCategory &other, std::string cuts = "" );
 
     // Destructor
     ~TreeCategory();

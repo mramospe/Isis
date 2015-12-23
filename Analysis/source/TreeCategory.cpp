@@ -41,7 +41,7 @@
 // -- CONSTRUCTORS AND DESTRUCTOR
 
 //_______________________________________________________________________________
-// Constructor
+// Main constructor
 Analysis::TreeCategory::TreeCategory( std::string name, TTree *itree, std::string cuts ) :
   fCuts( cuts ), fName( name ), fTree( itree ) {
 
@@ -64,6 +64,17 @@ Analysis::TreeCategory::TreeCategory( std::string name, TTree *itree, std::strin
   if ( fCuts.size() )
     std::cout << " - Cuts:\t" << fCuts << std::endl;
   std::cout << " - Entries:\t" << fTreeEntries.size() << std::endl;
+}
+
+//_______________________________________________________________________________
+// Constructor given another tree category
+Analysis::TreeCategory::TreeCategory( std::string             name,
+				      Analysis::TreeCategory &other,
+				      std::string             cuts ) :
+  fName( name ), fTree( other.GetTree() ) {
+
+  fCuts = other.fCuts + " && " + cuts;
+  fTreeEntries = other.MakeSlice( cuts );
 }
 
 //_______________________________________________________________________________
