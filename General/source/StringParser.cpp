@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/12/2015                                                      //
+//  Last update: 23/12/2015                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -408,7 +408,7 @@ bool General::StringParser::CheckCalcExpression( std::string expr, std::string k
 // Checks if the given expression is correctly writen to be calculated. The
 // < keys > argument has to contain the keywords to be replaced in < expr > to
 // make the check.
-bool General::StringParser::CheckCalcExpression( std::string expr, std::vector<std::string> keys ) {
+bool General::StringParser::CheckCalcExpression( std::string expr, std::vector<std::string> &keys ) {
   size_t pos = 0;
   for ( auto it = keys.begin(); it != keys.end(); it++ )
     while ( ( pos == expr.find( *it ) ) != std::string::npos )
@@ -496,7 +496,7 @@ bool General::StringParser::CheckEvalExpression( std::string expr, std::string k
 // Checks if the given expression is correctly writen to be evaluated. The
 // < keys > argument has to contain the keywords to be replaced in < expr > to
 // make the check.
-bool General::StringParser::CheckEvalExpression( std::string expr, std::vector<std::string> keys ) {
+bool General::StringParser::CheckEvalExpression( std::string expr, std::vector<std::string> &keys ) {
   size_t pos = 0;
   for ( auto it = keys.begin(); it != keys.end(); it++ )
     while ( ( pos == expr.find( *it ) ) != std::string::npos )

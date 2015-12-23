@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/12/2015                                                      //
+//  Last update: 23/12/2015                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -77,10 +77,10 @@ namespace General {
     // Main functions
     bool CheckCalcExpression( std::string expr );
     bool CheckCalcExpression( std::string expr, std::string key );
-    bool CheckCalcExpression( std::string expr, std::vector<std::string> keys );
+    bool CheckCalcExpression( std::string expr, std::vector<std::string> &keys );
     bool CheckEvalExpression( std::string expr );
     bool CheckEvalExpression( std::string expr, std::string key );
-    bool CheckEvalExpression( std::string expr, std::vector<std::string> keys );
+    bool CheckEvalExpression( std::string expr, std::vector<std::string> &keys );
 
     // Auxiliar functions
     inline void CheckCalcChar( std::string::iterator &it );
