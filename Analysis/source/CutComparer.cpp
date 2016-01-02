@@ -29,8 +29,10 @@
 #include "TDirectory.h"
 #include "TDirectoryFile.h"
 #include "TH1.h"
+#include "TLegend.h"
 #include "TObjString.h"
 #include "TROOT.h"
+#include "TStyle.h"
 
 #include "CutComparer.h"
 #include "StringParser.h"
@@ -123,6 +125,10 @@ void Analysis::CutComparer::Compare() {
   // Sets Root in batch mode to do not display the canvases
   gROOT -> SetBatch();
 
+  // Removes the title and the stats box ( for the canvases only )
+  gStyle -> SetOptTitle( 0 );
+  gStyle -> SetOptStat( 0 );
+
   // Checks that all the categories have the variables to work with
   for ( auto itc = fCategories.begin(); itc != fCategories.end(); itc++ ) {
     for ( auto itcmp = fCompVars.begin(); itcmp != fCompVars.end(); itcmp++ )
@@ -153,6 +159,7 @@ void Analysis::CutComparer::Compare() {
   TCanvas *canvas;
   TDirectoryFile *folder;
   TH1 *hist, **vhist = new TH1*[ fCategories.size() ];
+  TLegend *legend;
   TObjString *objStr;
 
   // Creates the iterators
@@ -202,6 +209,7 @@ void Analysis::CutComparer::Compare() {
     // Makes the loop over the different categories to make the histograms
     for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ ) {
       canvas = new TCanvas( itv -> first.c_str(), itv -> first.c_str() );
+      legend = new TLegend( 2./3, 2./3, 0.9, 0.9 );
       icol   = 0;
       for ( auto it = fCategories.begin(); it != fCategories.end(); it++, icol++ ) {
 	hist = ( *it ) -> MakeHistogram( itv -> first.c_str(),
@@ -214,18 +222,23 @@ void Analysis::CutComparer::Compare() {
 	hist   -> SetMarkerStyle( 20 );
 	hist   -> SetLineColor( currcol );
 	hist   -> SetMarkerColor( currcol );
+	hist   -> SetTitle( "" );
+	hist   -> GetXaxis() -> SetTitle( itv -> first.c_str() );
+	legend -> AddEntry( hist, ( *it ) -> GetName().c_str() );
 	hist   -> Write();
 	vhist[ icol ] = hist;
       }
       // Draws the pointers into the canvas
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
-	vhist[ ih ] -> Draw( "SAMEHE1" );
+	vhist[ ih ] -> DrawNormalized( "SAMEHE1" );
+      legend -> Draw();
       canvas -> Write();
       folder -> Save();
       // Deletes the pointers
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
 	delete vhist[ ih ];
       delete canvas;
+      delete legend;
     }
     // Returns to the previous directory
     delete folder;
