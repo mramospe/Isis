@@ -24,6 +24,7 @@
 
 #include "StringParser.h"
 #include "TreeCategory.h"
+#include "TreeExpression.h"
 
 #include "TDirectory.h"
 #include "TH1D.h"
@@ -159,106 +160,12 @@ TH1* Analysis::TreeCategory::MakeHistogram( std::string var,
 // Generates a vector with all the indices of this category that satisfy the
 // given cuts
 std::vector<size_t> Analysis::TreeCategory::MakeSlice( std::string cuts, bool check ) {
-
   std::vector<size_t> treeEntries;
-  TObjArray *brlist = fTree -> GetListOfBranches();
-
-  // Gets all the posible branches that could appear in the cuts. A vector of pairs
-  // is constructed since it is easier to sort it by values than a map.
-  std::string brname;
-  size_t pos;
-  std::vector<std::pair<std::string, size_t> > brvect;
-  for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
-    brname = brlist -> At( ibr ) -> GetName();
-    if ( ( pos = cuts.find( brname ) ) != std::string::npos )
-      brvect.push_back( std::make_pair( brname, pos ) );
+  Analysis::TreeBoolExpression texpr( cuts, fTree, check );
+  for ( auto it = fTreeEntries.begin(); it != fTreeEntries.end(); it++ ) {
+    fTree -> GetEntry( *it );
+    if ( texpr.Evaluate() )
+      treeEntries.push_back( *it );
   }
-
-  // If no variables are found in the cuts given, an error message is sent
-  if ( !brvect.size() )
-    std::cerr << "ERROR: No variables found in the current set of cuts" << std::endl;
-
-  // Sorts the variables, so the largest appear first
-  std::sort( brvect.begin(), brvect.end(),
-	     [] ( std::pair<std::string, size_t> it1,
-		  std::pair<std::string, size_t> it2 ) {
-	       return it1.first.size() > it2.first.size(); } );
-
-  // Gets only the true variables that appear in the cuts string
-  std::string ccuts = cuts;
-  for ( auto it = brvect.begin(); it != brvect.end(); it++ )
-    if ( ( pos = ccuts.find( it -> first ) ) != std::string::npos )
-      ccuts.replace( pos, ( it -> first ).size(), "%%%" );
-    else {
-      brvect.erase( it );
-      it--;
-    }
-
-  // Sorts the branches given the position in the cuts
-  std::sort( brvect.begin(), brvect.end(), [] ( std::pair<std::string, size_t> it1,
-						std::pair<std::string, size_t> it2 ) {
-	       return it1.second < it2.second; } );
-
-  // Gets the pointers to the different variables, saving their type. Only the branches
-  // of the variables to be used are enabled.
-  std::map<void*, char> varsMap;
-  std::string brtitle;
-  fTree -> SetBranchStatus( "*", false );
-  for ( auto it = brvect.begin(); it != brvect.end(); it++ ) {
-    brname  = it -> first;
-    fTree -> SetBranchStatus( brname.c_str(), true );
-    brtitle = fTree -> GetBranch( brname.c_str() ) -> GetTitle();
-    if ( brtitle.find( "/O" ) != std::string::npos )
-      varsMap[ fTree -> GetLeaf( brname.c_str() ) -> GetValuePointer() ] = 'O';
-    else if ( brtitle.find( "/D" ) != std::string::npos )
-      varsMap[ fTree -> GetLeaf( brname.c_str() ) -> GetValuePointer() ] = 'D';
-    else if ( brtitle.find( "/F" ) != std::string::npos )
-      varsMap[ fTree -> GetLeaf( brname.c_str() ) -> GetValuePointer() ] = 'F';
-    else if ( brtitle.find( "/I" ) != std::string::npos )
-      varsMap[ fTree -> GetLeaf( brname.c_str() ) -> GetValuePointer() ] = 'I';
-    else
-      std::cerr << "ERROR: Type for leaf < " << brname << " > not found" << std::endl;
-  }
-
-  // If it is told to, checks the current expression
-  if ( check )
-    check = General::StringParser::CheckEvalExpression( ccuts, "%%%" );
-  else
-    check = true;
-
-  // Either if the expression is correct or if it is not told to check it, performs the
-  // calculation
-  if ( check ) {
-
-    // Loops over the tree to get the entries corresponding to this category
-    size_t backpos;
-    std::stringstream sout;
-
-    for ( auto it = fTreeEntries.begin(); it != fTreeEntries.end(); it++ ) {
-      fTree -> GetEntry( *it );
-      sout.str( "" );
-      backpos = 0;
-      for ( auto vit = varsMap.begin(); vit != varsMap.end(); vit++ ) {
-	pos = ccuts.find( "%%%", backpos );
-	sout << ccuts.substr( backpos, pos - backpos );
-	if ( vit -> second == 'O' )
-	  sout << *static_cast<bool*>( vit -> first );
-	else if ( vit -> second == 'D' )
-	  sout << *static_cast<double*>( vit -> first );
-	else if ( vit -> second == 'F' )
-	  sout << *static_cast<float*>( vit -> first );
-	else
-	  sout << *static_cast<int*>( vit -> first );
-	backpos = pos + 3;
-      }
-      sout << ccuts.substr( backpos );
-
-      if ( General::StringParser::BareEvaluate( sout.str() ) )
-	treeEntries.push_back( *it );
-    }
-
-  }
-  else
-    std::cerr << "ERROR: Expression for the category not valid: " << ccuts << std::endl;
   return treeEntries;
 }
