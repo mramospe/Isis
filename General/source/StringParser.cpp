@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/12/2015                                                      //
+//  Last update: 04/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -555,7 +555,7 @@ inline bool General::StringParser::CheckParentheses( std::string &expr ) {
 // Checks if the expression to the right of the iterator is a number, term or
 // function
 inline bool General::StringParser::CheckRight( std::string::iterator it ) {
-  if ( !( *++it == '(' || ( *it >= '0' && *it <= '9' ) || *it == '.' || std::isalpha( *it ) ) )
-    return false;
-  return true;
+  if ( ( *++it == '(' || ( *it >= '0' && *it <= '9' ) || *it == '+' || *it == '-' || *it == '.' || std::isalpha( *it ) ) )
+    return true;
+  return false;
 }
