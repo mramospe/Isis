@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 04/01/2016                                                      //
+//  Last update: 05/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -58,6 +58,13 @@ namespace Analysis {
 					      size_t      nbins,
 					      double      vmin,
 					      double      vmax,
+					      std::string cuts = "",
+					      bool        check = true );
+    TH1*                       MakeHistogram( std::string name,
+					      std::string expr,
+					      size_t nbins,
+					      double vmin,
+					      double vmax,
 					      std::string cuts = "",
 					      bool        check = true );
     std::vector<size_t>        MakeSlice( std::string cuts, bool check = true );

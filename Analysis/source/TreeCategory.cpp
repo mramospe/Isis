@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 04/01/2016                                                      //
+//  Last update: 05/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -153,6 +153,31 @@ TH1* Analysis::TreeCategory::MakeHistogram( std::string var,
 
   // Finally reactivates all the branches and returns the histogram
   fTree -> SetBranchStatus( "*", true );
+  return hist;
+}
+
+//_______________________________________________________________________________
+// Makes a new histogram for a expression
+TH1* Analysis::TreeCategory::MakeHistogram( std::string name,
+					    std::string expr,
+					    size_t      nbins,
+					    double      vmin,
+					    double      vmax,
+					    std::string cuts,
+					    bool        check ) {
+  std::string hname = ( name + "_" + fName ).c_str();
+  // The returned histogram is always double-valued
+  TH1 *hist  = new TH1D( hname.c_str(), hname.c_str(), nbins, vmin, vmax );;
+  std::vector<size_t> ventries;
+  if ( cuts.size() )
+    ventries = this -> MakeSlice( cuts, check );
+  else
+    ventries = fTreeEntries;
+  Analysis::TreeDoubleExpression texpr( expr, fTree, check );
+  for ( auto it = ventries.begin(); it != ventries.end(); it++ ) {
+    fTree -> GetEntry( *it );
+    hist  -> Fill( texpr.Calculate() );
+  }
   return hist;
 }
 
