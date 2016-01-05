@@ -54,12 +54,15 @@ Analysis::TreeExpression::TreeExpression( std::string expr, TTree *itree ) :
 
   // Gets all the posible branches that could appear in the expression
   std::string brname;
-  size_t pos;
+  size_t backpos, pos;
   std::vector<std::pair<std::string, size_t> > brvect;
   for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
-    brname = brlist -> At( ibr ) -> GetName();
-    if ( ( pos = fExpression.find( brname ) ) != std::string::npos )
+    brname  = brlist -> At( ibr ) -> GetName();
+    backpos = 0;
+    while ( ( pos = fExpression.find( brname, backpos ) ) != std::string::npos ) {
       brvect.push_back( std::make_pair( brname, pos ) );
+      backpos = pos + brname.size();
+    }
   }
 
   // If no variables are found in the expression given, an error message is sent
@@ -142,12 +145,15 @@ void Analysis::TreeExpression::ReplaceBranchNames( std::string &expr, TTree *itr
 
   // Gets all the posible branches that could appear in the expression
   std::string brname;
-  size_t pos;
+  size_t backpos, pos;
   std::vector<std::string> brvect;
   for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
-    brname = brlist -> At( ibr ) -> GetName();
-    if ( expr.find( brname ) != std::string::npos )
+    brname  = brlist -> At( ibr ) -> GetName();
+    backpos = 0;
+    while ( ( pos = expr.find( brname, backpos ) ) != std::string::npos ) {
       brvect.push_back( brname );
+      backpos = pos + brname.size();
+    }
   }
 
   // If no variables are found in the expression given, an error message is sent
