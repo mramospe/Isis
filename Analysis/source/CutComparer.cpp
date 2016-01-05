@@ -36,6 +36,7 @@
 
 #include "CutComparer.h"
 #include "StringParser.h"
+#include "TreeExpression.h"
 #include "TreeManagement.h"
 
 #include <ctime>
@@ -66,42 +67,36 @@ Analysis::CutComparer::~CutComparer() { }
 // -- METHODS
 
 //_______________________________________________________________________________
-// Adds a new variable to compare. The number of bins and the range have to be
-// specified.
-void Analysis::CutComparer::AddCompVariable( std::string var,
-					     size_t      nbins,
-					     double      vmin,
-					     double      vmax ) {
-  CutComparer::CatCompVar cvar;
-  cvar.fMax = vmax;
-  cvar.fMin = vmin;
-  cvar.fN   = nbins;
-  fCompVars.push_back( std::make_pair( var, cvar ) );
-}
-
-//_______________________________________________________________________________
 // Adds a new variable to cut over. The name of the variable, the direction of
 // the cut: "<", ">", "<=" or ">=", the number of points and the range of the cut
 // have to be specified.
-void Analysis::CutComparer::AddCutVariable( std::string var,
+void Analysis::CutComparer::AddCutVariable( std::string name,
 					    std::string dir,
 					    size_t      npoints,
 					    double      vmin,
 					    double      vmax ) {
-  CutComparer::CatCompVar cvar;
-  cvar.fMax = vmax;
-  cvar.fMin = vmin;
-  cvar.fN   = npoints;
-  fCutVars.push_back( std::make_pair( var, cvar ) );
+  fCutVars.push_back( std::make_pair( name, CatCompVar( name, npoints, vmin, vmax ) ) );
   if ( dir != ">" && dir != "<" && dir != ">=" && dir != "<=" )
     std::cerr <<
-      "ERROR: Unknown boolean operator for variable < " << var << " >"
+      "ERROR: Unknown boolean operator for variable < " << name << " >"
 							<< std::endl;
   if ( fCutString.size() )
-    fCutString += " && " + var + dir + "%%%";
+    fCutString += " && " + name + dir + "%%%";
   else
-    fCutString = var + dir + "%%%";
+    fCutString = name + dir + "%%%";
   fLoopArray.AddIndex( npoints );
+}
+
+//_______________________________________________________________________________
+// Adds a new variable to cut over as an expression
+void Analysis::CutComparer::AddCutVariable( std::string name,
+					    std::string expr,
+					    std::string dir,
+					    size_t      npoints,
+					    double      vmin,
+					    double      vmax ) {
+  this -> AddCutVariable( expr, dir, npoints, vmin, vmax );
+  fCutVars.back().first = name;
 }
 
 //_______________________________________________________________________________
@@ -132,19 +127,31 @@ void Analysis::CutComparer::Compare() {
   // Checks that all the categories have the variables to work with
   for ( auto itc = fCategories.begin(); itc != fCategories.end(); itc++ ) {
     for ( auto itcmp = fCompVars.begin(); itcmp != fCompVars.end(); itcmp++ )
-      if ( !( *itc ) -> GetTree() -> GetBranch( itcmp -> first.c_str() ) ) {
-	std::cerr <<
-	  "ERROR: Branch < " << itcmp -> first.c_str() << " > not known for category < " <<
-	  ( *itc ) -> GetName() << " >" << std::endl;
-	return;
+      if ( itcmp -> second.fExpr == "" ) {
+	if ( !( *itc ) -> GetTree() -> GetBranch( itcmp -> first.c_str() ) ) {
+	  this -> SendError( itcmp -> first, ( *itc ) -> GetName(), 1 );
+	  return;
+	}
       }
+      else
+	if ( !TreeExpression::CheckCalcExpression( itcmp -> second.fExpr,
+						   ( *itc ) -> GetTree() ) ) {
+	  this -> SendError( itcmp -> first, ( *itc ) -> GetName(), 0 );
+	  return;
+	}
     for ( auto itcut = fCutVars.begin(); itcut != fCutVars.end(); itcut++ )
-      if ( !( *itc ) -> GetTree() -> GetBranch( itcut -> first.c_str() ) ) {
-	std::cerr <<
-	  "ERROR: Branch < " << itcut -> first.c_str() << " > not know for category < " <<
-	  ( *itc ) -> GetName() << " >" << std::endl;
-	return;
+      if ( itcut -> second.fExpr == "" ) {
+	if ( !( *itc ) -> GetTree() -> GetBranch( itcut -> first.c_str() ) ) {
+	  this -> SendError( itcut -> first, ( *itc ) -> GetName(), 1 );
+	  return;
+	}
       }
+      else
+	if ( !TreeExpression::CheckCalcExpression( itcut -> second.fExpr,
+						   ( *itc ) -> GetTree() ) ) {
+	  this -> SendError( itcut -> first, ( *itc ) -> GetName(), 0 );
+	  return;
+	}
   }
 
   // Performs the loop over all the different cuts, generating the histograms and saving them
@@ -212,12 +219,21 @@ void Analysis::CutComparer::Compare() {
       legend = new TLegend( 2./3, 2./3, 0.9, 0.9 );
       icol   = 0;
       for ( auto it = fCategories.begin(); it != fCategories.end(); it++, icol++ ) {
-	hist = ( *it ) -> MakeHistogram( itv -> first.c_str(),
-					 itv -> second.fN,
-					 itv -> second.fMin,
-					 itv -> second.fMax,
-					 cutStr,
-					 false );
+	if ( itv -> second.fExpr.size() )
+	  hist = ( *it ) -> MakeHistogram( itv -> first.c_str(),
+					   itv -> second.fExpr,
+					   itv -> second.fN,
+					   itv -> second.fMin,
+					   itv -> second.fMax,
+					   cutStr,
+					   false );
+	else
+	  hist = ( *it ) -> MakeHistogram( itv -> first.c_str(),
+					   itv -> second.fN,
+					   itv -> second.fMin,
+					   itv -> second.fMax,
+					   cutStr,
+					   false );
 	currcol = colors[ icol%6 ] + icol/6;
 	hist   -> SetMarkerStyle( 20 );
 	hist   -> SetLineColor( currcol );
