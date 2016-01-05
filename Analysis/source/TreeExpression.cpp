@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 04/01/2016                                                      //
+//  Last update: 05/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -111,6 +111,63 @@ Analysis::TreeExpression::TreeExpression( std::string expr, TTree *itree ) :
 //_______________________________________________________________________________
 // Destructor
 Analysis::TreeExpression::~TreeExpression() { }
+
+//_______________________________________________________________________________
+
+
+// -- STATIC MEMBERS FOR THE "TreeExpression" CLASS
+
+//_______________________________________________________________________________
+// Checks that the current expression can be correctly calculated, looking for
+// the branch names in the given tree
+bool Analysis::TreeExpression::CheckCalcExpression( std::string expr, TTree *itree ) {
+  TreeExpression::ReplaceBranchNames( expr, itree );
+  return General::StringParser::CheckCalcExpression( expr );
+}
+
+//_______________________________________________________________________________
+// Checks that the current expression can be correctly evaluated, looking for
+// the branch names in the given tree
+bool Analysis::TreeExpression::CheckEvalExpression( std::string expr, TTree *itree ) {
+  TreeExpression::ReplaceBranchNames( expr, itree );
+  return General::StringParser::CheckEvalExpression( expr );
+}
+
+//_______________________________________________________________________________
+// Replaces the names of the branches located in the given expression by a < 0 >
+void Analysis::TreeExpression::ReplaceBranchNames( std::string &expr, TTree *itree ) {
+
+  std::vector<size_t> treeEntries;
+  TObjArray *brlist = itree -> GetListOfBranches();
+
+  // Gets all the posible branches that could appear in the expression
+  std::string brname;
+  size_t pos;
+  std::vector<std::string> brvect;
+  for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
+    brname = brlist -> At( ibr ) -> GetName();
+    if ( expr.find( brname ) != std::string::npos )
+      brvect.push_back( brname );
+  }
+
+  // If no variables are found in the expression given, an error message is sent
+  if ( !brvect.size() )
+    throw std::logic_error( "ERROR: No variables found in the current expression" );
+
+  // Sorts the variables, so the largest appear first
+  std::sort( brvect.begin(), brvect.end(),
+	     [] ( std::string it1, std::string it2 ) {
+	       return it1.size() > it2.size(); } );
+
+  // Gets only the true variables that appear in the input expression
+  for ( auto it = brvect.begin(); it != brvect.end(); it++ )
+    if ( ( pos = expr.find( *it ) ) != std::string::npos )
+      expr.replace( pos, it -> size(), "0" );
+    else {
+      brvect.erase( it );
+      it--;
+    }
+}
 
 //_______________________________________________________________________________
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 04/01/2016                                                      //
+//  Last update: 05/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -50,9 +50,16 @@ namespace Analysis {
     TreeExpression( std::string expr, TTree *itree );
     virtual ~TreeExpression();
 
+    // Static methods
+    static bool CheckCalcExpression( std::string expr, TTree *itree );
+    static bool CheckEvalExpression( std::string expr, TTree *itree );
+
   protected:
     std::string                          fExpression;
     std::vector<std::pair<void*, char> > fVarPtrs;
+
+  private:
+    static void ReplaceBranchNames( std::string &expr, TTree *itree );
   };
 
 
