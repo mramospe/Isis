@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 05/01/2016                                                      //
+//  Last update: 07/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -41,16 +41,6 @@
 namespace Analysis {
 
   class CutComparer {
-
-    // Nested struct variable to manage the categories
-    struct CatCompVar {
-      CatCompVar( std::string expr, size_t npoints, double vmin, double vmax ) :
-	fExpr( expr ), fMax( vmax ), fMin( vmin ), fN( npoints ) { }
-      std::string fExpr;
-      double      fMax;
-      double      fMin;
-      size_t      fN;
-    };
 
   public:
 
@@ -88,17 +78,28 @@ namespace Analysis {
 
   protected:
 
+    // Nested struct to manage the variables
+    struct CutCompVar {
+      CutCompVar( std::string expr, size_t npoints, double vmin, double vmax ) :
+	fExpr( expr ), fMax( vmax ), fMin( vmin ), fN( npoints ) { }
+      std::string fExpr;
+      double      fMax;
+      double      fMin;
+      size_t      fN;
+    };
+
     // Attributes
     std::vector<TreeCategory*>             fCategories;
     std::vector<
-      std::pair<std::string, CatCompVar> > fCompVars;
+      std::pair<std::string, CutCompVar> > fCompVars;
     std::string                            fCutString;
     std::vector<
-      std::pair<std::string, CatCompVar> > fCutVars;
+      std::pair<std::string, CutCompVar> > fCutVars;
     General::LoopArray                     fLoopArray;
 
   private:
     inline void SendError( const std::string &expr, const std::string &cat, bool type );
+
   };
 
   //______________________________
@@ -118,7 +119,7 @@ namespace Analysis {
 					    size_t      nbins,
 					    double      vmin,
 					    double      vmax ) {
-    fCompVars.push_back( std::make_pair( name, CatCompVar( name, nbins, vmin, vmax ) ) );
+    fCompVars.push_back( std::make_pair( name, CutCompVar( name, nbins, vmin, vmax ) ) );
   }
   // Adds a new variable to compare as an expression
   inline void CutComparer::AddCompVariable( std::string name,
@@ -126,7 +127,7 @@ namespace Analysis {
 					    size_t      nbins,
 					    double      vmin,
 					    double      vmax ) {
-    fCompVars.push_back( std::make_pair( name, CatCompVar( expr, nbins, vmin, vmax ) ) );
+    fCompVars.push_back( std::make_pair( name, CutCompVar( expr, nbins, vmin, vmax ) ) );
   }
   // Private method to send the different possible error types of the class
   inline void CutComparer::SendError( const std::string &expr, const std::string &cat, bool type ) {

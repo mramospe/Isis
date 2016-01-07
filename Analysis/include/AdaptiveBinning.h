@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 13/07/2015			       //
+//  Last update: 07/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -44,29 +44,28 @@ namespace Analysis {
     
     // Constructor
     AdaptiveBinning();
-    AdaptiveBinning( unsigned int occ_min,
-		     double       xmin,
-		     double       xmax,
-		     double       ymin,
-		     double       ymax,
-		     TTree       *tree,
-		     const char  *xleaf_name,
-		     const char  *yleaf_name,
-		     const char  *wleaf_name = 0,
-		     double       xnorm = 1,
-		     double       ynorm = 1 );
+    AdaptiveBinning( size_t      occ_min,
+		     double      xmin,
+		     double      xmax,
+		     double      ymin,
+		     double      ymax,
+		     TTree      *tree,
+		     const char *xleaf_name,
+		     const char *yleaf_name,
+		     const char *wleaf_name = 0,
+		     double      xnorm = 1,
+		     double      ynorm = 1 );
 
     // Destructor
     ~AdaptiveBinning();
 
     // Methods
-    TH2Poly*     GetAdjHist( const char *name, const char *title );
-    TH2Poly*     GetAdjStruct( const char *name, const char *title );
-    TH2Poly*     GetHist( const char *name, const char *title );
-    unsigned int GetNbins() const;
-    TH2Poly*     GetStruct( const char *name, const char *title );
 
-  private:
+    TH2Poly* GetAdjHist( const char *name, const char *title );
+    TH2Poly* GetAdjStruct( const char *name, const char *title );
+    TH2Poly* GetHist( const char *name, const char *title );
+    size_t   GetNbins() const;
+    TH2Poly* GetStruct( const char *name, const char *title );
 
     // Nested class
     class Bin {
@@ -74,16 +73,27 @@ namespace Analysis {
     public:
 
       // Constructor
-      Bin( double xmin, double xmax, double ymin, double ymax );
+      Bin( const double &xmin, const double &xmax, const double &ymin, const double &ymax );
 
       // Destructor
       ~Bin();
 
       // Methods
-      void AdjustBin( double xmin, double xmax, double ymin, double ymax, double delta );
+      void AdjustBin( const double &xmin,
+		      const double &xmax,
+		      const double &ymin,
+		      const double &ymax,
+		      const double &delta );
       void CalcMedians();
       void Clear();
-      void IfInFill( double x, double y, double w );
+      void Fill( const double &x, const double &y, const double &w );
+
+      // Inline methods
+      inline const double GetNpoints() const;
+      inline const double GetXmin() const;
+      inline const double GetXmax() const;
+      inline const double GetYmin() const;
+      inline const double GetYmax() const;
     
       // Attributes
       double              fNpoints;
@@ -100,7 +110,7 @@ namespace Analysis {
       double              fYminPoint;
       std::vector<double> fYpoints;
       std::vector<double> fWpoints;
-
+    
     protected:
 
       // Methods
@@ -109,13 +119,21 @@ namespace Analysis {
 
     };
 
-  protected:
+    // Inline methods
+    inline std::vector<AdaptiveBinning::Bin>::const_iterator AdjBinListBegin();
+    inline std::vector<AdaptiveBinning::Bin>::const_iterator AdjBinListEnd();
+    inline std::vector<AdaptiveBinning::Bin>::const_iterator BinListBegin();
+    inline std::vector<AdaptiveBinning::Bin>::const_iterator BinListEnd();
+    inline const std::vector<AdaptiveBinning::Bin>           GetAdjBinList() const;
+    inline const std::vector<AdaptiveBinning::Bin>           GetBinList() const;
 
+  protected:
+    
     // Attributes
-    std::vector<Bin>    fAdjBinsList;
-    std::vector<Bin>    fBinsList;
+    std::vector<Bin>    fAdjBinList;
+    std::vector<Bin>    fBinList;
     double              fDelta;
-    unsigned int        fLength;
+    size_t              fLength;
     std::vector<double> fXdata;
     double              fXmax;
     double              fXmin;
@@ -124,7 +142,37 @@ namespace Analysis {
     double              fYmin;
     std::vector<double> fWdata;
 
-    };
+  };
+
+  //_____________________________________________
+  // INLINE METHODS FOR THE ADAPTIVEBINNING CLASS
+  inline std::vector<AdaptiveBinning::Bin>::const_iterator AdaptiveBinning::AdjBinListBegin() {
+    return fAdjBinList.cbegin();
+  }
+  inline std::vector<AdaptiveBinning::Bin>::const_iterator AdaptiveBinning::AdjBinListEnd() {
+    return fAdjBinList.cend();
+  }
+  inline std::vector<AdaptiveBinning::Bin>::const_iterator AdaptiveBinning::BinListBegin() {
+    return fBinList.cbegin();
+  }
+  inline std::vector<AdaptiveBinning::Bin>::const_iterator AdaptiveBinning::BinListEnd() {
+    return fBinList.cend();
+  }
+  inline const std::vector<AdaptiveBinning::Bin> AdaptiveBinning::GetAdjBinList() const {
+    return fAdjBinList;
+  }
+  inline const std::vector<AdaptiveBinning::Bin> AdaptiveBinning::GetBinList() const {
+    return fBinList;
+  }
+
+  //_________________________________
+  // INLINE METHODS FOR THE BIN CLASS
+    
+  inline const double AdaptiveBinning::Bin::GetNpoints() const { return fNpoints; }
+  inline const double AdaptiveBinning::Bin::GetXmax() const    { return fXmax; }
+  inline const double AdaptiveBinning::Bin::GetXmin() const    { return fXmin; }
+  inline const double AdaptiveBinning::Bin::GetYmax() const    { return fYmax; }
+  inline const double AdaptiveBinning::Bin::GetYmin() const    { return fYmin; }
 
 }
 

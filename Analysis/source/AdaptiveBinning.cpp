@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 11/08/2015			       //
+//  Last update: 07/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -48,45 +48,41 @@ Analysis::AdaptiveBinning::AdaptiveBinning() { }
 
 //______________________________________________________________________________
 // Constructor given all the parameters
-Analysis::AdaptiveBinning::AdaptiveBinning( unsigned int occ_min,
-					    double       xmin,
-					    double       xmax,
-					    double       ymin,
-					    double       ymax,
-					    TTree       *tree,
-					    const char  *xleaf_name,
-					    const char  *yleaf_name,
-					    const char  *wleaf_name,
-					    double       xnorm,
-					    double       ynorm ) :
+Analysis::AdaptiveBinning::AdaptiveBinning( size_t      occ_min,
+					    double      xmin,
+					    double      xmax,
+					    double      ymin,
+					    double      ymax,
+					    TTree      *tree,
+					    const char *xleaf_name,
+					    const char *yleaf_name,
+					    const char *wleaf_name,
+					    double      xnorm,
+					    double      ynorm ) :
   fXmax( xmax / xnorm ),
   fXmin( xmin / xnorm ),
   fYmax( ymax / ynorm ),
   fYmin( ymin / ynorm ) {
 
-  unsigned int nentries( tree -> GetEntries() );
+  std::cout << "--- Making an adaptive binning division ---" << std::endl;
+
+  size_t nentries = tree -> GetEntries();
 
   TLeaf
-    *xleaf( tree -> GetLeaf( xleaf_name ) ),
-    *yleaf( tree -> GetLeaf( yleaf_name ) );
+    *xleaf = tree -> GetLeaf( xleaf_name ),
+    *yleaf = tree -> GetLeaf( yleaf_name );
 
   double x, y, w;
 
   // Gets the data and fills the vectors that contain the points and the weights
   if ( wleaf_name ) {
-
     TLeaf *wleaf( tree -> GetLeaf( wleaf_name ) );
-
-    for ( unsigned int ievt = 0; ievt < nentries; ievt++ ) {
-
+    for ( size_t ievt = 0; ievt < nentries; ievt++ ) {
       tree -> GetEntry( ievt );
-
       x = xleaf -> GetValue() / xnorm;
       y = yleaf -> GetValue() / ynorm;
       w = wleaf -> GetValue();
-
       if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
-
 	fXdata.push_back( x );
 	fYdata.push_back( y );
 	fWdata.push_back( w );
@@ -94,82 +90,66 @@ Analysis::AdaptiveBinning::AdaptiveBinning( unsigned int occ_min,
     }
   }
   else {
-
-    for ( unsigned int ievt = 0; ievt < nentries; ievt++ ) {
-
+    for ( size_t ievt = 0; ievt < nentries; ievt++ ) {
       tree -> GetEntry( ievt );
-
       x = xleaf -> GetValue() / xnorm;
       y = yleaf -> GetValue() / ynorm;
-
       if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
-
 	fXdata.push_back( x );
 	fYdata.push_back( y );
       }
     }
-
     fWdata = std::vector<double> ( fXdata.size(), 1 );
-  }
-      
-
-  // Sets the length and the bins' list
-  fLength   = fXdata.size();
-  fBinsList = std::vector<Analysis::AdaptiveBinning::Bin>( 1, Bin( fXmin,
-								   fXmax,
-								   fYmin,
-								   fYmax ) );
-
+  } 
+  std::cout << "- Entries used:      " << fWdata.size() <<
+    " ( out ot " << nentries << " )" << std::endl;
 
   // Gets the minimum distance between points
   double
-    delta_x( std::abs( fXdata[ 0 ] - fXdata[ 1 ] ) ),
-    delta_y( std::abs( fYdata[ 0 ] - fYdata[ 1 ] ) ),
+    delta_x = std::abs( fXdata[ 0 ] - fXdata[ 1 ] ),
+    delta_y = std::abs( fYdata[ 0 ] - fYdata[ 1 ] ),
     new_delta;
 
-  for ( std::vector<double>::iterator it1 = fXdata.begin();
-	it1 != fXdata.end();
-	it1++ ) {
-    for ( std::vector<double>::iterator it2 = it1; it2 != fXdata.end(); it2++ ) {
-	  
+  for ( auto it1 = fXdata.begin(); it1 != fXdata.end(); it1++ )
+    for ( auto it2 = it1 + 1; it2 != fXdata.end(); it2++ ) {	  
       new_delta = std::abs( *it2 - *it1 );
-
       if ( new_delta < delta_x )
 	delta_x = new_delta;
     }
-  }
 
-  for ( std::vector<double>::iterator it1 = fYdata.begin();
-	it1 != fYdata.end();
-	it1++ ) {
-    for ( std::vector<double>::iterator it2 = it1; it2 != fYdata.end(); it2++ ) {
-	  
+  for ( auto it1 = fYdata.begin(); it1 != fYdata.end(); it1++ )
+    for ( auto it2 = it1 + 1; it2 != fYdata.end(); it2++ ) {
       new_delta = std::abs( *it2 - *it1 );
-
       if ( new_delta < delta_y )
 	delta_y = new_delta;
     }
-  }
-      
   fDelta = std::min( delta_x, delta_y )/2;
 
-  
-  // Gets the sum of the weights (to get the number of true entries)
-  double sum_of_evts( 0 );
-  for ( std::vector<double>::iterator it = fWdata.begin();
-	it != fWdata.end();
-	it++ )
-    sum_of_evts += *it;
+  /*ALDFHJSKJAHFSHAÑFJSAKÑJDLASÑJFLSAJ
+  // Modifies the minimum and maximum values of the axis to properly construct the histograms
+  fXmin -= fDelta;
+  fXmax += fDelta;
+  fYmin -= fDelta;
+  fYmax += fDelta;
+  */
 
+  // Sets the length and the bins' list
+  fLength  = fWdata.size();
+  fBinList = std::vector<Analysis::AdaptiveBinning::Bin>( 1, Bin( fXmin, fXmax, fYmin, fYmax ) );
+
+  // Gets the sum of the weights (to get the number of true entries)
+  double sum_of_evts = 0;
+  for ( auto it = fWdata.begin(); it != fWdata.end(); it++ )
+    sum_of_evts += *it;
+  std::cout << "- Sum of weights:    " << sum_of_evts << std::endl;
 
   // Makes the adaptive bins
-  unsigned int max_iter( std::floor( std::log( sum_of_evts/occ_min ) /
-				     std::log( 2 ) ) ), nbins( 1 );
+  size_t
+    max_iter = std::floor( std::log( sum_of_evts/occ_min )/std::log( 2 ) ),
+    nbins    = 1;
 
-  if ( max_iter == 0 ) {
-    std::cout << " WARNING: minimum occupancy so big, decrease it." << std::endl;
-    exit( 0 );
-  }
+  if ( max_iter == 0 )
+    std::cerr << " ERROR: minimum occupancy is so big, decrease it." << std::endl;
 
   double
     x_range( *std::max_element( fXdata.begin(), fXdata.end() ) -
@@ -177,62 +157,50 @@ Analysis::AdaptiveBinning::AdaptiveBinning( unsigned int occ_min,
     y_range( *std::max_element( fYdata.begin(), fYdata.end() ) -
 	     *std::min_element( fYdata.begin(), fYdata.end() ) );
 
-  for ( unsigned int i = 0; i < max_iter; i++ ) {
-	
-    for ( unsigned int ibin = 0; ibin < nbins; ibin ++ ) {
+  for ( size_t i = 0; i < max_iter; i++ ) {
+    for ( size_t ibin = 0; ibin < nbins; ibin++ ) {
+      for ( size_t ievt = 0; ievt < fLength; ievt++ )
+	fBinList[ ibin ].Fill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
 
-      for ( unsigned int ievt = 0; ievt < fLength; ievt++ )
-	fBinsList[ ibin ].IfInFill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
+      fBinList[ ibin ].CalcMedians();
 
-      fBinsList[ ibin ].CalcMedians();
+      if ( std::min( fBinList[ ibin ].fXmedian - fBinList[ ibin ].fXmin,
+		     fBinList[ ibin ].fXmax - fBinList[ ibin ].fXmedian )/x_range > 
+	   std::min( fBinList[ ibin ].fYmedian - fBinList[ ibin ].fYmin,
+		     fBinList[ ibin ].fYmax - fBinList[ ibin ].fYmedian )/y_range ) {
 
-      if ( std::min( fBinsList[ ibin ].fXmedian - fBinsList[ ibin ].fXmin,
-		     fBinsList[ ibin ].fXmax - fBinsList[ ibin ].fXmedian )/x_range > 
-	   std::min( fBinsList[ ibin ].fYmedian - fBinsList[ ibin ].fYmin,
-		     fBinsList[ ibin ].fYmax - fBinsList[ ibin ].fYmedian )/y_range ) {
-
-	fBinsList.push_back( Bin( fBinsList[ ibin ].fXmedian,
-				  fBinsList[ ibin ].fXmax,
-				  fBinsList[ ibin ].fYmin,
-				  fBinsList[ ibin ].fYmax ) );
-
-	fBinsList[ ibin ].fXmax = fBinsList[ ibin ].fXmedian;
+	fBinList.push_back( Bin( fBinList[ ibin ].fXmedian,
+				 fBinList[ ibin ].fXmax,
+				 fBinList[ ibin ].fYmin,
+				 fBinList[ ibin ].fYmax ) );
+	fBinList[ ibin ].fXmax = fBinList[ ibin ].fXmedian;
       }
       else {
 
-	fBinsList.push_back( Bin( fBinsList[ ibin ].fXmin,
-				  fBinsList[ ibin ].fXmax,
-				  fBinsList[ ibin ].fYmedian,
-				  fBinsList[ ibin ].fYmax ) );
-	    
-	fBinsList[ ibin ].fYmax = fBinsList[ ibin ].fYmedian;
+	fBinList.push_back( Bin( fBinList[ ibin ].fXmin,
+				 fBinList[ ibin ].fXmax,
+				 fBinList[ ibin ].fYmedian,
+				 fBinList[ ibin ].fYmax ) );
+	fBinList[ ibin ].fYmax = fBinList[ ibin ].fYmedian;
       }
-
       // Clears the bin
-      fBinsList[ ibin ].Clear();
+      fBinList[ ibin ].Clear();
     }
-
     // Sets the new number of bins
     nbins *= 2;
   }
-  
+  std::cout << "- Number of bins:    " << nbins << std::endl;
+  std::cout << "- Occupancy per bin: " << sum_of_evts/nbins << std::endl;
+
   // Fills the data for the last time to get the limits of the bins
-  for ( unsigned int ibin = 0; ibin < nbins; ibin++ ) {
-    for ( unsigned int ievt = 0; ievt < fLength; ievt++ )
-      fBinsList[ ibin ].IfInFill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
+  for ( auto itbin = fBinList.begin(); itbin != fBinList.end(); itbin++ )
+    for ( size_t ievt = 0; ievt < fLength; ievt++ )
+      itbin -> Fill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
 
-    fBinsList[ ibin ].Clear();
-  }
-
-  // Gets the adjusted bins' list
-  fAdjBinsList = std::vector<Analysis::AdaptiveBinning::Bin>( fBinsList );
-
-  for ( std::vector<Analysis::AdaptiveBinning::Bin>::iterator it = fAdjBinsList.begin();
-	it != fAdjBinsList.end();
-	it++ ) {
- 
-    it -> AdjustBin( fXmin, fXmax, fYmin, fYmax, fDelta );
-  }
+  // Makes the list of adjusted bins
+  fAdjBinList = std::vector<Analysis::AdaptiveBinning::Bin>( fBinList );
+  for ( auto itbin = fAdjBinList.begin(); itbin != fAdjBinList.end();	itbin++ )
+    itbin -> AdjustBin( fXmin, fXmax, fYmin, fYmax, fDelta );
 }
 
 //______________________________________________________________________________
@@ -250,7 +218,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetAdjHist( const char *name, const char *ti
 
   TH2Poly *hist = this -> GetAdjStruct( name, title );
 
-  for ( unsigned int ievt = 0; ievt < fLength; ievt++ )
+  for ( size_t ievt = 0; ievt < fLength; ievt++ )
     hist -> Fill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
 
   return hist;
@@ -264,8 +232,8 @@ TH2Poly* Analysis::AdaptiveBinning::GetAdjStruct( const char *name, const char *
 			       fXmin, fXmax,
 			       fYmin, fYmax );
 
-  for ( std::vector<Analysis::AdaptiveBinning::Bin>::iterator it = fAdjBinsList.begin();
-	it != fAdjBinsList.end();
+  for ( std::vector<Analysis::AdaptiveBinning::Bin>::iterator it = fAdjBinList.begin();
+	it != fAdjBinList.end();
 	it++ )
     hist -> AddBin( it -> fXmin, it -> fYmin, it -> fXmax, it -> fYmax );
 
@@ -278,7 +246,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetHist( const char *name, const char *title
 
   TH2Poly *hist = this -> GetStruct( name, title );
 
-  for ( unsigned int ievt = 0; ievt < fLength; ievt++ )
+  for ( size_t ievt = 0; ievt < fLength; ievt++ )
     hist -> Fill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
 
   return hist;
@@ -286,9 +254,9 @@ TH2Poly* Analysis::AdaptiveBinning::GetHist( const char *name, const char *title
 
 //______________________________________________________________________________
 // Gets the number of bins in the histogram
-unsigned int Analysis::AdaptiveBinning::GetNbins() const {
+size_t Analysis::AdaptiveBinning::GetNbins() const {
 
-  return fBinsList.size();
+  return fBinList.size();
 }
 
 //______________________________________________________________________________
@@ -299,9 +267,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *tit
 			       fXmin, fXmax,
 			       fYmin, fYmax );
 
-  for ( std::vector<Analysis::AdaptiveBinning::Bin>::iterator it = fBinsList.begin();
-	it != fBinsList.end();
-	it++ )
+  for ( auto it = fBinList.begin(); it != fBinList.end(); it++ )
     hist -> AddBin( it -> fXmin, it -> fYmin, it -> fXmax, it -> fYmax );
 
   return hist;
@@ -321,10 +287,10 @@ TH2Poly* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *tit
 
 //______________________________________________________________________________
 // Main constructor
-Analysis::AdaptiveBinning::Bin::Bin( double xmin,
-				     double xmax,
-				     double ymin,
-				     double ymax ) :
+Analysis::AdaptiveBinning::Bin::Bin( const double &xmin,
+				     const double &xmax,
+				     const double &ymin,
+				     const double &ymax ) :
   fNpoints( 0 ),
   fXmax( xmax ),
   fXmin( xmin ),
@@ -342,11 +308,11 @@ Analysis::AdaptiveBinning::Bin::~Bin() { }
 
 //______________________________________________________________________________
 // If the bin is in a border of the histogram, adjusts it to the data
-void Analysis::AdaptiveBinning::Bin::AdjustBin( double xmin,
-						double xmax,
-						double ymin,
-						double ymax,
-						double delta ) {
+void Analysis::AdaptiveBinning::Bin::AdjustBin( const double &xmin,
+						const double &xmax,
+						const double &ymin,
+						const double &ymax,
+						const double &delta ) {
 
   if ( fXmin == xmin )
     fXmin = fXminPoint - delta;
@@ -371,29 +337,21 @@ void Analysis::AdaptiveBinning::Bin::CalcMedians() {
   double sw_max, sw;
   int    it;
 
-  if ( ! int( std::round( fNpoints ) ) % 2 )
-    sw_max = fNpoints/2 - 1;
+  if ( ! ( int( std::round( fNpoints ) ) % 2 ) )
+    sw_max = fNpoints/2;
   else
     sw_max = ( fNpoints - 1 )/2;
 
   sw = 0;
   it = -1;
-  while ( sw < sw_max ) {
-
-    it++;
-    sw += xw_sorted[ it ];
-  }
-
+  while ( sw < sw_max )
+    sw += xw_sorted[ ++it ];
   fXmedian = ( fXpoints[ it ] + fXpoints[ it + 1 ] )/2;
 
   sw = 0;
   it = -1;
-  while ( sw < sw_max ) {
-    
-    it++;
-    sw += yw_sorted[ it ];
-  }
-
+  while ( sw < sw_max )
+    sw += yw_sorted[ ++it ];
   fYmedian = ( fYpoints[ it ] + fYpoints[ it + 1 ] )/2;
 }
 
@@ -412,7 +370,7 @@ void Analysis::AdaptiveBinning::Bin::Clear() {
 
 //______________________________________________________________________________
 // Fills the bin if the point is inside it
-void Analysis::AdaptiveBinning::Bin::IfInFill( double x, double y, double w ) {
+void Analysis::AdaptiveBinning::Bin::Fill( const double &x, const double &y, const double &w ) {
 
   if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
 
@@ -420,7 +378,7 @@ void Analysis::AdaptiveBinning::Bin::IfInFill( double x, double y, double w ) {
     fYpoints.push_back( y );
     fWpoints.push_back( w );
 
-    if ( ! fNpoints ) {
+    if ( !fNpoints ) {
 	
       fXminPoint = x;
       fXmaxPoint = x;
@@ -439,7 +397,6 @@ void Analysis::AdaptiveBinning::Bin::IfInFill( double x, double y, double w ) {
       else if ( y > fYmaxPoint )
 	fYmaxPoint = y;
     }
-    
     fNpoints += w;
   }
 }
@@ -456,25 +413,18 @@ std::vector<double>
 Analysis::AdaptiveBinning::Bin::Sort( std::vector<double> &d_vector,
 				      std::vector<double> &w_vector ) {
 
-  struct Ordering {
-    bool operator () ( const std::pair<double, double> &a,
-		       const std::pair<double, double> &b ) {
-
-      return a.first < b.first;
-    }
-  };
-
   std::vector< std::pair<double, double> > order( d_vector.size() );
 
-  for ( unsigned int i = 0; i < order.size(); i++ )
+  for ( size_t i = 0; i < order.size(); i++ )
     order[ i ] = std::make_pair( d_vector[ i ], w_vector[ i ] );
 
-  std::sort( order.begin(), order.end(), Ordering() );
+  std::sort( order.begin(), order.end(),
+	     [] ( const std::pair<double, double> &a,
+		  const std::pair<double, double> &b ) { return a.first < b.first; } );
 
   std::vector<double> sw_vector( order.size() );
 
-  for ( unsigned int i = 0; i < order.size(); i++ ) {
-    
+  for ( size_t i = 0; i < order.size(); i++ ) {
     d_vector [ i ] = order[ i ].first;
     sw_vector[ i ] = order[ i ].second;
   }

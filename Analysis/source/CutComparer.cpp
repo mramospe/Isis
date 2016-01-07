@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 05/01/2016                                                      //
+//  Last update: 07/01/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -75,7 +75,7 @@ void Analysis::CutComparer::AddCutVariable( std::string name,
 					    size_t      npoints,
 					    double      vmin,
 					    double      vmax ) {
-  fCutVars.push_back( std::make_pair( name, CatCompVar( name, npoints, vmin, vmax ) ) );
+  fCutVars.push_back( std::make_pair( name, CutCompVar( name, npoints, vmin, vmax ) ) );
   if ( dir != ">" && dir != "<" && dir != ">=" && dir != "<=" )
     std::cerr <<
       "ERROR: Unknown boolean operator for variable < " << name << " >"
@@ -160,7 +160,7 @@ void Analysis::CutComparer::Compare() {
   double step;
   std::string cutStr;
   std::stringstream sout, sname;
-  CutComparer::CatCompVar *ccvar;
+  CutComparer::CutCompVar *ccvar;
 
   // Pointers for the folder and the histograms
   TCanvas *canvas;
@@ -170,7 +170,7 @@ void Analysis::CutComparer::Compare() {
   TObjString *objStr;
 
   // Creates the iterators
-  std::vector<std::pair<std::string, CatCompVar> >::iterator itv;
+  std::vector<std::pair<std::string, CutCompVar> >::iterator itv;
   std::vector<std::pair<size_t, size_t> >::const_iterator    itl;  
 
   // Loops over all the configurations of cuts
