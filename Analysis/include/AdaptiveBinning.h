@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 07/01/2016			       //
+//  Last update: 08/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -70,6 +70,8 @@ namespace Analysis {
     // Nested class
     class Bin {
 
+      friend AdaptiveBinning;
+
     public:
 
       // Constructor
@@ -84,8 +86,6 @@ namespace Analysis {
 		      const double &ymin,
 		      const double &ymax,
 		      const double &delta );
-      void CalcMedians();
-      void Clear();
       void Fill( const double &x, const double &y, const double &w );
 
       // Inline methods
@@ -110,10 +110,17 @@ namespace Analysis {
       double              fYminPoint;
       std::vector<double> fYpoints;
       std::vector<double> fWpoints;
-    
+
     protected:
 
       // Methods
+      Bin Divide( double &xrange, double &yrange );
+    
+    private:
+
+      // Methods
+      void                CalcMedians();
+      void                Clear();
       std::vector<double> Sort( std::vector<double> &d_vector,
 				std::vector<double> &w_vector );
 

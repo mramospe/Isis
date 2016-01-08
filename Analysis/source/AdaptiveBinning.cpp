@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 07/01/2016			       //
+//  Last update: 08/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -125,13 +125,11 @@ Analysis::AdaptiveBinning::AdaptiveBinning( size_t      occ_min,
     }
   fDelta = std::min( delta_x, delta_y )/2;
 
-  /*ALDFHJSKJAHFSHAÑFJSAKÑJDLASÑJFLSAJ
   // Modifies the minimum and maximum values of the axis to properly construct the histograms
   fXmin -= fDelta;
   fXmax += fDelta;
   fYmin -= fDelta;
   fYmax += fDelta;
-  */
 
   // Sets the length and the bins' list
   fLength  = fWdata.size();
@@ -152,39 +150,16 @@ Analysis::AdaptiveBinning::AdaptiveBinning( size_t      occ_min,
     std::cerr << " ERROR: minimum occupancy is so big, decrease it." << std::endl;
 
   double
-    x_range( *std::max_element( fXdata.begin(), fXdata.end() ) -
+    xrange( *std::max_element( fXdata.begin(), fXdata.end() ) -
 	     *std::min_element( fXdata.begin(), fXdata.end() ) ),
-    y_range( *std::max_element( fYdata.begin(), fYdata.end() ) -
+    yrange( *std::max_element( fYdata.begin(), fYdata.end() ) -
 	     *std::min_element( fYdata.begin(), fYdata.end() ) );
 
   for ( size_t i = 0; i < max_iter; i++ ) {
     for ( size_t ibin = 0; ibin < nbins; ibin++ ) {
       for ( size_t ievt = 0; ievt < fLength; ievt++ )
 	fBinList[ ibin ].Fill( fXdata[ ievt ], fYdata[ ievt ], fWdata[ ievt ] );
-
-      fBinList[ ibin ].CalcMedians();
-
-      if ( std::min( fBinList[ ibin ].fXmedian - fBinList[ ibin ].fXmin,
-		     fBinList[ ibin ].fXmax - fBinList[ ibin ].fXmedian )/x_range > 
-	   std::min( fBinList[ ibin ].fYmedian - fBinList[ ibin ].fYmin,
-		     fBinList[ ibin ].fYmax - fBinList[ ibin ].fYmedian )/y_range ) {
-
-	fBinList.push_back( Bin( fBinList[ ibin ].fXmedian,
-				 fBinList[ ibin ].fXmax,
-				 fBinList[ ibin ].fYmin,
-				 fBinList[ ibin ].fYmax ) );
-	fBinList[ ibin ].fXmax = fBinList[ ibin ].fXmedian;
-      }
-      else {
-
-	fBinList.push_back( Bin( fBinList[ ibin ].fXmin,
-				 fBinList[ ibin ].fXmax,
-				 fBinList[ ibin ].fYmedian,
-				 fBinList[ ibin ].fYmax ) );
-	fBinList[ ibin ].fYmax = fBinList[ ibin ].fYmedian;
-      }
-      // Clears the bin
-      fBinList[ ibin ].Clear();
+      fBinList.push_back( fBinList[ ibin ].Divide( xrange, yrange ) );
     }
     // Sets the new number of bins
     nbins *= 2;
@@ -405,6 +380,29 @@ void Analysis::AdaptiveBinning::Bin::Fill( const double &x, const double &y, con
 
 
 // -- PROTECTED METHODS
+
+//______________________________________________________________________________
+//
+Analysis::AdaptiveBinning::Bin
+Analysis::AdaptiveBinning::Bin::Divide( double &xrange,	double &yrange ) {
+  this -> CalcMedians();
+  if ( std::min( fXmedian - fXmin, fXmax - fXmedian )/xrange > 
+       std::min( fYmedian - fYmin, fYmax - fYmedian )/yrange ) {
+    fXmax = fXmedian;
+    this -> Clear();
+    return Bin( fXmedian, fXmax, fYmin, fYmax );
+  }
+  else {
+    fYmax = fYmedian;
+    this -> Clear();
+    return Bin( fXmin, fXmax, fYmedian, fYmax );
+  }
+}
+
+//______________________________________________________________________________
+
+
+// -- PRIVATE METHODS
 
 //______________________________________________________________________________
 // Sorts the data and the weights and returns the sorted vector of weights for
