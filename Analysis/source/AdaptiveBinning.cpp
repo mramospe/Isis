@@ -333,14 +333,10 @@ void Analysis::AdaptiveBinning::Bin::CalcMedians() {
 //______________________________________________________________________________
 // Clears the content of the bin but the limits
 void Analysis::AdaptiveBinning::Bin::Clear() {
-
   fXpoints.clear();
   fYpoints.clear();
   fWpoints.clear();
-
   fNpoints = 0;
-  fXmedian = 0;
-  fYmedian = 0;
 }
 
 //______________________________________________________________________________
@@ -385,17 +381,20 @@ void Analysis::AdaptiveBinning::Bin::Fill( const double &x, const double &y, con
 //
 Analysis::AdaptiveBinning::Bin
 Analysis::AdaptiveBinning::Bin::Divide( double &xrange,	double &yrange ) {
+  double tmp;
   this -> CalcMedians();
   if ( std::min( fXmedian - fXmin, fXmax - fXmedian )/xrange > 
        std::min( fYmedian - fYmin, fYmax - fYmedian )/yrange ) {
+    tmp   = fXmax;
     fXmax = fXmedian;
     this -> Clear();
-    return Bin( fXmedian, fXmax, fYmin, fYmax );
+    return Bin( fXmedian, tmp, fYmin, fYmax );
   }
   else {
+    tmp   = fYmax;
     fYmax = fYmedian;
     this -> Clear();
-    return Bin( fXmin, fXmax, fYmedian, fYmax );
+    return Bin( fXmin, fXmax, fYmedian, tmp );
   }
 }
 
