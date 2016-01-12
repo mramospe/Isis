@@ -3,7 +3,7 @@
 //  perform analysis of asymmetries bin to bin       //
 ///////////////////////////////////////////////////////
 
-#include "AdaptiveBinning.h"
+#include "AdaptiveBinning/AdaptiveBinning2D.h"
 #include "RooFit/MirandaAnalysis.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -54,7 +54,7 @@ int main() {
   std::cout << "Created main tree" << std::endl;
 
   // Makes the adaptive binning histograms
-  Analysis::AdaptiveBinning AB( 40, 300, 1400, 300, 1400, mtree, "xVar", "yVar", 0, 1, 1 );
+  Analysis::AdaptiveBinning2D AB( 40, 300, 1400, 300, 1400, mtree, "xVar", "yVar", 0, 1, 1 );
 
   TH2Poly *hStr = AB.GetStruct( "hStr", "hStr" );
   TH2Poly *hAdj  = AB.GetAdjHist( "hAdj", "hAdj" );

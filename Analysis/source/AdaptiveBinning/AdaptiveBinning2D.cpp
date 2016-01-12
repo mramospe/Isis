@@ -37,6 +37,10 @@
 
 //______________________________________________________________________________
 // Main constructor
+Analysis::AdaptiveBinning2D::AdaptiveBinning2D() : AdaptiveBinning() { }
+
+//______________________________________________________________________________
+// Constructor given vectors of values
 Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 						double      xmin,
 						double      xmax,

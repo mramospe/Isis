@@ -1,3 +1,26 @@
+///////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------- //
+//						                     //
+//  Analysis package	  			                     //
+//        					                     //
+// ----------------------------------------------------------------- //
+//						                     //
+//  AUTHOR: Miguel Ramos Pernas		                             //
+//  e-mail: miguel.ramos.pernas@cern.ch		                     //
+//						                     //
+//  Last update: 12/01/2016			                     //
+//   						                     //
+// ----------------------------------------------------------------- //
+//						                     //
+//  Description:				                     //
+//						                     //
+//  Implements the class to make one-dimensional adaptive binning    //
+//  histograms. The construction can be made given a set of vectors  //
+//  or a TTree object and the name of the leaves.                    //
+//						                     //
+// ----------------------------------------------------------------- //
+///////////////////////////////////////////////////////////////////////
+
 
 #ifndef ADAPTIVE_BINNING_1D
 #define ADAPTIVE_BINNING_1D
@@ -20,6 +43,7 @@ namespace Analysis {
   public:
 
     // Constructors and destructor
+    AdaptiveBinning1D();
     AdaptiveBinning1D( size_t  occ,
 		       double  vmin,
 		       double  vmax,
