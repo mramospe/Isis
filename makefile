@@ -19,6 +19,9 @@ GENERAL_LIB        = lib/libGeneral.so
 ANALYSIS_SOURCE    = Analysis/source
 ANALYSIS_OBJECTS   = $(patsubst %.cpp, %.o, $(wildcard $(ANALYSIS_SOURCE)/*.cpp))
 ANALYSIS_LIB       = lib/libAnalysis.so
+ADBIN_SOURCE       = Analysis/source/AdaptiveBinning
+ADBIN_OBJECTS      = $(patsubst %.cpp, %.o, $(wildcard $(ADBIN_SOURCE)/*.cpp))
+ADBIN_LIB          = lib/libAdBin.so
 RFANALYSIS_SOURCE  = Analysis/source/RooFit
 RFANALYSIS_OBJECTS = $(patsubst %.cpp, %.o, $(wildcard $(RFANALYSIS_SOURCE)/*.cpp))
 RFANALYSIS_LIB     = lib/libRFAnalysis.so
@@ -26,7 +29,7 @@ TOOLS_EXECS        = $(patsubst %.cpp, %.out, $(wildcard Tools/*.cpp))
 
 # ------------------------------------------
 # Main compiling function
-all: $(GENERAL_LIB) $(ANALYSIS_LIB) $(RFANALYSIS_LIB) $(TOOLS_EXECS)
+all: $(GENERAL_LIB) $(ANALYSIS_LIB) $(ADBIN_LIB) $(RFANALYSIS_LIB) $(TOOLS_EXECS)
 	@echo "Installation finished"
 
 # ------------------------------------------
@@ -44,7 +47,7 @@ $(GENERAL_SOURCE)/%.o: $(GENERAL_SOURCE)/%.cpp
 
 $(GENERAL_LIB): $(GENERAL_OBJECTS)
 	$(COMPILER) $(CFLAGS) -o $@ $(GENERAL_SOURCE)/*.o
-	@echo "Created shared library for General package"
+	@echo "Created shared library for the General package"
 
 # ------------------------------------------
 # Compiles the Analysis package
@@ -53,7 +56,16 @@ $(ANALYSIS_SOURCE)/%.o: $(ANALYSIS_SOURCE)/%.cpp
 
 $(ANALYSIS_LIB): $(ANALYSIS_OBJECTS)
 	$(COMPILER) $(CFLAGS) -o $@ $(ANALYSIS_SOURCE)/*.o
-	@echo "Created shared library for Analysis package"
+	@echo "Created shared library for the Analysis package"
+
+# ----------------------------------------------
+# Compiles the adaptive binning package
+$(ADBIN_SOURCE)/%.o: $(ADBIN_SOURCE)/%.cpp
+	$(COMPILER) $(CFLAGS) -c $^ $(INCLUDE) $(ROOT_LIBS) -o $@
+
+$(ADBIN_LIB): $(ADBIN_OBJECTS)
+	$(COMPILER) $(CFLAGS) -o $@ $(ADBIN_SOURCE)/*.o
+	@echo "Created shared library for the adaptive binning package"
 
 # ----------------------------------------------
 # Compiles the RooFit-dependent Analysis package
@@ -62,7 +74,7 @@ $(RFANALYSIS_SOURCE)/%.o: $(RFANALYSIS_SOURCE)/%.cpp
 
 $(RFANALYSIS_LIB): $(RFANALYSIS_OBJECTS)
 	$(COMPILER) $(CFLAGS) -o $@ $(RFANALYSIS_SOURCE)/*.o
-	@echo "Created shared library for RooFit-Analysis package"
+	@echo "Created shared library for the RooFit-Analysis package"
 
 # ------------------------------------------
 # Compiles the Tools
@@ -86,6 +98,11 @@ clean:
 	then \
 		rm $(ANALYSIS_SOURCE)/*.o; \
 		echo " Removed compiled files at: $(ANALYSIS_SOURCE)"; \
+	fi;
+	@if [ "$(wildcard $(ADBIN_SOURCE)/*.o)" != "" ]; \
+	then \
+		rm $(ADBIN_SOURCE)/*.o; \
+		echo " Removed compiled files at: $(ADBIN_SOURCE)"; \
 	fi;
 	@if [ "$(wildcard $(RFANALYSIS_SOURCE)/*.o)" != "" ]; \
 	then \

@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 07/10/2015			       //
+//  Last update: 12/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -310,12 +310,12 @@ void Analysis::MirandaAnalysis::SetStructTree( TTree     *tree,
 					       const char *yleaf_name,
 					       const char *wleaf_name ) {
 
-  fStructure = Analysis::AdaptiveBinning( fMinOcc,
-					  fXmin, fXmax,
-					  fYmin, fYmax,
-					  tree,
-					  xleaf_name, yleaf_name, wleaf_name,
-					  fXnorm, fYnorm );
+  fStructure = Analysis::AdaptiveBinning2D( fMinOcc,
+					    fXmin, fXmax,
+					    fYmin, fYmax,
+					    tree,
+					    xleaf_name, yleaf_name, wleaf_name,
+					    fXnorm, fYnorm );
 }
 
 //______________________________________________________________________________

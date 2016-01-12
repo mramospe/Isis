@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 13/07/2015			       //
+//  Last update: 12/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -28,7 +28,7 @@
 #ifndef MIRANDA_ANALYSIS
 #define MIRANDA_ANALYSIS
 
-#include "AdaptiveBinning.h"
+#include "AdaptiveBinning/AdaptiveBinning2D.h"
 
 #include "TTree.h"
 #include "TLeaf.h"
@@ -84,18 +84,18 @@ namespace Analysis {
   protected:
     
     // Attributes
-    unsigned int    fMinOcc;
-    TTree          *fTopTree;
-    TLeaf         **fTopLeaves;
-    TTree          *fBotTree;
-    TLeaf         **fBotLeaves;
-    AdaptiveBinning fStructure;
-    double          fXmax;
-    double          fXmin;
-    double          fXnorm;
-    double          fYmax;
-    double          fYmin;
-    double          fYnorm;
+    unsigned int        fMinOcc;
+    TTree              *fTopTree;
+    TLeaf             **fTopLeaves;
+    TTree              *fBotTree;
+    TLeaf             **fBotLeaves;
+    AdaptiveBinning2D   fStructure;
+    double              fXmax;
+    double              fXmin;
+    double              fXnorm;
+    double              fYmax;
+    double              fYmin;
+    double              fYnorm;
 
   };
 
