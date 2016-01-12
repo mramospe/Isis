@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 08/01/2016			       //
+//  Last update: 11/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -60,11 +60,9 @@ namespace Analysis {
     ~AdaptiveBinning();
 
     // Methods
-
     TH2Poly* GetAdjHist( const char *name, const char *title );
     TH2Poly* GetAdjStruct( const char *name, const char *title );
     TH2Poly* GetHist( const char *name, const char *title );
-    size_t   GetNbins() const;
     TH2Poly* GetStruct( const char *name, const char *title );
 
     // Nested class
@@ -133,6 +131,7 @@ namespace Analysis {
     inline std::vector<AdaptiveBinning::Bin>::const_iterator BinListEnd();
     inline const std::vector<AdaptiveBinning::Bin>           GetAdjBinList() const;
     inline const std::vector<AdaptiveBinning::Bin>           GetBinList() const;
+    inline size_t                                            GetNbins() const;
 
   protected:
     
@@ -170,6 +169,9 @@ namespace Analysis {
   }
   inline const std::vector<AdaptiveBinning::Bin> AdaptiveBinning::GetBinList() const {
     return fBinList;
+  }
+  inline size_t AdaptiveBinning::GetNbins() const {
+    return fBinList.size();
   }
 
   //_________________________________

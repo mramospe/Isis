@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 08/01/2016			       //
+//  Last update: 11/01/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -188,7 +188,7 @@ Analysis::AdaptiveBinning::~AdaptiveBinning() { }
 // -- PUBLIC METHODS
 
 //______________________________________________________________________________
-// Gets a filled adjusted adaptive binned histogram
+// Makes a filled adjusted adaptive binned histogram
 TH2Poly* Analysis::AdaptiveBinning::GetAdjHist( const char *name, const char *title ) {
 
   TH2Poly *hist = this -> GetAdjStruct( name, title );
@@ -200,7 +200,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetAdjHist( const char *name, const char *ti
 }
 
 //______________________________________________________________________________
-// Gets an adjusted adaptive binned histogram
+// Makes an adjusted adaptive binned histogram
 TH2Poly* Analysis::AdaptiveBinning::GetAdjStruct( const char *name, const char *title ) {
 
   TH2Poly *hist = new TH2Poly( name, title,
@@ -216,7 +216,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetAdjStruct( const char *name, const char *
 }
 
 //______________________________________________________________________________
-// Gets a filled adaptive binned histogram
+// Makes a filled adaptive binned histogram
 TH2Poly* Analysis::AdaptiveBinning::GetHist( const char *name, const char *title ) {
 
   TH2Poly *hist = this -> GetStruct( name, title );
@@ -228,14 +228,7 @@ TH2Poly* Analysis::AdaptiveBinning::GetHist( const char *name, const char *title
 }
 
 //______________________________________________________________________________
-// Gets the number of bins in the histogram
-size_t Analysis::AdaptiveBinning::GetNbins() const {
-
-  return fBinList.size();
-}
-
-//______________________________________________________________________________
-// Gets an adaptive binned histogram
+// Makes an adaptive binned histogram
 TH2Poly* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *title ) {
 
   TH2Poly *hist = new TH2Poly( name, title,
