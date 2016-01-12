@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                    //
 //  e-mail: miguel.ramos.pernas@cern.ch                                            //
 //                                                                                 //
-//  Last update: 24/10/2015                                                        //
+//  Last update: 12/01/2016                                                        //
 //                                                                                 //
 // ------------------------------------------------------------------------------- //
 //                                                                                 //
@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "RooFit/ToyMCgenerator.h"
+#include "RooFitExt/ToyMCgenerator.h"
 
 #include "TLeaf.h"
 #include "TDatabasePDG.h"

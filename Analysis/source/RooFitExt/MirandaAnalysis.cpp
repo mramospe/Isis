@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////
 
 
-#include "RooFit/MirandaAnalysis.h"
+#include "RooFitExt/MirandaAnalysis.h"
 
 #include <cmath>
 

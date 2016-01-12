@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////
 
 #include "AdaptiveBinning/AdaptiveBinning2D.h"
-#include "RooFit/MirandaAnalysis.h"
+#include "RooFitExt/MirandaAnalysis.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
