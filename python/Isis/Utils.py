@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 09/12/2015                                //
+#//  Last update: 13/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -19,6 +19,7 @@
 #/////////////////////////////////////////////////////////////
 
 
+import math
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -41,6 +42,42 @@ def FormatTime( itime ):
         return strout[ :-1 ]
     else:
         return "0s"
+
+#_______________________________________________________________________________
+# This function allows to format a given expression in such a way that takes
+# into account the mathematical functions and the logical operators. It will
+# also check that the variables obtained are contained in the list given.
+def FormatEvalExpr( expr, vlist ):
+    expr      = expr.replace( "&&" , "and"  )
+    expr      = expr.replace( "||" , "or"   )
+    expr      = expr.replace( "abs", "fabs" )
+    variables = expr
+    for el in [ '==', '!=', '<=', '>=', '>', '<',
+                'and', 'or', '(', ')',
+                "+", "-", "*", "/" ]:
+        variables = variables.replace( el, '|' )
+    variables = variables.replace( ' ', '' )
+    variables = variables.split( '|' )
+    while '' in variables:
+        variables.remove( '' )
+    truevars = []
+    flist    = dir( math )
+    for el in variables:
+        if el not in flist:
+            try:
+                float( el )
+            except:
+                if el in vlist:
+                    truevars.append( el )
+                else:
+                    print "ERROR: Variable <", el, "> does not exist"
+        else:
+            expr = expr.replace( el, "math." + el )
+    ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
+    the variables '''
+    truevars.sort()
+    truevars.reverse()
+    return expr, truevars
 
 #_______________________________________________________________________________
 # Given two lists < x > and < y >, performs the inter(extra)polation of the

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 17/12/2015                                //
+#//  Last update: 13/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -26,7 +26,7 @@ from copy import deepcopy
 import math
 from Isis.Algebra import LongVector, Matrix
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
-from Isis.Utils import JoinDicts, MergeDicts
+from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts
 
 
 #_______________________________________________________________________________
@@ -242,39 +242,11 @@ class DataManager:
     def GetCutList( self, cut ):
         ''' This method allows to obtain a list with the events that satisfy the cuts
         given '''
-        cut       = cut.replace( "&&", " and " )
-        cut       = cut.replace( "||", " or "  )
-        cut       = cut.replace( "abs", "fabs" )
-        variables = cut
-        for el in [ '==', '!=', '<=', '>=', '>', '<',
-                    'and', 'or', '(', ')',
-                    "+", "-", "*", "/" ]:
-            variables = variables.replace( el, '|' )
-        variables = variables.replace( ' ', '' )
-        variables = variables.split( '|' )
-        while '' in variables:
-            variables.remove( '' )
-        var_list = []
-        flist = dir( math )
-        for el in variables:
-            if el not in flist:
-                try:
-                    float( el )
-                except:
-                    if el in self.Variables:
-                        var_list.append( el )
-                    else:
-                        print "ERROR: Cut on variable", el, "not valid, variable does not exist"
-            else:
-                cut = cut.replace( el, "math." + el )
-        ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
-        the variables '''
-        var_list.sort()
-        var_list.reverse()
-        values = [ self.Variables[ var ] for var in var_list ]
-        nvars  = len( var_list )
+        cut, variables = FormatEvalExpr( cut, self.Variables )
+        values = [ self.Variables[ var ] for var in variables ]
+        nvars  = len( variables )
         for ivar in xrange( nvars ):
-            cut = cut.replace( var_list[ ivar ], "values[ %i ][ ievt ]" %ivar )
+            cut = cut.replace( variables[ ivar ], "values[ %i ][ ievt ]" %ivar )
         return eval( "[ ievt for ievt in xrange( self.Nentries ) if " + cut + " ]" )
 
     def GetEntries( self, selection = False ):
@@ -333,14 +305,23 @@ class DataManager:
         self.OwnsTargets = False
         return self.Targets
 
-    def GetVarEvents( self, variable, cut = False ):
-        ''' Gets the list of values for a given variable. If a cut is specified it returns
-        the values concerning the sample which satisfies them. '''
-        values = self.Variables[ variable ]
+    def GetVarEvents( self, arg, cut = False ):
+        ''' If < arg > is a variable, it gets the list of values for it. If it is an expression,
+        it returns a list with the values corresponding to it. '''
         if cut:
-            return [ values[ ievt ] for ievt in self.GetCutList( cut ) ]
+            entries = self.GetCutList( cut )
         else:
-            return [ values[ ievt ] for ievt in xrange( self.Nentries ) ]
+            entries = xrange( self.Nentries )
+        if arg in self.Variables:
+            values = self.Variables[ arg ]
+            return [ values[ ievt ] for ievt in entries ]
+        else:
+            arg, variables = FormatEvalExpr( arg, self.Variables.keys() )
+            values = [ self.Variables[ var ] for var in variables ]
+            nvars  = len( variables )
+            for ivar in xrange( nvars ):
+                arg = arg.replace( variables[ ivar ], "values[ %i ][ ievt ]" %ivar )
+            return eval( "[ %s for ievt in entries ]" %arg )
 
     def GetVarNames( self ):
         ''' Gets the name of the variables in the class '''
@@ -353,14 +334,11 @@ class DataManager:
         if "name"  not in kwargs:  kwargs[ "name"  ]  = var
         if "title" not in kwargs:  kwargs[ "title" ]  = var
         if "xtitle" not in kwargs: kwargs[ "xtitle" ] = var
-        if "cuts" in kwargs:
-            var = self.GetVarEvents( var, kwargs[ "cuts" ] )
-            if wvar:
-                wvar = self.GetVarEvents( wvar, kwargs[ "cuts" ] )
-        else:
-            var = self.Variables[ var ]
-            if wvar:
-                wvar = self.Variables[ wvar ]
+        if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
+        else: cuts = False
+        var = self.GetVarEvents( var, cuts )
+        if wvar:
+            wvar = self.GetVarEvents( wvar, cuts )
         return MakeHistogram( var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
@@ -369,18 +347,13 @@ class DataManager:
         if "title"  not in kwargs: kwargs[ "title"  ] = xvar + "vs" + yvar
         if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
         if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
-        vwvar = False
-        if "cuts" in kwargs:
-            if wvar:
-                vwvar = self.GetVarEvents( wvar, kwargs[ "cuts" ] )
-            vxvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
-            vyvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
-        else:
-            if wvar:
-                vwvar = self.Variables[ wvar ]
-            vxvar = self.Variables[ xvar ]
-            vyvar = self.Variables[ yvar ]
-        return MakeHistogram2D( vxvar, vyvar, vwvar, **kwargs )
+        if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
+        else: cuts = False
+        if wvar:
+            wvar = self.GetVarEvents( wvar, cuts )
+        xvar = self.GetVarEvents( xvar, cuts )
+        yvar = self.GetVarEvents( yvar, cuts )
+        return MakeHistogram2D( xvar, yvar, wvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''
@@ -388,31 +361,34 @@ class DataManager:
         if "title"  not in kwargs: kwargs[ "title"  ] = xvar + "vs" + yvar
         if "xtitle" not in kwargs: kwargs[ "xtitle" ] = xvar
         if "ytitle" not in kwargs: kwargs[ "ytitle" ] = yvar
-        if "cuts" in kwargs:
-            xvar = self.GetVarEvents( xvar, kwargs[ "cuts" ] )
-            yvar = self.GetVarEvents( yvar, kwargs[ "cuts" ] )
-            if xerr: xerr = self.GetVarEvents( xerr, kwargs[ "cuts" ] )
-            if yerr: yerr = self.GetVarEvents( yerr, kwargs[ "cuts" ] )
-        else:
-            xvar = self.Variables[ xvar ]
-            yvar = self.Variables[ yvar ]
-            if xerr: xerr = self.Variables[ xerr ]
-            if yerr: yerr = self.Variables[ yerr ]
+        if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
+        else: cuts = False
+        xvar = self.GetVarEvents( xvar, cuts )
+        yvar = self.GetVarEvents( yvar, cuts )
+        if xerr: xerr = self.GetVarEvents( xerr, cuts )
+        if yerr: yerr = self.GetVarEvents( yerr, cuts )
         return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 
-    def MakeVariable( self, varname, arglist, function ):
-        ''' Makes another variable using those in the class. There have to be specified:
-        the new variable name, the name of the variables used by the function
-        ( ordered in a list ) and the function itself. The computation of the new
-        variable is going to be performed passing the function the variables as normal
-        entries ( *args, where args is the list of values ). '''
-        new_variable = self.Nentries*[ 0. ]
-        var_tensor   = [ self.Variables[ vname ] for vname in arglist ]
-        lvars        = range( len( arglist ) )
-        for ievt in xrange( self.Nentries ):
-            values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
-            new_variable[ ievt ] = function( *values )
-        self.Variables[ varname ] = new_variable
+    def MakeVariable( self, varname, arg, function = False ):
+        ''' Makes another variable using those in the class. There are two different
+        ways to do it. The first one consists on specifying the new variable name,
+        the name of the variables used by the function ( ordered in a list ) and the
+        function itself. The computation of the new variable is going to be performed
+        passing the variables to the function as normal entries ( *args, where args is
+        the list of values ). The second method consists on specifying only the name
+        of the variable and an expression in < arg >. The values will be processed
+        then for each entry taking into account the value obtained when evaluating the
+        expression. '''
+        if function:
+            new_variable = self.Nentries*[ 0. ]
+            var_tensor   = [ self.Variables[ vname ] for vname in arg ]
+            lvars        = xrange( len( arg ) )
+            for ievt in xrange( self.Nentries ):
+                values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
+                new_variable[ ievt ] = function( *values )
+            self.Variables[ varname ] = new_variable
+        else:
+            self.Variables[ varname ] = self.GetVarEvents( arg )
 
     def NewEvent( self, dic ):
         ''' Adds a new event to the manager. A value for all the variables has to be
