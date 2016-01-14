@@ -1,7 +1,7 @@
-*** Isis ***
+*** Isis project ***
 
-This set of c++ and python code constitute a tool to perform analysis in High Energy Physics. The environment is built executing the attached script "LoadEnvironment.sh".
+This set of c++ and python code constitute a tool to perform analysis in High Energy Physics. The environment is built executing the attached script "loadenv.sh".
 
 The different tools have been tested under C++11, Python v2.7.8 and ROOT v6.02 (see "https://root.cern.ch" for more information).
 
-To install the package, first source the configuration file "configure.sh" typing ". configure.sh" or "source configure.sh". Then type "make" and the installation will start. In order to set the Isis environment create an alias to execute $ISIS/bin/LoadEnvironment.sh, for example "source $ISIS/bin/LoadEnvironment.sh".
+To install the package, first source the configuration file "configure.sh" typing ". configure.sh" or "source configure.sh". Then type "make" and the installation will start. In order to set the Isis environment create an alias to execute $ISIS/bin/loadenv.sh, for example "source $ISIS/bin/loadenv.sh".
