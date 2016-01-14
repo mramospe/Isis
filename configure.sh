@@ -6,7 +6,7 @@
 #=================================================#
 
 # Loads the Isis environment
-source bin/LoadEnvironment.sh
+source bin/loadenv.sh
 echo " Loaded Isis environment"
 
 # If the library directory does not exist it is created
