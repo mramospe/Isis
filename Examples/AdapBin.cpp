@@ -107,17 +107,16 @@ int main() {
   canvas -> Clear();
   frame  -> Draw();
   canvas -> Write( "Fit" );
-  
+
   // Deletes the pointers
-  delete canvas;
-  delete frame;
+  delete mtree;
   delete data;
+  delete canvas;
   delete hAdj;
   delete hStr;
   delete hAdjStr;
   delete asHist;
-  delete mtree;
-
+  
   ifile -> Close();
 
   return 0;
