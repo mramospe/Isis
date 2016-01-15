@@ -9,8 +9,7 @@
 cflags="-Wall -std=c++11 -pthread"
 
 # Paths to the include folders
-ginclude=-I$ISIS/General/include
-ainclude=-I$ISIS/Analysis/include
+iinclude=-I$ISIS/include
 rinclude=-I`root-config --incdir`
 
 # C++ libraries (both Root and Isis)
@@ -24,7 +23,7 @@ do
     if [ "$opt" = "--cflags" ]; then
 	add=$cflags
     elif [ "$opt" = "--incdirs" ]; then
-	add=$rinclude" "$ginclude" "$ainclude
+	add=$rinclude" "$iinclude
     elif [ "$opt" = "--rlibs" ]; then
 	add=$rlibs
     elif [ "$opt" = "--libs" ]; then
