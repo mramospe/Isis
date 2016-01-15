@@ -5,14 +5,20 @@
 # e-mail: miguel.ramos.pernas@cern.ch	          #
 #=================================================#
 
-# Loads the Isis environment
-source bin/loadenv.sh
-echo " Loaded Isis environment"
+# Gets the path to this script
+currpath=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
+
+buildpath=$currpath/build
 
 # If the library directory does not exist it is created
-if [ ! -d "$ISIS/lib" ]; then
-    mkdir $ISIS/lib
-    echo " Created library folder at: $ISIS/lib"
+if [ ! -d "$buildpath" ]; then
+    mkdir $buildpath
+    echo "The Isis package will be built in $buildpath"
 fi
 
-echo " Type < make > to install the Isis project"
+echo "Accessing path $buildpath"
+cd $buildpath
+
+echo "Invoking cmake"
+cmake $currpath $@
+echo "Type < make > to install the Isis package"
