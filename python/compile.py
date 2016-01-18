@@ -35,7 +35,7 @@ for idir, dirs, files in tree:
         if f[ -3: ] == ".py":
             ifile = idir + f
             ofile = wdir + f + "c"
-            if not os.path.exists( ofile ):
+            if not os.path.exists( ofile ) or os.stat( ofile ).st_mtime < os.stat( ifile ).st_mtime:
                 print "Building file", ofile
                 py_compile.compile( ifile )
                 if replace:
