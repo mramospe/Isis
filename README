@@ -5,3 +5,5 @@ This set of c++ and python code constitute a tool to perform analysis in High En
 The different tools have been tested under C++11, Python v2.7.8 and ROOT v6.02 (see "https://root.cern.ch" for more information).
 
 To install the package, first source the configuration file "configure.sh" typing ". configure.sh" or "source configure.sh". Then type "make" and the installation will start. In order to set the Isis environment create an alias to execute $ISIS/bin/loadenv.sh, for example "source $ISIS/bin/loadenv.sh".
+
+The installation is done using cmake, so one can also create a proper installation directory. To see the avaliable options for the build process please read the < CMakeLists.txt > file.
