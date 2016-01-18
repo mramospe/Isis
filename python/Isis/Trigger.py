@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 18/11/2015                                                  //
+#//  Last update: 18/01/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -22,11 +22,11 @@
 
 from Isis.DataManagement import DataManager
 from Isis.Utils import LargestString
-from ROOT import TGraph
+from ROOT import TRandom3
 
 
 #_______________________________________________________________________________
-# Class Trigger
+# Class to perform trigger analysis. It operates over DataManager classes.
 class Trigger:
 
     def __init__( self, mib_rate, **kwargs ):
@@ -66,6 +66,9 @@ class Trigger:
         old_nevts = self.GetTrueEvents( mngr )
         new_nevts = old_nevts
         strsize   = LargestString( self.Cuts )
+        msg = "-- Efficiencies for " + mngr.Name + " [ total eff. ] [ partial eff. ] --"
+        lm  = len( msg )*"-"
+        print lm + "\n" + msg + "\n" + lm
         for cut in self.CutList:
             cut       = self.Cuts[ cut ]
             toceff    = new_nevts
@@ -92,14 +95,40 @@ class Trigger:
         else:
             self.SigMngr[ dtype ] = mngr
 
-    def BookCut( self, cut_id, cut ):
-        ''' Books a new cut with the id given by < cut_id > '''
-        self.Prepared = False
-        if cut_id in self.CutList:
-            print "CutID <", cut_id, "> already used, cut <", cut, "> not booked"
+    def ApplyTrigger( self, *args ):
+        ''' Applies the give trigger to the different DataManager classes in < args >. If
+        this is an empty list, then it will work with the signal and minimum bias samples. 
+        It also will show the rate. The cuts are removed after applying this method.
+        Finally returns the samples cut by this trigger in the same order as the those
+        given as input. '''
+        if not args:
+            args = [ self.SigMngr, self.MiBMngr ]
+        self.PrepareTrigger()
+        outmngrs = []
+        for mngr in args:
+            outmngrs.append( self.__call__( mngr ) )
+        msg = "-- Minimum bias rate: " + str( self.GetRate() ) + " Hz --"
+        lm  = len( msg )*"-"
+        print lm + "\n" + msg + "\n" + lm
+        return outmngrs
+
+    def BookCut( self, arg, cut = False ):
+        ''' If < arg > is a name, and < cut > is its attached cut, it books a new cut with
+        the id given by < arg >. Otherwise if < arg > is a variable of the class
+        < TriggerVarDict > there will be booked the enabled variables with an id equal to
+        the keys of it. '''
+        if cut:
+            self.Prepared = False
+            if arg in self.CutList:
+                print "CutID <", arg, "> already used, cut <", cut, "> not booked"
+            else:
+                self.CutList.append( arg )
+                self.Cuts[ arg ] = cut
         else:
-            self.CutList.append( cut_id )
-            self.Cuts[ cut_id ] = cut
+            for var in arg:
+                vdict = arg[ var ]
+                for el in vdict[ "vars" ]:
+                    self.BookCut( var + "_" + el, el + vdict[ "cond" ] + str( vdict[ "cut" ] ) )
 
     def GetCutLine( self ):
         ''' Gets all the cuts. Cuts located in < self.Cuts > will be concatenated with an 
@@ -242,3 +271,84 @@ class Trigger:
         ''' Sets the minimum bias rate '''
         self.Prepared = False
         self.MiBrate  = val
+
+#_______________________________________________________________________________
+# Class to store variables to be used by a trigger class. Every variable has
+# three different
+class TriggerVarDict( dict ):
+    
+    def __init__( self, vardict = {}, enabled_vars = [] ):
+        ''' The class can be constructed giving a dictionary as an argument, containing all
+        the variables with the information written with an identical format as that of the
+        < AddVariable > method. The variables to be enabled can also be given in a list. By
+        default all the variables given in the dictionary are enabled. '''
+        if vardict:
+            for el in vardict:
+                self[ el ] = vardict[ el ]
+            if enabled_vars:
+                self.EnabledVars = enabled_vars
+            else:
+                self.EnabledVars = vardict.keys()
+        else:
+            self.EnabledVars = []
+        self.Rndm = TRandom3()
+
+    def __iter__( self ):
+        ''' Definition of the iterator. The iteration is made over the enabled variables. '''
+        return self.EnabledVars.__iter__()
+
+    def next( self ):
+        ''' As in the < __iter__ > method, the iteration is made over the enabled variables. '''
+        return self.EnabledVars.next()
+        
+    def AddVariable( self, name, variables, condition, cut, minimum = False, maximum = False ):
+        ''' Adds a new variable to the dictionary. All the variables that are added
+        manually have to be written following this format '''
+        self[ name ] = {
+            "cond": condition,
+            "cut" : cut,
+            "min" : minimum,
+            "max" : maximum,
+            "vars": variables
+            }
+        if name not in self.EnabledVars:
+            self.EnabledVars.append( name )
+
+    def IsEnabled( self, name ):
+        ''' Checks if the given variable is enabled or not '''
+        if name in self.EnabledVars:
+            return True
+        else:
+            return False
+
+    def MakeCut( self, name ):
+        ''' Constructs the string with the cut of the variable < name > '''
+        vdict = self[ name ]
+        cond, value = vdict[ "cond" ], vdict[ "cut" ]
+        cut = vdict[ "vars" ][ 0 ] + cond + str( value )
+        for el in vdict[ "vars" ][ 1: ]:
+            cut += " and " + el + cond + str( value )
+        return cut
+
+    def MakeRandomCut( self, name ):
+        ''' Returns a random cut for the given variable '''
+        vdict = self[ name ]
+        value = ( vdict[ "max" ] - vdict[ "min" ] )*self.Rndm.Rndm() + vdict[ "min" ]
+        cond = vdict[ "cond" ]
+        cut  = vdict[ "vars" ][ 0 ] + cond + str( value )
+        for el in vdict[ "vars" ][ 1: ]:
+            cut += " and " + el + cond + str( value )
+        return cut
+
+    def SetEnabledVars( self, *args ):
+        ''' Sets the list of enabled variables to perform the different operations '''
+        self.EnabledVars = args
+
+    def SetVarStatus( self, name, status ):
+        ''' Sets the status of the variable < name > to the value given '''
+        if status == True:
+            if not name in self.EnabledVars:
+                self.EnabledVars.append( name )
+        else:
+            if name in self.EnabledVars:
+                self.EnabledVars.remove( name )
