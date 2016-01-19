@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 18/01/2016                                                  //
+#//  Last update: 19/01/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -21,7 +21,7 @@
 
 
 from Isis.DataManagement import DataManager
-from Isis.Utils import LargestString
+from Isis.Utils import LargestString, StringListFilter
 from ROOT import TRandom3
 
 
@@ -339,6 +339,54 @@ class TriggerVarDict( dict ):
         for el in vdict[ "vars" ][ 1: ]:
             cut += " and " + el + cond + str( value )
         return cut
+
+    def Print( self, arg = "*", **kwargs ):
+        ''' Displays the information of the current dictionary. In < arg > a list of variables can
+        be given, or a string containing the pattern that follow the variables to be used. If the
+        option < enabled > is set to false, all the variables in the class will be displayed. '''
+        if "enabled" in kwargs: enabled = kwargs[ "enabled" ]
+        else: enabled = False
+        if arg == "*":
+            if enabled:
+                arg = [ var for var in self ]
+            else:
+                arg = self.keys()
+        elif isinstance( arg, str ):
+            if enabled:
+                arg = StringListFilter( [ var for var in self ], arg )
+            else:
+                arg = StringListFilter( self.keys(), arg )
+        arg.sort()
+        gname = max( [ len( name ) for name in arg ] )
+        if gname < 4: gname = 4
+        gvars = max( len( str( self[ var ][ "vars" ] ) ) for var  in arg )
+        if gvars < 9: gvars = 9
+        gcut = max( len( str( self[ var ][ "cut" ] ) ) for var in arg )
+        if gcut < 3: gcut = 3
+        gmin = max( len( str( self[ var ][ "min" ] ) ) for var in arg )
+        if gmin < 4: gmin = 4
+        gmax = max( len( str( self[ var ][ "max" ] ) ) for var in arg )
+        if gmax < 4: gmax = 4
+        separator = ( gname + gvars + 5 + gcut + gmin + gmax + 21 )*"-"
+        lengths = [ gvars      , 5      , gcut , gmin  , gmax   ]
+        prorder = [ "vars"     , "cond" , "cut", "min" , "max"  ]
+        outlst  = [ "Variables", "Cond.", "Cut", "Min.", "Max." ]
+        prout   = 3*" " + "Name" + ( gname - 4 )*" "
+        for el, lgth in zip( outlst, lengths):
+            prout += 3*" " + el + ( lgth - len( el ) )*" "
+        print separator + "\n" + prout + "\n" + separator
+        for var in arg:
+            vdict = self[ var ]
+            prout = 3*" " + var + ( gname - len( var ) )*" "
+            for el, lgth in zip( prorder, lengths ):
+                prop = str( vdict[ el ] )
+                nwsp = lgth - len( prop )
+                if el == "cond":
+                    prout += 5*" " + prop + ( nwsp - 2 )*" "
+                else:
+                    prout += 3*" " + prop + nwsp*" "
+            print prout
+        print separator
 
     def SetEnabledVars( self, *args ):
         ''' Sets the list of enabled variables to perform the different operations '''

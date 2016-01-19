@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 13/01/2016                                //
+#//  Last update: 19/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -179,3 +179,40 @@ def MergeDicts( *args ):
         for dic in args:
             rdic[ key ] += dic[ key ]
     return rdic
+
+#_______________________________________________________________________________
+# Given a list and a pattern ( with elements separated by "*" symbols ) it
+# returns another list with those that satisfy it.
+def StringListFilter( lst, pattern ):
+    pattern = pattern.split( "*" )
+    checkstart, checkend = False, False
+    while "" in pattern:
+        pos = pattern.index( "" )
+        if pos:
+            del pattern[ pos ]
+            checkstart = True
+        else:
+            del pattern[ pos ]
+            checkend   = True
+    if checkstart and checkend:
+        checkstart, checkend = False, False
+    output = []
+    for el in lst:
+        add = True
+        if checkstart:
+            if not el.startswith( pattern[ 0 ] ):
+                add = False
+        elif checkend:
+            if not el.endswith( pattern[ -1 ] ):
+                add = False
+        if add:
+            pos = 0
+            for pt in pattern:
+                newpos = el.find( pt )
+                if newpos == -1 or newpos < pos:
+                    add = False
+                    break
+                pos = newpos
+            if add:
+                output.append( el )
+    return output
