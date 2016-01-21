@@ -4,13 +4,13 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 11/12/2015                                //
+#//  Last update: 21/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #/////////////////////////////////////////////////////////////
 
 
-import os, sys, pkgutil, inspect
+import sys, pkgutil, inspect
 
 
 # If this __init__.py file is executed, it will import all Isis and ROOT modules. Since

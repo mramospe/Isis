@@ -1,23 +1,23 @@
-//////////////////////////////////////////////////////////
-//                                                      //
-//  General package                                     //
-//                                                      //
-// ---------------------------------------------------- //
-//                                                      //
-//  AUTHOR: Miguel Ramos Pernas                         //
-//  e-mail: miguel.ramos.pernas@cern.ch                 //
-//                                                      //
-//  Last update: 30/09/2015                             //
-//                                                      //
-// ---------------------------------------------------- //
-//                                                      //
-//  Description:                                        //
-//                                                      //
-//  Template file that contains some utils to work with //
-//  c++ classes.                                        //
-//                                                      //
-// ---------------------------------------------------- //
-//////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+//                                                       //
+//  General package                                      //
+//                                                       //
+// ----------------------------------------------------- //
+//                                                       //
+//  AUTHOR: Miguel Ramos Pernas                          //
+//  e-mail: miguel.ramos.pernas@cern.ch                  //
+//                                                       //
+//  Last update: 21/01/2016                              //
+//                                                       //
+// ----------------------------------------------------- //
+//                                                       //
+//  Description:                                         //
+//                                                       //
+//  Template file that contains some utils to work with  //
+//  c++ classes.                                         //
+//                                                       //
+// ----------------------------------------------------- //
+///////////////////////////////////////////////////////////
 
 
 #ifndef __UTILS__
@@ -32,6 +32,23 @@
 //_______________________________________________________________________________ 
 
 namespace General {
+
+  //_______________________________________________________________________________
+  // Calculates the length ( number of numbers ) for a given interger
+  size_t CalcIntLength( long int integer ) {
+    size_t size = 0;
+    if ( integer > 0 )
+      while( integer >= 1 ) {
+	integer /= 10;
+	size++;
+      }
+    else
+      while ( integer <= -1 ) {
+	integer /= 10;
+	size++;
+      }
+    return size;
+  }
 
   //_______________________________________________________________________________
   // This function replaces all the substrings of the strings storaged in a vector
