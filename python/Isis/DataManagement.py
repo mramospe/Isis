@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 13/01/2016                                //
+#//  Last update: 26/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -419,11 +419,12 @@ class DataManager:
                 max_length = lvar
 
         ''' Prints the name of the manager '''
-        lname = len( self.Name )
-        print "\n" + 3*lname*'*' + "\n" + lname*" " + self.Name + "\n" + 3*lname*'*'
+        if self.Name:
+            lname = len( self.Name )
+            print "\n" + 3*lname*'*' + "\n" + lname*" " + self.Name + "\n" + 3*lname*'*'
         
         ''' Prints the targets '''
-        if len( self.Targets ):
+        if self.Targets:
             print "\nFiles attached:"
             for ifile in self.Targets:
                 out = " - " + ifile.GetName() + ": "

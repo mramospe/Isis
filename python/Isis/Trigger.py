@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 19/01/2016                                                  //
+#//  Last update: 26/01/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -120,7 +120,7 @@ class Trigger:
         if cut:
             self.Prepared = False
             if arg in self.CutList:
-                print "CutID <", arg, "> already used, cut <", cut, "> not booked"
+                print "WARNING: CutID <", arg, "> already used, cut <", cut, "> not booked"
             else:
                 self.CutList.append( arg )
                 self.Cuts[ arg ] = cut
@@ -228,7 +228,7 @@ class Trigger:
         elif cond == '>' : func = lambda x: x > cut
         elif cond == '<=': func = lambda x: x <= cut
         elif cond == '>=': func = lambda x: x >= cut
-        ''' If only a variable is provided, it makes a list with it '''
+        ''' If only one variable is provided, it makes a list with it '''
         if not type( varlst ) in ( list, tuple ):
             varlst = [ varlst ]
         for el in self.SigMngr:
@@ -237,19 +237,19 @@ class Trigger:
         ''' Performs the loop over all the cuts with the information provided '''
         sigmngrs = [ self.CutSigMngr[ el ] for el in self.CutSigMngr ]
         for i in range( npoints ):
-            cut      = first + i*step
-            lenlst   = len( sigmngrs )*[ 0 ]
+            cut    = first + i*step
+            lenlst = len( sigmngrs )*[ 0 ]
             for j, mngr in enumerate( sigmngrs ):
                 varvals  = [ mngr.Variables[ var ] for var in varlst ]
                 condlist = zip( *[ map( func, vals ) for vals in varvals ] )
-                for ievt in range( mngr.Nentries ):
+                for ievt in xrange( mngr.Nentries ):
                     if all( condlist[ ievt ] ):
                         lenlst[ j ] += 1
             varvals  = [ self.CutMiBMngr.Variables[ var ] for var in varlst ]
             condlist = zip( *[ map( func, vals ) for vals in varvals ] )
             nmib     = self.GetTrueEvents( self.CutMiBMngr,
-                                               [ ievt for ievt, el in enumerate( condlist ) 
-                                                 if all( el ) ] )
+                                           [ ievt for ievt, el in enumerate( condlist ) 
+                                             if all( el ) ] )
             results[ "cut"  ][ i ] = cut
             results[ "nmib" ][ i ] = nmib
             results[ "rate" ][ i ] = self.MiBrate*nmib*1./self.nMiBevts
@@ -400,3 +400,7 @@ class TriggerVarDict( dict ):
         else:
             if name in self.EnabledVars:
                 self.EnabledVars.remove( name )
+            elif name == "*":
+                self.EnabledVars = []
+            else:
+                print "ERROR: Variable <", name ,"> not recognised"

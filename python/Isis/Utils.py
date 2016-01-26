@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 19/01/2016                                //
+#//  Last update: 26/01/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -52,11 +52,20 @@ def FormatEvalExpr( expr, vlist ):
     expr      = expr.replace( "||" , "or"   )
     expr      = expr.replace( "abs", "fabs" )
     variables = expr
-    for el in [ '==', '!=', '<=', '>=', '>', '<',
-                'and', 'or', '(', ')',
-                "+", "-", "*", "/" ]:
-        variables = variables.replace( el, '|' )
     variables = variables.replace( ' ', '' )
+    for el in ( '==', '!=', '<=', '>=', '>', '<',
+                'and', 'or', '(', ')',
+                "*", "/" ):
+        variables = variables.replace( el, '|' )
+    ''' This lines allow the management of float values given with an < e/E > '''
+    if variables[ 0 ] in ( '+', '-' ):
+        variables = '|' + variables[ 1: ]
+    for i, el in enumerate( variables[ 1: ] ):
+        if el in ( "+", "-" ):
+            el = variables[ i - 1 ]
+            if el != "e" and el != "E":
+                variables = variables[ :i ] + '|' + variables[ i + 1: ]
+    ''' Splits the elements, so only the variables and the numbers remain '''
     variables = variables.split( '|' )
     while '' in variables:
         variables.remove( '' )
