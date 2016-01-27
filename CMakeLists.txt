@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 14/01/2016                                                    #
+#  Last update: 27/01/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -39,11 +39,12 @@ include_directories(${ROOT_INCLUDE_DIR})
 file(GLOB ROOT_LIBRARIES ${ROOT_LIBRARY_DIR}/*.so)
 
 #----------------------------------------------------------------------------
-# Defines two functions that copy or create a given directory only if it
-# does not exist
+# Defines two functions that copy or create a given directory/file only if it
+# does not exist. In the case of files it will also be copied if it is newer
+# than that in the specified path.
 function(self_copy_file file, path)
   get_filename_component(name ${file} NAME)
-  if(NOT EXISTS ${path}/${name})
+  if(NOT EXISTS ${path}/${name} OR ${file} IS_NEWER_THAN ${path}/${name})
     execute_process(COMMAND cp ${file} ${path}/.)
   endif()
 endfunction()
