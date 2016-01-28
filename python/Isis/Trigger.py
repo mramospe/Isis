@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 26/01/2016                                                  //
+#//  Last update: 28/01/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -22,8 +22,163 @@
 
 from Isis.DataManagement import DataManager
 from Isis.Utils import LargestString, StringListFilter
-from ROOT import TRandom3
+from ROOT import TCanvas, TLine, TMarker, TRandom3, kBlue, kRed
+from math import sqrt
 
+
+#_______________________________________________________________________________
+# This function set the cuts of a given trigger, so they minimize the ROC
+# distances obtained with the signal and minimum bias samples. For each loop,
+# a scan over all the variables enabled in < vardict > is performed, selecting
+# that who generates the best ROC performance. Afterwards the cut is made and
+# the process is repeated till the rate is smaller than the maximum allowed, or
+# since the maximum number of loops is reached ( in this case a warning message
+# will appear ). A total number of < npoints > will be computed to make the ROC
+# curves. The maximum number of loops is specified via < maxloop >. If the
+# < display > option is set to True, every time a ROC distance minimization is
+# done, the output canvas will show the curve. If a file is given in the
+# < save > argument, the graphs will be saved on it.
+def MinimizeROCdistances( trigger, sigsamples, vardict, maxrate, **kwargs ):
+    if "display" in kwargs: display = kwargs[ "display" ]
+    else: display = False
+    if "maxloop" in kwargs: maxloop = kwargs[ "maxloop" ]
+    else: maxloop = 10
+    if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
+    else: npoints = 100
+    if "save" in kwargs:
+        save = kwargs[ "save" ]
+        save.cd()
+    else:
+        save = False
+    ''' Since the calculations are made using the squared distance the weights are also squared '''
+    if "weights" in kwargs: weights = [ el**2 for el in kwargs[ "weights" ] ]
+    else: weigths = len( sigsamples )*[ 1. ]
+
+    sigzip = zip( sigsamples, weights )
+
+    print "\n**************************************************"
+    print "*** Starting ROC distance minimization process ***"
+    print "**************************************************"
+    print "Infomation:"
+    print "- Signal managers:", [ trigger.SigMngr[ mgr ].Name for mgr in trigger.SigMngr ]
+    print "- Minimum bias manager:", trigger.MiBMngr.Name
+    if save:
+        print "- Results will be written in file <", save.GetName(), ">"
+    
+    trigger.PrepareTrigger()
+    if display:
+        canvas = TCanvas( "ROC", "ROC" )
+    makegraph = display or save
+    nmib      = trigger.GetTrueEvents( trigger.MiBMngr )
+
+    ''' Works only with the enabled variables in the dictionary '''
+    variables = [ var for var in vardict ]
+    variables.sort()
+    toteff, totrej = 1, 0
+    print "- Working variables:", variables
+    for iloop in xrange( maxloop ):
+        bestdst2, cut, cvar = 1, 0, ""
+        trigger.PrepareTrigger()
+
+        ''' If the rate obtained is smaller than the maximum allowed displays the trigger
+        information and returns it '''
+        if trigger.GetRate() < maxrate:
+            print "\nSuccessful process"
+            trigger.Print()
+            return trigger
+
+        print "______________________" + len( str( iloop ) )*"_"
+        print "*** Starting loop", iloop + 1, "***"
+
+        for var in variables:
+            vdict = vardict[ var ]
+            lists = trigger.ScanVariable( vdict[ "vars" ],
+                                          vdict[ "cond" ],
+                                          vdict[ "min" ],
+                                          vdict[ "max" ],
+                                          npoints )
+
+            ''' Calculates the normalized rejections for the minimum bias '''
+            rej    = [ el*1./nmib for el in lists[ "nmib" ] ]
+            maxrej = max( rej )
+            if maxrej == 0:
+                print "Cuts on variable <", var, "> give a null rejection. Removed from list."
+                variables.remove( var )
+                continue
+            rej = [ 1. - el/maxrej for el in rej ]
+
+            ''' Calculates the normalized efficiencies for each sample '''
+            for smp, w2 in sigzip:
+                nsig   = trigger.SigMngr[ smp ].Nentries
+                eff    = [ el*1./nsig for el in lists[ "n" + smp ] ]
+                maxeff = max( eff )
+                eff    = [ el/maxeff for el in eff ]
+                dst2   = w2
+                for i, ( ieff, irej ) in enumerate( zip( eff, rej ) ):
+                    newdst2 = w2*( ( 1. - ieff )**2 + ( 1. - irej )**2 )
+                    if newdst2 < dst2:
+                        index, dst2 = i, newdst2
+                if dst2 < bestdst2:
+                    cvar  = var
+                    value = vdict[ "min" ] + index*( vdict[ "max" ] -
+                                                     vdict[ "min" ] )*1./( len( eff ) - 1 )
+                    besteff, bestrej, bestdst2 = eff[ index ], rej[ index ], dst2
+                    print "New smallest squared distance ( %s ):" % cvar, bestdst2
+                    if makegraph:
+                        graph = ( rej, eff, smp )
+
+        ''' Constructs the cut to be applied '''
+        vdict = vardict[ cvar ]
+        cond = vdict[ "cond" ]
+        cut  = vdict[ "vars" ][ 0 ] + cond + str( value )
+        for el in vdict[ "vars" ][ 1: ]:
+            cut += " and " + el + cond + str( value )
+        if cvar in trigger.CutList:
+            trigger.RemoveCuts( cvar )
+        trigger.BookCut( cvar, cut )
+        toteff *= besteff
+        totrej += bestrej*( 1. - totrej )
+        print "== Results =="
+        print "- Cut variable:", cvar
+        print "- Cut line:    ", cut
+        print "- Cut results [ total ] [ partial ]:"
+        print "   Efficiencies:", toteff, "(", besteff, ")"
+        print "   Rejections:  ", totrej, "(", bestrej, ")"
+        print "   ROC distance:", sqrt( bestdst2 )
+        print "   Rate:        ", trigger.GetRate()
+        ''' Depending on the specified options for the graphs and the canvas it displays and/or
+        saves them '''
+        if makegraph:
+            graph = MakeScatterPlot( graph[ 0 ],
+                                     graph[ 1 ],
+                                     xtitle = "Minimum bias rejection",
+                                     ytitle = "Signal efficiency ( " + graph[ 2 ] + " )" )
+            graph.SetTitle( cvar )
+            graph.GetXaxis().SetRangeUser( 0, 1 )
+            graph.GetYaxis().SetRangeUser( 0, 1 )
+            if display:
+                if not canvas:
+                    canvas = TCanvas( "ROC", "ROC" )
+                marker = TMarker( bestrej, besteff, 20 )
+                hline  = TLine( 0      , besteff, 1      , besteff )
+                vline  = TLine( bestrej, 0      , bestrej, 1       )
+                pline  = TLine( bestrej, besteff, 1      , 1       )
+                graph.Draw( "AP" )
+                pline.SetLineColor( kBlue )
+                pline.SetLineStyle( 2 )
+                marker.SetMarkerColor( kRed )
+                for el in ( hline, vline ):
+                    el.SetLineColor( kRed )
+                    el.SetLineStyle( 2 )
+                for el in ( pline, hline, vline, marker ):
+                    el.Draw( "SAME" )
+                canvas.Update()
+                raw_input( "Introduce any expression to continue: " )
+            if save:
+                graph.Write( "Loop_" + len( str( maxloop - iloop - 1 ) )*"0" +
+                             str( iloop ) + "_" + cvar )
+    print "WARNING: The ROC distance minimization process has not converged"
+    return trigger
 
 #_______________________________________________________________________________
 # Class to perform trigger analysis. It operates over DataManager classes.
@@ -91,7 +246,7 @@ class Trigger:
             else:
                 self.MiBMngr  = mngr
             if self.SelfNorm :
-                self.nMiBevts += len( mngr )
+                self.nMiBevts += mngr.Nentries
         else:
             self.SigMngr[ dtype ] = mngr
 
@@ -139,7 +294,7 @@ class Trigger:
         cut = cut[ :-5 ]
         return cut
 
-    def GetEfficiency( self, arg, dtype ):
+    def GetEfficiency( self, dtype, arg = [] ):
         ''' Returns the efficiency for signal or minimum bias samples. This quantity is refered
         to the total number of events in the main sample. The input parameter < arg > can be
         a cut string or a list of events. '''
@@ -151,6 +306,8 @@ class Trigger:
             mngr  = self.SigMngr[ dtype ]
         if isinstance( arg, str ):
             arg = cmngr.GetCutList( arg )
+        elif arg == []:
+            arg = xrange( cmngr.Nentries )
         return self.GetTrueEvents( cmngr, arg )*1./self.GetTrueEvents( mngr )
 
     def GetRate( self, arg = False ):
@@ -158,12 +315,16 @@ class Trigger:
         if isinstance( arg, str ):
             arg = self.CutMiBMngr.GetCutList( arg )
         if not arg:
-            arg = self.CutMiBMngr.GetCutList( self.GetCutLine() )
+            cutline = self.GetCutLine()
+            if cutline:
+                arg = self.CutMiBMngr.GetCutList( self.GetCutLine() )
+            else:
+                arg = xrange( self.CutMiBMngr.Nentries )
         return self.MiBrate*self.GetTrueEvents( self.CutMiBMngr, arg )*1./self.nMiBevts
 
-    def GetRejection( self, arg, dtype = "mib" ):
+    def GetRejection( self, dtype, arg ):
         ''' Gets the rejection for a given cut string or list '''
-        return 1. - self.GetEfficiency( arg, dtype )
+        return 1. - self.GetEfficiency( dtype, arg )
 
     def GetTrueEvents( self, mngr, lst = False ):
         ''' Method to get the number of true events in a given manager. If a list of
@@ -172,7 +333,7 @@ class Trigger:
             event_list = mngr.Variables[ self.EvtVar ]
             ''' If < lst > is a void list it is maintained as it is '''
             if lst == False:
-                lst = range( mngr.Nentries )
+                lst = xrange( mngr.Nentries )
             event_list = [ event_list[ i ] for i in lst ]
             evts       = len( set( event_list ) )
             return evts
@@ -198,7 +359,18 @@ class Trigger:
             for kw in self.SigMngr:
                 self.CutSigMngr[ kw ] = self.SigMngr[ kw ].CutSample( cut )
         self.Prepared = True
-        print "Trigger prepared"
+
+    def Print( self ):
+        ''' Displays the information of the current trigger '''
+        lines  = [ "Trigger features", "- Rate:" + str( self.GetRate() ), "- Efficiencies:" ]
+        maxstr = max( len( mngr ) for mngr in self.SigMngr )
+        for mngr in self.SigMngr:
+            lines.append( "   " + mngr + ( maxstr - len( mngr ) )*" " +
+                          " => " + str( self.GetEfficiency( mngr ) ) )
+        maxstr = max( len( line ) for line in lines )
+        decor  = maxstr*"*"
+        for line in [ decor ] + lines + [ decor ]:
+            print line
 
     def RemoveCuts( self, *args ):
         ''' Removes a cut booked in the class. After using this method, ApplyCuts has to
@@ -233,7 +405,7 @@ class Trigger:
             varlst = [ varlst ]
         for el in self.SigMngr:
             results[ "n"    + el ] = npoints*[ 0 ]
-            results[ "oldn" + el ] = len( self.SigMngr[ el ] )
+            results[ "oldn" + el ] = self.SigMngr[ el ].Nentries
         ''' Performs the loop over all the cuts with the information provided '''
         sigmngrs = [ self.CutSigMngr[ el ] for el in self.CutSigMngr ]
         for i in range( npoints ):
