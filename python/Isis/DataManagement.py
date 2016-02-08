@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 26/01/2016                                //
+#//  Last update: 08/02/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -242,7 +242,7 @@ class DataManager:
     def GetCutList( self, cut ):
         ''' This method allows to obtain a list with the events that satisfy the cuts
         given '''
-        cut, variables = FormatEvalExpr( cut, self.Variables )
+        cut, variables = FormatEvalExpr( cut, math )
         values = [ self.Variables[ var ] for var in variables ]
         nvars  = len( variables )
         for ivar in xrange( nvars ):
@@ -316,7 +316,7 @@ class DataManager:
             values = self.Variables[ arg ]
             return [ values[ ievt ] for ievt in entries ]
         else:
-            arg, variables = FormatEvalExpr( arg, self.Variables.keys() )
+            arg, variables = FormatEvalExpr( arg, math )
             values = [ self.Variables[ var ] for var in variables ]
             nvars  = len( variables )
             for ivar in xrange( nvars ):

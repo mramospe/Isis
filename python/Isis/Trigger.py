@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 28/01/2016                                                  //
+#//  Last update: 29/01/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -51,7 +51,7 @@ def MinimizeROCdistances( trigger, sigsamples, vardict, maxrate, **kwargs ):
     else:
         save = False
     ''' Since the calculations are made using the squared distance the weights are also squared '''
-    if "weights" in kwargs: weights = [ el**2 for el in kwargs[ "weights" ] ]
+    if "weights" in kwargs: weights = [ ( 1. - el )**2 for el in kwargs[ "weights" ] ]
     else: weigths = len( sigsamples )*[ 1. ]
 
     sigzip = zip( sigsamples, weights )
@@ -362,8 +362,13 @@ class Trigger:
 
     def Print( self ):
         ''' Displays the information of the current trigger '''
-        lines  = [ "Trigger features", "- Rate:" + str( self.GetRate() ), "- Efficiencies:" ]
-        maxstr = max( len( mngr ) for mngr in self.SigMngr )
+        lines   = [ "Trigger features" ]
+        cutline = self.GetCutLine()
+        maxstr  = max( len( mngr ) for mngr in self.SigMngr )
+        if cutline:
+            lines.append( "- Cuts: " + cutline )
+        for line in ( "- Rate: " + str( self.GetRate() ), "- Efficiencies:" ):
+            lines.append( line )
         for mngr in self.SigMngr:
             lines.append( "   " + mngr + ( maxstr - len( mngr ) )*" " +
                           " => " + str( self.GetEfficiency( mngr ) ) )
@@ -385,8 +390,8 @@ class Trigger:
                 del self.Cuts[ cut_id ]
 
     def ScanVariable( self, varlst, cond, first, last, npoints ):
-        ''' Performs a scan over the variable < var > from < first > to < last > in
-        < npoints > steps. Both end-points are included. The number of entries for
+        ''' Performs a scan over the variables in < varlst > from < first > to < last >
+        in < npoints > steps. Both end-points are included. The number of entries for
         the signal, minimum bias, cut and rate are returned in a dictionary, together
         with the initial number of minimum bias and signal events. '''
         if not self.Prepared: self.PrepareTrigger()

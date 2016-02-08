@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 13/12/2015                                   //
+#//  Last update: 01/02/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -221,7 +221,7 @@ def MultiPlot( mngrs, variables, **kwargs):
     if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
     else: nbins = 100
     if "norm" in kwargs: norm = kwargs[ "norm" ]
-    else: norm = 1
+    else: norm = True
 
     nvars   = len( variables ) + 1
     results = {}

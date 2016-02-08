@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 26/01/2016                                //
+#//  Last update: 08/02/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -45,9 +45,9 @@ def FormatTime( itime ):
 
 #_______________________________________________________________________________
 # This function allows to format a given expression in such a way that takes
-# into account the mathematical functions and the logical operators. It will
-# also check that the variables obtained are contained in the list given.
-def FormatEvalExpr( expr, vlist ):
+# into account the mathematical functions and the logical operators. The module
+# containing the mathematical functions can be specified.
+def FormatEvalExpr( expr, mathmod = math ):
     expr      = expr.replace( "&&" , "and"  )
     expr      = expr.replace( "||" , "or"   )
     expr      = expr.replace( "abs", "fabs" )
@@ -60,28 +60,32 @@ def FormatEvalExpr( expr, vlist ):
     ''' This lines allow the management of float values given with an < e/E > '''
     if variables[ 0 ] in ( '+', '-' ):
         variables = '|' + variables[ 1: ]
-    for i, el in enumerate( variables[ 1: ] ):
+    i, n = 1, len( variables )
+    while ( i != n ):
+        el = variables[ i ]
         if el in ( "+", "-" ):
             el = variables[ i - 1 ]
             if el != "e" and el != "E":
                 variables = variables[ :i ] + '|' + variables[ i + 1: ]
+            else:
+                i += 1
+        else:
+            i += 1
     ''' Splits the elements, so only the variables and the numbers remain '''
     variables = variables.split( '|' )
     while '' in variables:
         variables.remove( '' )
     truevars = []
-    flist    = dir( math )
+    flist    = dir( mathmod )
+    mathmod  = mathmod.__name__ + "."
     for el in variables:
-        if el not in flist:
-            try:
-                float( el )
-            except:
-                if el in vlist:
-                    truevars.append( el )
-                else:
-                    print "ERROR: Variable <", el, "> does not exist"
-        else:
-            expr = expr.replace( el, "math." + el )
+        try:
+            float( el )
+        except:
+            if el in flist:
+                expr = expr.replace( el, mathmod + el )
+            else:
+                truevars.append( el )
     ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
     the variables '''
     truevars.sort()
@@ -225,3 +229,51 @@ def StringListFilter( lst, pattern ):
             if add:
                 output.append( el )
     return output
+
+#_______________________________________________________________________________
+# This is a generator of numbers represented as strings. It allows to perform
+# iterations over numbers from < start > to < end >, filling the left side of
+# them with as much zeros as necessary to make all the numbers in the row have
+# the same size.
+class StrNumGenerator:
+
+    def __init__( self, start, end = False ):
+        ''' If only one number is specified the start will be taken as zero. Only positive
+        values are allowed. '''
+
+        if not end:
+            start, end = 0, start
+        elif end < start:
+            print "ERROR: The starting number has to be greater than the ending"
+        if end < 0 or start < 0:
+            print "ERROR: Input parameters have to be both positive"
+        end   -= 1
+        order  = len( str( end ) )
+        num, vlist = start, []
+        while num > 1:
+            num, rem = divmod( num, 10 )
+            vlist.append( rem )
+        while len( vlist ) < order:
+            vlist.append( 0 )
+        vlist[ 0 ] -= 1
+        self.CurrIter = 0
+        self.List     = vlist
+        self.MaxIter  = end - start
+
+    def __iter__( self ):
+        ''' On the iterations it returns itself '''
+        return self
+
+    def next( self ):
+        ''' Moves one position forward the iterator '''
+        if self.CurrIter > self.MaxIter:
+            raise StopIteration
+        else:
+            self.CurrIter  += 1
+            self.List[ 0 ] += 1
+            i = 0
+            while self.List[ i ] == 10:
+                self.List[ i ] = 0
+                i += 1
+                self.List[ i ] += 1
+            return "".join( [ str( el ) for el in reversed( self.List ) ] )
