@@ -247,18 +247,9 @@ class StrNumGenerator:
             print "ERROR: The starting number has to be greater than the ending"
         if end < 0 or start < 0:
             print "ERROR: Input parameters have to be both positive"
-        end   -= 1
-        order  = len( str( end ) )
-        num, vlist = start, []
-        while num > 1:
-            num, rem = divmod( num, 10 )
-            vlist.append( rem )
-        while len( vlist ) < order:
-            vlist.append( 0 )
-        vlist[ 0 ] -= 1
-        self.CurrIter = 0
-        self.List     = vlist
-        self.MaxIter  = end - start
+        self.CurrIter  = start
+        self.MaxIter   = end
+        self.MaxStrLen = len( str( end ) )
 
     def __iter__( self ):
         ''' On the iterations it returns itself '''
@@ -266,14 +257,10 @@ class StrNumGenerator:
 
     def next( self ):
         ''' Moves one position forward the iterator '''
-        if self.CurrIter > self.MaxIter:
+        if self.CurrIter == self.MaxIter:
             raise StopIteration
         else:
-            self.CurrIter  += 1
-            self.List[ 0 ] += 1
-            i = 0
-            while self.List[ i ] == 10:
-                self.List[ i ] = 0
-                i += 1
-                self.List[ i ] += 1
-            return "".join( [ str( el ) for el in reversed( self.List ) ] )
+            citer  = str( self.CurrIter )
+            lciter = len( citer ) + 1
+            self.CurrIter += 1
+            return ( self.MaxStrLen - lciter )*"0" + citer
