@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 21/01/2016                              //
+//  Last update: 15/02/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -48,6 +48,20 @@ namespace General {
 	size++;
       }
     return size;
+  }
+
+  //_______________________________________________________________________________
+  // This function allows to center a string in a place with width equal to
+  // < size >. In case of working with odd sizes the right hand will always be
+  // greater.
+  std::string CenterString( const std::string &str, const size_t &size ) {
+    unsigned short int
+      rst = size - str.size(),
+      coc = rst / 2;
+    std::string output( coc + rst % 2, ' ' );
+    output += str;
+    output += std::string( coc, ' ' );
+    return output;
   }
 
   //_______________________________________________________________________________

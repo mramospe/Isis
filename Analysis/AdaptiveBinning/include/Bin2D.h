@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 12/01/2016			                     //
+//  Last update: 15/02/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -20,6 +20,9 @@
 // ----------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////
 
+
+#ifndef BIN_2D
+#define BIN_2D
 
 #include "AdaptiveBinning/Bin.h"
 
@@ -97,3 +100,5 @@ namespace Analysis {
   inline const double Analysis::Bin2D::GetYmin() const { return fYmin; }
 
 }
+
+#endif
