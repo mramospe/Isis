@@ -32,6 +32,7 @@
 #include "TLeaf.h"
 #include "TList.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <cmath>
@@ -68,7 +69,9 @@ Analysis::VarWeighter::~VarWeighter() { }
 //_______________________________________________________________________________
 // Adds a new variable to this class. There have to be provided the name, number
 // of bins, minimum and maximum values and the unit for it. The bins stored in
-// the class will automatically be splitted.
+// the class will automatically be splitted. The blank bins will be removed. This
+// will take a while, but will boost the other methods, as well as to reduce the
+// memory consumption.
 void Analysis::VarWeighter::AddVariable( const std::string &name,
 					 const size_t      &nbins,
 					 const double      &min,
@@ -87,7 +90,31 @@ void Analysis::VarWeighter::AddVariable( const std::string &name,
     vbvector = it -> Split( name, nbins, min, max );
     appvector.insert( appvector.end(), vbvector.begin(), vbvector.end() );
   }
+
+  // Makes the setup of the trees
+  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
+  std::map<std::string, double> valuesmap;
+  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
+  
+  // Fills the bins with the reference data and removes the blank ones
+  this -> FillBinVector( fRefTree, refleafmap, valuesmap, appvector );
+  for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
+    if ( itb -> GetEntries() == 0 )
+      appvector.erase( itb-- );
+  for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
+    itb -> fNentries = 0;
+
+  // Fills the bins with the data to be weighted and removes the blank ones
+  this -> FillBinVector( fWhtTree, whtleafmap, valuesmap, appvector );
+  for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
+    if ( itb -> GetEntries() == 0 )
+      appvector.erase( itb-- );
+  for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
+    itb -> fNentries = 0;
+
+  // Finally redefines the vector of bins of the class
   fBinVector = appvector;
+  std::cout << " - Bin-list size:  " << fBinVector.size() << std::endl;
 }
 
 
@@ -165,43 +192,23 @@ void Analysis::VarWeighter::CalculateWeights( const double &maxrelerr, const siz
   std::cout << "Working with < " << fBinVector.size() << " > bins" << std::endl;
   std::cout << "Generating a copy of the bin vector" << std::endl;
   std::vector<Analysis::VarBin> refvector( fBinVector );
-  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
-  std::map<std::string, double> valuesmap;
   double
     wentries = fWhtTree -> GetEntries(),
     rentries = fRefTree -> GetEntries(),
     ratio    = wentries/rentries,
     sratio   = std::sqrt( wentries*( rentries + wentries )/rentries )/rentries;
 
-  // The branches that are not used are disabled to boost the method
+  // Makes the setup of the trees
+  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
+  std::map<std::string, double> valuesmap;
   std::cout << "Making maps of leaves from the input trees" << std::endl;
-  fRefTree -> SetBranchStatus( "*", false );
-  fWhtTree -> SetBranchStatus( "*", false );
-  for ( auto it = fVariables.begin(); it != fVariables.end(); it++ ) {
-    fRefTree -> SetBranchStatus( it -> first.c_str(), true );
-    fWhtTree  -> SetBranchStatus( it -> first.c_str(), true );
-    refleafmap[ it -> first ] = fRefTree -> GetLeaf( it -> first.c_str() );
-    whtleafmap[ it -> first ] = fWhtTree -> GetLeaf( it -> first.c_str() );
-    valuesmap[ it -> first ]  = 0;
-  }
+  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
   
   // Fills the bins for both the reference bins and the bins to be weighted
   std::cout << "Filling the reference bins" << std::endl;
-  for ( Long64_t ievt = 0; ievt < fRefTree -> GetEntries(); ievt++ ) {
-    fRefTree -> GetEntry( ievt );
-    for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
-      it -> second = refleafmap[ it -> first ] -> GetValue();
-    for ( auto itb = refvector.begin(); itb != refvector.end(); itb++ )
-      itb -> IfInsideAdd( valuesmap );
-  }
+  this -> FillBinVector( fRefTree, refleafmap, valuesmap, refvector );
   std::cout << "Filling the bins to be weighted" << std::endl;
-  for ( Long64_t ievt = 0; ievt < fWhtTree -> GetEntries(); ievt++ ) {
-    fWhtTree -> GetEntry( ievt );
-    for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
-      it -> second = whtleafmap[ it -> first ] -> GetValue();
-    for ( auto itb = fBinVector.begin(); itb != fBinVector.end(); itb++ )
-      itb -> IfInsideAdd( valuesmap );
-  }
+  this -> FillBinVector( fWhtTree, whtleafmap, valuesmap, fBinVector );
 
   // Calculates the weight for each bin. If the number of entries in the bin is null, that region
   // will be set with null weight.
@@ -281,7 +288,7 @@ void Analysis::VarWeighter::Print( const size_t &prec ) {
 // Returns a list with the histograms for one of the variables in the tree given
 // its name, the number of bins and the minimum and maximumm value in the
 // histogram.
-TList* Analysis::VarWeighter::MakeHistograms( std::string  variable,
+TList* Analysis::VarWeighter::MakeHistograms( std::string   variable,
 					      const size_t &nbins,
 					      const double &vmin,
 					      const double &vmax ) {
@@ -299,50 +306,55 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string  variable,
     *hfw = new TH1D( hfwn.c_str(), hfwn.c_str(), nbins, vmin, vmax ),
     *hfr = new TH1D( hfrn.c_str(), hfrn.c_str(), nbins, vmin, vmax );
 
-  // Enables only the branches to be used
+  // Makes the setup of the trees
   std::map<std::string, TLeaf*> refleafmap, whtleafmap;
   std::map<std::string, double> valuesmap;
-  std::vector<std::string> variables( 1, variable );
-  fRefTree -> SetBranchStatus( "*", false );
-  fWhtTree -> SetBranchStatus( "*", false );
+  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
+  
+  std::vector<std::string> variables;
+  TLeaf *leaf;
   for ( auto it = fVariables.begin(); it != fVariables.end(); it++ )
     variables.push_back( it -> first );
-  for ( auto it = variables.begin(); it != variables.end(); it++ ) {
-    fRefTree -> SetBranchStatus( it -> c_str(), true );
-    fWhtTree  -> SetBranchStatus( it -> c_str(), true );
-    refleafmap[ *it ] = fRefTree -> GetLeaf( it -> c_str() );
-    whtleafmap[ *it ] = fWhtTree -> GetLeaf( it -> c_str() );
-    valuesmap[ *it ]  = 0;
+  if ( std::find( variables.begin(), variables.end(), variable ) == variables.end() ) {
+    variables.push_back( variable );
+    fRefTree -> SetBranchStatus( variable.c_str(), true );
+    fWhtTree -> SetBranchStatus( variable.c_str(), true );
   }
   
   // This is the iterator of the vector of bins
   std::vector<Analysis::VarBin>::iterator itb;
 
   // Fills the histograms from the tree to be weighted
+  leaf = fWhtTree -> GetLeaf( variable.c_str() );
   for ( Long64_t ievt = 0; ievt < fWhtTree -> GetEntries(); ievt++ ) {
     fWhtTree -> GetEntry( ievt );
     for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
       it -> second = whtleafmap[ it -> first ] -> GetValue();
-    hrw -> Fill( whtleafmap[ variable ] -> GetValue() );
+    hrw -> Fill( leaf -> GetValue() );
     itb = fBinVector.begin();
     while( itb != fBinVector.end() && itb -> IsOutside( valuesmap ) )
       itb++;
     if ( itb != fBinVector.end() && itb -> GetWeight() )
-      hfw -> Fill( whtleafmap[ variable ] -> GetValue(), itb -> GetWeight() );
+      hfw -> Fill( leaf -> GetValue(), itb -> GetWeight() );
   }
   
   // Fills the histograms from the reference tree
+  leaf = fRefTree -> GetLeaf( variable.c_str() );
   for ( Long64_t ievt = 0; ievt < fRefTree -> GetEntries(); ievt++ ) {
     fRefTree -> GetEntry( ievt );
     for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
       it -> second = refleafmap[ it -> first ] -> GetValue();
-    hrr -> Fill( refleafmap[ variable ] -> GetValue() );
+    hrr -> Fill( leaf -> GetValue() );
     itb = fBinVector.begin();
     while( itb != fBinVector.end() && itb -> IsOutside( valuesmap ) )
       itb++;
     if ( itb != fBinVector.end() && itb -> GetWeight() > 0 )
-      hfr -> Fill( refleafmap[ variable ] -> GetValue() );
+      hfr -> Fill( leaf -> GetValue() );
   }
+
+  // Enables again all the variables of the trees
+  fRefTree -> SetBranchStatus( "*", true );
+  fWhtTree -> SetBranchStatus( "*", true );
 
   // Builds the list to be returned
   TList *list = new TList;
@@ -352,4 +364,42 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string  variable,
   list -> Add( hfr );
 
   return list;
+}
+
+//_______________________________________________________________________________
+
+
+// -- PRIVATE METHODS
+
+//_______________________________________________________________________________
+// Fills the bins in a vector given the tree, the map of leaves and the map of
+// values
+void Analysis::VarWeighter::FillBinVector( TTree *tree,
+					   std::map<std::string, TLeaf*> &leafmap,
+					   std::map<std::string, double> &valuesmap,
+					   std::vector<Analysis::VarBin> &binvector ) {
+  for ( Long64_t ievt = 0; ievt < tree -> GetEntries(); ievt++ ) {
+    tree -> GetEntry( ievt );
+    for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
+      it -> second = leafmap[ it -> first ] -> GetValue();
+    for ( auto itb = binvector.begin(); itb != binvector.end(); itb++ )
+      itb -> IfInsideAdd( valuesmap );
+  }  
+}
+
+//_______________________________________________________________________________
+// Disables all the branches that are not in the map of leaves. Only those to be
+// used are enabled. Also defines the keys for the given maps.
+void Analysis::VarWeighter::SetupTrees( std::map<std::string, TLeaf*> &refleafmap,
+					std::map<std::string, TLeaf*> &whtleafmap,
+					std::map<std::string, double> &valuesmap ) {
+  fRefTree -> SetBranchStatus( "*", false );
+  fWhtTree -> SetBranchStatus( "*", false );
+  for ( auto it = fVariables.begin(); it != fVariables.end(); it++ ) {
+    fRefTree -> SetBranchStatus( it -> first.c_str(), true );
+    fWhtTree  -> SetBranchStatus( it -> first.c_str(), true );
+    refleafmap[ it -> first ] = fRefTree -> GetLeaf( it -> first.c_str() );
+    whtleafmap[ it -> first ] = fWhtTree -> GetLeaf( it -> first.c_str() );
+    valuesmap[ it -> first ]  = 0;
+  }  
 }

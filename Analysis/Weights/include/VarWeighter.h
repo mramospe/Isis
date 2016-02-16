@@ -86,6 +86,13 @@ namespace Analysis {
 	       void    *saddress,
 	       std::map<std::string, double> &valuesmap,
 	       const std::map<std::string, TLeaf*> &newleafmap );
+    void FillBinVector( TTree *tree,
+			std::map<std::string, TLeaf*> &whtleafmap,
+			std::map<std::string, double> &valuesmap,
+			std::vector<Analysis::VarBin> &binvector );
+    void SetupTrees( std::map<std::string, TLeaf*> &refleafmap,
+		     std::map<std::string, TLeaf*> &whtleafmap,
+		     std::map<std::string, double> &valuesmap );
 
   };
 
@@ -97,8 +104,8 @@ namespace Analysis {
     return fBinVector;
   }
 
-  //___________________
-  // -- TEMPLATE METHOD
+  //___________________________
+  // -- PRIVATE TEMPLATE METHOD
 
   // Fills the output branches. It is important, in the < while > statement to do not change
   // the order of the conditionals.
