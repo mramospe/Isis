@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 27/01/2016                                                    #
+#  Last update: 16/02/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -78,8 +78,8 @@ add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis
 
 #----------------------------------------------------------------------------
 # Defines the different Analysis packages
-set(ANALYSIS_EXTRA_PKGS AdaptiveBinning RooFitExt)
-set(ANALYSIS_EXTRA_LIBS AdBin           RFExt    )
+set(ANALYSIS_EXTRA_PKGS Weights AdaptiveBinning RooFitExt)
+set(ANALYSIS_EXTRA_LIBS Wts     AdBin           RFExt    )
 
 #----------------------------------------------------------------------------
 # Makes the directories for the include files
@@ -148,8 +148,9 @@ endforeach()
 
 # Specifies the dependencies for each library
 add_dependencies(Analysis General)
-add_dependencies(AdBin Analysis)
-add_dependencies(RFExt AdBin)
+add_dependencies(Wts      Analysis)
+add_dependencies(AdBin    Analysis)
+add_dependencies(RFExt    AdBin)
 
 # Reverses the list to properly order de dependences
 list(REVERSE PROJECT_LIBRARIES)
