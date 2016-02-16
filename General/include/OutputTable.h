@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 21/01/2016                                                       //
+//  Last update: 16/02/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -47,12 +47,13 @@ namespace General {
 
     // Constructor and destructor
     OutputTable();
-    OutputTable( const unsigned short int &prec, const unsigned short int len );
+    OutputTable( const unsigned short int &prec, const unsigned short int len = 0 );
     ~OutputTable();
 
     // Methods
     std::string GetLine();
     void        Print( const char &chdeco = '*' );
+    void        SetFormat( const char *format, const std::vector<std::string> &titles );
     void        SetFormat( const char *format ... );
     std::string Start( const char &chdeco = '*' );
 
@@ -63,9 +64,6 @@ namespace General {
     inline void   Rewind();
     inline void   SetPrecision( const unsigned short int &prec );
     inline void   SetStrLength( const unsigned short int &len );
-
-    // Static method
-    static std::string CenteredString( const std::string &str, const size_t &size );
 
     // Template method
     template<class type>
@@ -84,6 +82,7 @@ namespace General {
     char                     fDecoChar;
     unsigned short int       fIvar;
     size_t                   fNlines;
+    std::vector<size_t>      fPrecisions;
     std::string              fSeparator;
     std::vector<size_t>      fSizes;
     unsigned short int       fStrLength;
@@ -122,6 +121,8 @@ namespace General {
   // to the same row and by a newline symbol when moving to another column
   template<class type>
   inline void OutputTable::AppendStream( type &str ) {
+    if ( fPrecisions[ fIvar ] )
+      fBuffer.precision( fPrecisions[ fIvar ] );
     fBuffer << str;
     if ( ++fIvar != fSizes.size() )
       fBuffer << '\t';

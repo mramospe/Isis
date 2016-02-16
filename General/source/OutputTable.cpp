@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 21/01/2016                                                       //
+//  Last update: 16/02/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -46,7 +46,7 @@ General::OutputTable::OutputTable() : fNlines( 0 ), fStrLength( 2 ) {
 }
 
 //_______________________________________________________________________________
-// Constructor given the number and string format information
+// Constructor given the precision number and string length
 General::OutputTable::OutputTable( const unsigned short int &prec,
 				   const unsigned short int len )
   : fNlines( 0 ), fStrLength( len ) {
@@ -58,26 +58,12 @@ General::OutputTable::OutputTable( const unsigned short int &prec,
 General::OutputTable::~OutputTable() { }
 
 //_______________________________________________________________________________
-// This static method allows to center a string in a place with width equal to
-// < size >. In case of working with odd sizes the right hand will be always
-// greater.
-std::string General::OutputTable::CenteredString( const std::string &str, const size_t &size ) {
-  unsigned short int
-    rst = size - str.size(),
-    coc = rst / 2;
-  std::string output( coc + rst % 2, ' ' );
-  output += str;
-  output += std::string( coc, ' ' );
-  return output;
-}
-
-//_______________________________________________________________________________
 // Returns a new line from the buffer
 std::string General::OutputTable::GetLine() {
   std::string str, var;
   for ( auto it = fSizes.begin(); it != fSizes.end(); it++ ) {
     fBuffer >> var;
-    str += this -> CenteredString( var, *it );
+    str += General::CenterString( var, *it );
   }
   return str;
 }
@@ -88,20 +74,24 @@ std::string General::OutputTable::GetLine() {
 void General::OutputTable::Print( const char &chdeco ) {
   std::string var, fSeparator = this -> Start();
   for ( unsigned short int iline = 0; iline < fNlines; iline++ ) {
-    for ( auto it = fSizes.begin(); it != fSizes.end(); it++ ) {
+    std::cout << "| ";
+    auto its = fSizes.begin(), itp = fPrecisions.begin();
+    while ( its != fSizes.end() ) {
       fBuffer >> var;
-      std::cout << this -> CenteredString( var, *it );
+      if ( *itp )
+	std::cout << std::setprecision( *itp );
+      std::cout << std::setw( *its ) << var << " |";
+      its++;
+      itp++;
     }
     std::cout << std::endl;
   }
   std::cout << fSeparator << std::endl;
 }
 
-//_______________________________________________________________________________
-// Sets the format of the elements displayed in the table. There can be displayed
-// values of any kind: boolean (b), short integers (i), integers (I), floats (f),
-// doubles (d) and strings (s).
-void General::OutputTable::SetFormat( const char *format ... ) {
+// Sets the format for the current table. To know which imput parameters are allowed to be
+// introduced see the < SetFormat( const char *format ... ) > method.
+void General::OutputTable::SetFormat( const char *format, const std::vector<std::string> &titles ) {
   fIvar = 0;
   if ( fSizes.size() )
     fSizes.clear();
@@ -110,33 +100,82 @@ void General::OutputTable::SetFormat( const char *format ... ) {
     short_size = General::CalcIntLength( std::numeric_limits<short int>::max() + 1 ),
     int_size   = General::CalcIntLength( std::numeric_limits<int>::max() + 1 ),
     size;
-  va_list args;
-  va_start( args, format );
+  const char* num;
+  auto it = titles.begin();
   while ( *format != '\0' ) {
-    fTitles.push_back( va_arg( args, const char* ) );
+    fTitles.push_back( *it++ );
     fSizes.push_back( fTitles.back().size() );
-    if ( *format == 'b' )
-      size = 1;
-    else if ( *format == 'i' )
-      size = short_size;
-    else if ( *format == 'I' )
-      size = int_size;
-    else if ( *format == 'f' )
-      // The 6 amounts from: sign (x2) + comma + exponential + argument (x2)
-      size = fBuffer.precision() + 6;
-    else if ( *format == 'd' )
-      // The 7 amounts from: sign (x2) + comma + exponential + argument (x3)
-      size = fBuffer.precision() + 7;
-    else if ( *format == 's' )
-      size = fStrLength;
-    else
-      std::cerr << "ERROR: Unknown variable type < " << *format << " > in table" << std::endl;
+    if ( *( format + 1 ) > '0' && *( format + 1 ) < '9' ) {
+      size = 0;
+      num  = format + 1;
+      while ( *num > '0' && *num < '9' )
+	size = *num++ - '0' + 10*size;
+      fPrecisions.push_back( size );
+      if ( *format == 'b' ) {
+	size = 1;
+	fPrecisions.back() = 0;
+	std::cout << "WARNING: Precision specification not allowed for boolean numbers" << std::endl;
+      }
+      else if ( *format == 'i' )
+	fPrecisions.back() = 0;
+      else if ( *format == 'I' )
+	fPrecisions.back() = 0;
+      else if ( *format == 'f' )
+	// The 6 amounts from: sign (x2) + comma + exponential + argument (x2)
+	size += 6;
+      else if ( *format == 'd' )
+	// The 7 amounts from: sign (x2) + comma + exponential + argument (x3)
+	size += 7;
+      else if ( *format == 's' )
+	fPrecisions.back() = 0;
+      else
+	std::cerr << "ERROR: Unknown variable type < " << *format << " > in table" << std::endl;
+      format += 2;
+    }
+    else {
+      fPrecisions.push_back( 0 );
+      if ( *format == 'b' )
+	size = 1;
+      else if ( *format == 'i' )
+	size = short_size;
+      else if ( *format == 'I' )
+	size = int_size;
+      else if ( *format == 'f' ) {
+	// The 6 amounts from: sign (x2) + comma + exponential + argument (x2)
+	size = fBuffer.precision() + 6;
+	fPrecisions.back() = fBuffer.precision();
+      }
+      else if ( *format == 'd' ) {
+	// The 7 amounts from: sign (x2) + comma + exponential + argument (x3)
+	size = fBuffer.precision() + 7;
+	fPrecisions.back() = fBuffer.precision();
+      }
+      else if ( *format == 's' )
+	size = fStrLength;
+      else
+	std::cerr << "ERROR: Unknown variable type < " << *format << " > in table" << std::endl;
+      format++;
+    }
     if ( size > fSizes.back() )
       fSizes.back() = size;
-    format++;
-    // This is the number of whitespaces that will be distributed to both sides of the elements
-    fSizes.back() += 4;
   }
+}
+
+//_______________________________________________________________________________
+// Sets the format of the elements displayed in the table. There can be displayed
+// values of any kind: boolean (b), short integers (i), integers (I), floats (f),
+// doubles (d) and strings (s). As second, third, ... arguments the title of the
+// variables have to be specified.
+void General::OutputTable::SetFormat( const char *format ... ) {
+  std::vector<std::string> titles;
+  va_list args;
+  va_start( args, format );
+  const char *cptr = format;
+  while ( *cptr != '\0' ) {
+    titles.push_back( va_arg( args, const char* ) );
+    cptr++;
+  }
+  this -> SetFormat( format, titles );
 }
 
 //_______________________________________________________________________________
@@ -148,17 +187,18 @@ std::string General::OutputTable::Start( const char &chdeco ) {
   fDecoChar = chdeco;
   if ( fBuffer.tellg() )
     fBuffer.seekg( 0 );
-  unsigned short int lsize = 0;
+  unsigned short int lsize = 2;
   for ( auto it = fSizes.begin(); it != fSizes.end(); it++ )
-    lsize += *it;
+    lsize += *it + 2;
   fSeparator = std::string( lsize, chdeco );
   std::cout << fSeparator << std::endl;
-  std::cout << std::left;
+  std::cout << std::right << "| ";
   // Displays the elements of the table
   auto itt = fTitles.begin();
   auto its = fSizes.begin();
+
   while( its != fSizes.end() )
-    std::cout << this -> CenteredString( *itt++, *its++ );
+    std::cout << General::CenterString( *itt++, *its++ ) << " |";
   std::cout << '\n' << fSeparator << std::endl;
   return fSeparator;
 }
