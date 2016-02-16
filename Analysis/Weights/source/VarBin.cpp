@@ -93,7 +93,8 @@ void Analysis::VarBin::Print( const size_t &width ) {
 // error. Both the weight and the error are computed in this method.
 void Analysis::VarBin::SetWeight( const size_t &rentries,
 				  const double &ratio,
-				  const double &sratio ) {
+				  const double &sratio,
+				  const double &maxrelerr ) {
   if ( rentries && fNentries ) {
     double
       rw = rentries*1./fNentries,
@@ -101,6 +102,10 @@ void Analysis::VarBin::SetWeight( const size_t &rentries,
       iw = 1./fNentries;
     fError  = rw*std::sqrt( ratio*ratio*( ir + iw ) + sratio*sratio );
     fWeight = rw*ratio;
+    if ( fError/fWeight > maxrelerr ) {
+      fError  = 0;
+      fWeight = 0;
+    }
   }
   else {
     fWeight = 0;

@@ -51,7 +51,8 @@ namespace Analysis {
     bool                IsOutside( const std::map<std::string, double> &values );
     void                SetWeight( const size_t &rentries,
 				   const double &ratio,
-				   const double &sratio );
+				   const double &sratio,
+				   const double &maxrelerr );
     void                Print( const size_t &width );
 
     // Inline methods

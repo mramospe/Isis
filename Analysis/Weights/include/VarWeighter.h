@@ -57,7 +57,7 @@ namespace Analysis {
 			 const std::string &wvname,
 			 const std::string &svname,
 			 const char        &type );
-    void   CalculateWeights( const size_t &prec = 0 );
+    void   CalculateWeights( const double &maxrelerr = 1., const size_t &prec = 0 );
     TList* MakeHistograms( std::string   variable,
 			   const size_t &nbins,
 			   const double &vmin,

@@ -93,15 +93,17 @@ void Analysis::VarWeighter::AddVariable( const std::string &name,
 
 //_______________________________________________________________________________
 // Applies the weights to a given tree. Two branches will be added to it: one
-// containing the weights and the other the errors. The type of the branch can
-// also be specified: D (double), F (float).
+// containing the weights and the other the errors. The type of the branch has
+// also to be specified: D (double), F (float). The maximum allowed relative
+// error is an optional input. If specified, all the weights with an error
+// greater than that are going to be set to zero.
 void Analysis::VarWeighter::ApplyWeights( TTree             *tree,
 					  const std::string &wvname,
 					  const std::string &svname,
 					  const char        &type ) {
   std::cout << "*** Initializing weighting process ***" << std::endl;
   std::cout << "Working with tree: " << tree -> GetName() <<
-    " (" << tree -> GetDirectory() -> GetName() << ")" << std::endl;
+    " ( " << tree -> GetDirectory() -> GetName() << " )" << std::endl;
   // Generates the maps of values and with the leaves of the tree to be used
   std::map<std::string, TLeaf*> newleafmap;
   std::map<std::string, double> valuesmap;
@@ -146,7 +148,7 @@ void Analysis::VarWeighter::ApplyWeights( TTree             *tree,
   tree -> SetBranchStatus( "*", true );
 
   // Writes the output tree
-  tree -> Write();
+  tree -> AutoSave();
   std::cout << "Written output tree < " << tree -> GetName() << " > in file: " <<
     tree -> GetDirectory() -> GetName() << std::endl;
 
@@ -156,7 +158,7 @@ void Analysis::VarWeighter::ApplyWeights( TTree             *tree,
 //_______________________________________________________________________________
 // Performs the calculation of the weights using the two attached trees. If a
 // precision is specified, the map of bins will be printed using such value.
-void Analysis::VarWeighter::CalculateWeights( const size_t &prec ) {
+void Analysis::VarWeighter::CalculateWeights( const double &maxrelerr, const size_t &prec ) {
   std::cout << "***************************" << std::endl;
   std::cout << "*** Calculating weights ***" << std::endl;
   std::cout << "***************************" << std::endl;
@@ -207,7 +209,7 @@ void Analysis::VarWeighter::CalculateWeights( const size_t &prec ) {
   size_t nowb = 0, nweights = 0, nwentries = 0, nrentries = 0;
   auto itr = refvector.begin(), itw = fBinVector.begin();
   while ( itr != refvector.end() ) {
-    itw -> SetWeight( itr -> GetEntries(), ratio, sratio );
+    itw -> SetWeight( itr -> GetEntries(), ratio, sratio, maxrelerr );
     if ( itw -> GetWeight() > 0. ) {
       nweights  += itw -> GetWeight();
       nwentries += itw -> GetEntries();
@@ -220,11 +222,12 @@ void Analysis::VarWeighter::CalculateWeights( const size_t &prec ) {
   }
   std::cout << "Results:" << std::endl;
   std::cout << " - Number of entries (reference): " <<
-    nrentries << " (" << fRefTree -> GetEntries() << ")" << std::endl;
+    nrentries << " ( " << fRefTree -> GetEntries() << " )" << std::endl;
   std::cout << " - Number of entries (weighted):  " <<
-    nwentries << " (" << fWhtTree -> GetEntries() << ")" << std::endl;
+    nwentries << " ( " << fWhtTree -> GetEntries() << " )" << std::endl;
   std::cout << " - Total sum of weights:          " << nweights << std::endl;
-  std::cout << " - Number of null-weighted bins:  " << nowb     << std::endl;
+  std::cout << " - Number of null-weighted bins:  " <<
+    nowb << " ( " << fBinVector.size() << " )" << std::endl;
   
   fRefTree -> SetBranchStatus( "*", true );
   fWhtTree -> SetBranchStatus( "*", true );
@@ -324,7 +327,7 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string  variable,
     itb = fBinVector.begin();
     while( itb != fBinVector.end() && itb -> IsOutside( valuesmap ) )
       itb++;
-    if ( itb != fBinVector.end() )
+    if ( itb != fBinVector.end() && itb -> GetWeight() )
       hfw -> Fill( whtleafmap[ variable ] -> GetValue(), itb -> GetWeight() );
   }
   
@@ -337,7 +340,7 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string  variable,
     itb = fBinVector.begin();
     while( itb != fBinVector.end() && itb -> IsOutside( valuesmap ) )
       itb++;
-    if ( itb != fBinVector.end() )
+    if ( itb != fBinVector.end() && itb -> GetWeight() > 0 )
       hfr -> Fill( refleafmap[ variable ] -> GetValue() );
   }
 
