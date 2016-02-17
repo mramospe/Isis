@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 16/02/2016                                                       //
+//  Last update: 17/02/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -47,7 +47,7 @@
 // Main constructor. The reference tree and the tree to be weighed have to be
 // passed to the constructor.
 Analysis::VarWeighter::VarWeighter( TTree *rtree, TTree *wtree ) :
-  fBinVector( 1 ), fRefTree( rtree ), fWhtTree( wtree ) {
+  fBinVector( 1 ), fRefTree( rtree ), fWgtTree( wtree ) {
   std::cout << "***********************************" << std::endl;
   std::cout << "*** Initializing weighter class ***" << std::endl;
   std::cout << "***********************************" << std::endl;
@@ -92,9 +92,9 @@ void Analysis::VarWeighter::AddVariable( const std::string &name,
   }
 
   // Makes the setup of the trees
-  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
+  std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
   std::map<std::string, double> valuesmap;
-  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
+  this -> SetupTrees( refleafmap, wgtleafmap, valuesmap );
   
   // Fills the bins with the reference data and removes the blank ones
   this -> FillBinVector( fRefTree, refleafmap, valuesmap, appvector );
@@ -105,7 +105,7 @@ void Analysis::VarWeighter::AddVariable( const std::string &name,
     itb -> fNentries = 0;
 
   // Fills the bins with the data to be weighted and removes the blank ones
-  this -> FillBinVector( fWhtTree, whtleafmap, valuesmap, appvector );
+  this -> FillBinVector( fWgtTree, wgtleafmap, valuesmap, appvector );
   for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
     if ( itb -> GetEntries() == 0 )
       appvector.erase( itb-- );
@@ -193,22 +193,22 @@ void Analysis::VarWeighter::CalculateWeights( const double &maxrelerr, const siz
   std::cout << "Generating a copy of the bin vector" << std::endl;
   std::vector<Analysis::VarBin> refvector( fBinVector );
   double
-    wentries = fWhtTree -> GetEntries(),
+    wentries = fWgtTree -> GetEntries(),
     rentries = fRefTree -> GetEntries(),
     ratio    = wentries/rentries,
     sratio   = std::sqrt( wentries*( rentries + wentries )/rentries )/rentries;
 
   // Makes the setup of the trees
-  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
+  std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
   std::map<std::string, double> valuesmap;
   std::cout << "Making maps of leaves from the input trees" << std::endl;
-  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
+  this -> SetupTrees( refleafmap, wgtleafmap, valuesmap );
   
   // Fills the bins for both the reference bins and the bins to be weighted
   std::cout << "Filling the reference bins" << std::endl;
   this -> FillBinVector( fRefTree, refleafmap, valuesmap, refvector );
   std::cout << "Filling the bins to be weighted" << std::endl;
-  this -> FillBinVector( fWhtTree, whtleafmap, valuesmap, fBinVector );
+  this -> FillBinVector( fWgtTree, wgtleafmap, valuesmap, fBinVector );
 
   // Calculates the weight for each bin. If the number of entries in the bin is null, that region
   // will be set with null weight.
@@ -231,13 +231,13 @@ void Analysis::VarWeighter::CalculateWeights( const double &maxrelerr, const siz
   std::cout << " - Number of entries (reference): " <<
     nrentries << " ( " << fRefTree -> GetEntries() << " )" << std::endl;
   std::cout << " - Number of entries (weighted):  " <<
-    nwentries << " ( " << fWhtTree -> GetEntries() << " )" << std::endl;
+    nwentries << " ( " << fWgtTree -> GetEntries() << " )" << std::endl;
   std::cout << " - Total sum of weights:          " << nweights << std::endl;
   std::cout << " - Number of null-weighted bins:  " <<
     nowb << " ( " << fBinVector.size() << " )" << std::endl;
   
   fRefTree -> SetBranchStatus( "*", true );
-  fWhtTree -> SetBranchStatus( "*", true );
+  fWgtTree -> SetBranchStatus( "*", true );
 
   // If a precision is specified, it displays the map of bins
   if ( prec )
@@ -307,9 +307,9 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string   variable,
     *hfr = new TH1D( hfrn.c_str(), hfrn.c_str(), nbins, vmin, vmax );
 
   // Makes the setup of the trees
-  std::map<std::string, TLeaf*> refleafmap, whtleafmap;
+  std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
   std::map<std::string, double> valuesmap;
-  this -> SetupTrees( refleafmap, whtleafmap, valuesmap );
+  this -> SetupTrees( refleafmap, wgtleafmap, valuesmap );
   
   std::vector<std::string> variables;
   TLeaf *leaf;
@@ -318,18 +318,18 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string   variable,
   if ( std::find( variables.begin(), variables.end(), variable ) == variables.end() ) {
     variables.push_back( variable );
     fRefTree -> SetBranchStatus( variable.c_str(), true );
-    fWhtTree -> SetBranchStatus( variable.c_str(), true );
+    fWgtTree -> SetBranchStatus( variable.c_str(), true );
   }
   
   // This is the iterator of the vector of bins
   std::vector<Analysis::VarBin>::iterator itb;
 
   // Fills the histograms from the tree to be weighted
-  leaf = fWhtTree -> GetLeaf( variable.c_str() );
-  for ( Long64_t ievt = 0; ievt < fWhtTree -> GetEntries(); ievt++ ) {
-    fWhtTree -> GetEntry( ievt );
+  leaf = fWgtTree -> GetLeaf( variable.c_str() );
+  for ( Long64_t ievt = 0; ievt < fWgtTree -> GetEntries(); ievt++ ) {
+    fWgtTree -> GetEntry( ievt );
     for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
-      it -> second = whtleafmap[ it -> first ] -> GetValue();
+      it -> second = wgtleafmap[ it -> first ] -> GetValue();
     hrw -> Fill( leaf -> GetValue() );
     itb = fBinVector.begin();
     while( itb != fBinVector.end() && itb -> IsOutside( valuesmap ) )
@@ -354,7 +354,7 @@ TList* Analysis::VarWeighter::MakeHistograms( std::string   variable,
 
   // Enables again all the variables of the trees
   fRefTree -> SetBranchStatus( "*", true );
-  fWhtTree -> SetBranchStatus( "*", true );
+  fWgtTree -> SetBranchStatus( "*", true );
 
   // Builds the list to be returned
   TList *list = new TList;
@@ -391,15 +391,15 @@ void Analysis::VarWeighter::FillBinVector( TTree *tree,
 // Disables all the branches that are not in the map of leaves. Only those to be
 // used are enabled. Also defines the keys for the given maps.
 void Analysis::VarWeighter::SetupTrees( std::map<std::string, TLeaf*> &refleafmap,
-					std::map<std::string, TLeaf*> &whtleafmap,
+					std::map<std::string, TLeaf*> &wgtleafmap,
 					std::map<std::string, double> &valuesmap ) {
   fRefTree -> SetBranchStatus( "*", false );
-  fWhtTree -> SetBranchStatus( "*", false );
+  fWgtTree -> SetBranchStatus( "*", false );
   for ( auto it = fVariables.begin(); it != fVariables.end(); it++ ) {
     fRefTree -> SetBranchStatus( it -> first.c_str(), true );
-    fWhtTree  -> SetBranchStatus( it -> first.c_str(), true );
+    fWgtTree  -> SetBranchStatus( it -> first.c_str(), true );
     refleafmap[ it -> first ] = fRefTree -> GetLeaf( it -> first.c_str() );
-    whtleafmap[ it -> first ] = fWhtTree -> GetLeaf( it -> first.c_str() );
+    wgtleafmap[ it -> first ] = fWgtTree -> GetLeaf( it -> first.c_str() );
     valuesmap[ it -> first ]  = 0;
   }  
 }

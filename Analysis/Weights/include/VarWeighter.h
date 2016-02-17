@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 16/02/2016                                                       //
+//  Last update: 17/02/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -72,7 +72,7 @@ namespace Analysis {
     // Attributes
     std::vector<Analysis::VarBin>       fBinVector;
     TTree                              *fRefTree;
-    TTree                              *fWhtTree;
+    TTree                              *fWgtTree;
     std::map<std::string, std::string>  fVariables;
 
   private:
@@ -87,11 +87,11 @@ namespace Analysis {
 	       std::map<std::string, double> &valuesmap,
 	       const std::map<std::string, TLeaf*> &newleafmap );
     void FillBinVector( TTree *tree,
-			std::map<std::string, TLeaf*> &whtleafmap,
+			std::map<std::string, TLeaf*> &wgtleafmap,
 			std::map<std::string, double> &valuesmap,
 			std::vector<Analysis::VarBin> &binvector );
     void SetupTrees( std::map<std::string, TLeaf*> &refleafmap,
-		     std::map<std::string, TLeaf*> &whtleafmap,
+		     std::map<std::string, TLeaf*> &wgtleafmap,
 		     std::map<std::string, double> &valuesmap );
 
   };
