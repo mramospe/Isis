@@ -19,6 +19,12 @@ fi
 echo "Accessing path $buildpath"
 cd $buildpath
 
+echo "Redefining variables CC and CXX:"
+export CC=`which gcc`
+export CXX=`which g++`
+echo "-- CC set to:  $CC"
+echo "-- CXX set to: $CXX"
+
 echo "Invoking cmake"
 cmake $currpath $@
 echo "Type < make > to install the Isis package"

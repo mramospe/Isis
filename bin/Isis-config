@@ -6,7 +6,7 @@
 #=======================================================#
 
 # C++ flags
-cflags="-Wall -std=c++0x -pthread"
+cflags="-Wall -std=c++11 -pthread"
 
 # Paths to the include folders
 iinclude=-I$ISIS/include

@@ -19,6 +19,8 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(Isis)
 set(libsuffix .so)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
 
 #----------------------------------------------------------------------------
 # The root directory can be specified via -DUSER_ROOT_PATH=path when running
@@ -36,7 +38,11 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${USER_ROOT_PATH}/etc/cmake)
 find_package(ROOT REQUIRED)
 include_directories(${ROOT_INCLUDE_DIR})
-file(GLOB ROOT_LIBRARIES ${ROOT_LIBRARY_DIR}/*.so)
+execute_process(
+  COMMAND ${PROJECT_SOURCE_DIR}/bin/./Isis-config --rlibs
+  OUTPUT_VARIABLE ROOT_LIBRARIES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
 #----------------------------------------------------------------------------
 # Defines two functions that copy or create a given directory/file only if it
@@ -143,7 +149,6 @@ foreach(index RANGE ${length})
   list(GET ANALYSIS_LIB_NAMES ${index} lib )
   file(GLOB source ${PROJECT_SOURCE_DIR}/Analysis/${folder}/source/*.cpp)
   add_library(${lib} SHARED ${source})
-  target_link_libraries(${lib} ${ROOT_LIBRARIES})
   list(APPEND PROJECT_LIBRARIES ${lib})
 endforeach()
 
