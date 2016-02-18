@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 05/01/2016                                                      //
+//  Last update: 17/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -57,9 +57,6 @@ Analysis::TreeCategory::TreeCategory( std::string name, TTree *itree, std::strin
   // If a set of cuts is providen it calculates the associated indices
   if ( cuts.size() )
     fTreeEntries = MakeSlice( fCuts );
-
-  // Enables again all the branches
-  fTree -> SetBranchStatus( "*", true );
 
   // Displays the information of the tree category
   std::cout << "*** Created new tree category < " << name << " > ***" << std::endl;

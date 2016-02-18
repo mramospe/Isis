@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 04/01/2016                                                      //
+//  Last update: 18/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -239,20 +239,6 @@ inline double General::StringParser::Term( std::string::iterator &it ) {
 // -------------------------------------------------
 
 //_______________________________________________________________________________
-// Main function to solve a boolean expression in a string
-inline bool General::StringParser::BoolExpression( std::string::iterator &it ) {
-  bool result = BoolTerm( it );
-  while ( *it == '&' || *it == '|' )
-    if ( *it == '&' && *( it + 1 ) == '&' )
-      result &= BoolTerm( it += 2 );
-    else if ( *it == '|' && *( it + 1 ) == '|' )
-      result |= BoolTerm( it += 2 );
-  if ( *it == ')' )
-    it++;
-  return result;
-}
-
-//_______________________________________________________________________________
 // Evaluates the given expression, returning the associated boolean value. Be
 // careful with the input string since no check will be made to determine if it
 // has been writen correctly. In order to check it first use the < Evaluate >
@@ -266,6 +252,20 @@ bool General::StringParser::BareEvaluate( std::string expr ) {
 }
 
 //_______________________________________________________________________________
+// Main function to solve a boolean expression in a string
+inline bool General::StringParser::BoolExpression( std::string::iterator &it ) {
+  bool result = BoolTerm( it );
+  while ( *it == '&' || *it == '|' )
+    if ( *it == '&' )
+      result &= BoolTerm( it += 2 );
+    else if ( *it == '|' )
+      result |= BoolTerm( it += 2 );
+  if ( *it == ')' )
+    it++;
+  return result;
+}
+
+//_______________________________________________________________________________
 // This function manages the parts of a boolean expression separated by < && >
 // and < || > operators
 inline bool General::StringParser::BoolTerm( std::string::iterator &it ) {
@@ -274,8 +274,11 @@ inline bool General::StringParser::BoolTerm( std::string::iterator &it ) {
   else if ( *it == '!' )
     return !BoolTerm( ++it );
   else
-    if ( ( *it == '1' || *it == '0' ) && ( *( it + 1 ) == '&' || *( it + 1 ) == '|' ) )
-      return *it++ - '0';
+    if ( *( it + 1 ) == '&' || *( it + 1 ) == '|' || *( it + 1 ) == ')' )
+      if ( *it++ == '0' )
+	return false;
+      else
+	return true;
     else
       return Inequation( it );
 }
@@ -289,19 +292,6 @@ bool General::StringParser::Evaluate( std::string expr ) {
     return BareEvaluate( expr );
   else
     throw std::invalid_argument( "ERROR: Input expression no valid" );
-}
-
-//_______________________________________________________________________________
-// Returns the position of the next boolean operator in the given string
-inline std::string::iterator General::StringParser::NextBoolOperator( std::string::iterator it ) {
-  while ( *it != '>' &&
-	  *it != '<' &&
-	  *it != '=' &&
-	  *it != '!' &&
-	  *it != '&' &&
-	  *it != '|' &&
-	  *it != '\0' ) it++;
-  return it;
 }
 
 //_______________________________________________________________________________
@@ -342,7 +332,28 @@ inline bool General::StringParser::Inequation( std::string::iterator &it ) {
       throw std::invalid_argument( "ERROR: Incomplete boolean expression" );
   }
   else
-    return true;
+    if ( *backit == '0' ) {
+      do { backit++; } while ( *backit == '0' );
+      if ( backit == it )
+	return false;
+      else
+	return true;
+    }
+    else
+      return true;
+}
+
+//_______________________________________________________________________________
+// Returns the position of the next boolean operator in the given string
+inline std::string::iterator General::StringParser::NextBoolOperator( std::string::iterator it ) {
+  while ( *it != '>' &&
+	  *it != '<' &&
+	  *it != '=' &&
+	  *it != '!' &&
+	  *it != '&' &&
+	  *it != '|' &&
+	  *it != '\0' ) it++;
+  return it;
 }
 
 
