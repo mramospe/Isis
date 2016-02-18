@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 16/02/2016                                                    #
+#  Last update: 18/02/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -143,6 +143,7 @@ foreach(index RANGE ${length})
   list(GET ANALYSIS_LIB_NAMES ${index} lib )
   file(GLOB source ${PROJECT_SOURCE_DIR}/Analysis/${folder}/source/*.cpp)
   add_library(${lib} SHARED ${source})
+  target_link_libraries(${lib} ${ROOT_LIBRARIES})
   list(APPEND PROJECT_LIBRARIES ${lib})
 endforeach()
 
