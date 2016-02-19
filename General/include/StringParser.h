@@ -70,6 +70,7 @@ namespace General {
     inline bool                  BoolTerm( std::string::iterator &it );
     inline bool                  Inequation( std::string::iterator &it );
     inline std::string::iterator NextBoolOperator( std::string::iterator it );
+    inline void                  NextUpLevelBool( std::string::iterator &it );
 
     // -------------------------------------------------------
     // Functions to check that the given expression is correct

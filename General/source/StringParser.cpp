@@ -257,10 +257,22 @@ bool General::StringParser::BareEvaluate( std::string expr ) {
 inline bool General::StringParser::BoolExpression( std::string::iterator &it, const bool &close ) {
   bool result = BoolTerm( it );
   while ( *it == '&' || *it == '|' )
-    if ( *it == '&' )
-      result &= BoolExpression( it += 2 );
-    else if ( *it == '|' )
-      result |= BoolExpression( it += 2 );
+    if ( *it == '&' ) {
+      if ( result )
+	result = BoolExpression( it += 2 );
+      else {
+	NextUpLevelBool( it += 2 );
+	return result;
+      }
+    }
+    else if ( *it == '|' ) {
+      if ( result ) {
+	NextUpLevelBool( it += 2 );
+	return result;
+      }
+      else
+	result = BoolExpression( it += 2 );
+    }
   if ( close && *it == ')' )
     it++;
   return result;
@@ -357,6 +369,16 @@ inline std::string::iterator General::StringParser::NextBoolOperator( std::strin
   return it;
 }
 
+ inline void General::StringParser::NextUpLevelBool( std::string::iterator &it ) {
+   size_t nestlvl = 1;
+   while ( nestlvl && *it != '\0' ) {
+     if ( *it == '(' )
+       nestlvl++;
+     else if ( *it == ')' )
+       nestlvl--;
+     it++;
+   }
+ }
 
 // --------------------------------------------------------------
 // Functions to check that a given expression is correctly writen

@@ -49,6 +49,7 @@ int main() {
   bvec.push_back( "1 || 0" );
   bvec.push_back( "1 && (1 + 2) > 5" );
   bvec.push_back( "0 || ( 1 && 0 )" );
+  bvec.push_back( "(1 || 0 || 0) && (0)" );
   for ( auto it = bvec.begin(); it != bvec.end(); it++ )
     std::cout << *it << " => " << General::StringParser::BareEvaluate( *it ) << std::endl;
 
