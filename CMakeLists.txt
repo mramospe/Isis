@@ -85,7 +85,7 @@ add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis
 #----------------------------------------------------------------------------
 # Defines the different Analysis packages
 set(ANALYSIS_EXTRA_PKGS Weights AdaptiveBinning RooFitExt)
-set(ANALYSIS_EXTRA_LIBS Wts     AdBin           RFExt    )
+set(ANALYSIS_EXTRA_LIBS Wgts    AdBin           RFExt    )
 
 #----------------------------------------------------------------------------
 # Makes the directories for the include files
@@ -154,7 +154,7 @@ endforeach()
 
 # Specifies the dependencies for each library
 add_dependencies(Analysis General)
-add_dependencies(Wts      Analysis)
+add_dependencies(Wgts     Analysis)
 add_dependencies(AdBin    Analysis)
 add_dependencies(RFExt    AdBin)
 
