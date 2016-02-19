@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 05/01/2016                                                      //
+//  Last update: 19/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -97,6 +97,7 @@ Analysis::TreeExpression::TreeExpression( std::string expr, TTree *itree ) :
   auto itp = fVarPtrs.begin();
   for ( auto itb = brvect.begin(); itb != brvect.end(); itb++, itp++ ) {
     brname  = itb -> first;
+    itree -> SetBranchStatus( brname.c_str(), true );
     brtitle = itree -> GetBranch( brname.c_str() ) -> GetTitle();
     if ( brtitle.find( "/O" ) != std::string::npos )
       *itp = std::make_pair( itree -> GetLeaf( brname.c_str() ) -> GetValuePointer(), 'O' );

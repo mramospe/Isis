@@ -458,15 +458,13 @@ inline bool General::StringParser::CheckBoolSymbol( std::string::iterator &it ) 
     return false;
   if ( *it == '=' && *frontit != '=' )
     return false;
-  if ( *it == '!' && *frontit != '=' )
-    return false;
   return true;
 }
 
 //_______________________________________________________________________________
 // Checks if a given character concerning "evaluate" expressions is well writen
 inline void General::StringParser::CheckEvalChar( std::string::iterator &it ) {
-  if ( *it == '&' || *it == '|' || *it == '=' || *it == '!' ) {
+  if ( *it == '&' || *it == '|' || *it == '=' || ( *it == '!' && *( it + 1 ) == '=' ) ) {
     if ( !CheckBoolSymbol( it ) )
       throw std::invalid_argument( "ERROR: Wrong boolean operator at position: " );
     else if ( !CheckLeft( it ) )
@@ -485,6 +483,12 @@ inline void General::StringParser::CheckEvalChar( std::string::iterator &it ) {
       throw std::invalid_argument( "ERROR: Wrong expression to the right of position " );
     else
       it = auxit + 1;
+  }
+  else if ( *it == '!' ) {
+    if ( !CheckRight( it + 1 ) )
+      throw std::invalid_argument( "ERROR: Wrong expression to the right of position " );
+    else
+      it++;
   }
 }
 
