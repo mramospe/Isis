@@ -508,6 +508,8 @@ bool General::StringParser::CheckEvalExpression( std::string expr ) {
       std::cerr << eval_error.what() << it - expr.begin() + 1 << " => Input: " << expr << std::endl;
       return false;
     }
+    if ( *it == '!' )
+      it++;
     try { CheckCalcChar( it ); }
     catch ( std::invalid_argument &calc_error ) {
       std::cerr << calc_error.what() << it - expr.begin() + 1 << " => Input: " << expr << std::endl;
@@ -593,7 +595,9 @@ inline bool General::StringParser::CheckParentheses( std::string &expr ) {
 // Checks if the expression to the right of the iterator is a number, term or
 // function
 inline bool General::StringParser::CheckRight( std::string::iterator it ) {
-  if ( ( *++it == '(' || ( *it >= '0' && *it <= '9' ) || *it == '+' || *it == '-' || *it == '.' || std::isalpha( *it ) ) )
+  if ( ( *++it == '(' || ( *it >= '0' && *it <= '9' ) ||
+	 *it == '+' || *it == '-' ||
+	 *it == '.' || *it == '!' || std::isalpha( *it ) ) )
     return true;
   return false;
 }
