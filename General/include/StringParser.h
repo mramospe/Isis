@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/12/2015                                                      //
+//  Last update: 19/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -66,7 +66,7 @@ namespace General {
     bool                         Evaluate( std::string expr );
     
     // Auxiliar functions
-    inline bool                  BoolExpression( std::string::iterator &it );
+    inline bool                  BoolExpression( std::string::iterator &it, const bool &close = false );
     inline bool                  BoolTerm( std::string::iterator &it );
     inline bool                  Inequation( std::string::iterator &it );
     inline std::string::iterator NextBoolOperator( std::string::iterator it );

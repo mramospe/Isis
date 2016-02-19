@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 18/02/2016                                                      //
+//  Last update: 19/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -252,15 +252,16 @@ bool General::StringParser::BareEvaluate( std::string expr ) {
 }
 
 //_______________________________________________________________________________
-// Main function to solve a boolean expression in a string
-inline bool General::StringParser::BoolExpression( std::string::iterator &it ) {
+// Main function to solve a boolean expression in a string. The boolean input
+// is necessary to properly take into account the nesting level.
+inline bool General::StringParser::BoolExpression( std::string::iterator &it, const bool &close ) {
   bool result = BoolTerm( it );
   while ( *it == '&' || *it == '|' )
     if ( *it == '&' )
-      result &= BoolTerm( it += 2 );
+      result &= BoolExpression( it += 2 );
     else if ( *it == '|' )
-      result |= BoolTerm( it += 2 );
-  if ( *it == ')' )
+      result |= BoolExpression( it += 2 );
+  if ( close && *it == ')' )
     it++;
   return result;
 }
@@ -270,7 +271,7 @@ inline bool General::StringParser::BoolExpression( std::string::iterator &it ) {
 // and < || > operators
 inline bool General::StringParser::BoolTerm( std::string::iterator &it ) {
   if ( *it == '(' )
-    return BoolExpression( ++it );
+    return BoolExpression( ++it, true );
   else if ( *it == '!' )
     return !BoolTerm( ++it );
   else
