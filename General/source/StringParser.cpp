@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 19/02/2016                                                      //
+//  Last update: 22/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -261,13 +261,13 @@ inline bool General::StringParser::BoolExpression( std::string::iterator &it, co
       if ( result )
 	result = BoolExpression( it += 2 );
       else {
-	NextUpLevelBool( it += 2 );
+	NextUpLevelBool( ++it );
 	return result;
       }
     }
     else if ( *it == '|' ) {
       if ( result ) {
-	NextUpLevelBool( it += 2 );
+	NextUpLevelBool( ++it );
 	return result;
       }
       else
@@ -372,11 +372,11 @@ inline std::string::iterator General::StringParser::NextBoolOperator( std::strin
  inline void General::StringParser::NextUpLevelBool( std::string::iterator &it ) {
    size_t nestlvl = 1;
    while ( nestlvl && *it != '\0' ) {
+     it++;
      if ( *it == '(' )
        nestlvl++;
      else if ( *it == ')' )
        nestlvl--;
-     it++;
    }
  }
 
