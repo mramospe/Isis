@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 09/12/2015                             //
+//  Last update: 22/02/2016                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -20,12 +20,12 @@
 //////////////////////////////////////////////////////////
 
 
-#include "TDirectory.h"
+#include "TreeManagement.h"
+
 #include "TBranch.h"
+#include "TDirectory.h"
 #include "TLeaf.h"
 #include "TObjArray.h"
-
-#include "TreeManagement.h"
 
 #include <iostream>
 #include <map>
@@ -34,7 +34,7 @@
 
 //_______________________________________________________________________________
 // Gets all the variables whose name contains a given keyword
-std::vector<std::string> Analysis::GetAllVarsWith( TTree *inputTree, std::string kw ) {
+std::vector<std::string> Analysis::GetAllVarsWith( TTree *inputTree, const std::string &kw ) {
 
   std::string  iname;
   TObjArray   *brList = inputTree -> GetListOfBranches();
@@ -80,7 +80,7 @@ std::vector<std::string> Analysis::GetBranchTitles( TTree *inputTree ) {
 
 //_______________________________________________________________________________
 // Gets the type of a variable in a tree
-std::string Analysis::GetVarType( TTree *inputTree, std::string var ) {
+std::string Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
 
   TObjArray *brList = inputTree -> GetListOfBranches();
 
@@ -92,7 +92,7 @@ std::string Analysis::GetVarType( TTree *inputTree, std::string var ) {
 
 //_______________________________________________________________________________
 // Gets the number of variables in a tree whose name contains a given keyword
-size_t Analysis::GetNvarsWithString( TTree *inputTree, std::string kw ) {
+size_t Analysis::GetNvarsWithString( TTree *inputTree, const std::string &kw ) {
 
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
@@ -129,7 +129,7 @@ size_t Analysis::GetNvarsWithType( TTree *inputTree, std::string type ) {
 // Returns the number of variables of a certain type in a given vector and tree
 size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 				     std::string type,
-				     std::vector<std::string> &vector ) {
+				     const std::vector<std::string> &vector ) {
 
   if ( type.find( '/' ) == std::string::npos )
     type = '/' + type;
@@ -138,9 +138,7 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
   std::string title;
   size_t      counter( 0 );
 
-  for ( std::vector<std::string>::iterator it = vector.begin();
-	it != vector.end();
-	it++ ) {
+  for ( auto it = vector.begin(); it != vector.end(); it++ ) {
     title = brList -> FindObject( it -> c_str() ) -> GetTitle();
     if ( title.find( type ) != std::string::npos )
       counter++;
@@ -154,8 +152,8 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 // output tree is going to be saved in the current directory, so an output file
 // must be opened first.
 void Analysis::MakeTreeChangingNames( TTree *inputTree,
-				      std::vector<std::string> ivars,
-				      std::vector<std::string> ovars ) {
+				      const std::vector<std::string> &ivars,
+				      const std::vector<std::string> &ovars ) {
 
   // Sends a warning message if the number of input variables is different to
   // the number of output variables
@@ -168,9 +166,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   std::cout << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << std::endl;
 
   // Deactivates the branches of the input variables
-  for ( std::vector<std::string>::iterator it = ivars.begin();
-	it != ivars.end();
-	it++ )
+  for ( auto it = ivars.begin(); it != ivars.end(); it++ )
     inputTree -> SetBranchStatus( it -> c_str(), false );
 
   // Clones the input tree
@@ -180,9 +176,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   outputTree -> Write();
 
   // Reactivates the branches of the input variables
-  for ( std::vector<std::string>::iterator it = ivars.begin();
-	it != ivars.end();
-	it++ )
+  for ( auto it = ivars.begin(); it != ivars.end(); it++ )
     inputTree -> SetBranchStatus( it -> c_str(), true );
 
   // Generates a set of vectors to almacenate the data
@@ -274,7 +268,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
 // Creates and saves a clone of the input tree where all the input variables of
 // the given type, specified by 'F' ( float ) or 'D' ( double ), are changed to
 // the other one
-TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, char itype ) {
+TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 
   TObjArray *brList = inputTree -> GetListOfBranches();
 

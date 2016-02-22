@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 07/01/2016                                                      //
+//  Last update: 22/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -31,8 +31,8 @@
 #include "LoopArray.h"
 #include "TreeCategory.h"
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -46,41 +46,46 @@ namespace Analysis {
 
     // Constructors
     CutComparer();
-    CutComparer( std::vector<TreeCategory*> &catvec );
+    CutComparer( const std::vector<TreeCategory*> &catvec );
 
     // Destructor
     ~CutComparer();
 
     // Methods
+    void AddCutVariable( const std::string &name,
+			 const std::string &dir,
+			 const size_t      &npoints,
+			 const double      &vmin,
+			 const double      &vmax );
+    void AddCutVariable( const std::string &name,
+			 const std::string &expr,
+			 const std::string &dir,
+			 const size_t      &npoints,
+			 const double      &vmin,
+			 const double      &vmax );
+    void Compare();
+
+    // Inline methods
     inline void AddCategory( TreeCategory &cat );
-    inline void AddCategories( std::vector<TreeCategory*> &catvec );
-    inline void AddCompVariable( std::string name,
-				 size_t      nbins,
-				 double      vmin,
-				 double      vmax );
-    inline void AddCompVariable( std::string name,
-				 std::string expr,
-				 size_t      nbins,
-				 double      vmin,
-				 double      vmax );
-    void        AddCutVariable( std::string name,
-				std::string dir,
-				size_t      npoints,
-				double      vmin,
-				double      vmax );
-    void        AddCutVariable( std::string name,
-				std::string expr,
-				std::string dir,
-				size_t      npoints,
-				double      vmin,
-				double      vmax );
-    void        Compare();
+    inline void AddCategories( const std::vector<TreeCategory*> &catvec );
+    inline void AddCompVariable( const std::string &name,
+				 const size_t      &nbins,
+				 const double      &vmin,
+				 const double      &vmax );
+    inline void AddCompVariable( const std::string &name,
+				 const std::string &expr,
+				 const size_t      &nbins,
+				 const double      &vmin,
+				 const double      &vmax );
 
   protected:
 
     // Nested struct to manage the variables
     struct CutCompVar {
-      CutCompVar( std::string expr, size_t npoints, double vmin, double vmax ) :
+      CutCompVar( const std::string &expr,
+		  const size_t      &npoints,
+		  const double      &vmin,
+		  const double      &vmax ) :
 	fExpr( expr ), fMax( vmax ), fMin( vmin ), fN( npoints ) { }
       std::string fExpr;
       double      fMax;
@@ -98,7 +103,7 @@ namespace Analysis {
     General::LoopArray                     fLoopArray;
 
   private:
-    inline void SendError( const std::string &expr, const std::string &cat, bool type );
+    inline void SendError( const std::string &expr, const std::string &cat, const bool &type );
 
   };
 
@@ -110,27 +115,29 @@ namespace Analysis {
     fCategories.push_back( &cat );
   }
   // Adds a set of categories stored in a vector
-  inline void CutComparer::AddCategories( std::vector<TreeCategory*> &catvec ) {
+  inline void CutComparer::AddCategories( const std::vector<TreeCategory*> &catvec ) {
     fCategories.insert( fCategories.end(), catvec.begin(), catvec.end() );
   }
   // Adds a new variable to compare. The number of bins and the range have to be
   // specified.
-  inline void CutComparer::AddCompVariable( std::string name,
-					    size_t      nbins,
-					    double      vmin,
-					    double      vmax ) {
+  inline void CutComparer::AddCompVariable( const std::string &name,
+					    const size_t      &nbins,
+					    const double      &vmin,
+					    const double      &vmax ) {
     fCompVars.push_back( std::make_pair( name, CutCompVar( name, nbins, vmin, vmax ) ) );
   }
   // Adds a new variable to compare as an expression
-  inline void CutComparer::AddCompVariable( std::string name,
-					    std::string expr,
-					    size_t      nbins,
-					    double      vmin,
-					    double      vmax ) {
+  inline void CutComparer::AddCompVariable( const std::string &name,
+					    const std::string &expr,
+					    const size_t      &nbins,
+					    const double      &vmin,
+					    const double      &vmax ) {
     fCompVars.push_back( std::make_pair( name, CutCompVar( expr, nbins, vmin, vmax ) ) );
   }
   // Private method to send the different possible error types of the class
-  inline void CutComparer::SendError( const std::string &expr, const std::string &cat, bool type ) {
+  inline void CutComparer::SendError( const std::string &expr,
+				      const std::string &cat,
+				      const bool        &type ) {
     if ( type )
       std::cerr <<
 	"ERROR: Branch < " << expr << " > not known for category < " <<	cat << " >" 

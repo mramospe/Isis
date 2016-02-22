@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 07/01/2016                                                      //
+//  Last update: 22/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -25,6 +25,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+#include "CutComparer.h"
+#include "StringParser.h"
+#include "TreeExpression.h"
+#include "TreeManagement.h"
+
 #include "TCanvas.h"
 #include "TDirectory.h"
 #include "TDirectoryFile.h"
@@ -33,11 +38,6 @@
 #include "TObjString.h"
 #include "TROOT.h"
 #include "TStyle.h"
-
-#include "CutComparer.h"
-#include "StringParser.h"
-#include "TreeExpression.h"
-#include "TreeManagement.h"
 
 #include <ctime>
 #include <sstream>
@@ -54,7 +54,7 @@ Analysis::CutComparer::CutComparer() { }
 
 //_______________________________________________________________________________
 // Constructor given a vector of categories
-Analysis::CutComparer::CutComparer( std::vector<Analysis::TreeCategory*> &catvec ) :
+Analysis::CutComparer::CutComparer( const std::vector<Analysis::TreeCategory*> &catvec ) :
   fCategories( catvec ) { }
 
 //_______________________________________________________________________________
@@ -70,11 +70,11 @@ Analysis::CutComparer::~CutComparer() { }
 // Adds a new variable to cut over. The name of the variable, the direction of
 // the cut: "<", ">", "<=" or ">=", the number of points and the range of the cut
 // have to be specified.
-void Analysis::CutComparer::AddCutVariable( std::string name,
-					    std::string dir,
-					    size_t      npoints,
-					    double      vmin,
-					    double      vmax ) {
+void Analysis::CutComparer::AddCutVariable( const std::string &name,
+					    const std::string &dir,
+					    const size_t      &npoints,
+					    const double      &vmin,
+					    const double      &vmax ) {
   fCutVars.push_back( std::make_pair( name, CutCompVar( name, npoints, vmin, vmax ) ) );
   if ( dir != ">" && dir != "<" && dir != ">=" && dir != "<=" )
     std::cerr <<
@@ -89,12 +89,12 @@ void Analysis::CutComparer::AddCutVariable( std::string name,
 
 //_______________________________________________________________________________
 // Adds a new variable to cut over as an expression
-void Analysis::CutComparer::AddCutVariable( std::string name,
-					    std::string expr,
-					    std::string dir,
-					    size_t      npoints,
-					    double      vmin,
-					    double      vmax ) {
+void Analysis::CutComparer::AddCutVariable( const std::string &name,
+					    const std::string &expr,
+					    const std::string &dir,
+					    const size_t      &npoints,
+					    const double      &vmin,
+					    const double      &vmax ) {
   this -> AddCutVariable( expr, dir, npoints, vmin, vmax );
   fCutVars.back().first = name;
 }

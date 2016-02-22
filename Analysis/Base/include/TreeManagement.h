@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 09/12/2015                             //
+//  Last update: 22/02/2016                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -33,19 +33,19 @@
 
 namespace Analysis {
 
-  std::vector<std::string> GetAllVarsWith( TTree *inputTree, std::string kw );
+  std::vector<std::string> GetAllVarsWith( TTree *inputTree, const std::string &kw );
   std::vector<std::string> GetBranchNames( TTree *inputTree );
   std::vector<std::string> GetBranchTitles( TTree *inputTree );
-  std::string              GetVarType( TTree *inputTree, std::string var );
-  size_t                   GetNvarsWithString( TTree *inputTree, std::string str );
+  std::string              GetVarType( TTree *inputTree, const std::string &var );
+  size_t                   GetNvarsWithString( TTree *inputTree, const std::string &kw );
   size_t                   GetNvarsWithType( TTree *inputTree, std::string type );
   size_t                   GetNvarsWithTypeIn( TTree *inputTree,
 					       std::string type,
-					       std::vector<std::string> &vector );
+					       const std::vector<std::string> &vector );
   void                     MakeTreeChangingNames( TTree *input_tree,
-						  std::vector< std::string > ivars,
-						  std::vector< std::string > ovars );
-  TTree*                   MakeTreeConvertingVars( TTree *inputTree, char itype = 'F' );
+						  const std::vector< std::string > &ivars,
+						  const std::vector< std::string > &ovars );
+  TTree*                   MakeTreeConvertingVars( TTree *inputTree, const char &itype = 'F' );
 
 }
 
