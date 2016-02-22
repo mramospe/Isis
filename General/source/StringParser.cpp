@@ -260,16 +260,12 @@ inline bool General::StringParser::BoolExpression( std::string::iterator &it, co
     if ( *it == '&' ) {
       if ( result )
 	result = BoolExpression( it += 2 );
-      else {
+      else
 	NextUpLevelBool( ++it );
-	return result;
-      }
     }
     else if ( *it == '|' ) {
-      if ( result ) {
+      if ( result )
 	NextUpLevelBool( ++it );
-	return result;
-      }
       else
 	result = BoolExpression( it += 2 );
     }
@@ -369,16 +365,19 @@ inline std::string::iterator General::StringParser::NextBoolOperator( std::strin
   return it;
 }
 
- inline void General::StringParser::NextUpLevelBool( std::string::iterator &it ) {
-   size_t nestlvl = 1;
-   while ( nestlvl && *it != '\0' ) {
-     it++;
-     if ( *it == '(' )
-       nestlvl++;
-     else if ( *it == ')' )
-       nestlvl--;
-   }
- }
+//_______________________________________________________________________________
+// Looks for a boolean operator one nesting level up
+inline void General::StringParser::NextUpLevelBool( std::string::iterator &it ) {
+  size_t nestlvl = 1;
+  while ( nestlvl && *it != '\0' ) {
+    it++;
+    if ( *it == '(' )
+      nestlvl++;
+    else if ( *it == ')' )
+      nestlvl--;
+  }
+}
+
 
 // --------------------------------------------------------------
 // Functions to check that a given expression is correctly writen
