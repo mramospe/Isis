@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/02/2016                                                      //
+//  Last update: 24/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -29,8 +29,10 @@
 #define CUT_COMPARER
 
 #include "LoopArray.h"
-#include "TreeCategory.h"
 
+#include "TTree.h"
+
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -46,7 +48,7 @@ namespace Analysis {
 
     // Constructors
     CutComparer();
-    CutComparer( const std::vector<TreeCategory*> &catvec );
+    CutComparer( const std::map<std::string, std::pair<TTree*, std::string> > &catvec );
 
     // Destructor
     ~CutComparer();
@@ -66,8 +68,7 @@ namespace Analysis {
     void Compare();
 
     // Inline methods
-    inline void AddCategory( TreeCategory &cat );
-    inline void AddCategories( const std::vector<TreeCategory*> &catvec );
+    inline void AddCategory( const std::string &name, TTree *tree, const std::string &cut );
     inline void AddCompVariable( const std::string &name,
 				 const size_t      &nbins,
 				 const double      &vmin,
@@ -94,16 +95,14 @@ namespace Analysis {
     };
 
     // Attributes
-    std::vector<TreeCategory*>             fCategories;
+    std::map<std::string,
+	     std::pair<TTree*, std::string> > fCategories;
     std::vector<
-      std::pair<std::string, CutCompVar> > fCompVars;
-    std::string                            fCutString;
+      std::pair<std::string, CutCompVar> >    fCompVars;
+    std::string                               fCutString;
     std::vector<
-      std::pair<std::string, CutCompVar> > fCutVars;
-    General::LoopArray                     fLoopArray;
-
-  private:
-    inline void SendError( const std::string &expr, const std::string &cat, const bool &type );
+      std::pair<std::string, CutCompVar> >    fCutVars;
+    General::LoopArray                        fLoopArray;
 
   };
 
@@ -111,12 +110,10 @@ namespace Analysis {
   // INLINE METHODS
 
   // Adds a new category to the comparer
-  inline void CutComparer::AddCategory( TreeCategory &cat ) {
-    fCategories.push_back( &cat );
-  }
-  // Adds a set of categories stored in a vector
-  inline void CutComparer::AddCategories( const std::vector<TreeCategory*> &catvec ) {
-    fCategories.insert( fCategories.end(), catvec.begin(), catvec.end() );
+  inline void CutComparer::AddCategory( const std::string &name,
+					TTree             *tree,
+					const std::string &cut ) {
+    fCategories[ name ] = std::make_pair( tree, cut );
   }
   // Adds a new variable to compare. The number of bins and the range have to be
   // specified.
@@ -134,20 +131,6 @@ namespace Analysis {
 					    const double      &vmax ) {
     fCompVars.push_back( std::make_pair( name, CutCompVar( expr, nbins, vmin, vmax ) ) );
   }
-  // Private method to send the different possible error types of the class
-  inline void CutComparer::SendError( const std::string &expr,
-				      const std::string &cat,
-				      const bool        &type ) {
-    if ( type )
-      std::cerr <<
-	"ERROR: Branch < " << expr << " > not known for category < " <<	cat << " >" 
-			   << std::endl;
-    else
-      std::cerr <<
-	"ERROR: Could not resolve expression for variable < " << expr <<
-	" > and category < " << cat << " >" << std::endl;
-  }
-
 }
 
 #endif
