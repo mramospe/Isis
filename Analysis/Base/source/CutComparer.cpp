@@ -199,13 +199,13 @@ void Analysis::CutComparer::Compare() {
       itl++;
     }
     cutStr = sout.str();
-    std::cout << " Generated new cut: " << cutStr << std::endl;
+    std::cout << "Generated new cut: " << cutStr << std::endl;
 
     // Generates the folder to save the histograms
     folder = new TDirectoryFile( sname.str().c_str(), sname.str().c_str() );
     folder -> Write();
     folder -> cd();
-    std::cout << " Generating histograms in folder < " << sname.str() << " >:" << std::endl;
+    std::cout << "Generating histograms in folder < " << sname.str() << " >:" << std::endl;
 
     // Writes the string with the information about the cut in the folder
     objStr = new TObjString( cutStr.c_str() );
@@ -235,14 +235,15 @@ void Analysis::CutComparer::Compare() {
 	  var = itv -> second.fExpr;
 	else
 	  var = name;
+	// Generates the histogram. The name has always to be set to avoid memory leak problems.
 	tree -> Draw( ( var + ">>hist(" + nbins + "," +	vmin + "," + vmax + ")"	).c_str(), cuts.c_str() );
 	hist = ( TH1* ) gDirectory -> Get( "hist" );
+	var  = name + "_" + it -> first;
+	hist -> SetNameTitle( var.c_str(), var.c_str() );
 
 	// The histogram is formatted only if it is not void
-	if ( hist -> GetEntries() != 0 ) {
-	  var     = name + "_" + it -> first;
+	if ( hist -> GetSumOfWeights() > 0 ) {
 	  currcol = colors[ icol%6 ] + icol/6;
-	  hist   -> SetNameTitle( var.c_str(), var.c_str() );
 	  hist   -> SetMarkerStyle( 20 );
 	  hist   -> SetLineColor( currcol );
 	  hist   -> SetMarkerColor( currcol );
@@ -258,19 +259,21 @@ void Analysis::CutComparer::Compare() {
       double max = 0;
       size_t imh = 0;
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
-	if ( vhist[ ih ] -> GetMaximum() > max ) {
-	  max = vhist[ ih ] -> GetMaximum();
-	  imh = ih;
-	}
-      vhist[ imh ] -> DrawNormalized( "HE1" );
-      for ( size_t ih = 0; ih < fCategories.size(); ih++ )
-	if ( ih != imh && vhist[ ih ] -> GetEntries() != 0 )
+	  if ( vhist[ ih ] -> GetMaximum() > max ) {
+	    max = vhist[ ih ] -> GetMaximum();
+	    imh = ih;
+	  }
+      if ( vhist[ imh ] -> GetSumOfWeights() > 0 ) {
+	vhist[ imh ] -> DrawNormalized( "HE1" );
+	for ( size_t ih = 0; ih < fCategories.size(); ih++ )
+	  if ( ih != imh && vhist[ ih ] -> GetSumOfWeights() > 0 )
 	    vhist[ ih ] -> DrawNormalized( "SAMEHE1" );
-      legend -> Draw();
-      canvas -> Write();
-      folder -> Save();
-      std::cout << "  - Variable < " << itv -> first << " > processed" << std::endl;
-
+	legend -> Draw();
+	canvas -> Write();
+	folder -> Save();
+      }
+      std::cout << " - Variable < " << itv -> first << " > processed" << std::endl;
+      
       // Deletes the pointers
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
 	delete vhist[ ih ];

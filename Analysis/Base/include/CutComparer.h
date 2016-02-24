@@ -68,7 +68,7 @@ namespace Analysis {
     void Compare();
 
     // Inline methods
-    inline void AddCategory( const std::string &name, TTree *tree, const std::string &cut );
+    inline void AddCategory( const std::string &name, TTree *tree, const std::string &cut = "" );
     inline void AddCompVariable( const std::string &name,
 				 const size_t      &nbins,
 				 const double      &vmin,
