@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 24/02/2016                                                      //
+//  Last update: 28/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -256,13 +256,18 @@ void Analysis::CutComparer::Compare() {
       }
       // Draws the pointers into the canvas. The first histogram to be drawn is that with the
       // maximum value in the Y axis.
-      double max = 0;
+      double sw, nmax, max = 0;
       size_t imh = 0;
-      for ( size_t ih = 0; ih < fCategories.size(); ih++ )
-	  if ( vhist[ ih ] -> GetMaximum() > max ) {
-	    max = vhist[ ih ] -> GetMaximum();
+      for ( size_t ih = 0; ih < fCategories.size(); ih++ ) {
+	sw = vhist[ ih ] -> GetSumOfWeights();
+	if ( sw > 0 ) {
+	  nmax = vhist[ ih ] -> GetMaximum()/sw
+	  if ( nmax > max ) {
+	    max = nmax;
 	    imh = ih;
 	  }
+	}
+      }
       if ( vhist[ imh ] -> GetSumOfWeights() > 0 ) {
 	vhist[ imh ] -> DrawNormalized( "HE1" );
 	for ( size_t ih = 0; ih < fCategories.size(); ih++ )
