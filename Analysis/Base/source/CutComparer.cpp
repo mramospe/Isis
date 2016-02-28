@@ -261,7 +261,7 @@ void Analysis::CutComparer::Compare() {
       for ( size_t ih = 0; ih < fCategories.size(); ih++ ) {
 	sw = vhist[ ih ] -> GetSumOfWeights();
 	if ( sw > 0 ) {
-	  nmax = vhist[ ih ] -> GetMaximum()/sw
+	  nmax = vhist[ ih ] -> GetMaximum()/sw;
 	  if ( nmax > max ) {
 	    max = nmax;
 	    imh = ih;

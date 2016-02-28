@@ -21,15 +21,21 @@ export ISIS_TOOLS=$ISIS/Tools
 echo "Loading source from: $ISIS"
 
 # Extends the path to bash scripts with this one
-PATH=$PATH:$currpath
+if [[ $PATH != *$currpath* ]]; then
+    export PATH=$currpath:$PATH
+fi
 echo "Extended shell path to $currpath"
 
 # The library path is updated with the Isis libraries
-export LD_LIBRARY_PATH=$ISIS/lib:$LD_LIBRARY_PATH
+if [[ $LD_LIBRARY_PATH != *$ISIS/lib* ]]; then
+    export LD_LIBRARY_PATH=$ISIS/lib:$LD_LIBRARY_PATH
+fi
 echo "Exported c++ libraries from: $ISIS/lib"
 
 # Exports the python modules
-export PYTHONPATH=$PYTHONPATH:$ISIS_PYTHON
+if [[ $PYTHONPATH != *$ISIS_PYTHON* ]]; then
+    export PYTHONPATH=$ISIS_PYTHON:$PYTHONPATH
+fi
 echo "Extended python path from: $ISIS_PYTHON"
 
 # Defines the alias to the tools
