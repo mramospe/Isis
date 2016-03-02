@@ -108,7 +108,7 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     elif tp == "double":
         hist = TH1D( name, title, nbins, vmin, vmax )
     elif tp == "int":
-        hist = TH1D( name, title, nbins, vmin, vmax )
+        hist = TH1I( name, title, nbins, vmin, vmax )
     else:
         print "Histogram type", tp, "not known"
         return
