@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 24/02/2016                                                      //
+//  Last update: 29/02/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -68,7 +68,10 @@ namespace Analysis {
     void Compare();
 
     // Inline methods
-    inline void AddCategory( const std::string &name, TTree *tree, const std::string &cut = "" );
+    inline void AddCategory( const std::string &name,
+			     TTree             *tree,
+			     const std::string &cut = "",
+			     const std::string &weight = "" );
     inline void AddCompVariable( const std::string &name,
 				 const size_t      &nbins,
 				 const double      &vmin,
@@ -112,8 +115,12 @@ namespace Analysis {
   // Adds a new category to the comparer
   inline void CutComparer::AddCategory( const std::string &name,
 					TTree             *tree,
-					const std::string &cut ) {
-    fCategories[ name ] = std::make_pair( tree, cut );
+					const std::string &cut,
+					const std::string &weight ) {
+    if ( weight.size() )
+      fCategories[ name ] = std::make_pair( tree, weight + "*(" + cut + ")" );
+    else
+      fCategories[ name ] = std::make_pair( tree, weight );
   }
   // Adds a new variable to compare. The number of bins and the range have to be
   // specified.
