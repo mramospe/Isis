@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 24/11/2015                             //
+#//  Last update: 02/03/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -20,8 +20,9 @@
 #//////////////////////////////////////////////////////////
 
 
-from ROOT import gStyle, TCanvas, TH1D, TGraph
+from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
+from Isis.Utils import CalcMinDist
 from math import sqrt
 
 
@@ -191,6 +192,48 @@ def CovMatrix( data ):
         for j in xrange( nvars ):
             covmatrix[ i ][ j ] = Covariance( data[ i ], data[ j ] )
     return covmatrix
+
+#_______________________________________________________________________________
+# Returns the two Kolmogorov-Smirnov factors. The input parameters can be
+# iterable objects or TH1 histograms. The < smpRef > variable will be taken
+# as the "reference" and < smpObs > as the distribution to check if matches.
+def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
+    if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
+        ''' If the classes are histograms it is worked using the bins contents '''
+        nbins = smpRef.GetNbinsX()
+        if nbins != smpObs.GetNbinsX():
+            print "ERROR: The number of bins is different for both samples"
+            return
+        elif smpRef.GetXaxis().GetXmin() != smpObs.GetXaxis().GetXmin():
+            print "ERROR: The minimum values for the axis of the histograms do not match"
+            return
+        elif smpRef.GetXaxis().GetXmax() != smpObs.GetXaxis().GetXmax():
+            print "ERROR: The maximum values for the axis of the histograms do not match"
+            return
+    else:
+        ''' This is the task performed when the input are two iterable classes '''
+        if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+        else: nbins = 100
+        if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+        else: vmin = min( smpRef + smpObs )
+        if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
+        else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
+        smpRef = MakeHistogram( smpRef, name = "ref", nbins = nbins, vmin = vmin, vmax = vmax )
+        smpObs = MakeHistogram( smpObs, name = "obs", nbins = nbins, vmin = vmin, vmax = vmax )
+    ''' Calculates the sum of weights and creates a list with the content of all the bins '''
+    nRef, nObs = [ smp.GetSumOfWeights() for smp in ( smpRef, smpObs ) ]
+    cRef = [ smpRef.GetBinContent( i )/nRef for i in xrange( 1, nbins + 1 ) ]
+    cObs = [ smpObs.GetBinContent( i )/nObs for i in xrange( 1, nbins + 1 ) ]
+    ''' Calculates the cumulated values '''
+    for i in xrange( 1, nbins ):
+        cRef[ i ] += cRef[ i - 1 ]
+        cObs[ i ] += cObs[ i - 1 ]
+    ''' Calculates the Kolmogorov-Smirnov parameters '''
+    Dp, Dm = [], []
+    for ib in xrange( nbins ):
+        Dp.append( cObs[ ib ] - cRef[ ib ] )
+        Dm.append( cRef[ ib ] - cObs[ ib ] )
+    return max( Dp ), max( Dm )
 
 #_______________________________________________________________________________
 # Calculates the linear correlation coefficient between two lists of values

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 08/02/2016                                //
+#//  Last update: 02/03/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -22,6 +22,18 @@
 import math
 from Isis.Algebra import Matrix, SolveLU
 
+
+#_______________________________________________________________________________
+# Calculates the minimum distance between values in an iterable object
+def CalcMinDist( lst ):
+    lgth = len( lst )
+    dst  = abs( lst[ 1 ] - lst[ 0 ] )
+    for i in xrange( lgth ):
+        for j in xrange( i + 1, lgth ):
+            newdst = abs( lst[ j ] - lst[ i ] )
+            if newdst < dst:
+                dst = newdst
+    return dst
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
@@ -176,6 +188,43 @@ def LargestString( lstdic ):
     else:
         print "The input parameter is not a list nor a dictionary, returned 0"
     return maxlen
+
+#_______________________________________________________________________________
+# This function generates a sublist from that given, with its values between
+# < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
+# than that of < vmax > will be considered. If set to False, the values that are
+# equal to it will also be considered. By default the output list is given
+# given sorted, and this behaviour is managed trough the < sort > variable.
+def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
+    if "sort" in kwargs: sort = kwargs[ "sort" ]
+    else: sort = True
+    if "nbr" in kwargs: nbr = kwargs[ "nbr" ]
+    else: nbr = True
+    order = zip( lst, xrange( len( lst ) ) )
+    order.sort()
+    cplst = [ fst for fst, sec in order ]
+    order = [ sec for fst, sec in order ]
+    lgth = len( cplst )
+    imin, imax = 0, lgth
+    if vmin != None:
+        i = 0
+        while i < lgth and cplst[ i ] < vmin:
+            i += 1
+        imin = i
+    if vmax != None:
+        i = -1
+        while i < lgth and cplst[ i ] > vmax:
+            i -= 1
+        if nbr and cplst[ i ] == vmax:
+            i -= 1
+        if i != -1:
+            imax = i + 1
+    if sort:
+        return cplst[ imin:imax ]
+    else:
+        order = order[ imin:imax ]
+        order.sort()
+        return cplst.__class__( lst[ el ] for el in order )
 
 #_______________________________________________________________________________
 # This function merges the values in various dictionaries into one
