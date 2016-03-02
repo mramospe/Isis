@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 17/02/2016                                                      //
+//  Last update: 02/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -29,7 +29,6 @@
 #include "TDirectory.h"
 #include "TH1D.h"
 #include "TH1F.h"
-#include "TH1I.h"
 #include "TLeaf.h"
 #include "TObjArray.h"
 
@@ -113,7 +112,8 @@ TH1* Analysis::TreeCategory::MakeHistogram( std::string var,
   fTree -> SetBranchStatus( var.c_str(), true );
   void *value = fTree -> GetLeaf( var.c_str() ) -> GetValuePointer();
 
-  // Checks for the variable type of the branch
+  // Checks for the variable type of the branch. In case the variable is an int,
+  // the generated histogram will have a double type.
   if ( brtitle.find( "/D" ) != std::string::npos ) {
     hist  = new TH1D( hname.c_str(), hname.c_str(), nbins, vmin, vmax );
     vtype = 'D';
@@ -123,7 +123,7 @@ TH1* Analysis::TreeCategory::MakeHistogram( std::string var,
     vtype = 'F';
   }
   else if ( brtitle.find( "/I" ) != std::string::npos ) {
-    hist  = new TH1I( hname.c_str(), hname.c_str(), nbins, vmin, vmax );
+    hist  = new TH1D( hname.c_str(), hname.c_str(), nbins, vmin, vmax );
     vtype = 'I';
   }
   else {

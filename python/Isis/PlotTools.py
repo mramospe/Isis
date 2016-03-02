@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 01/02/2016                                   //
+#//  Last update: 02/03/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -22,8 +22,8 @@
 
 from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
                    TGraph, TGraphErrors,
-                   TH1F, TH1D, TH1I,
-                   TH2F, TH2D, TH2I,
+                   TH1F, TH1D,
+                   TH2F, TH2D,
                    kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
 from array import array
 from math import sqrt
@@ -85,8 +85,9 @@ def ImportPlotModules():
         glob[ el ] = __import__( "ROOT." + el, glob, loc, [ '*' ] )
 
 #_______________________________________________________________________________
-# Function to generate a Root histogram given a list. By default no ytitle is drawn, but it
-# can be set with the < ytitle > option
+# Function to generate a Root histogram given a list. By default no ytitle is
+# drawn, but it can be set with the < ytitle > option. For values of type int,
+# the histogram will be of type double.
 def MakeHistogram( var, wvar = False, **kwargs ):
     if "name" in kwargs: name = kwargs[ "name" ]
     else: name = "hist"
@@ -107,7 +108,7 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     elif tp == "double":
         hist = TH1D( name, title, nbins, vmin, vmax )
     elif tp == "int":
-        hist = TH1I( name, title, nbins, vmin, vmax )
+        hist = TH1D( name, title, nbins, vmin, vmax )
     else:
         print "Histogram type", tp, "not known"
         return
@@ -152,7 +153,7 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
     elif tp == "double":
         hist = TH2D( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
     elif tp == "int":
-        hist = TH2I( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
+        hist = TH2D( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
     else:
         print "Histogram type", tp, "not known"
         return
