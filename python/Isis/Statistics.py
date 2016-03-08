@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 02/03/2016                             //
+#//  Last update: 03/03/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -196,10 +196,14 @@ def CovMatrix( data ):
 #_______________________________________________________________________________
 # Returns the two Kolmogorov-Smirnov factors. The input parameters can be
 # iterable objects or TH1 histograms. The < smpRef > variable will be taken
-# as the "reference" and < smpObs > as the distribution to check if matches.
+# as the "reference" and < smpObs > as the distribution to check if matches. If
+# a list or similar class is provided, by default the analysis will be unbinned,
+# controlling it with the < binned > option.
 def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
+    if "binned" in kwargs: binned = kwargs[ "binned" ]
+    else: binned = False
     if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
-        ''' If the classes are histograms it is worked using the bins contents '''
+        ''' If the classes are histograms it works using the bins contents '''
         nbins = smpRef.GetNbinsX()
         if nbins != smpObs.GetNbinsX():
             print "ERROR: The number of bins is different for both samples"
@@ -211,15 +215,47 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
             print "ERROR: The maximum values for the axis of the histograms do not match"
             return
     else:
-        ''' This is the task performed when the input are two iterable classes '''
-        if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
-        else: nbins = 100
-        if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
-        else: vmin = min( smpRef + smpObs )
-        if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
-        else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
-        smpRef = MakeHistogram( smpRef, name = "ref", nbins = nbins, vmin = vmin, vmax = vmax )
-        smpObs = MakeHistogram( smpObs, name = "obs", nbins = nbins, vmin = vmin, vmax = vmax )
+        if binned:
+            ''' This is the task performed when one wants to consider binned lists '''
+            if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+            else: nbins = 100
+            if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+            else: vmin = min( smpRef + smpObs )
+            if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
+            else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
+            smpRef = MakeHistogram( smpRef, name = "ref", nbins = nbins, vmin = vmin, vmax = vmax )
+            smpObs = MakeHistogram( smpObs, name = "obs", nbins = nbins, vmin = vmin, vmax = vmax )
+        else:
+            ''' This is what is performed when one works with unbinned distributions '''
+            if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
+            else: npoints = 100
+            smpRef  = list( smpRef )
+            smpObs  = list( smpObs )
+            mainlst = smpRef + smpObs
+            vmax    = max( mainlst )
+            vmin    = min( mainlst )
+            step    = float( vmax - min( mainlst ) )/npoints
+            points  = [ vmin + i*step for i in xrange( 1, npoints + 1 ) ]
+            points[ -1 ] += step
+            cRef, cObs = 1./len( smpRef ), 1./len( smpObs )
+            smpRef.sort()
+            smpObs.sort()
+            Dp, Dm = npoints*[ 0. ], npoints*[ 0. ]
+            for ip, p in enumerate( points ):
+                nRef, nObs = 0, 0
+                i = 0
+                while smpRef[ i ] < p:
+                    i += 1
+                    nRef += cRef
+                smpRef = smpRef[ i: ]
+                i = 0
+                while smpObs[ i ] < p:
+                    i += 1
+                    nObs += cRef
+                smpObs = smpObs[ i: ]
+                Dp[ ip ] = nObs - nRef
+                Dm[ ip ] = nRef - nObs
+            return max( Dp ), max( Dm )
     ''' Calculates the sum of weights and creates a list with the content of all the bins '''
     nRef, nObs = [ smp.GetSumOfWeights() for smp in ( smpRef, smpObs ) ]
     cRef = [ smpRef.GetBinContent( i )/nRef for i in xrange( 1, nbins + 1 ) ]
@@ -229,10 +265,10 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
         cRef[ i ] += cRef[ i - 1 ]
         cObs[ i ] += cObs[ i - 1 ]
     ''' Calculates the Kolmogorov-Smirnov parameters '''
-    Dp, Dm = [], []
+    Dp, Dm = nbins*[ 0. ], nbins*[ 0. ]
     for ib in xrange( nbins ):
-        Dp.append( cObs[ ib ] - cRef[ ib ] )
-        Dm.append( cRef[ ib ] - cObs[ ib ] )
+        Dp[ ib ] = cObs[ ib ] - cRef[ ib ]
+        Dm[ ib ] = cRef[ ib ] - cObs[ ib ]
     return max( Dp ), max( Dm )
 
 #_______________________________________________________________________________
