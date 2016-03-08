@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                        //
 //  e-mail: miguel.ramos.pernas@cern.ch                //
 //                                                     //
-//  Last update: 11/08/2015                            //
+//  Last update: 08/03/2016                            //
 //                                                     //
 // --------------------------------------------------- //
 //                                                     //
@@ -264,24 +264,3 @@ void Analysis::FileManager::PrintWriteFileName(Int_t ifile) {
 //_______________________________________________________________________________
 // Sets the name of the project.
 void Analysis::FileManager::SetName(const char *name) { fName = name; }
-
-//_______________________________________________________________________________
-
-
-// -- OTHER FUNCTIONS
-
-//_______________________________________________________________________________
-// Sends an error and exits the program.
-void Analysis::SendError(const char *error) {
-
-  std::cout << error << std::endl;
-  exit(0);
-}
-
-// Sends an error with a path and a file name and exits the program.
-void Analysis::SendError(const char *path,
-			 const char *file) {
-
-  std::cout << " Couldn't find " << path << " in file <" << file << ">" << std::endl;
-  exit(0);
-}

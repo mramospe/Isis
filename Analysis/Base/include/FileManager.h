@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                        //
 //  e-mail: miguel.ramos.pernas@cern.ch                //
 //                                                     //
-//  Last update: 13/07/2015                            //
+//  Last update: 08/03/2016                            //
 //                                                     //
 // --------------------------------------------------- //
 //                                                     //
@@ -19,10 +19,10 @@
 //                                                     //
 // --------------------------------------------------- //
 /////////////////////////////////////////////////////////
-                                       
 
-#ifndef PHYSICAL_PROJECT
-#define PHYSICAL_PROJECT
+
+#ifndef FILE_MANAGER
+#define FILE_MANAGER
 
 #include <iostream>
 
@@ -77,11 +77,6 @@ namespace Analysis {
     TList *fWriteFiles;
 
   };
-
-
-  // Other functions
-  void SendError(const char*);
-  void SendError(const char*, const char*);
 
 }
 
