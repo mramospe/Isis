@@ -8,7 +8,7 @@
 //  AUTHOR : Miguel Ramos Pernas		                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch		                                 //
 //                                                                               //
-//  Last Update: 09/12/2015			                                 //
+//  Last Update: 09/03/2016			                                 //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -21,8 +21,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef KIN_VARIABLES
-#define KIN_VARIABLES
+#ifndef PHYS_FUNCTIONS
+#define PHYS_FUNCTIONS
 
 #include "LorentzVector.h"
 
