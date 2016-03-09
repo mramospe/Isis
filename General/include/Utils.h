@@ -34,7 +34,7 @@
 namespace General {
 
   //_______________________________________________________________________________
-  // These are different functions
+  // These are the definitions of different useful functions
   size_t      CalcIntLength( long int integer );
   std::string CenterString( const std::string &str, const size_t &size );
   void        ParseStringMatch( std::vector<std::string>       &output,
@@ -46,26 +46,8 @@ namespace General {
 			   const std::string        &expr );
   
   //_______________________________________________________________________________
-  // This function allows to merge two vector so the output vector is the result
-  // of the concatenation of both
-  template<typename type> std::vector<type> MergeVectors( std::vector<type> vector1,
-							  std::vector<type> vector2 ) {
-    std::vector<type> ovector( vector1.size() + vector2.size() );
-    typename std::vector<type>::iterator
-      it1 = vector1.begin(),
-      it2 = vector2.begin(),
-      oit = ovector.begin();
-    
-    for ( true; it1 != vector1.end(); it1++, oit++ )
-      *oit = *it1;
-    for ( true; it2 != vector2.end(); it2++, oit++ )
-      *oit = *it2;
-    return ovector;
-  }
-
-  //_______________________________________________________________________________
   // Prints a given vector
-  template<typename type> void PrintVector( std::vector<type> &vector ) {
+  template<typename type> void PrintVector( const std::vector<type> &vector ) {
     std::stringstream ss;
     if ( vector.size() ) {
       ss << "[ " << vector[ 0 ];
@@ -82,7 +64,7 @@ namespace General {
 
   //_______________________________________________________________________________
   // Returns a given vector as a string
-  template<typename type> std::string VectorToString( std::vector<type> &vector ) {
+  template<typename type> std::string VectorToString( const std::vector<type> &vector ) {
     std::stringstream ss;
     if ( vector.size() ) {
       ss << "[ " << vector[ 0 ];
