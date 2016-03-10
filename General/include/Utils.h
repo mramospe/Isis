@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 09/03/2016                              //
+//  Last update: 10/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -51,9 +51,7 @@ namespace General {
     std::stringstream ss;
     if ( vector.size() ) {
       ss << "[ " << vector[ 0 ];
-      for ( typename std::vector<type>::iterator it = vector.begin() + 1;
-	    it != vector.end();
-	    it++ )
+      for ( auto it = vector.begin() + 1; it != vector.end(); ++it )
 	ss << ", " << *it;
       ss << " ]";
     }
@@ -68,9 +66,7 @@ namespace General {
     std::stringstream ss;
     if ( vector.size() ) {
       ss << "[ " << vector[ 0 ];
-      for ( typename std::vector<type>::iterator it = vector.begin() + 1;
-	    it != vector.end();
-	    it++ )
+      for ( auto it = vector.begin() + 1; it != vector.end(); ++it )
 	ss << ", " << *it;
       ss << " ]";
     }

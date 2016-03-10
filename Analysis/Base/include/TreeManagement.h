@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 22/02/2016                             //
+//  Last update: 10/03/2016                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -33,19 +33,22 @@
 
 namespace Analysis {
 
-  std::vector<std::string> GetAllVarsWith( TTree *inputTree, const std::string &kw );
-  std::vector<std::string> GetBranchNames( TTree *inputTree );
-  std::vector<std::string> GetBranchTitles( TTree *inputTree );
-  std::string              GetVarType( TTree *inputTree, const std::string &var );
-  size_t                   GetNvarsWithString( TTree *inputTree, const std::string &kw );
-  size_t                   GetNvarsWithType( TTree *inputTree, std::string type );
-  size_t                   GetNvarsWithTypeIn( TTree *inputTree,
-					       std::string type,
-					       const std::vector<std::string> &vector );
-  void                     MakeTreeChangingNames( TTree *input_tree,
-						  const std::vector< std::string > &ivars,
-						  const std::vector< std::string > &ovars );
-  TTree*                   MakeTreeConvertingVars( TTree *inputTree, const char &itype = 'F' );
+  void   GetBranchNames( std::vector<std::string> &vector,
+			 TTree *inputTree,
+			 const std::string &expr = "" );
+  void   GetBranchTitles( std::vector<std::string> &vector,
+			  TTree *inputTree,
+			  const std::string &expr = "" );
+  size_t GetNvarsWithExpr( TTree *inputTree, const std::string &expr );
+  size_t GetNvarsWithType( TTree *inputTree, const char &type );
+  size_t GetNvarsWithTypeIn( TTree *inputTree,
+			     const char &type,
+			     const std::vector<std::string> &vector );
+  char   GetVarType( TTree *inputTree, const std::string &var );
+  void   MakeTreeChangingNames( TTree *input_tree,
+				const std::vector< std::string > &ivars,
+				const std::vector< std::string > &ovars );
+  TTree* MakeTreeConvertingVars( TTree *inputTree, const char &itype = 'F' );
 
 }
 

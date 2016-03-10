@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 22/02/2016                             //
+//  Last update: 10/03/2016                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -21,6 +21,7 @@
 
 
 #include "TreeManagement.h"
+#include "Utils.h"
 
 #include "TBranch.h"
 #include "TDirectory.h"
@@ -33,118 +34,80 @@
 
 
 //_______________________________________________________________________________
-// Gets all the variables whose name contains a given keyword
-std::vector<std::string> Analysis::GetAllVarsWith( TTree *inputTree, const std::string &kw ) {
-
-  std::string  iname;
-  TObjArray   *brList = inputTree -> GetListOfBranches();
-
-  std::vector<std::string> ovector;
-  
-  for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ ) {
-    iname = brList -> At( ibr ) -> GetName();
-    if ( iname.find( kw ) != std::string::npos )
-      ovector.push_back( iname );
-  }
-
-  return ovector;
-}
-
-//_______________________________________________________________________________
-// Returns a vector that contains all the names of the branches in a tree
-std::vector<std::string> Analysis::GetBranchNames( TTree *inputTree ) {
-
+// Appends to the given vector all the names of the branches in a tree
+void Analysis::GetBranchNames( std::vector<std::string> &vector,
+			       TTree *inputTree,
+			       const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
-
   std::vector<std::string> brVector( brList -> GetSize() );
-
   for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetName();
-
-  return brVector;
+  if ( expr.size() )
+    General::ParseStringMatch( vector, brVector, expr );
+  else
+    vector.insert( vector.end(), brVector.begin(), brVector.end() );
 }
 
 //_______________________________________________________________________________
-// Returns a vector that contains all the titles of the branches in a tree
-std::vector<std::string> Analysis::GetBranchTitles( TTree *inputTree ) {
-
+// Appends to the given vector all the titles of the branches in a tree
+void Analysis::GetBranchTitles( std::vector<std::string> &vector,
+				TTree *inputTree,
+				const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
-
   std::vector<std::string> brVector( brList -> GetSize() );
-
   for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
-
-  return brVector;
-}
-
-//_______________________________________________________________________________
-// Gets the type of a variable in a tree
-std::string Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
-
-  TObjArray *brList = inputTree -> GetListOfBranches();
-
-  std::string type = brList -> FindObject( var.c_str() ) -> GetTitle();
-  type.replace( 0, var.length(), "" );
-
-  return type;
+  if ( expr.size() )
+    General::ParseStringMatch( vector, brVector, expr );
+  else
+    vector.insert( vector.end(), brVector.begin(), brVector.end() );
 }
 
 //_______________________________________________________________________________
 // Gets the number of variables in a tree whose name contains a given keyword
-size_t Analysis::GetNvarsWithString( TTree *inputTree, const std::string &kw ) {
-
-  TObjArray *brList = inputTree -> GetListOfBranches();
-  std::string title;
-  size_t      counter( 0 );
-  for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ ) {
-    title = brList -> At( ibr ) -> GetTitle();
-    if ( title.find( kw ) != std::string::npos )
-      counter++;
-  }
-
-  return counter;
+size_t Analysis::GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
+  std::vector<std::string> vector;
+  Analysis::GetBranchNames( vector, inputTree, expr );
+  return vector.size();
 }
 
 //_______________________________________________________________________________
 // Returns the number of variables of a given type
-size_t Analysis::GetNvarsWithType( TTree *inputTree, std::string type ) {
-
-  if ( type.find( '/' ) == std::string::npos )
-    type = '/' + type;
-
+size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
   for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ ) {
     title = brList -> At( ibr ) -> GetTitle();
-    if ( title.find( type ) != std::string::npos )
+    if ( title.back() == type )
       counter++;
   }
-
   return counter;
 }
 
 //_______________________________________________________________________________
 // Returns the number of variables of a certain type in a given vector and tree
 size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
-				     std::string type,
+				     const char &type,
 				     const std::vector<std::string> &vector ) {
-
-  if ( type.find( '/' ) == std::string::npos )
-    type = '/' + type;
-
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
-
   for ( auto it = vector.begin(); it != vector.end(); it++ ) {
     title = brList -> FindObject( it -> c_str() ) -> GetTitle();
-    if ( title.find( type ) != std::string::npos )
+    if ( title.back() == type )
       counter++;
   }
-
   return counter;
+}
+
+//_______________________________________________________________________________
+// Gets the type of a variable in a tree
+char Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
+  TObjArray *brList = inputTree -> GetListOfBranches();
+  std::string type = brList -> FindObject( var.c_str() ) -> GetTitle();
+  type.replace( 0, var.length(), "" );
+  return type[ 1 ];
 }
 
 //_______________________________________________________________________________
@@ -181,13 +144,13 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
 
   // Generates a set of vectors to almacenate the data
   std::vector< std::pair<float , TLeaf*> >
-    fvector( GetNvarsWithTypeIn( inputTree, "/F", ivars ) );
+    fvector( Analysis::GetNvarsWithTypeIn( inputTree, 'F', ivars ) );
   std::vector< std::pair<double, TLeaf*> >
-    dvector( GetNvarsWithTypeIn( inputTree, "/D", ivars ) );
+    dvector( Analysis::GetNvarsWithTypeIn( inputTree, 'D', ivars ) );
   std::vector< std::pair<int   , TLeaf*> >
-    ivector( GetNvarsWithTypeIn( inputTree, "/I", ivars ) );
+    ivector( Analysis::GetNvarsWithTypeIn( inputTree, 'I', ivars ) );
   std::vector< std::pair<bool  , TLeaf*> >
-    bvector( GetNvarsWithTypeIn( inputTree, "/B", ivars ) );
+    bvector( Analysis::GetNvarsWithTypeIn( inputTree, 'O', ivars ) );
 
   std::cout << " Variables to change:" << std::endl;
   std::cout << " - Float:  \t" << fvector.size() << std::endl;
@@ -338,34 +301,27 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
   // variable type
   if ( itype == 'F' )
     for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
-
       inputTree -> GetEntry( ievt );
-
       for ( auto it = vars.begin(); it != vars.end(); it++ ) {
 	pair = &( it -> second );
 	pair -> second = pair -> first;
       }
-
       outputTree -> Fill();
-
       if ( ievt % 100000 == 0 )
 	outputTree -> AutoSave();
     }
   else
     for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
-
       inputTree -> GetEntry( ievt );
-
       for ( auto it = vars.begin(); it != vars.end(); it++ ) {
 	pair = &( it -> second );
 	pair -> first = pair -> second;
       }
-
       outputTree -> Fill();
-
       if ( ievt % 100000 == 0 )
 	outputTree -> AutoSave();
     }
+
   outputTree -> AutoSave();
   std::cout << "Saved output tree < " << outputTree -> GetName() << " > in directory < "
 	    << gDirectory -> GetName() << " >" << std::endl;
