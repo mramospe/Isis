@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 17/02/2016                                                       //
+//  Last update: 11/03/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -178,6 +178,16 @@ void Analysis::VarWeighter::ApplyWeights( TTree             *tree,
   tree -> AutoSave();
   std::cout << "Written output tree < " << tree -> GetName() << " > in file: " <<
     tree -> GetDirectory() -> GetName() << std::endl;
+
+  // Deletes the allocated memory
+  if ( type == 'D' ) {
+    delete static_cast<double*>( waddress );
+    delete static_cast<double*>( saddress );
+  }
+  else {
+    delete static_cast<float*>( waddress );
+    delete static_cast<float*>( saddress );
+  }
 
   std::cout << "*** Weighting process finished ***" << std::endl;
 }
@@ -401,5 +411,5 @@ void Analysis::VarWeighter::SetupTrees( std::map<std::string, TLeaf*> &refleafma
     refleafmap[ it -> first ] = fRefTree -> GetLeaf( it -> first.c_str() );
     wgtleafmap[ it -> first ] = fWgtTree -> GetLeaf( it -> first.c_str() );
     valuesmap[ it -> first ]  = 0;
-  }  
+  }
 }
