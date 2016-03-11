@@ -87,7 +87,7 @@ void General::CutManager::AppendCuts( std::map<std::string, std::string> &map ) 
 
 //_______________________________________________________________________________       
 // Almacenates a new cut from the cuts-file
-std::string General::CutManager::BookCut( const std::string &key ) {
+std::string General::CutManager::BookCut( const std::string &key, const bool &print ) {
   if ( fCuts.find( key ) != fCuts.end() ) {
     std::cout << "Cut with name < " << key << " > already booked" << std::endl;
     return "";
@@ -95,7 +95,8 @@ std::string General::CutManager::BookCut( const std::string &key ) {
   std::string cut = this -> GetCut( key );
   if ( cut.size() ) {
     fCuts.insert( std::make_pair( key, cut ) );
-    std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+    if ( print )
+      std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
   }
   return cut;
 }
@@ -131,7 +132,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	// is saved and retrieved, in order to properly scan the file.
 	while ( ( ifirst = cuts.find( '$' ) ) != std::string::npos ) {
 	  ilast = cuts.find( '$', ifirst + 1 );
-	  sstr  = cuts.substr( ifirst + 1, key.size() );
+	  sstr  = cuts.substr( ifirst + 1, ilast - ifirst - 1 );
 	  fpos  = fFile.tellg();
 
 	  // The new cut is introduced between parentheses

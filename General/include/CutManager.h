@@ -58,7 +58,7 @@ namespace General {
     // Methods
     void               AppendCuts( std::vector<std::string> &vector );
     void               AppendCuts( std::map<std::string, std::string> &map );
-    std::string        BookCut( const std::string &key );
+    std::string        BookCut( const std::string &key, const bool &print = true );
     inline void        Clear();
     inline void        Close();
     inline std::string Get( const std::string &key );
