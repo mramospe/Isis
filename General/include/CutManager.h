@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 24/10/2015                              //
+//  Last update: 11/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -38,6 +38,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <vector>
 
 
 //_______________________________________________________________________________
@@ -49,25 +50,29 @@ namespace General {
   public:
 
     // Contructor
-    CutManager( std::string file_path );
+    CutManager( const std::string &file_path );
 
     // Destructor
     ~CutManager();
 
     // Methods
-    const char*        BookCut( std::string key );
+    void               AppendCuts( std::vector<std::string> &vector );
+    void               AppendCuts( std::map<std::string, std::string> &map );
+    std::string        BookCut( const std::string &key );
     inline void        Clear();
     inline void        Close();
-    inline const char* Get( std::string key );
-    const char*        GetCut( std::string key );
-    void               Open( std::string file_path );
+    inline std::string Get( const std::string &key );
+    std::string        GetCut( const std::string &key );
+    std::string        MakeMergedCut();
+    void               Open( const std::string &file_path );
     void               Print();
 
+    // Inline methods
     inline std::map<std::string, std::string>::iterator Begin();
     inline std::map<std::string, std::string>::iterator End();
 
     // Operator
-    inline const char* operator [] ( std::string key );
+    inline std::string operator [] ( const std::string &key );
 
   protected:
 
@@ -75,7 +80,6 @@ namespace General {
     std::map<std::string, std::string> fCuts;
     std::ifstream                      fFile;
     std::map<std::string, std::string> fOptions;
-    std::string::size_type             fSize;
 
   };
 
@@ -87,11 +91,11 @@ namespace General {
   // Closes the file related to this class
   inline void General::CutManager::Close() { fFile.close(); }
   // Returns the cut booked with name key
-  inline const char* CutManager::Get( std::string key ) {
+  inline std::string CutManager::Get( const std::string &key ) {
     return fCuts[ key ].c_str();
   }
   // Opens the file with the given path
-  inline void General::CutManager::Open( std::string file_path ) {
+  inline void General::CutManager::Open( const std::string &file_path ) {
     fFile.open( file_path.c_str() );
   }
   // Gets the location of the begin of the map of cuts
@@ -105,8 +109,8 @@ namespace General {
 
   //______________________________
   // OPERATOR
-  inline const char* CutManager::operator [] ( std::string key ) {
-    return fCuts[ key ].c_str();
+  inline std::string CutManager::operator [] ( const std::string &key ) {
+    return fCuts[ key ];
   }
 
 }

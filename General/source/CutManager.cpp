@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 24/10/2015                              //
+//  Last update: 11/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -33,11 +33,12 @@
 
 #include "CutManager.h"
 
-#include <iomanip>
-#include <sstream>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <iomanip>
 #include <limits>
+#include <sstream>
+#include <utility>
 
 
 //_______________________________________________________________________________       
@@ -47,10 +48,8 @@
 
 //_______________________________________________________________________________       
 // Main constructor
-General::CutManager::CutManager( std::string file_path ) : fSize( 0 ) {
-
+General::CutManager::CutManager( const std::string &file_path ) {
   fFile.open( file_path.c_str() );
-
   fOptions[ "and" ] = "&&" ;
   fOptions[ "or"  ] = "||" ;
 }
@@ -65,32 +64,45 @@ General::CutManager::~CutManager() { if ( fFile.is_open() ) fFile.close(); }
 // -- PUBLIC METHODS
 
 //_______________________________________________________________________________       
-// Almacenates a new cut from the cuts-file
-const char* General::CutManager::BookCut( std::string key ) {
+// Appends to the given vector the cuts of the current class
+void General::CutManager::AppendCuts( std::vector<std::string> &vector ) {
+  std::vector<std::string> appvec( fCuts.size() );
+  auto itv = appvec.begin();
+  auto itm = fCuts.begin();
+  while ( itm != fCuts.end() )
+    *itv++ = itm++ -> second;
+  vector.insert( vector.end(), appvec.begin(), appvec.end() );
+}
 
+//_______________________________________________________________________________       
+// Appends to the given map the cuts of the current class. If the cut already
+// exists, a warning message is displayed and the cut is replaced.
+void General::CutManager::AppendCuts( std::map<std::string, std::string> &map ) {
+  for ( auto itm = fCuts.begin(); itm != fCuts.end(); ++itm ) {
+    if ( map.find( itm -> first ) != map.end() )
+      std::cout << "WARNING: Replacing existing cut < " << itm -> first << " >" << std::endl;
+    map[ itm -> first ] = itm -> second;
+  }
+}
+
+//_______________________________________________________________________________       
+// Almacenates a new cut from the cuts-file
+std::string General::CutManager::BookCut( const std::string &key ) {
   if ( fCuts.find( key ) != fCuts.end() ) {
     std::cout << "Cut with name < " << key << " > already booked" << std::endl;
-    return 0;
+    return "";
   }
-
-  const char *cut = this -> GetCut( key );
-
-  if ( cut ) {
-  
-    fCuts.insert( std::pair<std::string, std::string>( key, cut ) );
-
-    if ( key.size() > fSize )
-      fSize = key.size();
-
+  std::string cut = this -> GetCut( key );
+  if ( cut.size() ) {
+    fCuts.insert( std::make_pair( key, cut ) );
     std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
   }
-
   return cut;
 }
 
 //_______________________________________________________________________________       
 // Functions that gets a cut from the cuts-file
-const char* General::CutManager::GetCut( std::string key ) {
+std::string General::CutManager::GetCut( const std::string &key ) {
 
   // Each time a cut is obtained the pointer to the file is set to its start
   if ( fFile.eof() )
@@ -98,9 +110,8 @@ const char* General::CutManager::GetCut( std::string key ) {
   fFile.seekg( 0 );
 
   std::string cuts, newcut, sstr;
-  std::string::size_type pos, ifirst, ilast;
-  size_t fpos;
-  bool   cond( true );
+  std::string::size_type pos, ifirst, ilast, fpos;
+  bool cond( true );
 
   while ( cond && std::getline( fFile, cuts ) ) {
 
@@ -136,7 +147,7 @@ const char* General::CutManager::GetCut( std::string key ) {
     }
 
     if ( fFile.eof() && cond ) {
-      std::cout << "WARNING: cut with name < " << key << " > does not exist." << std::endl;
+      std::cerr << "ERROR: Cut with name < " << key << " > does not exist." << std::endl;
       return 0;
     }
   }
@@ -146,17 +157,28 @@ const char* General::CutManager::GetCut( std::string key ) {
     while ( ( pos = cuts.find( it -> first ) ) != std::string::npos )
       cuts.replace( pos, ( it -> first ).size(), it -> second );
 
-  return cuts.c_str();
+  return cuts;
+}
+
+//_______________________________________________________________________________
+// Appends all the cuts in the same string using < && > statements
+std::string General::CutManager::MakeMergedCut() {
+  std::string gcut( '(' + fCuts.begin() -> second + ')' );
+  auto it = fCuts.begin();
+  for ( ++it; it != fCuts.end(); ++it )
+    gcut.append( " && (" + it -> second + ')' );
+  return gcut;
 }
 
 //_______________________________________________________________________________       
 // Prints the cuts attached to this class
 void General::CutManager::Print() {
-
-  for ( std::map<std::string, std::string>::iterator it = fCuts.begin();
-	it != fCuts.end(); it++ )
-    std::cout << std::left << std::setw( fSize ) <<
-      it -> first  <<
-      "\t=>\t"     <<
-      it -> second << std::endl;
+  size_t maxsize = std::max_element( fCuts.begin(),
+				     fCuts.end(),
+				     [] ( const std::pair<std::string, std::string> &p1,
+					  const std::pair<std::string, std::string> &p2 ) {
+				       return p1.first.size() < p2.first.size(); } ) -> first.size();
+  for ( auto it = fCuts.begin(); it != fCuts.end(); it++ )
+    std::cout << std::left << std::setw( maxsize ) <<
+      it -> first  << " => " << it -> second << std::endl;
 }
