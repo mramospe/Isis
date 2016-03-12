@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 11/03/2016                              //
+//  Last update: 12/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -50,7 +50,7 @@ namespace General {
   public:
 
     // Contructor
-    CutManager( const std::string &file_path );
+    CutManager( const std::string &file_path = "" );
 
     // Destructor
     ~CutManager();

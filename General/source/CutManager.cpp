@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 11/03/2016                              //
+//  Last update: 12/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -49,9 +49,10 @@
 //_______________________________________________________________________________       
 // Main constructor
 General::CutManager::CutManager( const std::string &file_path ) {
-  fFile.open( file_path.c_str() );
   fOptions[ "and" ] = "&&" ;
   fOptions[ "or"  ] = "||" ;
+  if ( file_path.size() )
+    fFile.open( file_path.c_str() );
 }
 
 //_______________________________________________________________________________       
