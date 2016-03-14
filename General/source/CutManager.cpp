@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 12/03/2016                              //
+//  Last update: 14/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -113,7 +113,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 
   std::string cuts, newcut, sstr;
   std::string::size_type pos, ifirst, ilast, fpos;
-  bool cond( true );
+  bool cond( true ), mismatch;
 
   while ( cond && std::getline( fFile, cuts ) ) {
 
@@ -132,15 +132,34 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	// If another cut is found it is replaced by its content. The position at the file
 	// is saved and retrieved, in order to properly scan the file.
 	while ( ( ifirst = cuts.find( '$' ) ) != std::string::npos ) {
-	  ilast = cuts.find( '$', ifirst + 1 );
-	  sstr  = cuts.substr( ifirst + 1, ilast - ifirst - 1 );
+
+	  mismatch = false;
+	  ilast    = cuts.find( '$', ifirst + 1 );
+
+	  if ( ilast == std::string::npos ) {
+	    mismatch = true;
+	    sstr.clear();
+	  }
+	  else {
+	    sstr = cuts.substr( ifirst + 1, ilast - ifirst - 1 );
+	    if ( sstr.find( ' ' ) != std::string::npos )
+	      mismatch = true;
+	  }
+	  
+	  if ( mismatch ) {
+	    std::cerr <<
+	      "ERROR: Mismatched < $ > symbol when scanning cut < "
+		      << key << " >" << std::endl;
+	    return std::string();
+	  }
+
 	  fpos  = fFile.tellg();
 
 	  // The new cut is introduced between parentheses
 	  newcut = "()";
 	  newcut.insert( 1, std::string( this -> GetCut( sstr ) ) );
 	  
-	  cuts.replace( ifirst, ilast + 1, newcut );
+	  cuts.replace( ifirst, ilast + 1 - ifirst, newcut );
 	  fFile.seekg( fpos );
 	}
 
