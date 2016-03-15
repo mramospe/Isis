@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 29/02/2016                                                      //
+//  Last update: 15/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -120,7 +120,7 @@ namespace Analysis {
     if ( weight.size() )
       fCategories[ name ] = std::make_pair( tree, weight + "*(" + cut + ")" );
     else
-      fCategories[ name ] = std::make_pair( tree, weight );
+      fCategories[ name ] = std::make_pair( tree, cut );
   }
   // Adds a new variable to compare. The number of bins and the range have to be
   // specified.

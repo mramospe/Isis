@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 28/02/2016                                                      //
+//  Last update: 15/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -129,6 +129,15 @@ void Analysis::CutComparer::Compare() {
   for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ )
     std::cout << " - " << itv -> first << std::endl;;
   std::cout << "Histograms to be written: " << fCategories.size()*fLoopArray.GetNloops() << std::endl;
+  std::cout << "*** List of categories ***" << std::endl;
+  for ( auto itc = fCategories.begin(); itc != fCategories.end(); itc++ ) {
+    std::cout << "-- " << itc -> first << " --" << std::endl;
+    std::cout << "-- " << itc -> first << std::endl;
+    std::cout << "  - Directory: " << itc -> second.first -> GetDirectory() -> GetPath() << std::endl;
+    std::cout << "  - Tree:      " << itc -> second.first -> GetName() << std::endl;
+    if ( itc -> second.second.size() )
+      std::cout << "  - Weight:    " << itc -> second.second << std::endl;
+  }
 
   // Sets Root in batch mode to do not display the canvases
   gROOT -> SetBatch();
@@ -254,8 +263,8 @@ void Analysis::CutComparer::Compare() {
 	}
 	vhist[ icol ] = hist;
       }
-      // Draws the pointers into the canvas. The first histogram to be drawn is that with the
-      // maximum value in the Y axis.
+      // Draws the histograms in the canvas. The first histogram to be drawn is that with
+      // the maximum value in the Y axis.
       double sw, nmax, max = 0;
       size_t imh = 0;
       for ( size_t ih = 0; ih < fCategories.size(); ih++ ) {
@@ -282,13 +291,13 @@ void Analysis::CutComparer::Compare() {
       // Deletes the pointers
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
 	delete vhist[ ih ];
-      delete canvas;
       delete legend;
+      delete canvas;
     }
 
     // Returns to the previous directory
-    delete folder;
     delete objStr;
+    delete folder;
     currDir -> cd();
   }
 
