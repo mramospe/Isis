@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 15/03/2016                                                      //
+//  Last update: 18/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -125,14 +125,13 @@ void Analysis::CutComparer::Compare() {
   std::cout << "Working directory set to: " << currDir -> GetName() << std::endl;
   std::cout << "Number of categories:     " << fCategories.size() << std::endl;
   std::cout << "Number of cut loops:      " << fLoopArray.GetNloops() << std::endl;
-  std::cout << "Variables to be compared:"  << std::endl;
+  std::cout << "Variables to be compared (" << fCompVars.size() << "):" << std::endl;
   for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ )
     std::cout << " - " << itv -> first << std::endl;;
-  std::cout << "Histograms to be written: " << fCategories.size()*fLoopArray.GetNloops() << std::endl;
+  std::cout << "Histograms to be written: " << fCategories.size()*fCompVars.size()*fLoopArray.GetNloops() << std::endl;
   std::cout << "*** List of categories ***" << std::endl;
   for ( auto itc = fCategories.begin(); itc != fCategories.end(); itc++ ) {
     std::cout << "-- " << itc -> first << " --" << std::endl;
-    std::cout << "-- " << itc -> first << std::endl;
     std::cout << "  - Directory: " << itc -> second.first -> GetDirectory() -> GetPath() << std::endl;
     std::cout << "  - Tree:      " << itc -> second.first -> GetName() << std::endl;
     if ( itc -> second.second.size() )
@@ -168,17 +167,25 @@ void Analysis::CutComparer::Compare() {
 
   // Performs the loop over all the different cuts, generating the histograms and saving them
   // into the output directory
-  size_t pos, backpos;
-  double step;
-  std::string cutStr;
+  size_t pos, backpos, imh;
+  double step, sw, nmax, max = 0;
+  std::string cutStr, var, cuts, vmin, vmax, nbins;
   std::stringstream sout, sname;
+  std::vector<size_t> htodel;
   CutComparer::CutCompVar *ccvar;
 
+  // Defines the colors to draw the histograms
+  Color_t currcol, colors[ 6 ] = { kBlue, kRed, kOrange, kGreen, kMagenta, kCyan };
+  unsigned short int icol;
+
   // Pointers for the folder and the histograms
-  TCanvas *canvas;
+  TCanvas *canvas = new TCanvas;
   TDirectoryFile *folder;
-  TH1 *hist( 0 ), **vhist = new TH1*[ fCategories.size() ];
-  TLegend *legend;
+  TH1
+    *hist   = 0,
+    **vhist = new TH1*[ fCategories.size() ],
+    **chist = new TH1*[ fCategories.size() ];
+  TLegend    *legend = new TLegend( 2./3, 2./3, 0.9, 0.9 );
   TObjString *objStr;
 
   // Creates the iterators
@@ -220,20 +227,21 @@ void Analysis::CutComparer::Compare() {
     objStr = new TObjString( cutStr.c_str() );
     objStr -> Write( "CutStr" );
 
-    // Defines the colors to draw the histograms
-    Color_t currcol, colors[ 6 ] = { kBlue, kRed, kOrange, kGreen, kMagenta, kCyan };
-    unsigned short int icol;
-
     // Makes the loop over the different variables and categories to make the histograms
-    std::string var, cuts, vmin, vmax, nbins;
     for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ ) {
       name   = itv -> first;
       nbins  = std::to_string( itv -> second.fN );
       vmin   = std::to_string( itv -> second.fMin );
       vmax   = std::to_string( itv -> second.fMax );
-      canvas = new TCanvas( name.c_str(), name.c_str() );
-      legend = new TLegend( 2./3, 2./3, 0.9, 0.9 );
       icol   = 0;
+
+      // Redefines the canvas and the legend
+      canvas -> Clear();
+      canvas -> SetName( name.c_str() );
+      canvas -> SetTitle( name.c_str() );
+      canvas -> cd();
+      legend -> Clear();
+
       for ( auto it = fCategories.begin(); it != fCategories.end(); it++, icol++ ) {
 	if ( it -> second.second.size() )
 	  cuts = "(" + it -> second.second + ") && (" + cutStr + ")";
@@ -263,10 +271,12 @@ void Analysis::CutComparer::Compare() {
 	}
 	vhist[ icol ] = hist;
       }
+      
       // Draws the histograms in the canvas. The first histogram to be drawn is that with
       // the maximum value in the Y axis.
-      double sw, nmax, max = 0;
-      size_t imh = 0;
+      max = 0;
+      imh = 0;
+      htodel.clear();
       for ( size_t ih = 0; ih < fCategories.size(); ih++ ) {
 	sw = vhist[ ih ] -> GetSumOfWeights();
 	if ( sw > 0 ) {
@@ -278,30 +288,43 @@ void Analysis::CutComparer::Compare() {
 	}
       }
       if ( vhist[ imh ] -> GetSumOfWeights() > 0 ) {
-	vhist[ imh ] -> DrawNormalized( "HE1" );
+	hist = vhist[ imh ] -> DrawNormalized( "HE1" );
 	for ( size_t ih = 0; ih < fCategories.size(); ih++ )
-	  if ( ih != imh && vhist[ ih ] -> GetSumOfWeights() > 0 )
-	    vhist[ ih ] -> DrawNormalized( "SAMEHE1" );
+	  if ( ih != imh && vhist[ ih ] -> GetSumOfWeights() > 0 ) {
+	    chist[ ih ] = vhist[ ih ] -> DrawNormalized( "SAMEHE1" );
+	    htodel.push_back( ih );
+	  }
 	legend -> Draw();
 	canvas -> Write();
 	folder -> Save();
+
+	// Deletes the cloned histograms
+	delete hist;
+	for ( auto it = htodel.begin(); it != htodel.end(); it++ )
+	  delete chist[ *it ];
       }
       std::cout << " - Variable < " << itv -> first << " > processed" << std::endl;
       
       // Deletes the pointers
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )
 	delete vhist[ ih ];
-      delete legend;
-      delete canvas;
     }
 
     // Returns to the previous directory
     delete objStr;
     delete folder;
+    
     currDir -> cd();
+    std::cout << "Returned to the main directory" << std::endl;
   }
 
+  // Deletes the last allocated memory
+  delete legend;
+  delete canvas;
+
+  delete [] chist;
   delete [] vhist;
+  
   std::cout << "*************************" << std::endl;
   std::cout << "*** Process finished! ***" << std::endl;
   std::cout << "*************************" << std::endl;
