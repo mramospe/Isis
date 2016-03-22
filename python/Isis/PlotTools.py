@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 02/03/2016                                   //
+#//  Last update: 22/03/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -21,7 +21,7 @@
 
 
 from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
-                   TGraph, TGraphErrors,
+                   TGraph, TGraphErrors, TH1,
                    TH1F, TH1D,
                    TH2F, TH2D,
                    kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
@@ -61,6 +61,33 @@ class ColorList:
         niter = self.Iter % len( self.Colors )
         self.Iter += 1
         return self.Colors[ niter ] + nloop
+
+#_______________________________________________________________________________
+# Draws the given histograms in such an order, that the first to be drawn is
+# that with the maximum value for the Y axis. If the variable < norm > is set
+# to True, then the histograms will be normalized and the function will return
+# the list with the clone histograms. On the other hand, if it is set to True,
+# it will return a list of None values. The draw options are set using the
+# < drawopt > keyword.
+def DrawHistograms( *args, **kwargs ):
+    if 'drawopt' in kwargs: drawopt = kwargs[ 'drawopt' ]
+    else: drawopt = ''
+    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
+    else: norm = True
+    imax = [ h.GetMaximum() for h in args ]
+    imax = imax.index( max( imax ) )
+    hlst = len( args )*[ 0 ]
+    lst  = range( len( args ) )
+    lst.remove( imax )
+    if norm:
+        meth = TH1.DrawNormalized
+    else:
+        meth = TH1.Draw
+    hlst[ imax ] = meth( args[ imax ], drawopt )
+    drawopt += 'SAME'
+    for i in lst:
+        hlst[ i ] = meth( args[ i ], drawopt )
+    return hlst
 
 #_______________________________________________________________________________
 # This function imports different plot modules from Root
