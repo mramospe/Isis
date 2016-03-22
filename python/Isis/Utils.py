@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 02/03/2016                                //
+#//  Last update: 22/03/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -19,7 +19,7 @@
 #/////////////////////////////////////////////////////////////
 
 
-import math
+import os, fcntl, math, struct, termios
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -313,3 +313,24 @@ class StrNumGenerator:
             lciter = len( citer ) + 1
             self.CurrIter += 1
             return ( self.MaxStrLen - lciter )*"0" + citer
+
+#_______________________________________________________________________________
+# Returns the values of the height and width of the terminal
+def TerminalSize():
+    def gwinsz( fd ):
+        try:
+            cr = struct.unpack( 'hh', fcntl.ioctl( fd, termios.TIOCGWINSZ, '1234' ) )
+        except:
+            return
+        return cr
+    cr = gwinsz( 0 ) or gwinsz( 1 ) or gwinsz( 2 )
+    if not cr:
+        try:
+            fd = os.open( os.ctermid(), os.O_RDONLY )
+            cr = gwinsz( fd )
+            os.close( fd )
+        except:
+            pass
+    if not cr:
+        cr = ( os.environ.get( 'LINES', 25 ), os.environ.get( 'COLUMNS', 80 ) )
+    return int( cr[ 0 ] ), int( cr[ 1 ] )
