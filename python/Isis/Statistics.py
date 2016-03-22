@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 03/03/2016                             //
+#//  Last update: 22/03/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -251,10 +251,10 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
                 i = 0
                 while smpObs[ i ] < p:
                     i += 1
-                    nObs += cRef
+                    nObs += cObs
                 smpObs = smpObs[ i: ]
-                Dp[ ip ] = nObs - nRef
-                Dm[ ip ] = nRef - nObs
+                Dp[ ip ] = abs( nObs - nRef )
+                Dm[ ip ] = abs( nRef - nObs )
             return max( Dp ), max( Dm )
     ''' Calculates the sum of weights and creates a list with the content of all the bins '''
     nRef, nObs = [ smp.GetSumOfWeights() for smp in ( smpRef, smpObs ) ]
@@ -267,8 +267,8 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
     ''' Calculates the Kolmogorov-Smirnov parameters '''
     Dp, Dm = nbins*[ 0. ], nbins*[ 0. ]
     for ib in xrange( nbins ):
-        Dp[ ib ] = cObs[ ib ] - cRef[ ib ]
-        Dm[ ib ] = cRef[ ib ] - cObs[ ib ]
+        Dp[ ib ] = abs( cObs[ ib ] - cRef[ ib ] )
+        Dm[ ib ] = abs( cRef[ ib ] - cObs[ ib ] )
     return max( Dp ), max( Dm )
 
 #_______________________________________________________________________________
