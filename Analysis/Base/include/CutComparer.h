@@ -48,7 +48,6 @@ namespace Analysis {
 
     // Constructors
     CutComparer();
-    CutComparer( const std::map<std::string, std::pair<TTree*, std::string> > &catvec );
 
     // Destructor
     ~CutComparer();
@@ -60,7 +59,7 @@ namespace Analysis {
 			 const double      &vmin,
 			 const double      &vmax );
     void AddCutVariable( const std::string &name,
-			 const std::string &expr,
+			 std::string        expr,
 			 const std::string &dir,
 			 const size_t      &npoints,
 			 const double      &vmin,
@@ -71,7 +70,8 @@ namespace Analysis {
     inline void AddCategory( const std::string &name,
 			     TTree             *tree,
 			     const std::string &cut = "",
-			     const std::string &weight = "" );
+			     const std::string &weight = "",
+			     const bool        &applycuts = true );
     inline void AddCompVariable( const std::string &name,
 				 const size_t      &nbins,
 				 const double      &vmin,
@@ -84,30 +84,46 @@ namespace Analysis {
 
   protected:
 
-    // Nested struct to manage the variables
+    // Nested structs to manage the variables and the categories
     struct CutCompVar {
-      CutCompVar( const std::string &expr,
+      CutCompVar( const std::string &name, 
+		  const std::string &expr,
 		  const size_t      &npoints,
 		  const double      &vmin,
 		  const double      &vmax,
 		  const size_t      &nvars = 1 ) :
-	fExpr( expr ), fMax( vmax ), fMin( vmin ), fNdiv( npoints ), fNvars( nvars ) { }
+	fExpr( expr ), fMax( vmax ), fMin( vmin ), fName( name ), fNdiv( npoints ), fNvars( nvars ) { }
       std::string fExpr;
       double      fMax;
       double      fMin;
+      std::string fName;
       size_t      fNdiv;
       size_t      fNvars;
     };
+    struct CutCompCat {
+      CutCompCat( const std::string &name,
+		  TTree             *tree,
+		  const std::string &cut = "",
+		  const std::string &weight = "",
+		  const bool        &applycuts = true ) :
+	fCut( applycuts ), fName( name ), fTree( tree ) {
+	if ( weight.size() )
+	  fWgtExpr = weight + "*(" + cut + ")";
+	else
+	  fWgtExpr = cut;
+      }
+      bool         fCut;
+      std::string  fName;
+      TTree       *fTree;
+      std::string  fWgtExpr;
+    };
 
     // Attributes
-    std::map<std::string,
-	     std::pair<TTree*, std::string> > fCategories;
-    std::vector<
-      std::pair<std::string, CutCompVar> >    fCompVars;
-    std::string                               fCutString;
-    std::vector<
-      std::pair<std::string, CutCompVar> >    fCutVars;
-    General::LoopArray                        fLoopArray;
+    std::vector<CutCompCat> fCategories;
+    std::vector<CutCompVar> fCompVars;
+    std::string             fCutString;
+    std::vector<CutCompVar> fCutVars;
+    General::LoopArray      fLoopArray;
 
   };
 
@@ -118,11 +134,9 @@ namespace Analysis {
   inline void CutComparer::AddCategory( const std::string &name,
 					TTree             *tree,
 					const std::string &cut,
-					const std::string &weight ) {
-    if ( weight.size() )
-      fCategories[ name ] = std::make_pair( tree, weight + "*(" + cut + ")" );
-    else
-      fCategories[ name ] = std::make_pair( tree, cut );
+					const std::string &weight,
+					const bool        &applycuts ) {
+    fCategories.push_back( CutCompCat( name, tree, cut, weight, applycuts ) );
   }
   // Adds a new variable to compare. The number of bins and the range have to be
   // specified.
@@ -130,7 +144,7 @@ namespace Analysis {
 					    const size_t      &nbins,
 					    const double      &vmin,
 					    const double      &vmax ) {
-    fCompVars.push_back( std::make_pair( name, CutCompVar( name, nbins, vmin, vmax ) ) );
+    fCompVars.push_back( CutCompVar( name, name, nbins, vmin, vmax ) );
   }
   // Adds a new variable to compare as an expression
   inline void CutComparer::AddCompVariable( const std::string &name,
@@ -138,8 +152,7 @@ namespace Analysis {
 					    const size_t      &nbins,
 					    const double      &vmin,
 					    const double      &vmax ) {
-    fCompVars.push_back( std::make_pair( name, CutCompVar( expr, nbins, vmin, vmax ) ) );
-    fCutVars.back().first = name;
+    fCompVars.push_back( CutCompVar( name, expr, nbins, vmin, vmax ) );
   }
 }
 
