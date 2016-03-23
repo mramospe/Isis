@@ -91,12 +91,14 @@ void Analysis::CutComparer::AddCutVariable( std::string        name,
   std::vector<std::string> nvec;
   General::SplitString( nvec, name, ";" );
   fCutVars.push_back( std::make_pair( name, CutCompVar( name, npoints, vmin, vmax, nvec.size() ) ) );
-  if ( fCutString.size() )
-    fCutString += " && " + nvec.front() + dir + "%%%";
-  else
-    fCutString = nvec.front() + dir + "%%%";
+  // If more than one variable is present, then the expression is introduced between parentheses
+  std::string add = nvec.front() + dir + "%%%";
   for ( auto itn = nvec.begin() + 1; itn != nvec.end(); ++itn )
-    fCutString += " && " + *itn + dir + "%%%";
+    add += " && " + *itn + dir + "%%%";
+  if ( fCutString.size() )
+    fCutString += " && (" + add + ')';
+  else
+    fCutString += '(' + add + ')';
   fLoopArray.AddIndex( npoints );
 }
 
@@ -232,6 +234,7 @@ void Analysis::CutComparer::Compare() {
       itv++;
       itl++;
     }
+    sout << fCutString.substr( backpos );
     cutStr = sout.str();
     std::cout << "Generated new cut: " << cutStr << std::endl;
 
