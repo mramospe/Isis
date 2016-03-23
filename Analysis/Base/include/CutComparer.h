@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 15/03/2016                                                      //
+//  Last update: 23/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -54,7 +54,7 @@ namespace Analysis {
     ~CutComparer();
 
     // Methods
-    void AddCutVariable( const std::string &name,
+    void AddCutVariable( std::string        name,
 			 const std::string &dir,
 			 const size_t      &npoints,
 			 const double      &vmin,
@@ -89,12 +89,14 @@ namespace Analysis {
       CutCompVar( const std::string &expr,
 		  const size_t      &npoints,
 		  const double      &vmin,
-		  const double      &vmax ) :
-	fExpr( expr ), fMax( vmax ), fMin( vmin ), fN( npoints ) { }
+		  const double      &vmax,
+		  const size_t      &nvars = 1 ) :
+	fExpr( expr ), fMax( vmax ), fMin( vmin ), fNdiv( npoints ), fNvars( nvars ) { }
       std::string fExpr;
       double      fMax;
       double      fMin;
-      size_t      fN;
+      size_t      fNdiv;
+      size_t      fNvars;
     };
 
     // Attributes
@@ -137,6 +139,7 @@ namespace Analysis {
 					    const double      &vmin,
 					    const double      &vmax ) {
     fCompVars.push_back( std::make_pair( name, CutCompVar( expr, nbins, vmin, vmax ) ) );
+    fCutVars.back().first = name;
   }
 }
 

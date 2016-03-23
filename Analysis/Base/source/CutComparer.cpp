@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 18/03/2016                                                      //
+//  Last update: 23/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -26,6 +26,7 @@
 
 
 #include "CutComparer.h"
+#include "Utils.h"
 
 #include "TCanvas.h"
 #include "TDirectory.h"
@@ -67,26 +68,41 @@ Analysis::CutComparer::~CutComparer() { }
 //_______________________________________________________________________________
 // Adds a new variable to cut over. The name of the variable, the direction of
 // the cut: "<", ">", "<=" or ">=", the number of points and the range of the cut
-// have to be specified.
-void Analysis::CutComparer::AddCutVariable( const std::string &name,
+// have to be specified. One can oblige this class to make the same cuts to a set
+// of variables writing in the < name > input, all the different names separated
+// by < ; >.
+void Analysis::CutComparer::AddCutVariable( std::string        name,
 					    const std::string &dir,
 					    const size_t      &npoints,
 					    const double      &vmin,
 					    const double      &vmax ) {
-  fCutVars.push_back( std::make_pair( name, CutCompVar( name, npoints, vmin, vmax ) ) );
   if ( dir != ">" && dir != "<" && dir != ">=" && dir != "<=" )
     std::cerr <<
       "ERROR: Unknown boolean operator for variable < " << name << " >"
 							<< std::endl;
+  // Removes the whitespaces that could be present in the name
+  auto it = name.begin();
+  while ( it != name.end() )
+    if ( *it == ' ' )
+      name.erase( it );
+    else
+      ++it;
+  // Adds the different variables
+  std::vector<std::string> nvec;
+  General::SplitString( nvec, name, ";" );
+  fCutVars.push_back( std::make_pair( name, CutCompVar( name, npoints, vmin, vmax, nvec.size() ) ) );
   if ( fCutString.size() )
-    fCutString += " && " + name + dir + "%%%";
+    fCutString += " && " + nvec.front() + dir + "%%%";
   else
-    fCutString = name + dir + "%%%";
+    fCutString = nvec.front() + dir + "%%%";
+  for ( auto itn = nvec.begin() + 1; itn != nvec.end(); ++itn )
+    fCutString += " && " + *itn + dir + "%%%";
   fLoopArray.AddIndex( npoints );
 }
 
 //_______________________________________________________________________________
-// Adds a new variable to cut over as an expression
+// Adds a new variable to cut over. This is meant to be used to make cuts over an
+// expression or over a set of variables.
 void Analysis::CutComparer::AddCutVariable( const std::string &name,
 					    const std::string &expr,
 					    const std::string &dir,
@@ -204,13 +220,15 @@ void Analysis::CutComparer::Compare() {
     itv = fCutVars.begin();
     itl = fLoopArray.cBegin();
     while ( itv != fCutVars.end() && itl != fLoopArray.cEnd() ) {
-      pos = fCutString.find( "%%%", backpos );
-      sout << fCutString.substr( backpos, pos - backpos );
       ccvar = &( itv -> second );
-      step  = ( ccvar -> fMax - ccvar -> fMin )/( ccvar -> fN - 1 );
-      sout << step*( itl -> first ) + ccvar -> fMin;
+      step  = ( ccvar -> fMax - ccvar -> fMin )/( ccvar -> fNdiv - 1 );
+      for ( size_t iv = 0; iv < ccvar -> fNvars; ++iv ) {
+	pos = fCutString.find( "%%%", backpos );
+	sout << fCutString.substr( backpos, pos - backpos );
+	sout << step*( itl -> first ) + ccvar -> fMin;
+	backpos = pos + 3;
+      }
       sname << itl -> first;
-      backpos = pos + 3;
       itv++;
       itl++;
     }
@@ -230,7 +248,7 @@ void Analysis::CutComparer::Compare() {
     // Makes the loop over the different variables and categories to make the histograms
     for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ ) {
       name   = itv -> first;
-      nbins  = std::to_string( itv -> second.fN );
+      nbins  = std::to_string( itv -> second.fNdiv );
       vmin   = std::to_string( itv -> second.fMin );
       vmax   = std::to_string( itv -> second.fMax );
       icol   = 0;
