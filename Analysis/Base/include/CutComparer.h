@@ -106,11 +106,13 @@ namespace Analysis {
 		  const std::string &cut = "",
 		  const std::string &weight = "",
 		  const bool        &applycuts = true ) :
-	fCut( applycuts ), fName( name ), fTree( tree ) {
-	if ( weight.size() )
-	  fWgtExpr = weight + "*(" + cut + ")";
-	else
-	  fWgtExpr = cut;
+	fCut( applycuts ), fName( name ), fTree( tree ), fWgtExpr( cut ) {
+	if ( weight.size() ) {
+	  if ( fWgtExpr.size() )
+	    fWgtExpr = weight + "*(" + fWgtExpr + ")";
+	  else
+	    fWgtExpr = weight;
+	}
       }
       bool         fCut;
       std::string  fName;

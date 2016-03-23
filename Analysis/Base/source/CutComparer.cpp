@@ -256,14 +256,14 @@ void Analysis::CutComparer::Compare() {
       legend -> Clear();
 
       for ( auto it = fCategories.begin(); it != fCategories.end(); it++, icol++ ) {
-	if ( it -> fWgtExpr.size() ) {
+	cuts = it -> fWgtExpr;
+	if ( cuts.size() ) {
 	  if ( it -> fCut )
-	    cuts = '(' + it -> fWgtExpr + ")*(" + cutStr + ')';
-	  else
-	    cuts = '(' + it -> fWgtExpr + ')';
+	    cuts = '(' + cuts + ")*(" + cutStr + ')';
 	}
 	else
-	  cuts = cutStr;
+	  if ( it -> fCut )
+	    cuts = cutStr;
 	tree = it -> fTree;
 	if ( itv -> fExpr.size() )
 	  var = itv -> fExpr;
