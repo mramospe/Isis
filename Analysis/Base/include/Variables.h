@@ -208,7 +208,6 @@ namespace Analysis {
     inline const type   GetMin() const;
     inline const size_t GetNdiv() const;
     inline const double GetStep( const bool &tolim = false ) const;
-    inline const type   GetValue() const;
     inline bool         IsInside() const;
     inline bool         IsInside( const type &value ) const;
     inline bool         IsOutside() const;
@@ -267,9 +266,6 @@ namespace Analysis {
   inline const double Variable<type>::GetStep( const bool &tolim ) const {
     return tolim ? double( fMax - fMin )/( fNdiv - 1 ) : double( fMax - fMin )/fNdiv;
   }
-  // Returns the current value of the variable
-  template<typename type>
-  inline const type Variable<type>::GetValue() const { return fValue; }
   // Checks whether the current value is inside of the variable of not
   template<typename type>
   inline bool Variable<type>::IsInside() const {

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/03/2016                                                      //
+//  Last update: 28/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -96,7 +96,8 @@ void Analysis::CutComparer::AddCutVariable( const std::string &name,
   // Adds the different variables
   std::vector<std::string> nvec;
   General::SplitString( nvec, expr, ";" );
-  fCutVars.push_back( CutCompVar( name, expr, npoints, vmin, vmax, nvec.size() ) );
+  fCutVars.push_back( std::make_pair( Analysis::Variable<double>( name, expr, vmin, vmax, npoints ),
+				      nvec.size() ) );
   // If more than one variable is present, then the expression is introduced between parentheses
   std::string add = nvec.front() + dir + "%%%";
   for ( auto itn = nvec.begin() + 1; itn != nvec.end(); ++itn )
@@ -138,7 +139,7 @@ void Analysis::CutComparer::Compare() {
   std::cout << "Number of cut loops:      " << fLoopArray.GetNloops() << std::endl;
   std::cout << "Variables to be compared (" << fCompVars.size() << "):" << std::endl;
   for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ )
-    std::cout << " - " << itv -> fName << std::endl;;
+    std::cout << " - " << itv -> GetName() << std::endl;;
   std::cout << "Histograms to be written: " << fCategories.size()*fCompVars.size()*fLoopArray.GetNloops() << std::endl;
   std::cout << "*** List of categories ***" << std::endl;
   for ( auto itc = fCategories.begin(); itc != fCategories.end(); itc++ ) {
@@ -167,10 +168,10 @@ void Analysis::CutComparer::Compare() {
     tree = itc -> fTree;
     name = itc -> fName;
     for ( auto itcmp = fCompVars.begin(); itcmp != fCompVars.end(); itcmp++ )
-      if ( itcmp -> fExpr == "" ) {
-	if ( !tree -> GetBranch( itcmp -> fName.c_str() ) ) {
+      if ( itcmp -> GetExpr() == "" ) {
+	if ( !tree -> GetBranch( itcmp -> GetName().c_str() ) ) {
 	  std::cerr <<
-	    "ERROR: Branch < " << itcmp -> fName << " > not known for category < " << name << " >" 
+	    "ERROR: Branch < " << itcmp -> GetName() << " > not known for category < " << name << " >" 
 			       << std::endl;
 	  return;
 	}
@@ -200,7 +201,7 @@ void Analysis::CutComparer::Compare() {
   TObjString *objStr;
 
   // Creates the iterators
-  std::vector<CutCompVar>::iterator itv;
+  std::vector<std::pair<Analysis::Variable<double>, size_t> >::iterator itv;
   std::vector<std::pair<size_t, size_t> >::const_iterator itl;
 
   // Loops over all the configurations of cuts
@@ -215,11 +216,12 @@ void Analysis::CutComparer::Compare() {
     itv = fCutVars.begin();
     itl = fLoopArray.cBegin();
     while ( itv != fCutVars.end() && itl != fLoopArray.cEnd() ) {
-      step  = ( itv -> fMax - itv -> fMin )/( itv -> fNdiv - 1 );
-      for ( size_t iv = 0; iv < itv -> fNvars; ++iv ) {
+      step  = itv -> first.GetStep( true );
+      itv -> first.SetValue( step*( itl -> first ) + itv -> first.GetMin() );
+      for ( size_t iv = 0; iv < itv -> second; ++iv ) {
 	pos = fCutString.find( "%%%", backpos );
 	sout << fCutString.substr( backpos, pos - backpos );
-	sout << step*( itl -> first ) + itv -> fMin;
+	sout << itv -> first.GetValue();
 	backpos = pos + 3;
       }
       sname << itl -> first;
@@ -242,10 +244,10 @@ void Analysis::CutComparer::Compare() {
 
     // Makes the loop over the different variables and categories to make the histograms
     for ( auto itv = fCompVars.begin(); itv != fCompVars.end(); itv++ ) {
-      name   = itv -> fName;
-      nbins  = std::to_string( itv -> fNdiv );
-      vmin   = std::to_string( itv -> fMin );
-      vmax   = std::to_string( itv -> fMax );
+      name   = itv -> GetName();
+      nbins  = std::to_string( itv -> GetNdiv() );
+      vmin   = std::to_string( itv -> GetMin() );
+      vmax   = std::to_string( itv -> GetMax() );
       icol   = 0;
 
       // Redefines the canvas and the legend
@@ -265,8 +267,8 @@ void Analysis::CutComparer::Compare() {
 	  if ( it -> fCut )
 	    cuts = cutStr;
 	tree = it -> fTree;
-	if ( itv -> fExpr.size() )
-	  var = itv -> fExpr;
+	if ( itv -> GetExpr().size() )
+	  var = itv -> GetExpr();
 	else
 	  var = name;
 	// Generates the histogram. The name has always to be set to avoid memory leak problems.
@@ -320,7 +322,7 @@ void Analysis::CutComparer::Compare() {
 	for ( auto it = htodel.begin(); it != htodel.end(); it++ )
 	  delete chist[ *it ];
       }
-      std::cout << " - Variable < " << itv -> fName << " > processed" << std::endl;
+      std::cout << " - Variable < " << itv -> GetName() << " > processed" << std::endl;
       
       // Deletes the pointers
       for ( size_t ih = 0; ih < fCategories.size(); ih++ )

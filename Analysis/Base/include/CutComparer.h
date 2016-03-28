@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/03/2016                                                      //
+//  Last update: 28/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -29,6 +29,7 @@
 #define CUT_COMPARER
 
 #include "LoopArray.h"
+#include "Variables.h"
 
 #include "TTree.h"
 
@@ -85,21 +86,6 @@ namespace Analysis {
   protected:
 
     // Nested structs to manage the variables and the categories
-    struct CutCompVar {
-      CutCompVar( const std::string &name, 
-		  const std::string &expr,
-		  const size_t      &npoints,
-		  const double      &vmin,
-		  const double      &vmax,
-		  const size_t      &nvars = 1 ) :
-	fExpr( expr ), fMax( vmax ), fMin( vmin ), fName( name ), fNdiv( npoints ), fNvars( nvars ) { }
-      std::string fExpr;
-      double      fMax;
-      double      fMin;
-      std::string fName;
-      size_t      fNdiv;
-      size_t      fNvars;
-    };
     struct CutCompCat {
       CutCompCat( const std::string &name,
 		  TTree             *tree,
@@ -121,11 +107,13 @@ namespace Analysis {
     };
 
     // Attributes
-    std::vector<CutCompCat> fCategories;
-    std::vector<CutCompVar> fCompVars;
-    std::string             fCutString;
-    std::vector<CutCompVar> fCutVars;
-    General::LoopArray      fLoopArray;
+    std::vector<CutCompCat>         fCategories;
+    std::vector<Variable<double> >  fCompVars;
+    std::string                     fCutString;
+    std::vector<std::pair<
+		  Variable<double>,
+		  size_t> >         fCutVars;
+    General::LoopArray              fLoopArray;
 
   };
 
@@ -146,7 +134,7 @@ namespace Analysis {
 					    const size_t      &nbins,
 					    const double      &vmin,
 					    const double      &vmax ) {
-    fCompVars.push_back( CutCompVar( name, name, nbins, vmin, vmax ) );
+    fCompVars.push_back( Variable<double>( name, name, vmin, vmax, nbins ) );
   }
   // Adds a new variable to compare as an expression
   inline void CutComparer::AddCompVariable( const std::string &name,
@@ -154,7 +142,7 @@ namespace Analysis {
 					    const size_t      &nbins,
 					    const double      &vmin,
 					    const double      &vmax ) {
-    fCompVars.push_back( CutCompVar( name, expr, nbins, vmin, vmax ) );
+    fCompVars.push_back( Variable<double>( name, expr, vmin, vmax, nbins ) );
   }
 }
 
