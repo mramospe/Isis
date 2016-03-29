@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 28/03/2016                                                      //
+//  Last update: 29/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -16,6 +16,8 @@
 //  A set of different classes and functions to manage variables are defined     //
 //  here. All these objects are used by the other classes in the Analysis        //
 //  package, to generate hisograms, graphs, perform analysis in ranges, etc.     //
+//  The functions < VariableType > and < ExtractValue > are linked together, in  //
+//  such a way that the behaviour for the different types have to be the same.   //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////////
@@ -34,44 +36,49 @@
 namespace Analysis {
 
   //_______________________________________________________________________________
-  // FUNCTIONS
+  // FUNCTION: VARIABLE TYPE
   //
-  // This an auxiliar function needed by the different variable classes
-  template<typename type> char VariableType() {
-    if ( typeid( type ) == typeid( const char* ) )
+  // This an auxiliar function needed by the different variable classes. It can be
+  // used in two different ways: the first one is to call this function with no
+  // argument < VariableType<type>() >, and the second one is calling it with the
+  // address of a variable < VariableType( &var ) >. In both cases it will work
+  // with the variable type, which is defined in the template call.
+  template<typename type> char VariableType( const type *var = 0 ) {
+    const std::type_info &tp = typeid( type );
+    if ( tp == typeid( const char* ) )
       return 'C';
-    else if ( typeid( type ) == typeid( char ) )
+    else if ( tp == typeid( char ) )
       return 'B';
-    else if ( typeid( type ) == typeid( unsigned char ) )
+    else if ( tp == typeid( unsigned char ) )
       return 'b';
-    else if ( typeid( type ) == typeid( short int ) )
+    else if ( tp == typeid( short int ) )
       return 'S';
-    else if ( typeid( type ) == typeid( unsigned short int ) )
+    else if ( tp == typeid( unsigned short int ) )
       return 's';
-    else if ( typeid( type ) == typeid( int ) )
+    else if ( tp == typeid( int ) )
       return 'I';
-    else if ( typeid( type ) == typeid( unsigned int ) )
+    else if ( tp == typeid( unsigned int ) )
       return 'i';
-    else if ( typeid( type ) == typeid( float ) )
+    else if ( tp == typeid( float ) )
       return 'F';
-    else if ( typeid( type ) == typeid( double ) )
+    else if ( tp == typeid( double ) )
       return 'D';
-    else if ( typeid( type ) == typeid( long long int ) )
+    else if ( tp == typeid( long long int ) )
       return 'L';
-    else if ( typeid( type ) == typeid( unsigned long long int ) )
+    else if ( tp == typeid( unsigned long long int ) )
       return 'l';
-    else if ( typeid( type ) == typeid( bool ) )
+    else if ( tp == typeid( bool ) )
       return 'O';
     else {
       std::cout << "WARNING: Type for one of the variables not known. Type id: " <<
-	typeid( type ).name() << std::endl;
+	tp.name() << std::endl;
       return '\0';
     }
   }
 
   
   //_______________________________________________________________________________
-  // NAMED VARIABLE
+  // CLASS: NAMED VARIABLE
   //
   // This class is the base class for all the different variable classes. It only
   // has a name, an expression and the value type. The first of these variables
@@ -123,7 +130,7 @@ namespace Analysis {
 
   
   //_______________________________________________________________________________
-  // BASIC VARIABLE
+  // CLASS: BASIC VARIABLE
   //
   // This class defines the main variable object to store a value. It is meant to
   // be used with boolean, integer, float and double variables.
@@ -181,7 +188,7 @@ namespace Analysis {
 
 
   //_______________________________________________________________________________
-  // VARIABLE
+  // CLASS: VARIABLE
   //
   // This is the main variable class. It stores the name, expression, a value and
   // the limits for it. If it is used with boolean variables, one has to take into
@@ -302,6 +309,40 @@ namespace Analysis {
   template<typename type>
   inline void Variable<type>::SetNdiv( const size_t &ndiv ) { fNdiv = ndiv; }
 
+
+  //_______________________________________________________________________________
+  // FUNCTION: EXTRACT VALUE
+  //
+  // This function sets the value stored in a < BasicVariable > class into another
+  // variable. The user must know if the two types are compatible.
+  template<typename type> void ExtractValue( type &out, const NamedVariable *var ) {
+    const char tp = var -> GetType();
+    if ( tp == 'C' )
+      out = static_cast<BasicVariable<const char*>*>( var ) -> GetValue();
+    else if ( tp == 'B' )
+      out = static_cast<BasicVariable<char>*>( var ) -> GetValue();
+    else if ( tp == 'b' )
+      out = static_cast<BasicVariable<unsigned char>*>( var ) -> GetValue();
+    else if ( tp == 'S' )
+      out = static_cast<BasicVariable<short int>*>( var ) -> GetValue();
+    else if ( tp == 's' )
+      out = static_cast<BasicVariable<unsigned short int>*>( var ) -> GetValue();
+    else if ( tp == 'I' )
+      out = static_cast<BasicVariable<int>*>( var ) -> GetValue();
+    else if ( tp == 'i' )
+      out = static_cast<BasicVariable<unsigned int>*>( var ) -> GetValue();
+    else if ( tp == 'F' )
+      out = static_cast<BasicVariable<float>*>( var ) -> GetValue();
+    else if ( tp == 'D' )
+      out = static_cast<BasicVariable<double>*>( var ) -> GetValue();
+    else if ( tp == 'L' )
+      out = static_cast<BasicVariable<long long int>*>( var ) -> GetValue();
+    else if ( tp == 'l' )
+      out = static_cast<BasicVariable<unsigned long long int>*>( var ) -> GetValue();
+    else // ( tp == 'O' )
+      out = static_cast<BasicVariable<bool>*>( var ) -> GetValue();
+  }
+  
 }
 
 #endif

@@ -16,6 +16,8 @@
 //  A set of different classes and functions to manage variables are defined     //
 //  here. All these objects are used by the other classes in the Analysis        //
 //  package, to generate hisograms, graphs, perform analysis in ranges, etc.     //
+//  The functions < VariableType > and < ExtractValue > are linked together, in  //
+//  such a way that the behaviour for the different types have to be the same.   //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////////

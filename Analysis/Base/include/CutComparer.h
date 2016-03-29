@@ -85,7 +85,7 @@ namespace Analysis {
 
   protected:
 
-    // Nested structs to manage the variables and the categories
+    // Nested struct to manage the categories
     struct CutCompCat {
       CutCompCat( const std::string &name,
 		  TTree             *tree,
