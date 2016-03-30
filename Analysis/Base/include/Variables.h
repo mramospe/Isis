@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 29/03/2016                                                      //
+//  Last update: 30/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -45,9 +45,7 @@ namespace Analysis {
   // with the variable type, which is defined in the template call.
   template<typename type> char VariableType( const type *var = 0 ) {
     const std::type_info &tp = typeid( type );
-    if ( tp == typeid( const char* ) )
-      return 'C';
-    else if ( tp == typeid( char ) )
+    if ( tp == typeid( char ) )
       return 'B';
     else if ( tp == typeid( unsigned char ) )
       return 'b';
@@ -313,13 +311,12 @@ namespace Analysis {
   //_______________________________________________________________________________
   // FUNCTION: EXTRACT VALUE
   //
-  // This function sets the value stored in a < BasicVariable > class into another
-  // variable. The user must know if the two types are compatible.
-  template<typename type> void ExtractValue( type &out, const NamedVariable *var ) {
+  // This function gets the value stored in a < BasicVariable > class and sets the
+  // given variable to its value. The user must know if the two types are
+  // compatible.
+  template<typename type> void ExtractValue( NamedVariable *var, type &out ) {
     const char tp = var -> GetType();
-    if ( tp == 'C' )
-      out = static_cast<BasicVariable<const char*>*>( var ) -> GetValue();
-    else if ( tp == 'B' )
+    if ( tp == 'B' )
       out = static_cast<BasicVariable<char>*>( var ) -> GetValue();
     else if ( tp == 'b' )
       out = static_cast<BasicVariable<unsigned char>*>( var ) -> GetValue();
@@ -341,6 +338,38 @@ namespace Analysis {
       out = static_cast<BasicVariable<unsigned long long int>*>( var ) -> GetValue();
     else // ( tp == 'O' )
       out = static_cast<BasicVariable<bool>*>( var ) -> GetValue();
+  }
+
+
+  //_______________________________________________________________________________
+  // FUNCTION: DEFINE VALUE
+  //
+  // This function sets the value stored in a < BasicVariable > class from another
+  // variable. The user must know if the two types are compatible.
+  template<typename type> void DefineValue( NamedVariable *var, type &value ) {
+    const char tp = var -> GetType();
+    if ( tp == 'B' )
+      static_cast<BasicVariable<char>*>( var ) -> SetValue( value );
+    else if ( tp == 'b' )
+      static_cast<BasicVariable<unsigned char>*>( var ) -> SetValue( value );
+    else if ( tp == 'S' )
+      static_cast<BasicVariable<short int>*>( var ) -> SetValue( value );
+    else if ( tp == 's' )
+      static_cast<BasicVariable<unsigned short int>*>( var ) -> SetValue( value );
+    else if ( tp == 'I' )
+      static_cast<BasicVariable<int>*>( var ) -> SetValue( value );
+    else if ( tp == 'i' )
+      static_cast<BasicVariable<unsigned int>*>( var ) -> SetValue( value );
+    else if ( tp == 'F' )
+      static_cast<BasicVariable<float>*>( var ) -> SetValue( value );
+    else if ( tp == 'D' )
+      static_cast<BasicVariable<double>*>( var ) -> SetValue( value );
+    else if ( tp == 'L' )
+      static_cast<BasicVariable<long long int>*>( var ) -> SetValue( value );
+    else if ( tp == 'l' )
+      static_cast<BasicVariable<unsigned long long int>*>( var ) -> SetValue( value );
+    else // ( tp == 'O' )
+      static_cast<BasicVariable<bool>*>( var ) -> SetValue( value );
   }
   
 }
