@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/02/2016                                                      //
+//  Last update: 31/03/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -327,18 +327,14 @@ inline bool General::StringParser::Inequation( std::string::iterator &it ) {
 	BareCalculate( std::string( ++it, NextBoolOperator( it + 1 ) ) ) && Inequation( it );
   }
   else if ( *it == '=' ) {
-    if ( *( ++it ) == '=' )
-      return BareCalculate( std::string( backit, it - 1 ) ) ==
-	BareCalculate( std::string( ++it, NextBoolOperator( it + 1 ) ) ) && Inequation( it );
-    else
-      throw std::invalid_argument( "ERROR: Incomplete boolean expression" );
+    ++it;
+    return BareCalculate( std::string( backit, it - 1 ) ) ==
+      BareCalculate( std::string( ++it, NextBoolOperator( it + 1 ) ) ) && Inequation( it );
   }
   else if ( *it == '!' ) {
-    if ( *( ++it ) == '=' )
-      return BareCalculate( std::string( backit, it - 1 ) ) !=
-	BareCalculate( std::string( ++it, NextBoolOperator( it + 1 ) ) ) && Inequation( it );
-    else
-      throw std::invalid_argument( "ERROR: Incomplete boolean expression" );
+    ++it;
+    return BareCalculate( std::string( backit, it - 1 ) ) !=
+      BareCalculate( std::string( ++it, NextBoolOperator( it + 1 ) ) ) && Inequation( it );
   }
   else
     if ( *backit == '0' ) {
@@ -448,7 +444,8 @@ bool General::StringParser::CheckCalcExpression( std::string expr, std::vector<s
 }
 
 //_______________________________________________________________________________
-// Checks that all the < && >, < || >, < == > and < != > are correctly writen
+// Checks that all < && >, < || > and < == >  are correctly writen. The < != >
+// symbol is not checked since < ! > is a correct boolean symbol.
 inline bool General::StringParser::CheckBoolSymbol( std::string::iterator &it ) {
   auto frontit = it + 1;
   if ( *it == '&' && *frontit != '&' )
