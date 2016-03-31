@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 12/03/2016                              //
+//  Last update: 31/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -63,7 +63,7 @@ namespace General {
     inline void        Close();
     inline std::string Get( const std::string &key );
     std::string        GetCut( const std::string &key );
-    std::string        MakeMergedCut();
+    std::string        MakeMergedCut( std::string joinop = "&&" );
     void               Open( const std::string &file_path );
     void               Print();
 
@@ -87,16 +87,12 @@ namespace General {
   // INLINE METHODS DEFINITION
 
   // Clears the data storaged in the class
-  inline void General::CutManager::Clear() { fCuts.clear(); }
+  inline void CutManager::Clear() { fCuts.clear(); }
   // Closes the file related to this class
-  inline void General::CutManager::Close() { fFile.close(); }
+  inline void CutManager::Close() { fFile.close(); }
   // Returns the cut booked with name key
   inline std::string CutManager::Get( const std::string &key ) {
     return fCuts[ key ].c_str();
-  }
-  // Opens the file with the given path
-  inline void General::CutManager::Open( const std::string &file_path ) {
-    fFile.open( file_path.c_str() );
   }
   // Gets the location of the begin of the map of cuts
   inline std::map<std::string, std::string>::iterator CutManager::Begin() {

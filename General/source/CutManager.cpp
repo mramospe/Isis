@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 14/03/2016                              //
+//  Last update: 31/03/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -52,7 +52,7 @@ General::CutManager::CutManager( const std::string &file_path ) {
   fOptions[ "and" ] = "&&" ;
   fOptions[ "or"  ] = "||" ;
   if ( file_path.size() )
-    fFile.open( file_path.c_str() );
+    this -> Open( file_path );
 }
 
 //_______________________________________________________________________________       
@@ -62,7 +62,7 @@ General::CutManager::~CutManager() { if ( fFile.is_open() ) fFile.close(); }
 //_______________________________________________________________________________       
 
 
-// -- PUBLIC METHODS
+// -- METHODS
 
 //_______________________________________________________________________________       
 // Appends to the given vector the cuts of the current class
@@ -182,13 +182,61 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 }
 
 //_______________________________________________________________________________
-// Appends all the cuts in the same string using < && > statements
-std::string General::CutManager::MakeMergedCut() {
+// Appends all the cuts in the same string using the given statement (< && > by
+// default)
+std::string General::CutManager::MakeMergedCut( std::string joinop ) {
   std::string gcut( '(' + fCuts.begin() -> second + ')' );
+  joinop = ' ' + joinop + " (";
   auto it = fCuts.begin();
   for ( ++it; it != fCuts.end(); ++it )
-    gcut.append( " && (" + it -> second + ')' );
+    gcut.append( joinop + it -> second + ')' );
   return gcut;
+}
+
+//_______________________________________________________________________________       
+// Opens the file in the given path. The old file will be closed first.
+void General::CutManager::Open( const std::string &file_path ) {
+  if ( fFile.is_open() )
+    fFile.close();
+  fFile.open( file_path.c_str() );
+  std::string line, str;
+  size_t nl = 0, pos, newpos;
+  while ( std::getline( fFile, line ) ) {
+    ++nl;
+    if ( line.size() )
+      if ( line.front() != '#' ) {
+	if ( ( pos = line.find( '=' ) ) != std::string::npos ) {
+
+	  // Checks whether the cut name is free of whitespaces
+	  str = line.substr( 0, pos );
+	  while ( str.front() == ' ' )
+	    str.erase( str.begin() );
+	  while ( str.back() == ' ' )
+	    str.erase( str.end() - 1 );
+	  if ( str.find( ' ' ) != std::string::npos ) {
+	    std::cerr << "ERROR: The cut defined in line < " << nl <<
+	      " > has whitespaces on its name" << std::endl;
+	    return;
+	  }
+
+	  // Checks the matching of the < $ > symbols in the expression
+	  while ( ( pos = line.find( '$', ++pos ) ) != std::string::npos ) {
+	    newpos = line.find( '$', ++pos );
+	    str    = line.substr( pos, newpos - pos );
+	    if ( newpos == std::string::npos || str.find( ' ' ) != std::string::npos ) {
+	      std::cerr << "ERROR: Mismatched < $ > symbol in line < " << nl << " >" << std::endl;
+	      return;
+	    }
+	    pos = newpos + 1;
+	  }
+	}
+	else
+	  std::cout << "WARNING: Line number < " << nl <<
+	    " > not a cut line; must be commented (starting by #)" << std::endl;
+      }
+  }
+  fFile.clear();
+  fFile.seekg( 0 );
 }
 
 //_______________________________________________________________________________       
