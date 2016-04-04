@@ -47,7 +47,7 @@ class CutManager:
 
     def __getitem__( self, key ):
         ''' Gets the cut related to the key given '''
-        return self.CutList[ index ]
+        return self.CutList[ key ]
 
     def Clear( self ):
         ''' Clears the content obtained from the file as well as the cuts booked '''
@@ -58,7 +58,7 @@ class CutManager:
         ''' Clears the content obtained from the file '''
         self.CutFile = []
 
-    def BookCut( self, name ):
+    def BookCut( self, name, prt = True ):
         ''' Books a new cut and returns it '''
         if name in self.CutList:
             print 'Cut with name <', name, '> already booked'
@@ -66,7 +66,8 @@ class CutManager:
         cut = self.GetCut( name )
         if cut:
             self.CutList[ name ] = cut
-            print 'Booked new cut <', name, '>:', self.CutList[ name ]
+            if prt:
+                print 'Booked new cut <', name, '>:', self.CutList[ name ]
         return cut
 
     def GetCut( self, name ):
