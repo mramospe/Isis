@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 31/03/2016                              //
+//  Last update: 01/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -66,8 +66,9 @@ namespace General {
     std::string        MakeMergedCut( std::string joinop = "&&" );
     void               Open( const std::string &file_path );
     void               Print();
+    inline void        RemoveCut( const std::string &key );
 
-    // Inline methods
+    // Iteration methods
     inline std::map<std::string, std::string>::iterator Begin();
     inline std::map<std::string, std::string>::iterator End();
 
@@ -101,6 +102,9 @@ namespace General {
   // Gets the location of the end of the map of cuts 
   inline std::map<std::string, std::string>::iterator CutManager::End() {
     return fCuts.end();
+  }
+  inline void CutManager::RemoveCut( const std::string &key ) {
+    fCuts.erase( key );
   }
 
   //______________________________

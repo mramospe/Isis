@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 31/03/2016                              //
+//  Last update: 04/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -107,8 +107,7 @@ std::string General::CutManager::BookCut( const std::string &key, const bool &pr
 std::string General::CutManager::GetCut( const std::string &key ) {
 
   // Each time a cut is obtained the pointer to the file is set to its start
-  if ( fFile.eof() )
-    fFile.clear();
+  fFile.clear();
   fFile.seekg( 0 );
 
   std::string cuts, newcut, sstr;
