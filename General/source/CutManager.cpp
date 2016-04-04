@@ -173,7 +173,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
   }
   // Changes the name of the conditionals in the cuts set
   for ( std::map<std::string, std::string>::iterator it = fOptions.begin();
-	it != fOptions.end(); it++ )
+	it != fOptions.end(); ++it )
     while ( ( pos = cuts.find( it -> first ) ) != std::string::npos )
       cuts.replace( pos, ( it -> first ).size(), it -> second );
 
@@ -205,6 +205,13 @@ void General::CutManager::Open( const std::string &file_path ) {
     if ( line.size() )
       if ( line.front() != '#' ) {
 	if ( ( pos = line.find( '=' ) ) != std::string::npos ) {
+
+	  // Checks whether does exist any other assignment operator in the same line
+	  if ( line.find( '=', pos + 1 ) != std::string::npos ) {
+	    std::cerr << "ERROR: Found two assignment operators in line < " <<
+	      nl << " >" << std::endl;
+	    return;
+	  }
 
 	  // Checks whether the cut name is free of whitespaces
 	  str = line.substr( 0, pos );
@@ -246,7 +253,7 @@ void General::CutManager::Print() {
 				     [] ( const std::pair<std::string, std::string> &p1,
 					  const std::pair<std::string, std::string> &p2 ) {
 				       return p1.first.size() < p2.first.size(); } ) -> first.size();
-  for ( auto it = fCuts.begin(); it != fCuts.end(); it++ )
+  for ( auto it = fCuts.begin(); it != fCuts.end(); ++it )
     std::cout << std::left << std::setw( maxsize ) <<
       it -> first  << " => " << it -> second << std::endl;
 }
