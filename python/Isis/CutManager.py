@@ -87,7 +87,7 @@ class CutManager:
                     ifirst = cuts.find( '$', ifirst )
                     ilast  = cuts.find( '$', ifirst + 1 )
                     newcut = cuts[ ifirst : ilast + 1 ]
-                    cuts   = cuts.replace( newcut, '(' + self.GetCut( newcut[ 1:-1 ] ) + ')' )
+                    cuts   = cuts.replace( newcut, self.GetCut( newcut[ 1:-1 ] ) )
                 for el in self.Options:
                     while el in cuts:
                         cuts = cuts.replace( el, self.Options[ el ] )
