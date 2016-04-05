@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 01/04/2016                              //
+//  Last update: 05/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -66,6 +66,7 @@ namespace General {
     std::string        MakeMergedCut( std::string joinop = "&&" );
     void               Open( const std::string &file_path );
     void               Print();
+    inline void        RemoveAllCuts();
     inline void        RemoveCut( const std::string &key );
 
     // Iteration methods
@@ -103,8 +104,13 @@ namespace General {
   inline std::map<std::string, std::string>::iterator CutManager::End() {
     return fCuts.end();
   }
+  // Removes the cut booked as < key >
   inline void CutManager::RemoveCut( const std::string &key ) {
     fCuts.erase( key );
+  }
+  // Removes all the cuts booked
+  inline void CutManager::RemoveAllCuts() {
+    fCuts.clear();
   }
 
   //______________________________

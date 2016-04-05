@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                          //
 #//  e-mail: miguel.ramos.pernas@cern.ch                  //
 #//                                                       //
-#//  Last update: 04/04/2016                              //
+#//  Last update: 05/04/2016                              //
 #//                                                       //
 #// ----------------------------------------------------- //
 #//                                                       //
@@ -144,6 +144,10 @@ class CutManager:
         ''' Prints the cuts booked in the class '''
         for key in self.CutList:
             print key, '->', self.CutList[ key ]
+
+    def RemoveAllCuts( self ):
+        ''' Removes all the cuts '''
+        self.CutList = OrderedDict()
 
     def RemoveCut( self, kw ):
         ''' Removes the cut identified by the key < kw > '''
