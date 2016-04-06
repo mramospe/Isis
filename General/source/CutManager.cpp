@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 04/04/2016                              //
+//  Last update: 06/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -198,6 +198,10 @@ void General::CutManager::Open( const std::string &file_path ) {
   if ( fFile.is_open() )
     fFile.close();
   fFile.open( file_path.c_str() );
+  if ( !fFile ) {
+    std::cerr << "ERROR: File < " << file_path << " > does not exist" << std::endl;
+    return;
+  }
   std::string line, str;
   size_t nl = 0, pos, newpos;
   while ( std::getline( fFile, line ) ) {
