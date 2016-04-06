@@ -10,15 +10,15 @@
 //  AUTHOR : Miguel Ramos Pernas                       //
 //  e-mail: miguel.ramos.pernas@cern.ch                //
 //                                                     //
-//  Last Update: 09/12/2015                            //
+//  Last Update: 06/04/2016                            //
 //                                                     //
 // --------------------------------------------------- //
 //                                                     //
 // Usage:                                              //
 //                                                     //
-// >> ./GetLuminosity path_to_file                     //
-// >> ./GetLuminosity path_to_file1 path_to_file2      //
-// >> ./GetLuminosity path_to_file1 path_to_file2      //
+// >> ./getLuminosity path_to_file                     //
+// >> ./getLuminosity path_to_file1 path_to_file2      //
+// >> ./getLuminosity path_to_file1 path_to_file2      //
 //    tree_path branch_path                            // 
 //                                                     //
 // --------------------------------------------------- //

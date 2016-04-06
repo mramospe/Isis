@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                  //
 #//  e-mail: miguel.ramos.pernas@cern.ch                          //
 #//                                                               //
-#//  Last update: 07/09/2015                                      //
+#//  Last update: 06/04/2016                                      //
 #//                                                               //
 #// ------------------------------------------------------------- //
 #//                                                               //
@@ -16,7 +16,7 @@
 #//  Allows to change a given word in a file or recursively in a  //
 #//  directory:                                                   //
 #//                                                               //
-#//  python ChangeWords.py file input_word output_word            //
+#//  python changeWords.py file input_word output_word            //
 #//                                                               //
 #// ------------------------------------------------------------- //
 #///////////////////////////////////////////////////////////////////

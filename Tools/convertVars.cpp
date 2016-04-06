@@ -9,13 +9,13 @@
 //  AUTHOR : Miguel Ramos Pernas                                            //
 //  e-mail: miguel.ramos.pernas@cern.ch                                     //
 //                                                                          //
-//  Last Update: 09/12/2015                                                 //
+//  Last Update: 06/04/2016                                                 //
 //                                                                          //
 // ------------------------------------------------------------------------ //
 //                                                                          //
 // Usage:                                                                   //
 //                                                                          //
-// >> ./ConvertVars.out OutputFileName InputFileName InputTreePath VarType  //
+// >> ./convertVars.out OutputFileName InputFileName InputTreePath VarType  //
 //                                                                          //
 // ------------------------------------------------------------------------ //
 //////////////////////////////////////////////////////////////////////////////
