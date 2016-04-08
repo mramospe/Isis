@@ -420,27 +420,32 @@ class DataManager:
         ''' Prints the information of the class as well as the values for the first 20
         events. If < events > is introduced as an input, the number of events showed
         would be that specified by the user. If < cut > is specified only will be
-        showed the events that statisfy the given cut. If < name > is specified this
-        name is going to be printed before the other information. '''
-
-        if 'cut' not in kwargs:
-            kwargs[ 'cut' ] = False
-        if 'events' not in kwargs:
-            kwargs[ 'events' ] = False
-        if 'variables' not in kwargs:
-            kwargs[ 'variables' ] = self.Variables.keys()
-            kwargs[ 'variables' ].sort()
-
-        max_length = 0
-        for var in kwargs[ 'variables' ]:
-            lvar = len( var )
-            if lvar > max_length:
-                max_length = lvar
-
+        showed the events that statisfy the given cut. If < prec > is given, the
+        number of decimal points it sets to this value. '''
+        
+        if not self.Variables:
+            print 'ERROR:', self.Name, '=> No variables booked in this manager'
+            return
+        
+        if 'cut' in kwargs: cut = kwargs[ 'cut' ]
+        else: cut = False
+        if 'events' in kwargs: events = kwargs[ 'events' ]
+        else: events = False
+        if 'prec' in kwargs: prec = kwargs[ 'prec' ]
+        else: prec = 3
+        form = '%.' + str( prec ) + 'e'
+        if prec:
+            prec += 1
+        
+        ''' If no variables are specified all are printed '''
+        if not args:
+            args = self.Variables.keys()
+        args.sort()
+        
         ''' Prints the name of the manager '''
         if self.Name:
-            lname = len( self.Name )
-            print '\n' + 3*lname*'*' + '\n' + lname*' ' + self.Name + '\n' + 3*lname*'*'
+            lname = 3*len( self.Name )
+            print '\n' + lname*'*' + '\n' + self.Name.center( lname ) + '\n' + lname*'*'
         
         ''' Prints the targets '''
         if self.Targets:
@@ -451,46 +456,52 @@ class DataManager:
                     out += tree.GetName() + ', '
                 print out[ :-2 ]
 
-        ''' Prints the variables '''
-        if self.Variables:
-            vout      = ' '
-            variables = []
-            if len( args ):
-                variables = args
-                for var in args:
-                    vout      += var + ', '
+        ''' Prints the variables. The variable < maxsize > is the maximum size of the
+        numbers in the print '''
+        maxsize   = 7 + prec
+        vout      = ' '
+        shortvars = []
+        for var in args:
+            vout += var + ', '
+            if len( var ) > maxsize:
+                shortvars.append( var[ :maxsize ] + '*' )
             else:
-                for var in kwargs[ 'variables' ]:
-                    variables.append( var )
-                    vout      += var + ', '
-            print '\nVariables:' + vout[ :-2 ] + '\n'
-
-            ''' Prints the values of the variables '''
-            vout = ' '
-            for var in variables:
-                vout += '%.3e' + '\t|\t'
-            vout = vout[ :-2 ]
-
-            if kwargs[ 'cut' ]:
-                evlist = self.GetCutList( kwargs[ 'cut' ] )
-            else:
-                evlist = range( self.Nentries )
-
-            if kwargs[ 'events' ]:
-                i = 0
-                for ievt in evlist:
-                    if i == kwargs[ 'events' ]: break
-                    i += 1
-                    print vout % self.GetEventTuple( ievt, *variables )
-            else:
-                for ievt in evlist:
-                    if ievt and ievt % 20 == 0:
-                        if raw_input(
-                            '< Introduce q to exit, and any other input to continue printing >: '
-                            ) == 'q': break
-                    print vout % self.GetEventTuple( ievt, *variables )
+                shortvars.append( var.center( maxsize ) )
+        print 'Variables:' + vout[ :-2 ]
+        vout = '| '
+        for var in shortvars:
+            vout += var.center( maxsize ) + ' |'
+        deco = len( vout )*'='
+        print deco + '\n' + vout + '\n' + deco
+        
+        ''' Prints the values of the variables '''
+        if cut:
+            evtlst = self.GetCutList( cut )
         else:
-            print 'ERROR: No variables booked in this manager'
+            evtlst = xrange( self.Nentries )
+
+        if events:
+            i = 0
+            for ievt in evtlst:
+                if i == events: break
+                i += 1
+                vout = '| '
+                for var in self.GetEventTuple( ievt, *args ):
+                    vout += ( form %var ).rjust( maxsize ) + ' |'
+                print vout
+            print deco + '\n'
+        else:
+            for ievt in evtlst:
+                if ievt and ievt % 20 == 0:
+                    if raw_input(
+                        '< Introduce q to exit, and any other input to continue printing >: '
+                        ) == 'q': break
+                vout = '| '
+                for var in self.GetEventTuple( ievt, *args ):
+                    vout += ( form %var ).rjust( maxsize ) + ' |'
+                print vout
+            if ievt + 1 == len( evtlst ):
+                print deco + '\n'
 
     def RemoveVariable( self, var ):
         ''' Removes a booked variable '''
@@ -544,13 +555,8 @@ class DataManager:
         of this method take a look at the function < DictFromTxt >. '''
         if not tnames and not kwargs:
             tnames = self.Variables.keys()
-        dict2add = DictFromTxt( fname, tnames, **kwargs )
-        self.AddDataFromDict( dict2add )
-        
-        print 'WARNING:', self.Name, '=> Variable <', var, '> not in the manager; not stored'
-        print 'Storing', len( columns ), 'variables from txt file <', fname, '>'
-        self.Nentries = len( self.Variables[ self.Variables.keys()[ 0 ] ] )
-        ifile.close()
+        self.AddDataFromDict( DictFromTxt( fname, tnames, **kwargs ) )
+        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
 
 #_______________________________________________________________________________
 # If the input is a string, returns an array with values of a certain type
@@ -632,7 +638,7 @@ def DictFromTxt( fname, tnames = [], **kwargs ):
         columns = range( len( line ) )
     if all( isinstance( line[ i ], str ) for i in columns ):
         if tnames:
-            columns = [ columns[ i ] for i in columns if tnames[ i ] == line[ i ] ]
+            columns = [ columns[ i ] for i in columns if line[ i ] in tnames ]
         else:
             tnames = [ line[ i ] for i in columns ]
         line = ifile.readline().split()
@@ -646,7 +652,6 @@ def DictFromTxt( fname, tnames = [], **kwargs ):
         elif len( tnames ) != len( columns ):
             print 'ERROR: The names of the variables and the column index must match'
             return
-    print 'Storing', len( columns ), 'variables from txt file <', fname, '>'
     convfuncs, varvalues = [], []
     for index, icol in enumerate( columns ):
         value = line[ icol ]
