@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 22/03/2016                                //
+#//  Last update: 08/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -40,34 +40,34 @@ def CalcMinDist( lst ):
 # quantities is zero, it is not displayed.
 def FormatTime( itime ):
     conv  = [ 60, 60, 24, 7 ]
-    vlist = [ "s", "min", "h", "d", "w" ]
-    vals  = { "s": itime, "min": 0, "h": 0, "d": 0, "w": 0 }
+    vlist = [ 's', 'min', 'h', 'd', 'w' ]
+    vals  = { 's': itime, 'min': 0, 'h': 0, 'd': 0, 'w': 0 }
     for cval, nunit, ounit in zip( conv, vlist[ 1: ], vlist[ :-1 ] ):
         vals[ nunit ], vals[ ounit ] = divmod( int( vals[ ounit ] ), cval )
     vlist.reverse()
-    strout = ""
+    strout = ''
     for kw in vlist:
         val = vals[ kw ]
         if val:
-            strout += str( vals[ kw ] ) + kw + " "
+            strout += str( vals[ kw ] ) + kw + ' '
     if strout:
         return strout[ :-1 ]
     else:
-        return "0s"
+        return '0s'
 
 #_______________________________________________________________________________
 # This function allows to format a given expression in such a way that takes
 # into account the mathematical functions and the logical operators. The module
 # containing the mathematical functions can be specified.
 def FormatEvalExpr( expr, mathmod = math ):
-    expr      = expr.replace( "&&" , "and"  )
-    expr      = expr.replace( "||" , "or"   )
-    expr      = expr.replace( "abs", "fabs" )
+    expr      = expr.replace( '&&' , 'and'  )
+    expr      = expr.replace( '||' , 'or'   )
+    expr      = expr.replace( 'abs', 'fabs' )
     variables = expr
     variables = variables.replace( ' ', '' )
     for el in ( '==', '!=', '<=', '>=', '>', '<',
                 'and', 'or', '(', ')',
-                "*", "/" ):
+                '*', '/' ):
         variables = variables.replace( el, '|' )
     ''' This lines allow the management of float values given with an < e/E > '''
     if variables[ 0 ] in ( '+', '-' ):
@@ -75,9 +75,9 @@ def FormatEvalExpr( expr, mathmod = math ):
     i, n = 1, len( variables )
     while ( i != n ):
         el = variables[ i ]
-        if el in ( "+", "-" ):
+        if el in ( '+', '-' ):
             el = variables[ i - 1 ]
-            if el != "e" and el != "E":
+            if el != 'e' and el != 'E':
                 variables = variables[ :i ] + '|' + variables[ i + 1: ]
             else:
                 i += 1
@@ -89,7 +89,7 @@ def FormatEvalExpr( expr, mathmod = math ):
         variables.remove( '' )
     truevars = []
     flist    = dir( mathmod )
-    mathmod  = mathmod.__name__ + "."
+    mathmod  = mathmod.__name__ + '.'
     for el in variables:
         try:
             float( el )
@@ -122,7 +122,7 @@ def InferValue( x, y, x0, nord = False ):
             nord += 1
         else:
             nord = lp
-            print "WARNING: Order greater than the number of points. Value set to", lp
+            print 'WARNING: Order greater than the number of points. Value set to', lp
     else:
         nord = lp
 
@@ -166,7 +166,7 @@ def JoinDicts( *args ):
         for key in dic:
             if key in rdict:
                 del rdict[ key ]
-                print "Key <", key, "> already in dictionary. Not considered."
+                print 'WARNING: Key <', key, '> already in dictionary. Not considered.'
             else:
                 rdict[ key ] = dic[ key ]
     return rdict
@@ -186,7 +186,7 @@ def LargestString( lstdic ):
             newlen = len( lstdic[ kw ] )
             if newlen > maxlen: maxlen = newlen
     else:
-        print "The input parameter is not a list nor a dictionary, returned 0"
+        print 'The input parameter is not a list nor a dictionary, returned 0'
     return maxlen
 
 #_______________________________________________________________________________
@@ -196,9 +196,9 @@ def LargestString( lstdic ):
 # equal to it will also be considered. By default the output list is given
 # given sorted, and this behaviour is managed trough the < sort > variable.
 def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
-    if "sort" in kwargs: sort = kwargs[ "sort" ]
+    if 'sort' in kwargs: sort = kwargs[ 'sort' ]
     else: sort = True
-    if "nbr" in kwargs: nbr = kwargs[ "nbr" ]
+    if 'nbr' in kwargs: nbr = kwargs[ 'nbr' ]
     else: nbr = True
     order = zip( lst, xrange( len( lst ) ) )
     order.sort()
@@ -243,13 +243,13 @@ def MergeDicts( *args ):
     return rdic
 
 #_______________________________________________________________________________
-# Given a list and a pattern ( with elements separated by "*" symbols ) it
+# Given a list and a pattern ( with elements separated by '*' symbols ) it
 # returns another list with those that satisfy it.
 def StringListFilter( lst, pattern ):
-    pattern = pattern.split( "*" )
+    pattern = pattern.split( '*' )
     checkstart, checkend = False, False
-    while "" in pattern:
-        pos = pattern.index( "" )
+    while '' in pattern:
+        pos = pattern.index( '' )
         if pos:
             del pattern[ pos ]
             checkstart = True
@@ -293,9 +293,9 @@ class StrNumGenerator:
         if not end:
             start, end = 0, start
         elif end < start:
-            print "ERROR: The starting number has to be greater than the ending"
+            print 'ERROR: The starting number has to be greater than the ending'
         if end < 0 or start < 0:
-            print "ERROR: Input parameters have to be both positive"
+            print 'ERROR: Input parameters have to be both positive'
         self.CurrIter  = start
         self.MaxIter   = end
         self.MaxStrLen = len( str( end ) )
@@ -312,7 +312,7 @@ class StrNumGenerator:
             citer  = str( self.CurrIter )
             lciter = len( citer ) + 1
             self.CurrIter += 1
-            return ( self.MaxStrLen - lciter )*"0" + citer
+            return ( self.MaxStrLen - lciter )*'0' + citer
 
 #_______________________________________________________________________________
 # Returns the values of the height and width of the terminal
