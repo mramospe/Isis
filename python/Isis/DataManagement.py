@@ -66,26 +66,26 @@ class DataManager:
                 else:
                     ftype = 'root'
 
-                ''' This is the constructor for Root files '''
                 if ftype in ( 'root', 'Root', 'ROOT' ):
+                    ''' This is the constructor for Root files '''
                     if ifile and tnames:
                         self.AddTarget( ifile, tnames )
                     elif ifile and not tnames:
                         print 'WARNING: Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
-                
-                ''' This is the constructor for txt files '''
+
                 elif ftype in ( 'txt', 'TXT' ):
+                    ''' This is the constructor for txt files '''
                     if ifile and tnames:
                         self.StoreTxtData( ifile, tnames, **kwargs )
                     elif ifile and not tnames:
                         print 'WARNING: Arguments for DataManager class using txt files are < file path > and < variables names >'
                 
-                ''' If the type specified is not recognised a warning message is sent '''
                 else:
+                    ''' If the type specified is not recognised a warning message is sent '''
                     print 'WARNING: File format <', ftype, '> for DataManager class not known'
             
-            ''' This is the constructor using a dictionary (the ftype value is omitted) '''
             else:
+                ''' This is the constructor using a dictionary (the ftype value is omitted) '''
                 self.AddDataFromDict( ifile )
 
         for kw in kwargs:
