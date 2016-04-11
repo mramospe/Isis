@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 08/04/2016                                //
+#//  Last update: 11/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -22,7 +22,6 @@
 
 from ROOT import TFile, TTree, gDirectory
 from array import array
-from copy import deepcopy
 import math
 from Isis.Algebra import LongVector, Matrix
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
@@ -55,7 +54,7 @@ class DataManager:
         self.Variables   = {}
 
         ''' The constructor starts here '''
-        if name:
+        if name != False:
             self.Name = name
             ''' First check if < ifile > is a string or if it can be used as a dictionary'''
             if isinstance( ifile, str ):
@@ -76,7 +75,7 @@ class DataManager:
                 elif ftype in ( 'txt', 'TXT' ):
                     ''' This is the constructor for txt files '''
                     if ifile and tnames:
-                        self.StoreTxtData( ifile, tnames, **kwargs )
+                        self.AddDataFromTxt( ifile, tnames, **kwargs )
                     elif ifile and not tnames:
                         print 'WARNING: Arguments for DataManager class using txt files are < file path > and < variables names >'
                 
@@ -93,27 +92,27 @@ class DataManager:
 
     def __add__( self, other ):
         ''' Allows merging two objects of this class. The new manager owns all the targets. '''
-        mngr          = DataManager()
-        mngr.Nentries = self.Nentries + other.Nentries
-        mngr.Targets.update( self.Targets  )
-        mngr.Targets.update( other.Targets )
+        mgr          = DataManager()
+        mgr.Nentries = self.Nentries + other.Nentries
+        mgr.Targets.update( self.Targets  )
+        mgr.Targets.update( other.Targets )
         true_vars = [ var for var in self.Variables if var in other.Variables ]
         for var in true_vars:
-            mngr.Variables[ var ] = self.Variables[ var ] + other.Variables[ var ]
+            mgr.Variables[ var ] = self.Variables[ var ] + other.Variables[ var ]
         self.OwnsTargets  = False
         other.OwnsTargets = False
-        mngr.Name = self.Name + '+' + other.Name
-        return mngr
+        mgr.Name = self.Name + '+' + other.Name
+        return mgr
 
     def __iadd__( self, other ):
         ''' Allows adding another manager variables to this class. The manager added
         looses the possession of the targets. '''
         if self.Nentries:
-            mngr = self + other
+            mgr = self + other
             other.OwnsTargets = False
             return self + other
         else:
-            self = deepcopy( other )
+            self = other.Copy()
             other.OwnsTargets = False
 
     def __del__( self ):
@@ -146,12 +145,12 @@ class DataManager:
         else:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
-
+    
     def AddDataFromDict( self, dict2add ):
         ''' Adds data from a dictionary of lists. First checks that all the lists in the
         dictionary have the same size. Then a check is made to see if some variables are
         present in the current manager. If so, all of them have to be present. '''
-        lgth = len( dict2add.itervalues().next() )
+        lgth = len( next( dict2add.itervalues() ) )
         if not all( len( values ) == lgth for kw, values in dict2add.iteritems() ):
             print 'WARNING:', self.Name, '=> The lists to add have not got the same size. Data not merged.'
             return
@@ -171,6 +170,14 @@ class DataManager:
         else:
             self.Variables = dict2add
             self.Nentries  = lgth
+
+    def AddDataFromTxt( self, fname, tnames = [], **kwargs ):
+        ''' Method to store the values almacenated on a txt file. To see the functionality
+        of this method take a look at the function < DictFromTxt >. '''
+        if not tnames and not kwargs:
+            tnames = self.Variables.keys()
+        self.AddDataFromDict( DictFromTxt( fname, tnames, **kwargs ) )
+        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
 
     def AddTarget( self, fname, tnames ):
         ''' Adds a new target file and/or tree to the class. One has to provide the file
@@ -226,27 +233,33 @@ class DataManager:
         else:
             print 'WARNING: No targets added to the manager, could not book variables:', var_names
 
-    def Copy( self, *args, **kwargs ):
-        ''' Returns a copy of this class that does not own the targets. '''
-        if 'cuts' in kwargs: cmngr = self.CutSample( kwargs[ 'cuts' ] )
-        else: cmngr = self
-        if args: variables = args
-        else: variables = cmngr.Variables.keys()
-        mngr = DataManager()
-        for v in variables:
-            mngr.Variables[ v ] = deepcopy( cmngr.Variables[ v ] )
-        mngr.Nentries = cmngr.Nentries
-        return mngr
-
+    def Copy( self, name = '', **kwargs ):
+        ''' Returns a copy of this class that does not own the targets. A set of cuts can be
+        specified. The range of the events to be copied can be specified (as a slice object),
+        as well as the variables to be copied. By default the entire class is copied. '''
+        if 'cuts' in kwargs: cmgr = self.CutSample( kwargs[ 'cuts' ] )
+        else: cmgr = DataManager( name, self.Variables )
+        if 'evts' in kwargs: evts = kwargs[ 'evts' ]
+        else: evts = slice( 0, self.Nentries )
+        if 'varset' in kwargs: varset = kwargs[ 'varset' ]
+        else: varset = cmgr.Variables.keys()
+        for v in cmgr.Variables.keys():
+            if v in varset:
+                cmgr.Variables[ v ] = cmgr.Variables[ v ][ evts ]
+            else:
+                del cmgr.Variables[ v ]
+        cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
+        return cmgr
+    
     def CutSample( self, cut ):
         ''' Returns another DataManager based on the events that satisfy the cuts given.
         The targets are not transfered to the new class. '''
-        mngr     = DataManager()
+        mgr      = DataManager()
         add_list = self.GetCutList( cut )
         for kw, vlist in self.Variables.iteritems():
-            mngr.Variables[ kwvar ] = [ vlist[ i ] for i in add_list ]
-        mngr.Nentries = len( add_list )
-        return mngr
+            mgr.Variables[ kwvar ] = [ vlist[ i ] for i in add_list ]
+        mgr.Nentries = len( add_list )
+        return mgr
 
     def CloseFiles( self ):
         ''' Closes all the target files if they are owned by the class '''
@@ -410,7 +423,7 @@ class DataManager:
             self.Variables[ varname ] = self.GetVarEvents( arg )
 
     def NewEvent( self, dic ):
-        ''' Adds a new event to the manager. A value for all the variables has to be
+        ''' Adds a new event to the manager. Values for all the variables have to be
         provided. '''
         for key, values in self.Variables.iteritems():
             values.append( dic[ key ] )
@@ -549,14 +562,6 @@ class DataManager:
                 ofile.write( out[ :-1 ] + '\n' )
             if close: ofile.close()
             else: return ofile
-
-    def StoreTxtData( self, fname, tnames = [], **kwargs ):
-        ''' Method to store the values almacenated on a txt file. To see the functionality
-        of this method take a look at the function < DictFromTxt >. '''
-        if not tnames and not kwargs:
-            tnames = self.Variables.keys()
-        self.AddDataFromDict( DictFromTxt( fname, tnames, **kwargs ) )
-        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
 
 #_______________________________________________________________________________
 # If the input is a string, returns an array with values of a certain type
