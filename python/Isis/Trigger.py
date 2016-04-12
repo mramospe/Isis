@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                                              //
 #//  e-mail: miguel.ramos.pernas@cern.ch                                      //
 #//                                                                           //
-#//  Last update: 29/01/2016                                                  //
+#//  Last update: 12/04/2016                                                  //
 #//                                                                           //
 #// --------------------------------------------------------------------------//
 #//                                                                           //
@@ -227,7 +227,7 @@ class Trigger:
         for cut in self.CutList:
             cut       = self.Cuts[ cut ]
             toceff    = new_nevts
-            mngr      = mngr.CutSample( cut )
+            mngr      = mngr.SubSample( cuts = cut )
             new_nevts = self.GetTrueEvents( mngr )
             ''' This print corresponds to the cut, the efficiency of the trigger
             after it and the efficiency of the cut '''
@@ -355,9 +355,9 @@ class Trigger:
             for kw in self.SigMngr:
                 self.CutSigMngr[ kw ] = self.SigMngr[ kw ].Copy()
         else:
-            self.CutMiBMngr = self.MiBMngr.CutSample( cut )
+            self.CutMiBMngr = self.MiBMngr.SubSample( cuts = cut )
             for kw in self.SigMngr:
-                self.CutSigMngr[ kw ] = self.SigMngr[ kw ].CutSample( cut )
+                self.CutSigMngr[ kw ] = self.SigMngr[ kw ].SubSample( cuts = cut )
         self.Prepared = True
 
     def Print( self ):

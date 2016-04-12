@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 22/03/2016                                   //
+#//  Last update: 12/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -274,7 +274,7 @@ def MultiPlot( mngrs, variables, **kwargs):
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
             for i in xrange( nmngrs ):
-                mngrs[ i ], mngrs[ i ].Name = mngrs[ i ].CutSample( cuts ), mngrs[ i ].Name
+                mngrs[ i ], mngrs[ i ].Name = mngrs[ i ].SubSample( cuts = cuts ), mngrs[ i ].Name
 
         ''' Disables the stat box of the histograms '''
         gStyle.SetOptStat( 0 )

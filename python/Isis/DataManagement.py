@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 11/04/2016                                //
+#//  Last update: 12/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -70,18 +70,18 @@ class DataManager:
                     if ifile and tnames:
                         self.AddTarget( ifile, tnames )
                     elif ifile and not tnames:
-                        print 'WARNING: Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
+                        print 'WARNING:', self.Name, 'Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
 
                 elif ftype in ( 'txt', 'TXT' ):
                     ''' This is the constructor for txt files '''
                     if ifile and tnames:
                         self.AddDataFromTxt( ifile, tnames, **kwargs )
                     elif ifile and not tnames:
-                        print 'WARNING: Arguments for DataManager class using txt files are < file path > and < variables names >'
+                        print 'WARNING:', self.Name, '=> Arguments for DataManager class using txt files are < file path > and < variables names >'
                 
                 else:
                     ''' If the type specified is not recognised a warning message is sent '''
-                    print 'WARNING: File format <', ftype, '> for DataManager class not known'
+                    print 'WARNING:', self.Name, '=> File format <', ftype, '> for DataManager class not known'
             
             else:
                 ''' This is the constructor using a dictionary (the ftype value is omitted) '''
@@ -231,36 +231,15 @@ class DataManager:
             self.Variables.update( MergeDicts( *dictlist ) )
             self.Nentries  = len( self.Variables[ name ] )
         else:
-            print 'WARNING: No targets added to the manager, could not book variables:', var_names
+            print 'WARNING: ', self.Name, '=> No targets added to the manager, could not book variables:', var_names
 
-    def Copy( self, name = '', **kwargs ):
-        ''' Returns a copy of this class that does not own the targets. A set of cuts can be
-        specified. The range of the events to be copied can be specified (as a slice object),
-        as well as the variables to be copied. By default the entire class is copied. '''
-        if 'cuts' in kwargs: cmgr = self.CutSample( kwargs[ 'cuts' ] )
-        else: cmgr = DataManager( name, self.Variables )
-        if 'evts' in kwargs: evts = kwargs[ 'evts' ]
-        else: evts = slice( 0, self.Nentries )
-        if 'varset' in kwargs: varset = kwargs[ 'varset' ]
-        else: varset = cmgr.Variables.keys()
-        for v in cmgr.Variables.keys():
-            if v in varset:
-                cmgr.Variables[ v ] = cmgr.Variables[ v ][ evts ]
-            else:
-                del cmgr.Variables[ v ]
-        cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
-        return cmgr
+    def Copy( self, name = '' ):
+        ''' Returns a copy of this class that does not own the targets. This method is meant to
+        generate a copy with no other requirement. '''
+        if not name:
+            name = self.Name + '_copy'
+        return DataManager( name, self.Variables )
     
-    def CutSample( self, cut ):
-        ''' Returns another DataManager based on the events that satisfy the cuts given.
-        The targets are not transfered to the new class. '''
-        mgr      = DataManager()
-        add_list = self.GetCutList( cut )
-        for kw, vlist in self.Variables.iteritems():
-            mgr.Variables[ kwvar ] = [ vlist[ i ] for i in add_list ]
-        mgr.Nentries = len( add_list )
-        return mgr
-
     def CloseFiles( self ):
         ''' Closes all the target files if they are owned by the class '''
         if self.OwnsTargets:
@@ -270,7 +249,7 @@ class DataManager:
                 ifile.Close()
                 del self.Targets[ ifile ]
         else:
-            print 'WARNING: This DataManager does not own its targets'
+            print 'WARNING:', self.Name, 'This DataManager does not own its targets'
 
     def GetCutList( self, cut ):
         ''' This method allows to obtain a list with the events that satisfy the cuts
@@ -539,17 +518,17 @@ class DataManager:
         if ftype in ( 'root', 'Root', 'ROOT' ):
             if tree_name:
                 ofile = TFile.Open( name, 'RECREATE' )
-                print 'Saving tree with name <', tree_name, '> in <', name, '>'
+                print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
                 TreeFromDict( tree_name, self.Variables )
             else:
-                print ( 'Saving tree with name <', name, '> in <', gDirectory.GetName(), '>' )
+                print self.Name, '=> Saving tree with name <', name, '> in <', gDirectory.GetName(), '>'
                 TreeFromDict( name, self.Variables )
-            print 'Written', self.Nentries, 'entries'
+            print self.Name, '=> Written', self.Nentries, 'entries'
             if close: ofile.Close()
             else: return ofile
         elif ftype in ( 'txt', 'TXT' ):
             ofile = open( name, 'wt' )
-            print 'Saving txt data in file <', name, '>'
+            print self.Name, '=> Saving txt data in file <', name, '>'
             varvalues = [ self.Variables[ var ] for var in variables ]
             out = ''
             for var in variables:
@@ -562,6 +541,34 @@ class DataManager:
                 ofile.write( out[ :-1 ] + '\n' )
             if close: ofile.close()
             else: return ofile
+    
+    def SetName( self, name ):
+        ''' Sets the name of the current manager '''
+        self.Name = name
+
+    def SubSample( self, name = '', **kwargs ):
+        ''' Returns a copy of this class satisfying the given requirements. The new manager will
+        not own the targets. A set of cuts can be specified. The range of the events to be copied
+        can be specified (as a slice object), as well as the variables to be copied. By default
+        the entire class is copied. '''
+        if 'cuts' in kwargs:
+            cmgr    = DataManager()
+            evtlst = self.GetCutList( kwargs[ 'cuts' ] )
+            for kw, vlist in self.Variables.iteritems():
+                cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst ]
+        else:
+            cmgr = self.Copy( name )
+        if 'evts' in kwargs: evts = kwargs[ 'evts' ]
+        else: evts = slice( 0, self.Nentries )
+        if 'varset' in kwargs: varset = kwargs[ 'varset' ]
+        else: varset = cmgr.Variables.keys()
+        for v in cmgr.Variables.keys():
+            if v in varset:
+                cmgr.Variables[ v ] = cmgr.Variables[ v ][ evts ]
+            else:
+                del cmgr.Variables[ v ]
+        cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
+        return cmgr
 
 #_______________________________________________________________________________
 # If the input is a string, returns an array with values of a certain type
