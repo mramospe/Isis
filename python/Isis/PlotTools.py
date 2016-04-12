@@ -28,7 +28,7 @@ from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
 from array import array
 from math import sqrt
 import sys
-from Isis.MathExt import Decompose, GreaterComDiv, IsPrime, IsSquare
+from Isis.MathExt import Decompose, GreaterComDiv, IsPrime, IsSquare, NearestSquare
 
 
 #_______________________________________________________________________________
@@ -250,35 +250,33 @@ def MultiPlot( mngrs, variables, **kwargs):
     else: nbins = 100
     if "norm" in kwargs: norm = kwargs[ "norm" ]
     else: norm = True
-
+    
     nvars   = len( variables ) + 1
     results = {}
     if all( var in mngr.Variables for mngr in mngrs for var in variables ):
         ''' Checks if the number of variables is a square number '''
-        if IsSquare( nvars ):
-            nxvars = int( round( sqrt( nvars ) ) )
+        nstsq = NearestSquare( nvars )
+        nstrt = int( sqrt( nstsq ) )
+        if nstsq >= nvars:
+            nxvars = nstrt
             nyvars = nxvars
         else:
-            nxvars, nyvars = 1, 1
-            if IsPrime( nvars ): decvars = Decompose( nvars + 1 )
-            else:                decvars = Decompose( nvars )
-            for i in xrange( len( decvars ) ):
-                if i % 2: nxvars *= decvars[ i ]
-                else:     nyvars *= decvars[ i ]
-
+            nxvars = nstrt
+            nyvars = nstrt + 1
+        
         ''' Generates and divides the canvas '''
         canvas = TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
-
+        
         nmngrs = len( mngrs )
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
             for i in xrange( nmngrs ):
                 mngrs[ i ], mngrs[ i ].Name = mngrs[ i ].SubSample( cuts = cuts ), mngrs[ i ].Name
-
+        
         ''' Disables the stat box of the histograms '''
         gStyle.SetOptStat( 0 )
-
+        
         ''' Constructs the legend and the information panel if specified '''
         if legend:
             rlegend = TLegend( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
@@ -291,7 +289,7 @@ def MultiPlot( mngrs, variables, **kwargs):
             rtxtinf.SetTextSize( 0.075 )
             rtxtinf.SetFillColor( 42 )
             rtxtinf.SetShadowColor( 0 )
-
+        
         ''' Generates and draws the histograms '''
         for iv, var in enumerate( variables ):
             canvas.cd( iv + 1 )

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 13/12/2015                                   //
+#//  Last update: 12/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -19,7 +19,7 @@
 #////////////////////////////////////////////////////////////////
 
 
-from math import sqrt
+from math import sqrt, floor
 
 
 #_______________________________________________________________________________
@@ -73,3 +73,14 @@ def LeastComMult( *args ):
     while any( cnt % el for el in args ):
         cnt += 1
     return cnt
+
+#_______________________________________________________________________________
+# Calculates the nearest perfect square number to the one given
+def NearestSquare( number ):
+    nfloor  = floor( sqrt( number ) )
+    lowsqrt = nfloor**2
+    upsqrt  = ( nfloor + 1 )**2
+    if number - lowsqrt < upsqrt - number:
+        return round( lowsqrt )
+    else:
+        return round( upsqrt )

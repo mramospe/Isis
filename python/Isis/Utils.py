@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 08/04/2016                                //
+#//  Last update: 12/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -60,9 +60,9 @@ def FormatTime( itime ):
 # into account the mathematical functions and the logical operators. The module
 # containing the mathematical functions can be specified.
 def FormatEvalExpr( expr, mathmod = math ):
-    expr      = expr.replace( '&&' , 'and'  )
-    expr      = expr.replace( '||' , 'or'   )
-    expr      = expr.replace( 'abs', 'fabs' )
+    expr      = expr.replace( '&&' , ' and ' )
+    expr      = expr.replace( '||' , ' or '  )
+    expr      = expr.replace( 'abs', 'fabs'  )
     variables = expr
     variables = variables.replace( ' ', '' )
     for el in ( '==', '!=', '<=', '>=', '>', '<',
