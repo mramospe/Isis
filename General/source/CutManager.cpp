@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 06/04/2016                              //
+//  Last update: 13/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -152,12 +152,9 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	    return std::string();
 	  }
 
+	  // Replaces the cut name by its value
 	  fpos  = fFile.tellg();
-
-	  // The new cut is introduced between parentheses
-	  newcut = "()";
-	  newcut.insert( 1, std::string( this -> GetCut( sstr ) ) );
-	  
+	  newcut = this -> GetCut( sstr );	  
 	  cuts.replace( ifirst, ilast + 1 - ifirst, newcut );
 	  fFile.seekg( fpos );
 	}
@@ -177,7 +174,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
     while ( ( pos = cuts.find( it -> first ) ) != std::string::npos )
       cuts.replace( pos, ( it -> first ).size(), it -> second );
 
-  return cuts;
+  return '(' + cuts + ')';
 }
 
 //_______________________________________________________________________________

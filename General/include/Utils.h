@@ -56,7 +56,7 @@ namespace General {
   //  Whitespaces can be written surrounding < = > symbols too.
   //  No whitespaces can be present between characters in the expression to assign.
   template<typename type>
-  void ParseOpts( std::string opts, const std::string &var, type &value ) {
+  void ParseOpt( std::string opts, const std::string &var, type &value ) {
 
     size_t endpos, pos = opts.find( var );
 
