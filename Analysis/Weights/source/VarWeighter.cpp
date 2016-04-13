@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 11/03/2016                                                       //
+//  Last update: 12/04/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -252,6 +252,10 @@ void Analysis::VarWeighter::CalculateWeights( const double &maxrelerr, const siz
   // If a precision is specified, it displays the map of bins
   if ( prec )
     this -> Print( prec );
+
+  std::cout << "**************************" << std::endl;
+  std::cout << "*** Weights calculated ***" << std::endl;
+  std::cout << "**************************" << std::endl;
 }
 
 //_______________________________________________________________________________

@@ -28,7 +28,7 @@ from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
 from array import array
 from math import sqrt
 import sys
-from Isis.MathExt import Decompose, GreaterComDiv, IsPrime, IsSquare, NearestSquare
+from Isis.MathExt import NearestSquare
 
 
 #_______________________________________________________________________________
