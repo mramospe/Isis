@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 12/04/2016                                   //
+#//  Last update: 14/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -74,15 +74,16 @@ def DrawHistograms( *args, **kwargs ):
     else: drawopt = ''
     if 'norm' in kwargs: norm = kwargs[ 'norm' ]
     else: norm = True
-    imax = [ h.GetMaximum() for h in args ]
+    if norm:
+        imax = [ h.GetMaximum()*1./h.GetSumOfWeights() for h in args ]
+        meth = TH1.DrawNormalized
+    else:
+        imax = [ h.GetMaximum() for h in args ]
+        meth = TH1.Draw
     imax = imax.index( max( imax ) )
     hlst = len( args )*[ 0 ]
     lst  = range( len( args ) )
     lst.remove( imax )
-    if norm:
-        meth = TH1.DrawNormalized
-    else:
-        meth = TH1.Draw
     hlst[ imax ] = meth( args[ imax ], drawopt )
     drawopt += 'SAME'
     for i in lst:
