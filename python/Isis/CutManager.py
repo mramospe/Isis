@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                          //
 #//  e-mail: miguel.ramos.pernas@cern.ch                  //
 #//                                                       //
-#//  Last update: 05/04/2016                              //
+#//  Last update: 14/04/2016                              //
 #//                                                       //
 #// ----------------------------------------------------- //
 #//                                                       //
@@ -97,6 +97,11 @@ class CutManager:
         else:
             print 'WARNING: cut with name <', name, '> does not exist.'
             return False
+
+    def MakeMergedCut( self, joinop = '&&' ):
+        ''' Merges the cuts booked in this class using the given operator '''
+        joinop = ' ' + joinop + ' '
+        return joinop.join( self.CutList.itervalues() )
 
     def Open( self, file_name ):
         ''' Opens a new file and gets its content. In this method the lines are checked to see

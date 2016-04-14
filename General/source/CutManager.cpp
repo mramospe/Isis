@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 13/04/2016                              //
+//  Last update: 14/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -181,11 +181,11 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 // Appends all the cuts in the same string using the given statement (< && > by
 // default)
 std::string General::CutManager::MakeMergedCut( std::string joinop ) {
-  std::string gcut( '(' + fCuts.begin() -> second + ')' );
-  joinop = ' ' + joinop + " (";
+  joinop = ' ' + joinop + ' ';
   auto it = fCuts.begin();
+  std::string gcut( it -> second );
   for ( ++it; it != fCuts.end(); ++it )
-    gcut.append( joinop + it -> second + ')' );
+    gcut.append( joinop + it -> second );
   return gcut;
 }
 
