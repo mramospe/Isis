@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 09/03/2016                              //
+//  Last update: 15/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -21,6 +21,8 @@
 
 
 #include "Utils.h"
+
+#include <algorithm>
 
 
 //_______________________________________________________________________________
@@ -52,6 +54,51 @@ std::string General::CenterString( const std::string &str, const size_t &size ) 
   output += str;
   output += std::string( coc, ' ' );
   return output;
+}
+
+//_______________________________________________________________________________
+// Checks the current expression to see if it can be pased. If a list of strings
+// is given, a check is made to see if all the names in the current expression
+// are contained in such list.
+void General::CheckParseOpts( const std::string              &str,
+			      const std::vector<std::string> &lst ) {
+
+  std::string name, opt;
+  size_t pos;
+
+  // Splits the string to get the different options
+  std::vector<std::string> splt;  
+  General::SplitString( splt, str, ":" );
+
+  // Performs the loop over the splitted options to verify that they are
+  // correctly written
+  for ( auto it = splt.begin(); it != splt.end(); ++it ) {
+    if ( ( pos = it -> find( '=' ) ) != std::string::npos ) {
+      name = it -> substr( 0, pos );
+      opt  = it -> substr( pos + 1 );
+      General::TrimString( name );
+      General::TrimString( opt );
+    }
+    else {
+      name = *it;
+      opt  = std::string();
+      General::TrimString( name );
+      while ( name.front() == '!' )
+	name.erase( name.begin() );
+    }
+    
+    // Checks if the name of the option is in the given list
+    if ( lst.size() && std::find( lst.begin(), lst.end(), name ) == lst.end() )
+      std::cerr << "WARNING: Option for < " << name <<
+	" > not known; check the input options." << std::endl;
+    
+    // Checks if the option given has whitespaces or not
+    if ( opt.find( ' ' ) != std::string::npos ) {
+      std::cerr << "ERROR: Option < " << name << 
+	" > has whitespaces on its value" << std::endl;
+      return;
+    }
+  }
 }
 
 //_______________________________________________________________________________
@@ -127,3 +174,12 @@ void General::SplitString( std::vector<std::string> &output,
   output.push_back( str.substr( pos, str.size() - pos ) );
 }
 
+//_______________________________________________________________________________
+// Trims the given string using < trexpr >. All the elements that match this
+// expression in the front and back of < str > will be removed.
+void General::TrimString( std::string &str, const std::string &trexpr ) {
+  size_t pos = str.find_first_not_of( trexpr );
+  str.erase( 0, pos );
+  pos = str.find_last_not_of( trexpr ) + 1;
+  str.erase( pos );
+}

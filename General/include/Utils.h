@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 13/04/2016                              //
+//  Last update: 15/04/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -37,6 +37,8 @@ namespace General {
   // These are the definitions of different useful functions
   size_t      CalcIntLength( long int integer );
   std::string CenterString( const std::string &str, const size_t &size );
+  void        CheckParseOpts( const std::string              &str,
+			      const std::vector<std::string> &lst = {} );
   void        ParseStringMatch( std::vector<std::string>       &output,
 				const std::vector<std::string> &vector,
 				const std::string              &expr );
@@ -46,6 +48,8 @@ namespace General {
   void        SplitString( std::vector<std::string> &output,
 			   const std::string        &str,
 			   const std::string        &expr );
+  void        TrimString( std::string &str, const std::string &trexpr = " " );
+
 
   //_______________________________________________________________________________
   // This function sets < value > to the assignement given in the expression
@@ -58,36 +62,36 @@ namespace General {
   template<typename type>
   void ParseOpt( std::string opts, const std::string &var, type &value ) {
 
-    size_t endpos, pos = opts.find( var );
+    size_t endpos, pos, varpos = opts.find( var );
 
     // If the variable is not found an error is displayed
-    if ( pos == std::string::npos ) {
+    if ( varpos == std::string::npos ) {
       std::cerr << "ERROR: Could not parse option < " << var <<
 	" >. Key not found." << std::endl;
       return;
     }
   
     // Looks for the end of the current expression
-    endpos = opts.find( ':', pos );
-    if ( pos == std::string::npos )
+    endpos = opts.find( ':', varpos );
+    if ( varpos == std::string::npos )
       endpos = opts.size();
-
-    // If no < = > symbol is found, it is considered that the variable is true
-    pos = opts.find( '=', pos );
+    
+    // If no < = > symbol is found, it is considered that the variable is boolean
+    pos = opts.find( '=', varpos );
     if ( pos >= endpos ) {
       value = true;
+      if ( varpos )
+	while ( opts.at( --varpos ) == '!' ) {
+	  opts.erase( varpos );
+	  value = !value;
+	}
       return;
     }
     ++pos;
   
-    // Gets the string to parse
+    // Gets the string to parse removing the initial and final whitespaces
     opts = opts.substr( pos, endpos - pos );
-
-    // Removes the initial and final whitespaces
-    while ( opts.front() == ' ' )
-      opts.erase( 0 );
-    while ( opts.back() == ' ' )
-      opts.erase( opts.size() - 1 );
+    TrimString( opts );
 
     // If the string to be parsed has whitespaces, an error is sent
     if ( opts.find( ' ' ) != std::string::npos ) {
