@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 14/04/2016                                   //
+#//  Last update: 18/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -59,7 +59,7 @@ class ColorList:
         exception to stop the iteration. '''
         nloop = self.Iter / len( self.Colors )
         niter = self.Iter % len( self.Colors )
-        self.Iter += 1
+        self.Iter += 3
         return self.Colors[ niter ] + nloop
 
 #_______________________________________________________________________________
