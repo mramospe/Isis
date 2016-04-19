@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 12/04/2016                                                       //
+//  Last update: 19/04/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -23,7 +23,7 @@
 
 
 #include "Utils.h"
-#include "Weights/VarWeighter.h"
+#include "VarWeighter.h"
 
 #include "TBranch.h"
 #include "TDirectory.h"

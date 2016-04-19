@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 12/01/2016			                     //
+//  Last update: 19/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -25,7 +25,7 @@
 #ifndef ADAPTIVE_BINNING_1D
 #define ADAPTIVE_BINNING_1D
 
-#include "AdaptiveBinning/AdaptiveBinning.h"
+#include "AdaptiveBinning.h"
 #include "Bin1D.h"
 
 #include "TH1D.h"

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 16/02/2016                                                       //
+//  Last update: 19/04/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Weights/VarBin.h"
+#include "VarBin.h"
 
 #include <iomanip>
 #include <iostream>

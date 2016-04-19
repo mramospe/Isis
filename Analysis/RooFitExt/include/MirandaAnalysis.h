@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 12/01/2016			       //
+//  Last update: 19/04/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -28,7 +28,7 @@
 #ifndef MIRANDA_ANALYSIS
 #define MIRANDA_ANALYSIS
 
-#include "AdaptiveBinning/AdaptiveBinning2D.h"
+#include "AdaptiveBinning2D.h"
 
 #include "TTree.h"
 #include "TLeaf.h"

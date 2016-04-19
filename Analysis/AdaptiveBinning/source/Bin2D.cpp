@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 12/01/2016			                     //
+//  Last update: 19/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -21,7 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#include "AdaptiveBinning/Bin2D.h"
+#include "Bin2D.h"
 
 #include <algorithm>
 

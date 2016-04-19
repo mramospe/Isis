@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                   //
 //  e-mail: miguel.ramos.pernas@cern.ch                                           //
 //                                                                                //
-//  Last update: 17/02/2016                                                       //
+//  Last update: 19/04/2016                                                       //
 //                                                                                //
 // ------------------------------------------------------------------------------ //
 //                                                                                //
@@ -25,7 +25,7 @@
 #ifndef VAR_WEIGHTER
 #define VAR_WEIGHTER
 
-#include "Weights/VarBin.h"
+#include "VarBin.h"
 
 #include "TBranch.h"
 #include "TLeaf.h"

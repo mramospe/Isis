@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 18/02/2016                                                    #
+#  Last update: 19/04/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -19,8 +19,6 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(Isis)
 set(libsuffix .so)
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
 
 #----------------------------------------------------------------------------
 # The root directory can be specified via -DUSER_ROOT_PATH=path when running
@@ -45,6 +43,14 @@ execute_process(
   )
 
 #----------------------------------------------------------------------------
+# Sets the compiler flags
+execute_process(
+  COMMAND ${PROJECT_SOURCE_DIR}/bin/./Isis-config --cflags
+  OUTPUT_VARIABLE CMAKE_CXX_FLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+#----------------------------------------------------------------------------
 # Defines two functions that copy or create a given directory/file only if it
 # does not exist. In the case of files it will also be copied if it is newer
 # than that in the specified path.
@@ -58,6 +64,25 @@ function(self_make_directory dir)
   if(NOT EXISTS ${dir})
     file(MAKE_DIRECTORY ${dir})
   endif()
+endfunction()
+
+#----------------------------------------------------------------------------
+# This function defines the general way to compile the code of a package in
+# the project. In spite of this, one can define another way to perform this
+# task, as long as the library is correctly exported.
+function(self_build_package libname deps)
+  file(GLOB files ${PROJECT_SOURCE_DIR}/include/*)
+  foreach(file ${files})
+    self_copy_file(${file} ${BINARY_INCLUDE_DIR})
+  endforeach()
+  include_directories(${BINARY_INCLUDE_DIR})
+  file(GLOB source ${PROJECT_SOURCE_DIR}/source/*.cpp)
+  set(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/lib/lib${libname}.so)
+  add_library(${libname} SHARED ${source})
+  if(deps)
+    add_dependencies(${libname} ${deps})
+  endif()
+  set(PROJECT_LIBRARIES ${PROJECT_LIBRARIES} ${libname} PARENT_SCOPE)
 endfunction()
 
 #----------------------------------------------------------------------------
@@ -77,41 +102,9 @@ if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
 endif()
 
 #----------------------------------------------------------------------------
-# Defines the way to compile the python source
-set(PYSOURCE ${PROJECT_SOURCE_DIR}/python )
-set(PYBINARY ${PROJECT_BINARY_DIR}/python/Isis)
-add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis ${PYBINARY})
-
-#----------------------------------------------------------------------------
-# Defines the different Analysis packages
-set(ANALYSIS_EXTRA_PKGS Weights AdaptiveBinning RooFitExt)
-set(ANALYSIS_EXTRA_LIBS Wgts    AdBin           RFExt    )
-
-#----------------------------------------------------------------------------
-# Makes the directories for the include files
+# Makes the directory for the include files
 set(BINARY_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include)
 self_make_directory(${BINARY_INCLUDE_DIR})
-foreach(pkg ${ANALYSIS_EXTRA_PKGS})
-  self_make_directory(${BINARY_INCLUDE_DIR}/${pkg})
-  file(GLOB files ${PROJECT_SOURCE_DIR}/Analysis/${pkg}/include/*)
-  foreach(file ${files})
-    self_copy_file(${file} ${BINARY_INCLUDE_DIR}/${pkg})
-  endforeach()
-endforeach()
-
-#----------------------------------------------------------------------------
-# Adds the include files of the main packages
-file(GLOB files ${PROJECT_SOURCE_DIR}/Analysis/Base/include/*)
-foreach(file ${files})
-  self_copy_file(${file} ${BINARY_INCLUDE_DIR})
-endforeach()
-file(GLOB files ${PROJECT_SOURCE_DIR}/General/include/*)
-foreach(file ${files})
-  self_copy_file(${file} ${BINARY_INCLUDE_DIR})
-endforeach()
-
-#----------------------------------------------------------------------------
-# Sets the path to the include directory of the project
 include_directories(${BINARY_INCLUDE_DIR})
 
 #----------------------------------------------------------------------------
@@ -121,44 +114,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 message("-- Output library directory set to: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 #----------------------------------------------------------------------------
-# Sets the compiler flags
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/bin/./Isis-config --cflags
-  OUTPUT_VARIABLE CMAKE_CXX_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-#----------------------------------------------------------------------------
-# Defines how to generate the different libraries of the Isis project
-
-# Specifies the source for the general package
-file(GLOB source ${PROJECT_SOURCE_DIR}/General/source/*.cpp)
-set(General ${PROJECT_BINARY_DIR}/lib/libGeneral.so)
-add_library(General SHARED ${source})
-
-# Initializes the list of libraries of the project
-set(PROJECT_LIBRARIES General)
-
-# Specifies the different analysis folders and library names
-set(ANALYSIS_PKG_NAMES Base     ${ANALYSIS_EXTRA_PKGS})
-set(ANALYSIS_LIB_NAMES Analysis ${ANALYSIS_EXTRA_LIBS})
-list(LENGTH ANALYSIS_PKG_NAMES length)
-math(EXPR length "${length} - 1")
-foreach(index RANGE ${length})
-  list(GET ANALYSIS_PKG_NAMES ${index} folder)
-  list(GET ANALYSIS_LIB_NAMES ${index} lib )
-  file(GLOB source ${PROJECT_SOURCE_DIR}/Analysis/${folder}/source/*.cpp)
-  add_library(${lib} SHARED ${source})
-  list(APPEND PROJECT_LIBRARIES ${lib})
-endforeach()
-
-# Specifies the dependencies for each library
-add_dependencies(Analysis General)
-add_dependencies(Wgts     Analysis)
-add_dependencies(AdBin    Analysis)
-add_dependencies(RFExt    AdBin)
-
-# Reverses the list to properly order de dependences
+# Adds the different main packages of the project. The list of libraries is
+# reversed to avoid linking problems.
+set(PROJECT_LIBRARIES)
+add_subdirectory(General)
+add_subdirectory(Analysis)
+add_subdirectory(python)
 list(REVERSE PROJECT_LIBRARIES)
 
 #----------------------------------------------------------------------------
@@ -166,20 +127,21 @@ list(REVERSE PROJECT_LIBRARIES)
 # .py files to the folder
 self_make_directory(${PROJECT_BINARY_DIR}/Tools)
 set(TOOLS_DIR ${PROJECT_SOURCE_DIR}/Tools)
+self_make_directory(${PROJECT_BINARY_DIR}/Tools)
+file(GLOB ncomptools ${TOOLS_DIR}/*.C ${TOOLS_DIR}/*.py)
+foreach(path ${ncomptools})
+  string(REPLACE ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} script ${path})
+  configure_file(${path} ${script} COPYONLY)
+endforeach()
+
 file(GLOB srctools ${TOOLS_DIR}/*.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Tools)
 foreach(tool ${srctools})
   string(REPLACE ".cpp" ".out" comptool ${tool})
   string(REPLACE ${TOOLS_DIR}/ "" comptool ${comptool})
   add_executable(${comptool} ${tool})
-  target_link_libraries(${comptool} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
   add_dependencies(${comptool} ${PROJECT_LIBRARIES})
-  add_dependencies(Isis-python ${comptool})
-endforeach()
-file(GLOB ncomptools ${TOOLS_DIR}/*.C ${TOOLS_DIR}/*.py)
-foreach(path ${ncomptools})
-  string(REPLACE ${PROJECT_SOURCE_DIR}/ "" script ${path})
-  configure_file(${path} ${script} COPYONLY)
+  target_link_libraries(${comptool} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
 endforeach()
 
 #----------------------------------------------------------------------------
@@ -187,15 +149,18 @@ endforeach()
 # will be compiled.
 if(BUILD_EXAMPLES)
   if(${BUILD_EXAMPLES} STREQUAL "ON")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Examples)
+    message("-- The examples will be built")
     set(EXAMPLES_DIR ${PROJECT_BINARY_DIR}/Examples)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_DIR})
     file(GLOB examples ${EXAMPLES_DIR}/*.cpp)
     foreach(file ${examples})
       string(REPLACE ".cpp" ".out" compfile ${file})
       string(REPLACE ${EXAMPLES_DIR}/ "" compfile ${compfile})
       add_executable(${compfile} ${file})
+      add_dependencies(${compfile} ${PROJECT_LIBRARIES})
       target_link_libraries(${compfile} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
-      add_dependencies(${compfile} Isis-python ${PROJECT_LIBRARIES})
     endforeach()
+  else()
+    message("-- The examples will not be built")
   endif()
 endif()

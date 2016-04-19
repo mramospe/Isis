@@ -2,7 +2,7 @@
 //  Example of generation of ToyMontecarlo samples  //
 //////////////////////////////////////////////////////
 
-#include "RooFitExt/ToyMCgenerator.h"
+#include "ToyMCgenerator.h"
 #include "TFile.h"
 #include "TRandom.h"
 

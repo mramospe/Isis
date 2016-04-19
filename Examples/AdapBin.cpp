@@ -3,8 +3,8 @@
 //  perform analysis of asymmetries bin to bin       //
 ///////////////////////////////////////////////////////
 
-#include "AdaptiveBinning/AdaptiveBinning2D.h"
-#include "RooFitExt/MirandaAnalysis.h"
+#include "AdaptiveBinning2D.h"
+#include "MirandaAnalysis.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
