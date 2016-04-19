@@ -51,15 +51,7 @@ execute_process(
   )
 
 #----------------------------------------------------------------------------
-# Defines two functions that copy or create a given directory/file only if it
-# does not exist. In the case of files it will also be copied if it is newer
-# than that in the specified path.
-function(self_copy_file file, path)
-  get_filename_component(name ${file} NAME)
-  if(NOT EXISTS ${path}/${name} OR ${file} IS_NEWER_THAN ${path}/${name})
-    execute_process(COMMAND cp ${file} ${path}/.)
-  endif()
-endfunction()
+# Defines a function that creates a given directory only if it does not exist
 function(self_make_directory dir)
   if(NOT EXISTS ${dir})
     file(MAKE_DIRECTORY ${dir})
@@ -73,7 +65,10 @@ endfunction()
 function(self_build_package libname deps)
   file(GLOB files ${PROJECT_SOURCE_DIR}/include/*)
   foreach(file ${files})
-    self_copy_file(${file} ${BINARY_INCLUDE_DIR})
+    get_filename_component(name ${file} NAME)
+    if(NOT EXISTS ${BINARY_INCLUDE_DIR}/${name} OR ${file} IS_NEWER_THAN ${BINARY_INCLUDE_DIR}/${name})
+      execute_process(COMMAND cp ${file} ${BINARY_INCLUDE_DIR}/.)
+    endif()
   endforeach()
   include_directories(${BINARY_INCLUDE_DIR})
   file(GLOB source ${PROJECT_SOURCE_DIR}/source/*.cpp)
