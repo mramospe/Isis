@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 19/04/2016			                     //
+//  Last update: 20/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -114,7 +114,56 @@ Analysis::AdaptiveBinning1D::~AdaptiveBinning1D() { }
 //______________________________________________________________________________
 
 
-// -- METHODS
+// -- PUBLIC METHODS
+
+//______________________________________________________________________________
+// Generates a new branch with name < brname > in the tree < itree >, and fills
+// it with the bin corresponding to each event.
+void Analysis::AdaptiveBinning1D::BinsToTree( std::string        brname,
+					      TTree             *itree,
+					      const std::string &datavar ) {
+  int ibin;
+  itree -> SetBranchStatus( "*", false );
+  itree -> SetBranchStatus( datavar.c_str(), true );
+  TH1     *hist   = this -> GetStruct( brname.c_str(), brname.c_str() );
+  TLeaf   *leaf   = itree -> GetLeaf( datavar.c_str() );
+  TBranch *branch = itree -> Branch( brname.c_str(), &ibin, ( brname + "/I" ).c_str() );
+  for ( Long64_t ievt = 0; ievt < itree -> GetEntries(); ++ievt ) {
+    itree -> GetEntry( ievt );
+    ibin = hist -> Fill( leaf -> GetValue() );
+    branch -> Fill();
+  }
+  itree -> AutoSave();
+  itree -> SetBranchStatus( "*", true );
+  delete hist;
+}
+
+//______________________________________________________________________________
+// Returns an histogram with the adaptive bins and filled with the data used to
+// construct it
+TH1D* Analysis::AdaptiveBinning1D::GetHist( const char *name, const char *title ) {
+  TH1D *hist = this -> GetStruct( name, title );
+  for ( auto it = fData.begin(); it != fData.end(); it++ )
+    hist -> Fill( it -> first, it -> second );
+  return hist;
+}
+
+//______________________________________________________________________________
+// Returns an empty histogram with the adaptive binning structure
+TH1D* Analysis::AdaptiveBinning1D::GetStruct( const char *name, const char *title ) {
+ double *bins = new double[ fBinList.size() + 1 ];
+  for ( size_t i = 0; i < fBinList.size(); i++ )
+    bins[ i ] = fBinList[ i ].fMin;
+  bins[ fBinList.size() ] = fBinList.back().fMax;
+  TH1D *hist = new TH1D( name, title, fBinList.size(), bins );
+  delete bins;
+  return hist;
+}
+
+//______________________________________________________________________________
+
+
+// -- PROTECTED METHOD
 
 //______________________________________________________________________________
 // Constructs the vector of one-dimensional adaptive bins
@@ -193,26 +242,4 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
 
   // Displays the information of the process
   this -> DisplayInfo( fData.size(), sw, nbins, sw/nbins );
-}
-
-//______________________________________________________________________________
-// Returns an histogram with the adaptive bins and filled with the data used to
-// construct it
-TH1D* Analysis::AdaptiveBinning1D::GetHist( const char *name, const char *title ) {
-  TH1D *hist = this -> GetStruct( name, title );
-  for ( auto it = fData.begin(); it != fData.end(); it++ )
-    hist -> Fill( it -> first, it -> second );
-  return hist;
-}
-
-//______________________________________________________________________________
-// Returns an empty histogram with the adaptive binning structure
-TH1D* Analysis::AdaptiveBinning1D::GetStruct( const char *name, const char *title ) {
- double *bins = new double[ fBinList.size() + 1 ];
-  for ( size_t i = 0; i < fBinList.size(); i++ )
-    bins[ i ] = fBinList[ i ].fMin;
-  bins[ fBinList.size() ] = fBinList.back().fMax;
-  TH1D *hist = new TH1D( name, title, fBinList.size(), bins );
-  delete bins;
-  return hist;
 }

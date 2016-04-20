@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 19/04/2016			                     //
+//  Last update: 20/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -168,7 +168,7 @@ TH2Poly* Analysis::AdaptiveBinning2D::GetStruct( const char *name, const char *t
 //______________________________________________________________________________
 
 
-// -- PROTECTED METHODS
+// -- PROTECTED METHOD
 
 //______________________________________________________________________________
 // Constructs the vector of two-dimensional adaptive bins
