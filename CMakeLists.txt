@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 19/04/2016                                                    #
+#  Last update: 20/04/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -50,14 +50,35 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
+#============================================================================
+# FUNCTIONS
 #----------------------------------------------------------------------------
-# Defines a function that creates a given directory only if it does not exist
+# This function copies a file only if it does not exist in the output
+# directory or if it is newer than the one existing there.
+function(self_copy_file file, path)
+  get_filename_component(name ${file} NAME)
+  if(NOT EXISTS ${path}/${name} OR ${file} IS_NEWER_THAN ${path}/${name})
+    execute_process(COMMAND cp -r ${file} ${path}/.)
+  endif()
+endfunction()
+#----------------------------------------------------------------------------
+# This function creates a directory only if it does not exist
 function(self_make_directory dir)
   if(NOT EXISTS ${dir})
     file(MAKE_DIRECTORY ${dir})
   endif()
 endfunction()
-
+#----------------------------------------------------------------------------
+# This function creates a directory if it does not exist and copies all its
+# contents. If the output directory already exists, the files that are not
+# present or that are outdated are replaced.
+function(self_copy_directory inputdir outputdir)
+  self_make_directory(${outputdir})
+  file(GLOB files ${inputdir}/*)
+  foreach(file ${files})
+    self_copy_file(${file} ${outputdir})
+  endforeach()
+endfunction()
 #----------------------------------------------------------------------------
 # This function defines the general way to compile the code of a package in
 # the project. In spite of this, one can define another way to perform this
@@ -65,10 +86,7 @@ endfunction()
 function(self_build_package libname deps)
   file(GLOB files ${PROJECT_SOURCE_DIR}/include/*)
   foreach(file ${files})
-    get_filename_component(name ${file} NAME)
-    if(NOT EXISTS ${BINARY_INCLUDE_DIR}/${name} OR ${file} IS_NEWER_THAN ${BINARY_INCLUDE_DIR}/${name})
-      execute_process(COMMAND cp ${file} ${BINARY_INCLUDE_DIR}/.)
-    endif()
+    self_copy_file(${file}, ${BINARY_INCLUDE_DIR})
   endforeach()
   include_directories(${BINARY_INCLUDE_DIR})
   file(GLOB source ${PROJECT_SOURCE_DIR}/source/*.cpp)
@@ -79,6 +97,7 @@ function(self_build_package libname deps)
   endif()
   set(PROJECT_LIBRARIES ${PROJECT_LIBRARIES} ${libname} PARENT_SCOPE)
 endfunction()
+#============================================================================
 
 #----------------------------------------------------------------------------
 # The python folder is created only if the source directory is equal to the
@@ -87,13 +106,9 @@ endfunction()
 if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
   self_make_directory(${PROJECT_BINARY_DIR}/python)
   self_make_directory(${PROJECT_BINARY_DIR}/python/Isis)
-  execute_process(COMMAND cp -r ${PROJECT_SOURCE_DIR}/Examples .)
-  self_make_directory(${PROJECT_BINARY_DIR}/bin)
-  file(GLOB files ${PROJECT_SOURCE_DIR}/bin/*)
-  foreach(infile ${files})
-    string(REPLACE ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} outfile ${infile})
-    configure_file(${infile} ${outfile} COPYONLY)
-  endforeach()
+  self_copy_directory(${PROJECT_SOURCE_DIR}/Tools ${PROJECT_BINARY_DIR}/Tools)
+  self_copy_directory(${PROJECT_SOURCE_DIR}/Examples ${PROJECT_BINARY_DIR}/Examples)
+  self_copy_directory(${PROJECT_SOURCE_DIR}/bin ${PROJECT_BINARY_DIR}/bin)
 endif()
 
 #----------------------------------------------------------------------------
@@ -120,15 +135,7 @@ list(REVERSE PROJECT_LIBRARIES)
 #----------------------------------------------------------------------------
 # Specifies the scripts of the tools to be compiled, and copies the .C and
 # .py files to the folder
-self_make_directory(${PROJECT_BINARY_DIR}/Tools)
 set(TOOLS_DIR ${PROJECT_SOURCE_DIR}/Tools)
-self_make_directory(${PROJECT_BINARY_DIR}/Tools)
-file(GLOB ncomptools ${TOOLS_DIR}/*.C ${TOOLS_DIR}/*.py)
-foreach(path ${ncomptools})
-  string(REPLACE ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} script ${path})
-  configure_file(${path} ${script} COPYONLY)
-endforeach()
-
 file(GLOB srctools ${TOOLS_DIR}/*.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Tools)
 foreach(tool ${srctools})
