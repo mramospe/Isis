@@ -29,7 +29,32 @@ from array import array
 from math import sqrt
 import sys
 from Isis.MathExt import NearestSquare
+from Isis.Utils import CalcMinDist
 
+
+#_______________________________________________________________________________
+# This class is meant to be used together with the < MakeAdaptiveBinningHist >
+# funtion. Basically is a class that stores a minimum value, a maximum and the
+# sum of weights.
+class ABbin:
+    
+    def __init__( self ):
+        ''' By default all the parameters are set to zero '''
+        self.Min          = 0
+        self.Max          = 0
+        self.SumOfWeights = 0
+
+    def SetBin( self, vmin, vmax ):
+        ''' Sets the range of the bin '''
+        self.Min, self.Max = vmin, vmax
+
+    def Fill( self, pos, weight = 1 ):
+        ''' Fills the bin, adding the pertinent weight to the bin '''
+        if pos < self.Min:
+            self.Min = pos
+        elif pos > self.Max:
+            self.Max = pos
+        self.SumOfWeights += weight
 
 #_______________________________________________________________________________
 # This class allows to generate a color list to iter over. The colors are given
@@ -91,6 +116,29 @@ def DrawHistograms( *args, **kwargs ):
     return hlst
 
 #_______________________________________________________________________________
+# Returns the histogram constructor given the type as a string
+def HistByType( tp, dim = 1 ):
+    if tp not in ( 'float', 'double', 'int' ):
+        print "ERROR: Histogram type", tp, "not known"
+        return
+    if dim == 1:
+        if tp == "float":
+            return TH1F
+        elif tp == "double":
+            return TH1D
+        else:
+            return TH1I
+    elif dim == 2:
+        if tp == "float":
+            return TH2F
+        elif tp == "double":
+            return TH2D
+        else:
+            return TH2I
+    else:
+        print "ERROR: Histogram dimension", dim, "not known"
+
+#_______________________________________________________________________________
 # This function imports different plot modules from Root
 def ImportPlotModules():
     glob = sys._getframe( 1 ).f_globals
@@ -113,6 +161,71 @@ def ImportPlotModules():
         glob[ el ] = __import__( "ROOT." + el, glob, loc, [ '*' ] )
 
 #_______________________________________________________________________________
+# This function creates a 1-D adaptive binning histogram given a name, the
+# minimum occupancy value and a list. Adding a list of weights is also possible.
+def MakeAdaptiveBinningHist( name, minocc, values, weights = False, **kwargs ):
+    if 'title' in kwargs: title = kwargs[ 'title' ]
+    else: title = name
+    if 'vmin' in kwargs:
+        vmin   = kwargs[ 'vmin' ]
+        values = [ val for val in values if val >= vmin ]
+    if 'vmax' in kwargs:
+        vmax   = kwargs[ 'vmax' ]
+        values = [ val for val in values if val < vmax ]
+    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
+    else: xtitle = name
+    if 'vtype' in kwargs: histcall = HistByType( kwargs[ 'vtype' ] )
+    else: histcall = TH1D
+    
+    ''' Calculates the minimum distance between points '''
+    length = len( values )
+    delta  = CalcMinDist( values )/2.
+    if weights:
+        sw    = float( sum( weights ) )
+        nbins = int( sw )/minocc
+    else:
+        weights = length*[ 1. ]
+        sw      = float( length )
+        nbins   = length/minocc
+
+    ''' If the occupancy requested is too big, an error message is displayed '''
+    if nbins == 0:
+        print 'ERROR: Occupancy requested is too big:', minocc
+
+    ''' Creates a list with the values and the weights joint and sorts it by the values '''
+    values = zip( values, weights )
+    values.sort()
+    
+    ''' Fills the bins with the data '''
+    binlist = [ ABbin() for i in xrange( nbins ) ]
+    idat, swpb = 0, 0
+    for idf, ib in enumerate( binlist ):
+        swpb = sw/( nbins - idf )
+        while ib.SumOfWeights < swpb and idat < length:
+            ib.Fill( values[ idat ][ 0 ], values[ idat ][ 1 ] )
+            idat += 1
+        sw -= ib.SumOfWeights
+    while idat < length:
+        binlist[ -1 ].Fill( values[ idat ][ 0 ], values[ idat ][ 1 ] )
+
+    ''' Defines the ranges for the bins '''
+    binlist[  0 ].Max += delta
+    binlist[  0 ].Min  = min( values )[ 0 ] - delta
+    binlist[ -1 ].Max  = max( values )[ 0 ] + delta
+    for ib in xrange( 1, nbins - 1 ):
+        binlist[ ib ].SetBin( binlist[ ib - 1 ].Max, binlist[ ib ].Max + delta )
+    binlist[ -1 ].Min = binlist[ -2 ].Max
+    
+    ''' To create the Root histogram, an array of doubles has to be created, with the minimum
+    value for the bins '''
+    bins = array( 'd', ( nbins + 1 )*[ 0. ] )
+    for ib, b in enumerate( binlist ):
+        bins[ ib ] = b.Min
+    bins[ -1 ] = binlist[ -1 ].Max
+    
+    return histcall( name, title, nbins, bins )
+
+#_______________________________________________________________________________
 # Function to generate a Root histogram given a list. By default no ytitle is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
@@ -127,17 +240,11 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
     else: vmax = max( var )
     if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
     else: vmin = min( var )
-    if "vtype" in kwargs: tp = kwargs[ "vtype" ]
-    else: tp = "double"
-    if tp == "float":
-        hist = TH1F( name, title, nbins, vmin, vmax )
-    elif tp == "double":
-        hist = TH1D( name, title, nbins, vmin, vmax )
-    elif tp == "int":
-        hist = TH1I( name, title, nbins, vmin, vmax )
-    else:
-        print "Histogram type", tp, "not known"
-        return
+    if "vtype" in kwargs: histcall = HistByType( kwargs[ "vtype" ] )
+    else: histcall = TH1D
+    
+    hist = histcall( name, title, nbins, vmin, vmax )
+    
     if wvar:
         for el, w in zip( var, wvar ):
             hist.Fill( el, w )
@@ -170,17 +277,11 @@ def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
     else: xmin = min( xvar )
     if "ymin" in kwargs: ymin = kwargs[ "ymin" ]
     else: ymin = min( yvar )
-    if "vtype" in kwargs: tp = kwargs[ "vtype" ]
-    else: tp = "double"
-    if tp == "float":
-        hist = TH2F( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
-    elif tp == "double":
-        hist = TH2D( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
-    elif tp == "int":
-        hist = TH2D( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
-    else:
-        print "Histogram type", tp, "not known"
-        return
+    if "vtype" in kwargs: histcall = HistByType( kwargs[ "vtype" ], 2 )
+    else: histcall = TH2D
+
+    hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
+
     if wvar:
         for x, y, w in zip( xvar, yvar, wvar ):
             hist.Fill( x, y, w )

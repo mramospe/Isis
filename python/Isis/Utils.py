@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 12/04/2016                                //
+#//  Last update: 21/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -26,14 +26,9 @@ from Isis.Algebra import Matrix, SolveLU
 #_______________________________________________________________________________
 # Calculates the minimum distance between values in an iterable object
 def CalcMinDist( lst ):
-    lgth = len( lst )
-    dst  = abs( lst[ 1 ] - lst[ 0 ] )
-    for i in xrange( lgth ):
-        for j in xrange( i + 1, lgth ):
-            newdst = abs( lst[ j ] - lst[ i ] )
-            if newdst < dst:
-                dst = newdst
-    return dst
+    lst = sorted( set( lst ) )
+    lst = [ abs( lst[ i - 1 ] - lst[ i ] ) for i in xrange( 1, len( lst ) ) ]
+    return min( lst )
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
