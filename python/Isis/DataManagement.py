@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 12/04/2016                                //
+#//  Last update: 21/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -342,20 +342,28 @@ class DataManager:
         ''' Makes the histogram of the given variable. A selection can be applied
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
-        if 'name'  not in kwargs:  kwargs[ 'name'  ]  = var
-        if 'title' not in kwargs:  kwargs[ 'title' ]  = var
-        if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = var
         if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
         else: cuts = False
+        if 'name' not in kwargs:
+            name = self.Name + '_' + var
+        else:
+            name = kwargs[ 'name' ]
+            del kwargs[ 'name' ]
+        if 'title' not in kwargs:  kwargs[ 'title' ]  = name
+        if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = var
         var = self.GetVarEvents( var, cuts )
         if wvar:
             wvar = self.GetVarEvents( wvar, cuts )
-        return MakeHistogram( var, wvar, **kwargs )
+        return MakeHistogram( name, var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''
-        if 'name'   not in kwargs: kwargs[ 'name'   ] = xvar + 'vs' + yvar
-        if 'title'  not in kwargs: kwargs[ 'title'  ] = xvar + 'vs' + yvar
+        if 'name'   not in kwargs:
+            name = self.Name + '_' + xvar + '_vs_' + yvar
+        else:
+            name = kwargs[ 'name' ]
+            del kwargs[ 'name' ]
+        if 'title'  not in kwargs: kwargs[ 'title'  ] = name
         if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = xvar
         if 'ytitle' not in kwargs: kwargs[ 'ytitle' ] = yvar
         if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
@@ -364,7 +372,7 @@ class DataManager:
             wvar = self.GetVarEvents( wvar, cuts )
         xvar = self.GetVarEvents( xvar, cuts )
         yvar = self.GetVarEvents( yvar, cuts )
-        return MakeHistogram2D( xvar, yvar, wvar, **kwargs )
+        return MakeHistogram2D( name, xvar, yvar, wvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''

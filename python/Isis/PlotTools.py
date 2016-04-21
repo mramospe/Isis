@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 18/04/2016                                   //
+#//  Last update: 21/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -116,11 +116,9 @@ def ImportPlotModules():
 # Function to generate a Root histogram given a list. By default no ytitle is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
-def MakeHistogram( var, wvar = False, **kwargs ):
-    if "name" in kwargs: name = kwargs[ "name" ]
-    else: name = "hist"
+def MakeHistogram( name, var, wvar = False, **kwargs ):
     if "title" in kwargs: title = kwargs[ "title" ]
-    else: title = "hist"
+    else: title = name
     if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
     else: nbins = 100
     if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
@@ -153,11 +151,9 @@ def MakeHistogram( var, wvar = False, **kwargs ):
 
 #_______________________________________________________________________________
 # Creates a 2-dimensional histogram given two lists
-def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
-    if "name" in kwargs: name = kwargs[ "name" ]
-    else: name = "hist"
+def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
     if "title" in kwargs: title = kwargs[ "title" ]
-    else: title = "hist"
+    else: title = name
     if "xbins" in kwargs: xbins = kwargs[ "xbins" ]
     else: xbins = 100
     if "ybins" in kwargs: ybins = kwargs[ "ybins" ]
@@ -298,8 +294,8 @@ def MultiPlot( mngrs, variables, **kwargs):
             vmin, vmax, hists = min( totlst ), max( totlst ), []
             for im, mngr in enumerate( mngrs ):
                 hname = mngr.Name + "_" + var
-                hists.append( mngr.MakeHistogram( var,
-                                                  name  = hname,
+                hists.append( mngr.MakeHistogram( hname,
+                                                  var,
                                                   title = var,
                                                   nbins = nbins,
                                                   vmin  = vmin,

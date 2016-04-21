@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 22/03/2016                             //
+#//  Last update: 21/04/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -223,8 +223,8 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
             else: vmin = min( smpRef + smpObs )
             if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
             else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
-            smpRef = MakeHistogram( smpRef, name = "ref", nbins = nbins, vmin = vmin, vmax = vmax )
-            smpObs = MakeHistogram( smpObs, name = "obs", nbins = nbins, vmin = vmin, vmax = vmax )
+            smpRef = MakeHistogram( 'ref', smpRef, nbins = nbins, vmin = vmin, vmax = vmax )
+            smpObs = MakeHistogram( 'obs', smpObs, nbins = nbins, vmin = vmin, vmax = vmax )
         else:
             ''' This is what is performed when one works with unbinned distributions '''
             if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
