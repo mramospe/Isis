@@ -33,30 +33,6 @@ from Isis.Utils import CalcMinDist
 
 
 #_______________________________________________________________________________
-# This class is meant to be used together with the < MakeAdaptiveBinningHist >
-# funtion. Basically is a class that stores a minimum value, a maximum and the
-# sum of weights.
-class ABbin:
-    
-    def __init__( self ):
-        ''' By default all the parameters are set to zero '''
-        self.Min          = 0
-        self.Max          = 0
-        self.SumOfWeights = 0
-
-    def SetBin( self, vmin, vmax ):
-        ''' Sets the range of the bin '''
-        self.Min, self.Max = vmin, vmax
-
-    def Fill( self, pos, weight = 1 ):
-        ''' Fills the bin, adding the pertinent weight to the bin '''
-        if pos < self.Min:
-            self.Min = pos
-        elif pos > self.Max:
-            self.Max = pos
-        self.SumOfWeights += weight
-
-#_______________________________________________________________________________
 # This class allows to generate a color list to iter over. The colors are given
 # by < __getitem__ > method or in an iteration process. The number of times the
 # given index is greater than the number of colors in the list, corresponds to
@@ -163,7 +139,7 @@ def ImportPlotModules():
 #_______________________________________________________________________________
 # This function creates a 1-D adaptive binning histogram given a name, the
 # minimum occupancy value and a list. Adding a list of weights is also possible.
-def MakeAdaptiveBinningHist( name, minocc, values, weights = False, **kwargs ):
+def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
     if 'title' in kwargs: title = kwargs[ 'title' ]
     else: title = name
     if 'vmin' in kwargs:
@@ -172,6 +148,8 @@ def MakeAdaptiveBinningHist( name, minocc, values, weights = False, **kwargs ):
     if 'vmax' in kwargs:
         vmax   = kwargs[ 'vmax' ]
         values = [ val for val in values if val < vmax ]
+    else:
+        vmax   = max( values )
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
     if 'vtype' in kwargs: histcall = HistByType( kwargs[ 'vtype' ] )
@@ -180,6 +158,8 @@ def MakeAdaptiveBinningHist( name, minocc, values, weights = False, **kwargs ):
     ''' Calculates the minimum distance between points '''
     length = len( values )
     delta  = CalcMinDist( values )/2.
+
+    ''' Calculates the array of weights '''
     if weights:
         sw    = float( sum( weights ) )
         nbins = int( sw )/minocc
@@ -187,41 +167,40 @@ def MakeAdaptiveBinningHist( name, minocc, values, weights = False, **kwargs ):
         weights = length*[ 1. ]
         sw      = float( length )
         nbins   = length/minocc
-
+    
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
         print 'ERROR: Occupancy requested is too big:', minocc
-
+    
     ''' Creates a list with the values and the weights joint and sorts it by the values '''
     values = zip( values, weights )
     values.sort()
     
     ''' Fills the bins with the data '''
-    binlist = [ ABbin() for i in xrange( nbins ) ]
+    binlist = tuple( [ vmax, 0 ] for i in xrange( nbins ) )
     idat, swpb = 0, 0
     for idf, ib in enumerate( binlist ):
         swpb = sw/( nbins - idf )
-        while ib.SumOfWeights < swpb and idat < length:
-            ib.Fill( values[ idat ][ 0 ], values[ idat ][ 1 ] )
+        while ib[ 1 ] < swpb and idat < length:
+            val, wgt = values[ idat ]
+            if val < ib[ 0 ]:
+                ib[ 0 ] = val
+            ib[ 1 ] += wgt
             idat += 1
-        sw -= ib.SumOfWeights
+        sw -= ib[ 1 ]
     while idat < length:
-        binlist[ -1 ].Fill( values[ idat ][ 0 ], values[ idat ][ 1 ] )
-
+        binlist[ -1 ][ 0 ], binlist[ -1 ][ 1 ] = values[ idat ]
+    
     ''' Defines the ranges for the bins '''
-    binlist[  0 ].Max += delta
-    binlist[  0 ].Min  = min( values )[ 0 ] - delta
-    binlist[ -1 ].Max  = max( values )[ 0 ] + delta
-    for ib in xrange( 1, nbins - 1 ):
-        binlist[ ib ].SetBin( binlist[ ib - 1 ].Max, binlist[ ib ].Max + delta )
-    binlist[ -1 ].Min = binlist[ -2 ].Max
+    for ib in binlist:
+        ib[ 0 ] -= delta
     
     ''' To create the Root histogram, an array of doubles has to be created, with the minimum
     value for the bins '''
     bins = array( 'd', ( nbins + 1 )*[ 0. ] )
-    for ib, b in enumerate( binlist ):
-        bins[ ib ] = b.Min
-    bins[ -1 ] = binlist[ -1 ].Max
+    for i, ib in enumerate( binlist ):
+        bins[ i ] = ib[ 0 ]
+    bins[ -1 ] = max( values )[ 0 ] + delta
     
     return histcall( name, title, nbins, bins )
 
