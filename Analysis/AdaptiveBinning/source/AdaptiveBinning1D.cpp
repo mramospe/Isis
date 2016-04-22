@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 20/04/2016			                     //
+//  Last update: 22/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -61,14 +61,14 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
     while( itv != values -> end() )
       if ( *itv >= vmin && *itv <= vmax )
 	fData.push_back( std::make_pair( *itv++, *itw++ ) );
+    fWeighted = true;
     this -> Construct( occ );
   }
   else {
-    std::vector<double> wvals( values -> size(), 1 );
-    auto itw = wvals.begin();
     while( itv != values -> end() )
       if ( *itv >= vmin && *itv <= vmax )
-	fData.push_back( std::make_pair( *itv++, *itw++ ) );
+	fData.push_back( std::make_pair( *itv++, 1 ) );
+    fWeighted = false;
     this -> Construct( occ );
   }
 }
@@ -177,7 +177,7 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
     sw += it -> second;
 
   // Calculates the minimum distance between events
-  double new_delta, delta = 1;
+  double new_delta, delta = std::abs( fData.front().first - fData.back().first );
   for ( auto it1 = fData.begin(); it1 != fData.end(); it1++ )
     for ( auto it2 = it1 + 1; it2 != fData.end(); it2++ ) {
       new_delta = std::abs( it2 -> first - it1 -> first );
@@ -200,14 +200,18 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   std::sort( fData.begin(), fData.end(), [] ( std::pair<double, double> it1,
 					      std::pair<double, double> it2 ) {
 	       return it1.first < it2.first; } );
+  
   // Depending if it is working with weights or with entries it fills the bins
   auto id = fData.begin();
   if ( fWeighted ) {
-    double swpb = sw/nbins;
-    for ( auto ib = fBinList.begin(); ib != fBinList.end(); ib++, id++ ) {
-      while ( ib -> GetSumOfWeights() < swpb && id != fData.end() )
+    double auxsw = sw, swpb = 0;
+    for ( auto ib = fBinList.begin(); ib != fBinList.end(); ib++ ) {
+      swpb = auxsw/nbins--;
+      while ( ib -> GetSumOfWeights() < swpb && id != fData.end() ) {
 	ib -> Fill( id -> first, id -> second );
-      swpb = ( sw - swpb )/( --nbins );
+	++id;
+      }
+      auxsw -= ib -> GetSumOfWeights();
     }
     // If the end of the data has not been reached, it fills the last bin with the rest of the events
     while ( id != fData.end() )
@@ -215,8 +219,8 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   }
   else {
     size_t
-      enpb = fData.size()/nbins,
-      add1 = fData.size()%nbins;
+      enpb = fData.size() / nbins,
+      add1 = fData.size() % nbins;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ib++ ) {
       if ( add1 ) {
 	while ( ib -> GetEntries() < enpb + 1 )
@@ -228,17 +232,20 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
 	  ib -> Fill( id++ -> first );
     }
   }
-
+  
   // Corrects the first and the last bins so the range is the specified in the constructor
-  fBinList.front().fMin = fMin;
-  fBinList.front().fMax = fBinList.front().fMax + delta;
-  fBinList.back().fMax  = fMax;
-
+  fBinList.front().fMin  = fMin;
+  fBinList.front().fMax += delta;
+  fBinList.back().fMax   = fMax;
+  
   // Sets the different bin limits
   auto itlast = fBinList.end() - 1;
   for ( auto it = fBinList.begin() + 1; it != itlast; it++ )
     it -> SetBin( ( it - 1 ) -> fMax, it -> fMax + delta );
   fBinList.back().fMin = ( fBinList.end() - 2 ) -> fMax;
+
+  //for ( auto it = fBinList.begin(); it != fBinList.end(); it++ )
+  //  std::cout << it -> GetMin() << std::endl;
 
   // Displays the information of the process
   this -> DisplayInfo( fData.size(), sw, nbins, sw/nbins );

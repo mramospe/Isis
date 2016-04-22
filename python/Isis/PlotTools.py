@@ -189,7 +189,8 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         sw -= ib[ 1 ]
     while idat < length:
         binlist[ -1 ][ 0 ], binlist[ -1 ][ 1 ] = values[ idat ]
-        
+        idat += 1
+
     ''' To create the Root histogram, an array of doubles has to be created, with the minimum
     value for the bins '''
     bins = array( 'd', ( nbins + 1 )*[ 0. ] )
