@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 21/04/2016                                   //
+#//  Last update: 22/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -140,6 +140,8 @@ def ImportPlotModules():
 # This function creates a 1-D adaptive binning histogram given a name, the
 # minimum occupancy value and a list. Adding a list of weights is also possible.
 def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
+
+    ''' These are the options that can be passed to the function '''
     if 'title' in kwargs: title = kwargs[ 'title' ]
     else: title = name
     if 'vmin' in kwargs:
@@ -149,17 +151,14 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         vmax   = kwargs[ 'vmax' ]
         values = [ val for val in values if val < vmax ]
     else:
-        vmax   = max( values )
+        vmax   = max( values ) + CalcMinDist( values )/2.
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
     if 'vtype' in kwargs: histcall = HistByType( kwargs[ 'vtype' ] )
     else: histcall = TH1D
     
-    ''' Calculates the minimum distance between points '''
-    length = len( values )
-    delta  = CalcMinDist( values )/2.
-
     ''' Calculates the array of weights '''
+    length = len( values )
     if weights:
         sw    = float( sum( weights ) )
         nbins = int( sw )/minocc
@@ -190,17 +189,13 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         sw -= ib[ 1 ]
     while idat < length:
         binlist[ -1 ][ 0 ], binlist[ -1 ][ 1 ] = values[ idat ]
-    
-    ''' Defines the ranges for the bins '''
-    for ib in binlist:
-        ib[ 0 ] -= delta
-    
+        
     ''' To create the Root histogram, an array of doubles has to be created, with the minimum
     value for the bins '''
     bins = array( 'd', ( nbins + 1 )*[ 0. ] )
     for i, ib in enumerate( binlist ):
         bins[ i ] = ib[ 0 ]
-    bins[ -1 ] = max( values )[ 0 ] + delta
+    bins[ -1 ] = vmax
     
     return histcall( name, title, nbins, bins )
 
