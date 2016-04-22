@@ -90,7 +90,7 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
     TLeaf *wleaf = tree -> GetLeaf( wname );
     for ( long int ievt = 0; ievt < tree -> GetEntries(); ievt++ ) {
       tree -> GetEntry( ievt );
-      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() <= vmax )
+      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
 	fData.push_back( std::make_pair( leaf -> GetValue(), wleaf -> GetValue() ) );
     }
     fWeighted = true;
@@ -99,7 +99,7 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
   else {
     for ( long int ievt = 0; ievt < tree -> GetEntries(); ievt++ ) {
       tree -> GetEntry( ievt );
-      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() <= vmax )
+      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
 	fData.push_back( std::make_pair( leaf -> GetValue(), 1 ) );
     }
     fWeighted = false;
@@ -175,7 +175,7 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   double sw = 0;
   for ( auto it = fData.begin(); it != fData.end(); it++ )
     sw += it -> second;
-
+  
   // Calculates the minimum distance between events
   double new_delta, delta = std::abs( fData.front().first - fData.back().first );
   for ( auto it1 = fData.begin(); it1 != fData.end(); it1++ )
@@ -185,17 +185,17 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
 	delta = new_delta;
     }
   delta /= 2;
-
+  
   // Calculates the number of bins
   size_t nbins = size_t( sw )/occ;
-
+  
   // If the number of bins is zero an error is displayed
   if ( nbins == 0 )
     std::cerr << "ERROR: Occupancy requested is too big: " << occ << std::endl;
-
+  
   // Creates the vector of bins
   fBinList = std::vector<Bin1D>( nbins );
-
+  
   // Sorts the data and the weights
   std::sort( fData.begin(), fData.end(), [] ( std::pair<double, double> it1,
 					      std::pair<double, double> it2 ) {
@@ -205,8 +205,9 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   auto id = fData.begin();
   if ( fWeighted ) {
     double auxsw = sw, swpb = 0;
+    size_t binsout = 0;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ib++ ) {
-      swpb = auxsw/nbins--;
+      swpb = auxsw/( nbins - binsout++ );
       while ( ib -> GetSumOfWeights() < swpb && id != fData.end() ) {
 	ib -> Fill( id -> first, id -> second );
 	++id;
@@ -243,9 +244,6 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   for ( auto it = fBinList.begin() + 1; it != itlast; it++ )
     it -> SetBin( ( it - 1 ) -> fMax, it -> fMax + delta );
   fBinList.back().fMin = ( fBinList.end() - 2 ) -> fMax;
-
-  //for ( auto it = fBinList.begin(); it != fBinList.end(); it++ )
-  //  std::cout << it -> GetMin() << std::endl;
 
   // Displays the information of the process
   this -> DisplayInfo( fData.size(), sw, nbins, sw/nbins );
