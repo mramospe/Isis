@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 19/04/2016			                     //
+//  Last update: 22/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -40,7 +40,7 @@ namespace Analysis {
   public:
     
     // Constructor and destructor
-    Bin1D();
+    Bin1D( const double &vmin );
     ~Bin1D();
 
     // Method
@@ -48,27 +48,24 @@ namespace Analysis {
 
     // Inline methods
     inline const double GetMin() const;
-    inline const double GetMax() const;
 
   protected:
 
     // Attributes
-    double fMax;
     double fMin;
 
     // Method
-    inline void SetBin( const double &vmin, const double &vmax );
+    inline void SetMin( const double &vmin );
 
   };
 
   //_______________
   // INLINE METHODS
 
-  // Methods to return the limit of the bin
+  // Method to return the limit of the bin
   inline const double Bin1D::GetMin() const { return fMin; }
-  inline const double Bin1D::GetMax() const { return fMax; }
   // Sets the limits of the bin to the input values
-  inline void Bin1D::SetBin( const double &vmin, const double &vmax ) { fMin = vmin; fMax = vmax; }
+  inline void Bin1D::SetMin( const double &vmin ) { fMin = vmin; }
 
 }
 

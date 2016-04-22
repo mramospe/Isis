@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 19/04/2016			                     //
+//  Last update: 22/04/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -31,7 +31,7 @@
 
 //______________________________________________________________________________
 // Constructor
-Analysis::Bin1D::Bin1D() : Bin(), fMax( 0 ), fMin( 0 ) { }
+Analysis::Bin1D::Bin1D( const double &vmin ) : Bin(), fMin( vmin ) { }
 
 //______________________________________________________________________________
 // Destructor
@@ -47,8 +47,6 @@ Analysis::Bin1D::~Bin1D() { }
 void Analysis::Bin1D::Fill( const double &pos, const double &weight ) {
   if ( pos < fMin )
     fMin = pos;
-  else if ( pos > fMax )
-    fMax = pos;
   fEntries++;
   fSumOfWeights += weight;
 }
