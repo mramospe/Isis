@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 21/04/2016                             //
+#//  Last update: 25/04/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -22,9 +22,29 @@
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
+from Isis.PlotTools import MakeCumulative, MakeHistogram
 from Isis.Utils import CalcMinDist
 from math import sqrt
 
+
+#_______________________________________________________________________________
+# Calculates the covariance between two lists ( with the same size )
+def Covariance( lst1, lst2 ):
+    m1 = Mean( lst1 )
+    m2 = Mean( lst2 )
+    ex = [ ( v1 - m1 )*( v2 - m2 ) for v1, v2 in zip( lst1, lst2 ) ]
+    return Mean( ex )
+
+#_______________________________________________________________________________
+# Calculates the covariance matrix for a given set of data. The indexes of the
+# data set have to correspond to the values of one of the variables.
+def CovMatrix( data ):
+    nvars     = len( data )
+    covmatrix = Matrix( [ nvars*[ 0. ] for i in xrange( nvars ) ] )
+    for i in xrange( nvars ):
+        for j in xrange( nvars ):
+            covmatrix[ i ][ j ] = Covariance( data[ i ], data[ j ] )
+    return covmatrix
 
 #_______________________________________________________________________________
 # This class allows to generate the linear Fisher discriminant variable given
@@ -68,15 +88,15 @@ class FisherDiscriminant:
     def PlotFisherQuality( self, **kwargs ):
         ''' Plots the histograms of the fisher discriminant values for the two training
         samples '''
-        if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+        if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
         else: nbins = 100
-        if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
+        if 'npoints' in kwargs: npoints = kwargs[ 'npoints' ]
         else: npoints = 100
-        if "nsig" in kwargs: nsig = kwargs[ "nsig" ]
+        if 'nsig' in kwargs: nsig = kwargs[ 'nsig' ]
         else: nsig = 1000
-        if "nbkg" in kwargs: nbkg = kwargs[ "nbkg" ]
+        if 'nbkg' in kwargs: nbkg = kwargs[ 'nbkg' ]
         else: nbkg = 1000
-        if "offset" in kwargs: offset = kwargs[ "offset" ]
+        if 'offset' in kwargs: offset = kwargs[ 'offset' ]
         else: offset = 0
 
         ''' Gets the fisher discriminant values for the samples '''
@@ -85,8 +105,8 @@ class FisherDiscriminant:
         minv, maxv = min( fisherTot ) - offset, max( fisherTot ) + offset
 
         ''' Makes the histograms with the aforementioned variables '''
-        histA = TH1D( "Signal", "", nbins, minv, maxv )
-        histB = TH1D( "Background", "", nbins, minv, maxv )
+        histA = TH1D( 'Signal', '', nbins, minv, maxv )
+        histB = TH1D( 'Background', '', nbins, minv, maxv )
         for el in fisherSig: histA.Fill( el )
         for el in fisherBkg: histB.Fill( el )
         histA.Scale( nsig*1./histA.GetEntries() )
@@ -119,19 +139,19 @@ class FisherDiscriminant:
             rej.SetPoint( i, cut, bkgrej )
 
         ''' Defines the name, title, line style and marker style of the graphs '''
-        roc.SetNameTitle( "ROC", "" )
-        roc.GetXaxis().SetTitle( "Background rejection" )
-        roc.GetYaxis().SetTitle( "Signal efficiency" )
+        roc.SetNameTitle( 'ROC', '' )
+        roc.GetXaxis().SetTitle( 'Background rejection' )
+        roc.GetYaxis().SetTitle( 'Signal efficiency' )
         roc.SetLineColor( 4 ); roc.SetMarkerStyle( 8 )
-        sig.SetNameTitle( "Significance", "" )
-        sig.GetYaxis().SetTitle( "S/#sqrt{S + B}" )
-        sig.GetXaxis().SetTitle( "FD cut" )
+        sig.SetNameTitle( 'Significance', '' )
+        sig.GetYaxis().SetTitle( 'S/#sqrt{S + B}' )
+        sig.GetXaxis().SetTitle( 'FD cut' )
         sig.SetLineColor( 4 ); sig.SetMarkerStyle( 8 )
-        eff.SetNameTitle( "Signal efficiency", "" )
-        eff.GetXaxis().SetTitle( "FD cut" )
+        eff.SetNameTitle( 'Signal efficiency', '' )
+        eff.GetXaxis().SetTitle( 'FD cut' )
         eff.SetLineColor( 4 ); eff.SetMarkerStyle( 8 )
-        rej.SetNameTitle( "Background rejection", "" )
-        rej.GetXaxis().SetTitle( "FD cut" )
+        rej.SetNameTitle( 'Background rejection', '' )
+        rej.GetXaxis().SetTitle( 'FD cut' )
         rej.SetLineColor( 2 ); rej.SetMarkerStyle( 8 )
 
         ''' Draws all the plots in a canvas and returns them '''
@@ -140,16 +160,16 @@ class FisherDiscriminant:
         gStyle.SetOptStat( 0 )
         canvas.cd( 1 )
         if histA.GetMaximum() > histB.GetMaximum():
-            histA.GetXaxis().SetTitle( "Fisher linear discriminant" )
+            histA.GetXaxis().SetTitle( 'Fisher linear discriminant' )
             histA.Draw()
-            histB.Draw( "SAME" )
+            histB.Draw( 'SAME' )
         else:
-            histB.GetXaxis().SetTitle( "Fisher linear discriminant" )
+            histB.GetXaxis().SetTitle( 'Fisher linear discriminant' )
             histB.Draw()
-            histA.Draw( "SAME" )
-        canvas.cd( 2 ); eff.Draw( "APC" ); rej.Draw( "SAMEPC" );
-        canvas.cd( 3 ); roc.Draw( "APC" )
-        canvas.cd( 4 ); sig.Draw( "APC" )
+            histA.Draw( 'SAME' )
+        canvas.cd( 2 ); eff.Draw( 'APC' ); rej.Draw( 'SAMEPC' );
+        canvas.cd( 3 ); roc.Draw( 'APC' )
+        canvas.cd( 4 ); sig.Draw( 'APC' )
 
         canvas.cd( 1 ).BuildLegend( 0.15, 0.75, 0.35, 0.85 )
         canvas.cd( 2 ).BuildLegend( 0.15, 0.75, 0.45, 0.85 )
@@ -158,76 +178,142 @@ class FisherDiscriminant:
         lst = sig.GetY()
         maxv, maxi = max( [ ( lst[ i ], i ) for i in xrange( sig.GetN() ) ] )
 
-        print "----------------------------"
-        print "Fisher discriminant analysis"
-        print "----------------------------"
-        print "Number of Background events:", nbkg
-        print "Number of Signal events:    ", nsig
-        print "Maximum significance:", maxv, "when cutting at", minv + maxi*step
-        print "----------------------------"
+        print '----------------------------'
+        print 'Fisher discriminant analysis'
+        print '----------------------------'
+        print 'Number of Background events:', nbkg
+        print 'Number of Signal events:    ', nsig
+        print 'Maximum significance:', maxv, 'when cutting at', minv + maxi*step
+        print '----------------------------'
 
-        return { "canvas" : canvas,
-                 "histA"  : histA,
-                 "histB"  : histB,
-                 "eff"    : eff,
-                 "rej"    : rej,
-                 "roc"    : roc,
-                 "sig"    : sig }
-
-#_______________________________________________________________________________
-# Calculates the covariance between two lists ( with the same size )
-def Covariance( lst1, lst2 ):
-    m1 = Mean( lst1 )
-    m2 = Mean( lst2 )
-    ex = [ ( v1 - m1 )*( v2 - m2 ) for v1, v2 in zip( lst1, lst2 ) ]
-    return Mean( ex )
+        return { 'canvas' : canvas,
+                 'histA'  : histA,
+                 'histB'  : histB,
+                 'eff'    : eff,
+                 'rej'    : rej,
+                 'roc'    : roc,
+                 'sig'    : sig }
 
 #_______________________________________________________________________________
-# Calculates the covariance matrix for a given set of data. The indexes of the
-# data set have to correspond to the values of one of the variables.
-def CovMatrix( data ):
-    nvars     = len( data )
-    covmatrix = Matrix( [ nvars*[ 0. ] for i in xrange( nvars ) ] )
-    for i in xrange( nvars ):
-        for j in xrange( nvars ):
-            covmatrix[ i ][ j ] = Covariance( data[ i ], data[ j ] )
-    return covmatrix
+# This class allows to generate an integral transformation from a given set of
+# values. This method is the opposite to that which is used to generate a set
+# of values with following some distribution given an uniform random 
+# distributed set of values (so the input values would be transformed to an 
+# uniform distribution). It can proceed by two different ways. One is using an
+# adaptive binning technique to take the best use of the statistics, while in
+# the other usual bins are used. This last method has the disadvantage that the
+# final shape is bin dependent (this means that even the transformation of the
+# input values could not start at 0).
+class IntegralTransformer:
+    
+    def __init__( self, nbins, arg, **kwargs ):
+        ''' To initialize the class one has to provide the number of bins that will be used
+        in the transformed distribution < nbins > and an argument, that can be a set of
+        values or a histogram. If it is a set of values, the option to use the adaptive
+        binning technique is set by the < adaptbin > parameter. If no such technique is used,
+        one can control the number of bin for the input sample with the input parameter
+        < ntrbins >. '''
+
+        if 'verbose' in kwargs: verbose = kwargs[ 'verbose' ]
+        else: verbose = True
+        
+        if isinstance( arg, TH1 ):
+            if verbose:
+                print ( 'INFO: After the transformation, all the values greater than one will be ' +
+                        'attached to the last bin' )
+                        
+            self.AdaptBin = False
+            self.MainHist = arg
+            self.Nbins    = nbins
+        else:
+            if 'adaptbin' in kwargs: self.AdaptBin = kwargs[ 'adaptbin' ]
+            else: self.AdaptBin = False
+            
+            if self.AdaptBin:
+                if verbose:
+                    print ( 'INFO: The output histogram comes from an adaptive binned transformation. ' +
+                            'Is constructed as: x in bin if x > min and x <= max.' )
+                
+                length = len( arg )
+                self.MainHist   = MakeAdaptiveBinnedHist( '', length/nbins, arg )
+                self.MainTRhist = self.MainHist.Clone()
+                self.Nbins      = nbins
+            
+                for val in arg:
+                    self.MainHist.Fill( val )
+            else:
+                if 'ntrbins' in kwargs: nbins = kwargs[ 'ntrbins' ]
+                else: nbins = 100
+                self.__init__( nbins, MakeHistogram( '', arg, nbins = nbins ) )
+                
+        self.CumulativeHist = MakeCumulative( self.MainHist )
+    
+    def Transform( self, name, values, **kwargs ):
+        ''' Transforms the distribution from the given set of values using the class distribution.
+        One must provide the name of the output histogram and an iterable with the values. The
+        title and the type of histogram are set using the < title > and < htype > parameters. '''
+
+        if 'title' in kwargs: title = kwargs[ 'title' ]
+        else: title = name
+        if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
+        else: histcall = TH1D
+        
+        transf = histcall( name, title, self.Nbins, 0, 1 )
+        
+        if self.AdaptBin:
+            abhist = self.MainHist.Clone()
+            abhist.Clear()
+            for val in values:
+                abhist.Fill( val )
+            for ib in xrange( 1, self.MainHist.GetNbinsX() + 1 ):
+                cont   = int( abhist.GetBinContent( ib ) )
+                transf.SetBinContent( ib, cont )
+        else:
+            addifone = 1 - transf.GetBinWidth( 1 )/2
+            for val in values:
+                fval = self.CumulativeHist.Interpolate( val )
+                if fval != 1:
+                    transf.Fill( fval )
+                else:
+                    transf.Fill( addifone )
+        
+        return transf
 
 #_______________________________________________________________________________
 # Returns the two Kolmogorov-Smirnov factors. The input parameters can be
 # iterable objects or TH1 histograms. The < smpRef > variable will be taken
-# as the "reference" and < smpObs > as the distribution to check if matches. If
+# as the 'reference' and < smpObs > as the distribution to check if matches. If
 # a list or similar class is provided, by default the analysis will be unbinned,
 # controlling it with the < binned > option.
 def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
-    if "binned" in kwargs: binned = kwargs[ "binned" ]
+    if 'binned' in kwargs: binned = kwargs[ 'binned' ]
     else: binned = False
     if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
         ''' If the classes are histograms it works using the bins contents '''
         nbins = smpRef.GetNbinsX()
         if nbins != smpObs.GetNbinsX():
-            print "ERROR: The number of bins is different for both samples"
+            print 'ERROR: The number of bins is different for both samples'
             return
         elif smpRef.GetXaxis().GetXmin() != smpObs.GetXaxis().GetXmin():
-            print "ERROR: The minimum values for the axis of the histograms do not match"
+            print 'ERROR: The minimum values for the axis of the histograms do not match'
             return
         elif smpRef.GetXaxis().GetXmax() != smpObs.GetXaxis().GetXmax():
-            print "ERROR: The maximum values for the axis of the histograms do not match"
+            print 'ERROR: The maximum values for the axis of the histograms do not match'
             return
     else:
         if binned:
             ''' This is the task performed when one wants to consider binned lists '''
-            if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+            if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
             else: nbins = 100
-            if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+            if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
             else: vmin = min( smpRef + smpObs )
-            if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
+            if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
             else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
             smpRef = MakeHistogram( 'ref', smpRef, nbins = nbins, vmin = vmin, vmax = vmax )
             smpObs = MakeHistogram( 'obs', smpObs, nbins = nbins, vmin = vmin, vmax = vmax )
         else:
             ''' This is what is performed when one works with unbinned distributions '''
-            if "npoints" in kwargs: npoints = kwargs[ "npoints" ]
+            if 'npoints' in kwargs: npoints = kwargs[ 'npoints' ]
             else: npoints = 100
             smpRef  = list( smpRef )
             smpObs  = list( smpObs )
@@ -310,7 +396,7 @@ def Mode( lst ):
         if vdict[ el ] == oldmax:
             nmodes += 1
     if nmodes > 1:
-        print "WARNING: A number of", nmodes, "exist in the input list"
+        print 'WARNING: A number of', nmodes, 'exist in the input list'
     return oldmax
 
 #_______________________________________________________________________________

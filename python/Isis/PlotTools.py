@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 22/04/2016                                   //
+#//  Last update: 25/04/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -93,48 +93,48 @@ def DrawHistograms( *args, **kwargs ):
 
 #_______________________________________________________________________________
 # Returns the histogram constructor given the type as a string
-def HistByType( tp, dim = 1 ):
+def HistFromType( tp, dim = 1 ):
     if tp not in ( 'float', 'double', 'int' ):
-        print "ERROR: Histogram type", tp, "not known"
+        print 'ERROR: Histogram type', tp, 'not known'
         return
     if dim == 1:
-        if tp == "float":
+        if tp == 'float':
             return TH1F
-        elif tp == "double":
+        elif tp == 'double':
             return TH1D
         else:
             return TH1I
     elif dim == 2:
-        if tp == "float":
+        if tp == 'float':
             return TH2F
-        elif tp == "double":
+        elif tp == 'double':
             return TH2D
         else:
             return TH2I
     else:
-        print "ERROR: Histogram dimension", dim, "not known"
+        print 'ERROR: Histogram dimension', dim, 'not allowed'
 
 #_______________________________________________________________________________
 # This function imports different plot modules from Root
 def ImportPlotModules():
     glob = sys._getframe( 1 ).f_globals
     loc  = sys._getframe( 1 ).f_locals
-    modlist = [ "gROOT", "TBrowser", 
-                "TDirectory", "TDirectoryFile", "gDirectory", "TFile",
-                "TTree", "TBranch", "TLeaf",
-                "TCanvas", "TPave", "TPaveText", "TLegend",
-                "TH1D", "TH1F", "TH1I",
-                "TH2D", "TH2F", "TH2I",
-                "TGraph", "TGraphErrors",
-                "TF1", "TF2", "TLine",
-                "TColor",
-                "kBlue", "kViolet", "kMagenta", "kPink",
-                "kRed", "kOrange", "kYellow",
-                "kSpring", "kGreen", "kTeal", "kCyan", "kAzure",
-                "kWhite", "kBlack", "kGray" ]
-    glob[ "ROOT" ] = __import__( "ROOT" )
+    modlist = [ 'gROOT', 'TBrowser', 
+                'TDirectory', 'TDirectoryFile', 'gDirectory', 'TFile',
+                'TTree', 'TBranch', 'TLeaf',
+                'TCanvas', 'TPave', 'TPaveText', 'TLegend',
+                'TH1D', 'TH1F', 'TH1I',
+                'TH2D', 'TH2F', 'TH2I',
+                'TGraph', 'TGraphErrors',
+                'TF1', 'TF2', 'TLine',
+                'TColor',
+                'kBlue', 'kViolet', 'kMagenta', 'kPink',
+                'kRed', 'kOrange', 'kYellow',
+                'kSpring', 'kGreen', 'kTeal', 'kCyan', 'kAzure',
+                'kWhite', 'kBlack', 'kGray' ]
+    glob[ 'ROOT' ] = __import__( 'ROOT' )
     for el in modlist:
-        glob[ el ] = __import__( "ROOT." + el, glob, loc, [ '*' ] )
+        glob[ el ] = __import__( 'ROOT.' + el, glob, loc, [ '*' ] )
 
 #_______________________________________________________________________________
 # This function creates a 1-D adaptive binning histogram given a name, the
@@ -154,7 +154,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         vmax   = max( values ) + CalcMinDist( values )/2.
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
-    if 'vtype' in kwargs: histcall = HistByType( kwargs[ 'vtype' ] )
+    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
     else: histcall = TH1D
     
     ''' Calculates the array of weights '''
@@ -201,21 +201,42 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
     return histcall( name, title, nbins, bins )
 
 #_______________________________________________________________________________
+# Returns a histogram containing the cumulative distribution of that given. If
+# the option < norm > is given, the histogram will be scaled in such a way that
+# the maximum value will be one.
+def MakeCumulative( hist, **kwargs ):
+    if 'name' in kwargs: name = kwargs[ 'name' ]
+    else: name = ''
+    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
+    else: norm = True
+    if 'title' in kwargs: title = kwargs[ 'title' ]
+    else: title = name
+    chist = hist.Clone()
+    chist.SetNameTitle( name, title )
+    cumulative = chist.GetBinContent( 1 )
+    for i in xrange( 2, hist.GetNbinsX() + 1 ):
+        cumulative += hist.GetBinContent( i )
+        chist.SetBinContent( i, cumulative )
+    if norm:
+        chist.Scale( 1./chist.GetMaximum() )
+    return chist
+
+#_______________________________________________________________________________
 # Function to generate a Root histogram given a list. By default no ytitle is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
 def MakeHistogram( name, var, wvar = False, **kwargs ):
-    if "title" in kwargs: title = kwargs[ "title" ]
+    if 'title' in kwargs: title = kwargs[ 'title' ]
     else: title = name
-    if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+    if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
     else: nbins = 100
-    if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
+    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
-    if "vmax" in kwargs: vmax = kwargs[ "vmax" ]
+    if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
     else: vmax = max( var )
-    if "vmin" in kwargs: vmin = kwargs[ "vmin" ]
+    if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
     else: vmin = min( var )
-    if "vtype" in kwargs: histcall = HistByType( kwargs[ "vtype" ] )
+    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
     else: histcall = TH1D
     
     hist = histcall( name, title, nbins, vmin, vmax )
@@ -227,32 +248,32 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
         for el in var:
             hist.Fill( el )
     hist.GetXaxis().SetTitle( xtitle )
-    if "ytitle" in kwargs:
-        hist.GetYaxis().SetTitle( kwargs[ "ytitle" ] )
+    if 'ytitle' in kwargs:
+        hist.GetYaxis().SetTitle( kwargs[ 'ytitle' ] )
     return hist
 
 #_______________________________________________________________________________
 # Creates a 2-dimensional histogram given two lists
 def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
-    if "title" in kwargs: title = kwargs[ "title" ]
+    if 'title' in kwargs: title = kwargs[ 'title' ]
     else: title = name
-    if "xbins" in kwargs: xbins = kwargs[ "xbins" ]
+    if 'xbins' in kwargs: xbins = kwargs[ 'xbins' ]
     else: xbins = 100
-    if "ybins" in kwargs: ybins = kwargs[ "ybins" ]
+    if 'ybins' in kwargs: ybins = kwargs[ 'ybins' ]
     else: ybins = 100
-    if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
-    else: xtitle = "X"
-    if "ytitle" in kwargs: ytitle = kwargs[ "ytitle" ]
-    else: ytitle = "Y"
-    if "xmax" in kwargs: xmax = kwargs[ "xmax" ]
+    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
+    else: xtitle = 'X'
+    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
+    else: ytitle = 'Y'
+    if 'xmax' in kwargs: xmax = kwargs[ 'xmax' ]
     else: xmax = min( xvar )
-    if "ymax" in kwargs: ymax = kwargs[ "ymax" ]
+    if 'ymax' in kwargs: ymax = kwargs[ 'ymax' ]
     else: ymax = min( yvar )
-    if "xmin" in kwargs: xmin = kwargs[ "xmin" ]
+    if 'xmin' in kwargs: xmin = kwargs[ 'xmin' ]
     else: xmin = min( xvar )
-    if "ymin" in kwargs: ymin = kwargs[ "ymin" ]
+    if 'ymin' in kwargs: ymin = kwargs[ 'ymin' ]
     else: ymin = min( yvar )
-    if "vtype" in kwargs: histcall = HistByType( kwargs[ "vtype" ], 2 )
+    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ], 2 )
     else: histcall = TH2D
 
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
@@ -270,14 +291,14 @@ def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
 #_______________________________________________________________________________
 # Generates a scatter plot given two lists of data
 def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
-    if "name" in kwargs: name = kwargs[ "name" ]
+    if 'name' in kwargs: name = kwargs[ 'name' ]
     else: name = False
-    if "title" in kwargs: title = kwargs[ "title" ]
+    if 'title' in kwargs: title = kwargs[ 'title' ]
     else: title = False
-    if "xtitle" in kwargs: xtitle = kwargs[ "xtitle" ]
-    else: xtitle = "X"
-    if "ytitle" in kwargs: ytitle = kwargs[ "ytitle" ]
-    else: ytitle = "Y"
+    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
+    else: xtitle = 'X'
+    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
+    else: ytitle = 'Y'
     npoints = len( xvar )
     xvar    = array( 'd', xvar )
     yvar    = array( 'd', yvar )
@@ -307,21 +328,21 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
 def MultiPlot( mngrs, variables, **kwargs):
-    if "colors" in kwargs: colors = ColorList( kwargs[ "colors" ] )
+    if 'colors' in kwargs: colors = ColorList( kwargs[ 'colors' ] )
     else: colors = ColorList()
-    if "cuts" in kwargs: cuts = kwargs[ "cuts" ]
+    if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
     else: cuts = False
-    if "errors" in kwargs: errors = kwargs[ "errors" ]
+    if 'errors' in kwargs: errors = kwargs[ 'errors' ]
     else: errors = False
-    if "legend" in kwargs: legend = kwargs[ "legend" ]
+    if 'legend' in kwargs: legend = kwargs[ 'legend' ]
     else: legend = True
-    if "name" in kwargs: name = kwargs[ "name" ]
-    else: name = "canvas"
-    if "title" in kwargs: title = kwargs[ "title" ]
-    else: title = "canvas"
-    if "nbins" in kwargs: nbins = kwargs[ "nbins" ]
+    if 'name' in kwargs: name = kwargs[ 'name' ]
+    else: name = 'canvas'
+    if 'title' in kwargs: title = kwargs[ 'title' ]
+    else: title = 'canvas'
+    if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
     else: nbins = 100
-    if "norm" in kwargs: norm = kwargs[ "norm" ]
+    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
     else: norm = True
     
     nvars   = len( variables ) + 1
@@ -353,12 +374,12 @@ def MultiPlot( mngrs, variables, **kwargs):
         ''' Constructs the legend and the information panel if specified '''
         if legend:
             rlegend = TLegend( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
-            rlegend.SetHeader( "#bf{-- Legend --}" )
+            rlegend.SetHeader( '#bf{-- Legend --}' )
             rlegend.SetTextAlign( 22 )
             rlegend.SetTextSize( 0.075 )
             rlegend.SetFillColor( 17 )
             rtxtinf = TPaveText( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
-            rtxtinf.AddText( "-- Number of entries --" )
+            rtxtinf.AddText( '-- Number of entries --' )
             rtxtinf.SetTextSize( 0.075 )
             rtxtinf.SetFillColor( 42 )
             rtxtinf.SetShadowColor( 0 )
@@ -369,7 +390,7 @@ def MultiPlot( mngrs, variables, **kwargs):
             totlst = [ el for mngr in mngrs for el in mngr[ var ]  ]
             vmin, vmax, hists = min( totlst ), max( totlst ), []
             for im, mngr in enumerate( mngrs ):
-                hname = mngr.Name + "_" + var
+                hname = mngr.Name + '_' + var
                 hists.append( mngr.MakeHistogram( hname,
                                                   var,
                                                   title = var,
@@ -384,25 +405,25 @@ def MultiPlot( mngrs, variables, **kwargs):
                 h.SetMarkerColor( colors[ im ] )
                 if legend and iv == 0:
                     ''' In the first iteration adds the entries to the legend '''
-                    rlegend.AddEntry( h, "#bf{" + mngr.Name + "}", "L" )
-                    rtxtinf.AddText( mngr.Name + ": %i" % h.GetEntries() )
+                    rlegend.AddEntry( h, '#bf{' + mngr.Name + '}', 'L' )
+                    rtxtinf.AddText( mngr.Name + ': %i' % h.GetEntries() )
                 results[ hname ] = h
             ''' The maximum of the y-axis in the pad is set to the 110% of the maximum
             value for all the histograms to be drawn '''
             hists[ 0 ].SetMaximum( 1.1*max( h.GetMaximum() for h in hists ) )
             for h in hists:
-                if errors: h.Draw( "SAMEE" )
-                else:      h.Draw( "SAME"  )
+                if errors: h.Draw( 'SAMEE' )
+                else:      h.Draw( 'SAME'  )
         if legend:
             pad = canvas.cd( nvars )
             pad.Divide( 2, 1 )
             pad.cd( 1 ); rlegend.Draw()
             pad.cd( 2 ); rtxtinf.Draw()
-            results[ "legend" ] = rlegend
-            results[ "info" ]   = rtxtinf
+            results[ 'legend' ] = rlegend
+            results[ 'info' ]   = rtxtinf
         canvas.Update()
         results[ name ] = canvas
         return results
     else:
-        print "Any of the managers does not have access to some of the variables"
+        print 'Any of the managers does not have access to some of the variables'
         return
