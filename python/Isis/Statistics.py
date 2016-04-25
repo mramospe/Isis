@@ -22,7 +22,7 @@
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
-from Isis.PlotTools import MakeCumulative, MakeHistogram
+from Isis.PlotTools import MakeAdaptiveBinnedHist, MakeCumulative, MakeHistogram
 from Isis.Utils import CalcMinDist
 from math import sqrt
 
