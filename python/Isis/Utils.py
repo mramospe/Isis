@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 21/04/2016                                //
+#//  Last update: 26/04/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -29,6 +29,14 @@ def CalcMinDist( lst ):
     lst = sorted( set( lst ) )
     lst = [ abs( lst[ i - 1 ] - lst[ i ] ) for i in xrange( 1, len( lst ) ) ]
     return min( lst )
+
+#_______________________________________________________________________________
+# Returns the minimum and maximum values for the combined range for all the
+# given lists
+def CombinedRange( *args ):
+    minlst = min( min( lst ) for lst in args )
+    maxlst = max( max( lst ) for lst in args )
+    return minlst, maxlst
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
@@ -236,6 +244,17 @@ def MergeDicts( *args ):
         for dic in args:
             rdic[ key ] += dic[ key ]
     return rdic
+
+#_______________________________________________________________________________
+# Returns the minimum and maximum values for the shared range among lists. If
+# there is no shared range < False > is returned.
+def SharedRange( *args ):
+    minlst = max( min( lst ) for lst in args )
+    maxlst = min( max( lst ) for lst in args )
+    if maxlst > minlst:
+        return minlst, maxlst
+    else:
+        return False
 
 #_______________________________________________________________________________
 # Given a list and a pattern ( with elements separated by '*' symbols ) it
