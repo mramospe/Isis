@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 15/04/2016                              //
+//  Last update: 02/05/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -46,13 +46,13 @@ size_t General::CalcIntLength( long int integer ) {
 // This function allows to center a string in a place with width equal to
 // < size >. In case of working with odd sizes the right hand will always be
 // greater.
-std::string General::CenterString( const std::string &str, const size_t &size ) {
+std::string General::CenterString( const std::string &str, const size_t &size, const char &ch ) {
   unsigned short int
     rst = size - str.size(),
     coc = rst / 2;
-  std::string output( coc + rst % 2, ' ' );
+  std::string output( coc + rst % 2, ch );
   output += str;
-  output += std::string( coc, ' ' );
+  output += std::string( coc, ch );
   return output;
 }
 

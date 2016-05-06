@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 15/04/2016                              //
+//  Last update: 03/05/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -36,7 +36,7 @@ namespace General {
   //_______________________________________________________________________________
   // These are the definitions of different useful functions
   size_t      CalcIntLength( long int integer );
-  std::string CenterString( const std::string &str, const size_t &size );
+  std::string CenterString( const std::string &str, const size_t &size, const char &ch = ' ' );
   void        CheckParseOpts( const std::string              &str,
 			      const std::vector<std::string> &lst = {} );
   void        ParseStringMatch( std::vector<std::string>       &output,
@@ -72,23 +72,27 @@ namespace General {
     }
   
     // Looks for the end of the current expression
-    endpos = opts.find( ':', varpos );
     if ( varpos == std::string::npos )
       endpos = opts.size();
+    else
+      endpos = opts.find( ':', varpos );
     
-    // If no < = > symbol is found, it is considered that the variable is boolean
+    // If no < = > symbol is found, it is considered that the variable is boolean. The static_cast
+    // call is needed to allow taking strings as values at compilation time.
     pos = opts.find( '=', varpos );
     if ( pos >= endpos ) {
-      value = true;
+      bool res = true;
       if ( varpos )
 	while ( opts.at( --varpos ) == '!' ) {
 	  opts.erase( varpos );
-	  value = !value;
+	  res = !res;
 	}
+      void *auxptr = &res;
+      value = *static_cast<type*>( auxptr );
       return;
     }
     ++pos;
-  
+    
     // Gets the string to parse removing the initial and final whitespaces
     opts = opts.substr( pos, endpos - pos );
     TrimString( opts );
