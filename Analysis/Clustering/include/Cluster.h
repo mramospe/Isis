@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 06/05/2016                                                      //
+//  Last update: 07/05/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -40,7 +40,7 @@ namespace General {
     Cluster();
     Cluster( const Cluster &other );
     Cluster( const std::vector<double> &weights );
-    ~Cluster();
+    virtual ~Cluster();
 
     // Methods
     void   AddPoint( const ClusterPoint &point );

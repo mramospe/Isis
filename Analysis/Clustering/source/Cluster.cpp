@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 06/05/2016                                                      //
+//  Last update: 07/05/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -75,7 +75,8 @@ double General::Cluster::Dispersion() const {
 }
 
 //_______________________________________________________________________________
-// Returns the weighted distance between two points
+// Returns the weighted distance between two points. The weight is dividing since
+// as its value grows, the distance must turn smaller.
 double General::Cluster::Distance( const General::ClusterPoint &pointA,
 				   const General::ClusterPoint &pointB ) const {
 
@@ -86,7 +87,7 @@ double General::Cluster::Distance( const General::ClusterPoint &pointA,
     itw = fWeights.cbegin();
   
   while ( itc != pointA.GetValues().end() ) {
-    val    = (*itw++)*( (*itv++) - (*itc++) );
+    val    = ( (*itv++) - (*itc++) )/(*itw++);
     dist2 += val*val;
   }
   
