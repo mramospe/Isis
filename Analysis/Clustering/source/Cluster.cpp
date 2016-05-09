@@ -1,13 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //                                                                               //
-//  General package                                                              //
+//  Analysis package                                                             //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 07/05/2016                                                      //
+//  Last update: 09/05/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -31,11 +31,11 @@
 
 //_______________________________________________________________________________
 // Main constructor
-General::Cluster::Cluster() { }
+Analysis::Cluster::Cluster() { }
 
 //_______________________________________________________________________________
 // Copy constructor
-General::Cluster::Cluster( const Cluster &other ) {
+Analysis::Cluster::Cluster( const Cluster &other ) {
   
   fCenterOfMass = other.fCenterOfMass;
   fPoints       = other.fPoints;
@@ -44,11 +44,11 @@ General::Cluster::Cluster( const Cluster &other ) {
 
 //_______________________________________________________________________________
 // Constructor given the array of weights
-General::Cluster::Cluster( const std::vector<double> &weights ) : fWeights( weights ) { }
+Analysis::Cluster::Cluster( const std::vector<double> &weights ) : fWeights( weights ) { }
 
 //_______________________________________________________________________________
 // Destructor
-General::Cluster::~Cluster() { }
+Analysis::Cluster::~Cluster() { }
 
 //_______________________________________________________________________________
 
@@ -57,7 +57,7 @@ General::Cluster::~Cluster() { }
 
 //_______________________________________________________________________________
 // Adds a new point to the cluster. The center of mass is automatically calculated.
-void General::Cluster::AddPoint( const General::ClusterPoint &point ) {
+void Analysis::Cluster::AddPoint( const Analysis::ClusterPoint &point ) {
 
   fCenterOfMass = ClusterPoint::CenterOfMass( fCenterOfMass, point, fWeights );
   fPoints.push_back( point );
@@ -65,7 +65,7 @@ void General::Cluster::AddPoint( const General::ClusterPoint &point ) {
 
 //_______________________________________________________________________________
 // Calculates the dispersion (squared standard deviation) of the points in the cluster
-double General::Cluster::Dispersion() const {
+double Analysis::Cluster::Dispersion() const {
 
   double s2 = 0;
   for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
@@ -77,8 +77,8 @@ double General::Cluster::Dispersion() const {
 //_______________________________________________________________________________
 // Returns the weighted distance between two points. The weight is dividing since
 // as its value grows, the distance must turn smaller.
-double General::Cluster::Distance( const General::ClusterPoint &pointA,
-				   const General::ClusterPoint &pointB ) const {
+double Analysis::Cluster::Distance( const Analysis::ClusterPoint &pointA,
+				    const Analysis::ClusterPoint &pointB ) const {
 
   double dist2 = 0, val;
   auto
@@ -96,8 +96,8 @@ double General::Cluster::Distance( const General::ClusterPoint &pointA,
 
 //_______________________________________________________________________________
 // Merges two clusters into one, owning all the points
-General::Cluster General::Cluster::MergeClusters( const Cluster &clusterA,
-						  const Cluster &clusterB ) {
+Analysis::Cluster Analysis::Cluster::MergeClusters( const Cluster &clusterA,
+						    const Cluster &clusterB ) {
 
   Cluster cluster( clusterA );
 
@@ -109,15 +109,15 @@ General::Cluster General::Cluster::MergeClusters( const Cluster &clusterA,
     *itw++ += *itwB++;
 
   cluster.fPoints.insert( cluster.fPoints.end(), clusterB.fPoints.cbegin(), cluster.fPoints.cend() );
-  cluster.fCenterOfMass = General::ClusterPoint::CenterOfMass( clusterA.fCenterOfMass,
-							       clusterB.fCenterOfMass,
-							       weights );
+  cluster.fCenterOfMass = Analysis::ClusterPoint::CenterOfMass( clusterA.fCenterOfMass,
+								clusterB.fCenterOfMass,
+								weights );
   return cluster;
 }
 
 //_______________________________________________________________________________
 // Normalizes the values in the points of the cluster
-void General::Cluster::Normalize( const std::vector<double> &values ) {
+void Analysis::Cluster::Normalize( const std::vector<double> &values ) {
   for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
     it -> Normalize( values );
   fCenterOfMass.Normalize( values );

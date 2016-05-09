@@ -1,13 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //                                                                               //
-//  General package                                                              //
+//  Analysis package                                                             //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 06/05/2016                                                      //
+//  Last update: 09/05/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -30,17 +30,17 @@
 
 //_______________________________________________________________________________
 // Main constructor
-General::ClusterPoint::ClusterPoint( const size_t &nvars, const double &wgt ) :
+Analysis::ClusterPoint::ClusterPoint( const size_t &nvars, const double &wgt ) :
   fValues( nvars ), fWeight( wgt ) { }
 
 //_______________________________________________________________________________
 // Constructor given a vector of values
-General::ClusterPoint::ClusterPoint( const std::vector<double> &values, const double &wgt ) :
+Analysis::ClusterPoint::ClusterPoint( const std::vector<double> &values, const double &wgt ) :
   fValues( values ), fWeight( wgt ) { }
 
 //_______________________________________________________________________________
 // Destructor
-General::ClusterPoint::~ClusterPoint() { };
+Analysis::ClusterPoint::~ClusterPoint() { };
 
 //_______________________________________________________________________________
 
@@ -49,9 +49,9 @@ General::ClusterPoint::~ClusterPoint() { };
 
 //_______________________________________________________________________________
 // Returns a point corresponding to the center of mass calculated using two points
-General::ClusterPoint General::ClusterPoint::CenterOfMass( const ClusterPoint &pointA,
-							   const ClusterPoint &pointB,
-							   const std::vector<double> &weights ) {
+Analysis::ClusterPoint Analysis::ClusterPoint::CenterOfMass( const ClusterPoint &pointA,
+							     const ClusterPoint &pointB,
+							     const std::vector<double> &weights ) {
 
   ClusterPoint point( pointA.fValues.size() );
   
