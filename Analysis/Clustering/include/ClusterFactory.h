@@ -57,6 +57,7 @@ namespace Analysis {
     inline void                  AddVariable( const std::string &name, const double &wgt = 1 );
     inline Cluster*              GetCluster( const size_t &icl );
     inline std::vector<Cluster>& GetClusters();
+    inline size_t                GetNclusters() const;
     inline void                  SetClusterWeights( const int &index,
 						    const std::vector<double> &wgts );
 
@@ -107,6 +108,8 @@ namespace Analysis {
   Cluster* ClusterFactory::GetCluster( const size_t &icl ) { return &fClusters[ icl ]; }
   // Returns the vector of clusters
   std::vector<Cluster>& ClusterFactory::GetClusters() { return fClusters; }
+  // Returns the current number of clusters
+  size_t ClusterFactory::GetNclusters() const { return fClusters.size(); }
 
 }
 
