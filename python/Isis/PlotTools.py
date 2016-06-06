@@ -154,6 +154,8 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         vmax   = max( values ) + CalcMinDist( values )/2.
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
+    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
+    else: ytitle = 'Entries'
     if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
     else: histcall = TH1D
     
@@ -198,7 +200,11 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         bins[ i ] = ib[ 0 ]
     bins[ -1 ] = vmax
     
-    return histcall( name, title, nbins, bins )
+    hist = histcall( name, title, nbins, bins )
+    hist.GetXaxis().SetTitle( xtitle )
+    hist.GetYaxis().SetTitle( ytitle )
+
+    return hist
 
 #_______________________________________________________________________________
 # Returns a histogram containing the cumulative distribution of that given. If
@@ -232,6 +238,8 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
     else: nbins = 100
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
+    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
+    else: ytitle = 'Entries'
     if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
     else: vmax = max( var )
     if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
@@ -247,9 +255,10 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
     else:
         for el in var:
             hist.Fill( el )
+    
     hist.GetXaxis().SetTitle( xtitle )
-    if 'ytitle' in kwargs:
-        hist.GetYaxis().SetTitle( kwargs[ 'ytitle' ] )
+    hist.GetYaxis().SetTitle( ytitle )
+    
     return hist
 
 #_______________________________________________________________________________
@@ -292,9 +301,9 @@ def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
 # Generates a scatter plot given two lists of data
 def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
     if 'name' in kwargs: name = kwargs[ 'name' ]
-    else: name = False
+    else: name = ''
     if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = False
+    else: title = name
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = 'X'
     if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
@@ -315,12 +324,11 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
         graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
     else:
         graph = TGraph( npoints, xvar, yvar )
-    if name:
-        graph.SetName( name )
-    if title:
-        graph.SetTitle( title )
+    
+    graph.SetNameTitle( name, title )
     graph.GetXaxis().SetTitle( xtitle )
     graph.GetYaxis().SetTitle( ytitle )
+    
     return graph
 
 #_______________________________________________________________________________
