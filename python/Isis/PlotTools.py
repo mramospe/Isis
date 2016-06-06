@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 09/05/2016                                   //
+#//  Last update: 06/06/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -433,5 +433,5 @@ def MultiPlot( mngrs, variables, **kwargs):
         results[ name ] = canvas
         return results
     else:
-        print 'Any of the managers does not have access to some of the variables'
+        print 'ERROR: Any of the managers does not have access to some of the variables'
         return
