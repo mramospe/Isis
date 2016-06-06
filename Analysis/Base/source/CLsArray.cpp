@@ -32,10 +32,10 @@
 //_______________________________________________________________________________
 // Main constructor
 Analysis::CLsArray::CLsArray() : fGenerator( 0 ),
-				 fType( 0 ),
 				 fMeans( 0 ),
 				 fSigmas( 0 ),
-				 fSize( 0 ) { }
+				 fSize( 0 ),
+				 fType( 'P' ) { }
 
 //_______________________________________________________________________________
 // Copy constructor
@@ -63,7 +63,7 @@ Analysis::CLsArray::CLsArray( const Analysis::CLsArray &other ) :
 // Constructor for single-values ( Gaussian )
 Analysis::CLsArray::CLsArray( const double &value, const double &sigma ) :
   fGenerator( 0 ),
-  fType( "Gaussian" ) {
+  fType( 'G' ) {
 
   fSize        = 1;
   fMeans       = new double[ 1 ];
@@ -78,7 +78,7 @@ Analysis::CLsArray::CLsArray( double    *values,
 			      double    *sigmas,
 			      const int &size ) :
   fGenerator( 0 ),
-  fType( "Gaussian" ) {
+  fType( 'G' ) {
 
   fSize   = size;
   fMeans  = new double[ fSize ];
@@ -94,8 +94,8 @@ Analysis::CLsArray::CLsArray( double    *values,
 // Constructor for single-values ( Poisson )
 Analysis::CLsArray::CLsArray( const double &value ) :
   fGenerator( 0 ),
-  fType( "Poisson" ),
-  fSigmas( 0 ) {
+  fSigmas( 0 ),
+  fType( 'P' ) {
 
   fSize       = 1;
   fMeans      = new double[ 1 ];
@@ -106,8 +106,8 @@ Analysis::CLsArray::CLsArray( const double &value ) :
 // Constructor for multiple-values ( Poisson )
 Analysis::CLsArray::CLsArray( double *values, const int &size ) :
   fGenerator( 0 ),
-  fType( "Poisson" ),
-  fSigmas( 0 ) {
+  fSigmas( 0 ),
+  fType( 'P' ) {
 
   fSize  = size;
   fMeans = new double[ fSize ];
@@ -119,7 +119,8 @@ Analysis::CLsArray::CLsArray( double *values, const int &size ) :
 //_______________________________________________________________________________
 // Destructor
 Analysis::CLsArray::~CLsArray() {
-  delete[] fMeans;
+  if ( fMeans )
+    delete[] fMeans;
   if ( fSigmas )
     delete[] fSigmas;
 }
@@ -166,7 +167,7 @@ Analysis::CLsArray::operator + ( const Analysis::CLsArray &other ) {
 
   double means_res[ fSize ];
 
-  if ( !strcmp( fType, "Gaussian" ) and !strcmp( other.fType, "Gaussian" ) ) {
+  if ( fType == 'G' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
@@ -175,7 +176,7 @@ Analysis::CLsArray::operator + ( const Analysis::CLsArray &other ) {
     }
     return Analysis::CLsArray( means_res, sigmas_res, fSize );
   }
-  else if ( !strcmp( fType, "Gaussian" ) and !strcmp( other.fType, "Poisson" ) ) {
+  else if ( fType == 'G' and other.fType == 'P' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
@@ -184,7 +185,7 @@ Analysis::CLsArray::operator + ( const Analysis::CLsArray &other ) {
     }
     return Analysis::CLsArray( means_res, sigmas_res, fSize );
   }
-  else if ( !strcmp( fType, "Poisson" ) and !strcmp( other.fType, "Gaussian" ) ) {
+  else if ( fType == 'P' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
@@ -207,7 +208,7 @@ Analysis::CLsArray::operator - ( const Analysis::CLsArray &other ) {
 
   double means_res[ fSize ];
 
-  if ( !strcmp( fType, "Gaussian" ) and !strcmp( other.fType, "Gaussian" ) ) {
+  if ( fType == 'G' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
@@ -216,7 +217,7 @@ Analysis::CLsArray::operator - ( const Analysis::CLsArray &other ) {
     }
     return Analysis::CLsArray( means_res, sigmas_res, fSize );
   }
-  else if ( !strcmp( fType, "Gaussian" ) and !strcmp( other.fType, "Poisson" ) ) {
+  else if ( fType == 'G' and other.fType == 'P' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
@@ -225,7 +226,7 @@ Analysis::CLsArray::operator - ( const Analysis::CLsArray &other ) {
     }
     return Analysis::CLsArray( means_res, sigmas_res, fSize );
   }
-  else if ( !strcmp( fType, "Poisson" ) and !strcmp( other.fType, "Gaussian" ) ) {
+  else if ( fType == 'P' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
     for ( int i = 0; i < fSize; i++ ) {
       means_res[ i ]  = fMeans[ i ] - other.fMeans[ i ];
@@ -247,7 +248,7 @@ Analysis::CLsArray Analysis::operator * ( const double &value, const CLsArray &o
 
   double means_res[ other.fSize ];
 
-  if ( !strcmp( other.fType, "Gaussian" ) ) {
+  if ( other.fType == 'G' ) {
     double sigmas_res[ other.fSize ];
     for ( int i = 0; i < other.fSize; i++ ) {
       means_res[ i ]  = value*other.fMeans[ i ];
@@ -269,7 +270,7 @@ Analysis::CLsArray Analysis::operator * ( const CLsArray &other, const double &v
   int    size( other.fSize );
   double means_res[ size ];
 
-  if ( !strcmp( other.fType, "Gaussian" ) ) {
+  if ( other.fType == 'G' ) {
     double sigmas_res[ size ];
     for ( int i = 0; i < size; i++ ) {
       means_res[ i ]  = value*other.fMeans[ i ];
@@ -351,8 +352,11 @@ double Analysis::CLsArray::GetPoissonProb( const Analysis::CLsArray &values  ) {
 inline double Analysis::GetGaussian( const double &mean,
 				     const double &sigma,
 				     const double &value ) {
-  return 1./( std::sqrt( 2*M_PI )*sigma )*
-    std::exp( - ( value - mean )*( value - mean )/( 2*sigma*sigma ) );
+  double
+    dist = value - mean,
+    norm = std::sqrt( 2*M_PI )*sigma,
+    s2   = 2*sigma*sigma;
+  return std::exp( - dist*dist/s2 )/norm;
 }
 
 //_______________________________________________________________________________

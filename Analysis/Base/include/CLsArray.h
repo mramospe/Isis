@@ -61,10 +61,10 @@ namespace Analysis {
     
     // Attributes
     TRandom3    fGenerator;
-    const char *fType;
     double     *fMeans;
     double     *fSigmas;
     int         fSize;
+    char        fType;
 
     // Methods
     CLsArray  GenerateGaussian();

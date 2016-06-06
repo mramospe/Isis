@@ -47,11 +47,11 @@ Analysis::CLsAnalyser::CLsAnalyser( const Analysis::CLsArray &old_hyp,
   fOldHyp  = old_hyp;
   fNPoints = npoints;
 
-  if ( !strcmp( fNewHyp.fType, "Gaussian" ) )
+  if ( fNewHyp.fType == 'G' )
     GetNewHypProb = &Analysis::CLsArray::GetGaussianProb;
   else
     GetNewHypProb = &Analysis::CLsArray::GetPoissonProb;
-  if ( !strcmp( fOldHyp.fType, "Gaussian" ) )
+  if ( fOldHyp.fType == 'G' )
     GetOldHypProb = &Analysis::CLsArray::GetGaussianProb;
   else
     GetOldHypProb = &Analysis::CLsArray::GetPoissonProb;
@@ -73,13 +73,13 @@ void Analysis::CLsAnalyser::Evaluate() {
   fNewHypArray = std::vector<double>( fNPoints );
   fOldHypArray = std::vector<double>( fNPoints );
 
-  if ( !strcmp( fNewHyp.fType, "Gaussian" ) )
+  if ( fNewHyp.fType == 'G' )
     for ( int ievt = 0; ievt < fNPoints; ievt++ )
       fNewHypArray[ ievt ] = this -> TestStat( fNewHyp.GenerateGaussian() );
   else
     for ( int ievt = 0; ievt < fNPoints; ievt++ )
       fNewHypArray[ ievt ] = this -> TestStat( fNewHyp.GeneratePoisson() );
-  if ( !strcmp( fOldHyp.fType, "Gaussian" ) )
+  if ( fOldHyp.fType == 'G' )
     for ( int ievt = 0; ievt < fNPoints; ievt++ )
       fOldHypArray[ ievt ] = this -> TestStat( fOldHyp.GenerateGaussian() );
   else
@@ -93,36 +93,34 @@ void Analysis::CLsAnalyser::Evaluate() {
 //_______________________________________________________________________________
 // Gets the new hypothesis histogram
 TH1D* Analysis::CLsAnalyser::GetNewHypHist( const char *name, const int &nbins ) {
+  
   double
     step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
     xmin( fOldHypArray[ 0 ] - step ),
     xmax( fNewHypArray[ fNPoints - 1 ] + step );
 
-  TH1D *hist = new TH1D( name,
-			 name,
-			 nbins,
-			 xmin,
-			 xmax );
+  TH1D *hist = new TH1D( name, name, nbins, xmin, xmax );
 
   for ( int i = 0; i < fNPoints; i++ )
     hist -> Fill( fNewHypArray[ i ] );
+  
   return hist;
 }
 
 //_______________________________________________________________________________
 // Gets the old hypothesis histogram
 TH1D* Analysis::CLsAnalyser::GetOldHypHist( const char *name, const int &nbins ) {
+  
   double
     step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
     xmin( fOldHypArray[ 0 ] - step ),
     xmax( fNewHypArray[ fNPoints - 1 ] + step );
-  TH1D *hist = new TH1D( name,
-			 name,
-			 nbins,
-			 xmin,
-			 xmax );
+  
+  TH1D *hist = new TH1D( name, name, nbins, xmin, xmax );
+  
   for ( int i = 0; i < fNPoints; i++ )
     hist -> Fill( fOldHypArray[ i ] );
+  
   return hist;
 }
 
@@ -132,7 +130,6 @@ double Analysis::CLsAnalyser::GetPValue( const std::vector<double> &list,
 					 const double              &t0,
 					 const char                type ) {
   int evts( 0 );
-  std::vector<double>::iterator it;
   if ( type == 'N' ) {
     for ( auto it = list.begin(); it != list.end(); it++ )
       if ( *it < t0 )
@@ -147,8 +144,8 @@ double Analysis::CLsAnalyser::GetPValue( const std::vector<double> &list,
 }
 
 //_______________________________________________________________________________
-// Gets the CLs for a given confidence level ( introduce 0.8413 and 1 - 0.8413
-// to get the region inside 1 sigma ).
+// Gets the CLs for a given confidence level (introduce 0.8413 and 1 - 0.8413 to
+// get the region inside 1 sigma).
 double Analysis::CLsAnalyser::GetQCLs( const double &q, const char type ) {
   double tq;
   if ( type == 'N' )
@@ -189,7 +186,7 @@ void Analysis::CLsAnalyser::SetHypothesis( const Analysis::CLsArray &old_hyp,
 void Analysis::CLsAnalyser::SetNewHypothesis( const Analysis::CLsArray &new_hyp ) {
   fNewHyp = new_hyp;
   fNewHypArray.clear();
-  if ( !strcmp( fNewHyp.fType, "Gaussian" ) )
+  if ( fNewHyp.fType == 'G' )
     GetNewHypProb = &Analysis::CLsArray::GetGaussianProb;
   else
     GetNewHypProb = &Analysis::CLsArray::GetPoissonProb;
@@ -203,7 +200,7 @@ void Analysis::CLsAnalyser::SetOldHypothesis( const Analysis::CLsArray &old_hyp 
   fOldHyp = old_hyp;
   fOldHypArray.clear();
 
-  if ( !strcmp( fOldHyp.fType, "Gaussian" ) )
+  if ( fOldHyp.fType == 'G' )
     GetOldHypProb = &Analysis::CLsArray::GetGaussianProb;
   else
     GetOldHypProb = &Analysis::CLsArray::GetPoissonProb;
