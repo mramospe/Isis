@@ -2,7 +2,8 @@
 //  Mu-scan example for CLs calculations  //
 ////////////////////////////////////////////
 
-#include "CLsAnalysis.h"
+#include "CLsArray.h"
+#include "CLsAnalyser.h"
 
 #include "TCanvas.h"
 #include "TFile.h"
@@ -86,7 +87,7 @@ int main() {
 
     std::cout << " t0:\t\t"      << Analyser.TestStat( OBSarray )  << std::endl;
     std::cout << " CLs:\t\t"     << Analyser.GetCLs( OBSarray )    << std::endl;
-    std::cout << " CLs_med:\t"   << Analyser.GetQCLs( 0.5, "old" ) << std::endl;
+    std::cout << " CLs_med:\t"   << Analyser.GetQCLs( 0.5, 'O' ) << std::endl;
     std::cout << " CLs_1smin:\t" << Analyser.GetQCLs( 0.8413 )     << std::endl;
     std::cout << " CLs_1smax:\t" << Analyser.GetQCLs( 1 - 0.8413 ) << std::endl;
     std::cout << " Alpha:\t\t"   << Analyser.GetAlpha( OBSarray )  << std::endl;
