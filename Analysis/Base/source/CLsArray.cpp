@@ -22,6 +22,7 @@
 #include "CLsArray.h"
 
 #include <cmath>
+#include <iostream>
 
 
 //_______________________________________________________________________________
@@ -46,17 +47,29 @@ Analysis::CLsArray::CLsArray( const Analysis::CLsArray &other ) :
   fSize  = other.fSize;
   
   fMeans = new double[ fSize ];
-  for ( int i = 0; i < fSize; i++ )
+  for ( int i = 0; i < fSize; ++i )
     fMeans[ i ] = other.fMeans[ i ];
     
   if ( other.fSigmas ) {
       
     fSigmas = new double[ fSize ];
-    for ( int i = 0; i < fSize; i++ )
+    for ( int i = 0; i < fSize; ++i )
       fSigmas[ i ] = other.fSigmas[ i ];
   }
   else
     fSigmas = 0;
+}
+
+//_______________________________________________________________________________
+// Constructor for single-values ( Poisson )
+Analysis::CLsArray::CLsArray( const double &value ) :
+  fGenerator( 0 ),
+  fSigmas( 0 ),
+  fType( 'P' ) {
+
+  fSize       = 1;
+  fMeans      = new double[ 1 ];
+  fMeans[ 0 ] = value;
 }
 
 //_______________________________________________________________________________
@@ -73,47 +86,54 @@ Analysis::CLsArray::CLsArray( const double &value, const double &sigma ) :
 }
 
 //_______________________________________________________________________________
-// Constructor for multiple-values ( Gaussian )
-Analysis::CLsArray::CLsArray( double    *values,
-			      double    *sigmas,
-			      const int &size ) :
+// Constructor for multiple-values. If an array with the standard deviations is
+// provided, the values are considered to be gaussian.
+Analysis::CLsArray::CLsArray( const int &size, double *values, double *sigmas ) :
   fGenerator( 0 ),
-  fType( 'G' ) {
+  fSigmas( 0 ),
+  fType( 'P' ) {
 
   fSize   = size;
   fMeans  = new double[ fSize ];
-  fSigmas = new double[ fSize ];
+  
+  if ( sigmas ) {
+    fSigmas = new double[ fSize ];
+    fType   = 'G';
+  }
 
-  for (int i = 0; i < fSize; i++) {
+  for ( int i = 0; i < fSize; ++i ) {
     fMeans[ i ]  = values[ i ];
-    fSigmas[ i ] = sigmas[ i ];
+    if ( sigmas )
+      fSigmas[ i ] = sigmas[ i ];
   }
 }
 
 //_______________________________________________________________________________
-// Constructor for single-values ( Poisson )
-Analysis::CLsArray::CLsArray( const double &value ) :
+// Constructor given two lists
+Analysis::CLsArray::CLsArray( const std::initializer_list<double> values,
+			      const std::initializer_list<double> sigmas ) :
   fGenerator( 0 ),
   fSigmas( 0 ),
   fType( 'P' ) {
 
-  fSize       = 1;
-  fMeans      = new double[ 1 ];
-  fMeans[ 0 ] = value;
-}
-
-//_______________________________________________________________________________
-// Constructor for multiple-values ( Poisson )
-Analysis::CLsArray::CLsArray( double *values, const int &size ) :
-  fGenerator( 0 ),
-  fSigmas( 0 ),
-  fType( 'P' ) {
-
-  fSize  = size;
+  fSize  = values.size();
   fMeans = new double[ fSize ];
+  
+  if ( sigmas.size() ) {
+    if ( values.size() != sigmas.size() )
+      std::cerr <<
+	"ERROR: Vectors of values and standard deviations given to the array have different lengths"
+		<< std::endl;
+    fSigmas = new double[ fSize ];
+    fType   = 'G';
+  }
 
-  for (int i = 0; i < fSize; i++)
-    fMeans[ i ] = values[ i ];
+  auto itv = values.begin(), its = sigmas.begin();
+  for ( int i = 0; i < fSize; ++i ) {
+    fMeans[ i ] = *( itv + i );
+    if ( fSigmas )
+      fSigmas[ i ] = *( its + i );
+  }
 }
 
 //_______________________________________________________________________________
@@ -142,14 +162,14 @@ Analysis::CLsArray::operator = ( const Analysis::CLsArray &other ) {
     delete[] fMeans;
     fSize  = other.fSize;
     fMeans = new double[ fSize ];
-    for ( int i = 0; i < fSize; i++ )
+    for ( int i = 0; i < fSize; ++i )
       fMeans[ i ] = other.fMeans[ i ];
   }
 
   if ( other.fSigmas ) {
     delete[] fSigmas;
     fSigmas = new double[ fSize ];
-    for ( int i = 0; i < fSize; i++ )
+    for ( int i = 0; i < fSize; ++i )
       fSigmas[ i ] = other.fSigmas[ i ];
   }
 
@@ -169,35 +189,35 @@ Analysis::CLsArray::operator + ( const Analysis::CLsArray &other ) {
 
   if ( fType == 'G' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( fSigmas[ i ]*fSigmas[ i ] +
 					     other.fSigmas[ i ]*other.fSigmas[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else if ( fType == 'G' and other.fType == 'P' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( fSigmas[ i ]*fSigmas[ i ]
 					     + other.fMeans[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else if ( fType == 'P' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( other.fMeans[ i ]*other.fMeans[ i ]
 					     + fMeans[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else {
-    for ( int i = 0; i < fSize; i++ )
+    for ( int i = 0; i < fSize; ++i )
       means_res[ i ] = fMeans[ i ] + other.fMeans[ i ];
-    return Analysis::CLsArray( means_res, fSize );
+    return Analysis::CLsArray( fSize, means_res );
   }
 }
 
@@ -210,35 +230,35 @@ Analysis::CLsArray::operator - ( const Analysis::CLsArray &other ) {
 
   if ( fType == 'G' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( fSigmas[ i ]*fSigmas[ i ] -
 					     other.fSigmas[ i ]*other.fSigmas[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else if ( fType == 'G' and other.fType == 'P' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] + other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( fSigmas[ i ]*fSigmas[ i ]
 					     - other.fMeans[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else if ( fType == 'P' and other.fType == 'G' ) {
     double sigmas_res[ fSize ];
-    for ( int i = 0; i < fSize; i++ ) {
+    for ( int i = 0; i < fSize; ++i ) {
       means_res[ i ]  = fMeans[ i ] - other.fMeans[ i ];
       sigmas_res[ i ] = std::sqrt( std::abs( other.fMeans[ i ]*other.fMeans[ i ]
 					     - fMeans[ i ] ) );
     }
-    return Analysis::CLsArray( means_res, sigmas_res, fSize );
+    return Analysis::CLsArray( fSize, means_res, sigmas_res );
   }
   else {
-    for ( int i = 0; i < fSize; i++ )
+    for ( int i = 0; i < fSize; ++i )
       means_res[ i ] = fMeans[ i ] - other.fMeans[ i ];
-    return Analysis::CLsArray( means_res, fSize );
+    return Analysis::CLsArray( fSize, means_res );
   }
 }
 
@@ -250,16 +270,16 @@ Analysis::CLsArray Analysis::operator * ( const double &value, const CLsArray &o
 
   if ( other.fType == 'G' ) {
     double sigmas_res[ other.fSize ];
-    for ( int i = 0; i < other.fSize; i++ ) {
+    for ( int i = 0; i < other.fSize; ++i ) {
       means_res[ i ]  = value*other.fMeans[ i ];
       sigmas_res[ i ] = value*other.fSigmas[ i ];
     }
-    return Analysis::CLsArray( means_res, sigmas_res, other.fSize );
+    return Analysis::CLsArray( other.fSize, means_res, sigmas_res );
   }
   else {
-    for ( int i = 0; i < other.fSize; i++ )
+    for ( int i = 0; i < other.fSize; ++i )
       means_res[ i ]  = value*other.fMeans[ i ];
-    return Analysis::CLsArray( means_res, other.fSize );
+    return Analysis::CLsArray( other.fSize, means_res );
   }
 }
 
@@ -272,16 +292,16 @@ Analysis::CLsArray Analysis::operator * ( const CLsArray &other, const double &v
 
   if ( other.fType == 'G' ) {
     double sigmas_res[ size ];
-    for ( int i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; ++i ) {
       means_res[ i ]  = value*other.fMeans[ i ];
       sigmas_res[ i ] = value*other.fSigmas[ i ];
     }
-    return Analysis::CLsArray( means_res, sigmas_res, size );
+    return Analysis::CLsArray( size, means_res, sigmas_res );
   }
   else {
-    for ( int i = 0; i < size; i++ )
+    for ( int i = 0; i < size; ++i )
       means_res[ i ]  = value*other.fMeans[ i ];
-    return Analysis::CLsArray( means_res, size );
+    return Analysis::CLsArray( size, means_res );
   }
 }
 
@@ -301,9 +321,9 @@ Analysis::CLsArray Analysis::CLsArray::operator / ( const double &value ) {
 // distribution given by the means and sigmas owned by this class.
 Analysis::CLsArray Analysis::CLsArray::GenerateGaussian() {
   double res[ fSize ];
-  for ( int i = 0; i < fSize; i++ )
+  for ( int i = 0; i < fSize; ++i )
     res[ i ] = fGenerator.Gaus( fMeans[ i ], fSigmas[ i ] );
-  return Analysis::CLsArray( res, fSize );;
+  return Analysis::CLsArray( fSize, res );
 }
 
 //_______________________________________________________________________________
@@ -311,16 +331,16 @@ Analysis::CLsArray Analysis::CLsArray::GenerateGaussian() {
 // distribution given by the means and sigmas owned by this class.
 Analysis::CLsArray Analysis::CLsArray::GeneratePoisson() {
   double res[ fSize ];
-  for ( int i = 0; i < fSize; i++ )
+  for ( int i = 0; i < fSize; ++i )
     res[ i ] = fGenerator.Poisson( fMeans[ i ] );
-  return Analysis::CLsArray( res, fSize );
+  return Analysis::CLsArray( fSize, res );
 }
 
 //_______________________________________________________________________________
 // Gets the gaussian probability of having the given value(s)
 double Analysis::CLsArray::GetGaussianProb( const Analysis::CLsArray &values  ) {
   double res( 1 );
-  for ( int i = 0; i < fSize; i++ )
+  for ( int i = 0; i < fSize; ++i )
     res *= GetGaussian( fMeans[ i ], fSigmas[ i ], values.fMeans[ i ] );
 
   return res;
@@ -332,7 +352,7 @@ double Analysis::CLsArray::GetPoissonProb( const Analysis::CLsArray &values  ) {
 
   double res( 1 );
 
-  for ( int i = 0; i < fSize; i++ )
+  for ( int i = 0; i < fSize; ++i )
     res *= GetPoisson( fMeans[ i ], values.fMeans[ i ] );
 
   return res;

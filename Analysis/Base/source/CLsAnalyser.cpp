@@ -45,7 +45,7 @@ Analysis::CLsAnalyser::CLsAnalyser( const Analysis::CLsArray &old_hyp,
 
   fNewHyp  = new_hyp;
   fOldHyp  = old_hyp;
-  fNPoints = npoints;
+  fNpoints = npoints;
 
   if ( fNewHyp.fType == 'G' )
     GetNewHypProb = &Analysis::CLsArray::GetGaussianProb;
@@ -70,20 +70,20 @@ Analysis::CLsAnalyser::~CLsAnalyser() { }
 // Gets the distribution of the old and new hypothesis
 void Analysis::CLsAnalyser::Evaluate() {
   
-  fNewHypArray = std::vector<double>( fNPoints );
-  fOldHypArray = std::vector<double>( fNPoints );
+  fNewHypArray = std::vector<double>( fNpoints );
+  fOldHypArray = std::vector<double>( fNpoints );
 
   if ( fNewHyp.fType == 'G' )
-    for ( int ievt = 0; ievt < fNPoints; ievt++ )
+    for ( int ievt = 0; ievt < fNpoints; ievt++ )
       fNewHypArray[ ievt ] = this -> TestStat( fNewHyp.GenerateGaussian() );
   else
-    for ( int ievt = 0; ievt < fNPoints; ievt++ )
+    for ( int ievt = 0; ievt < fNpoints; ievt++ )
       fNewHypArray[ ievt ] = this -> TestStat( fNewHyp.GeneratePoisson() );
   if ( fOldHyp.fType == 'G' )
-    for ( int ievt = 0; ievt < fNPoints; ievt++ )
+    for ( int ievt = 0; ievt < fNpoints; ievt++ )
       fOldHypArray[ ievt ] = this -> TestStat( fOldHyp.GenerateGaussian() );
   else
-    for ( int ievt = 0; ievt < fNPoints; ievt++ )
+    for ( int ievt = 0; ievt < fNpoints; ievt++ )
       fOldHypArray[ ievt ] = this -> TestStat( fOldHyp.GeneratePoisson() );
 
   std::sort( fNewHypArray.begin(), fNewHypArray.end() );
@@ -95,13 +95,13 @@ void Analysis::CLsAnalyser::Evaluate() {
 TH1D* Analysis::CLsAnalyser::GetNewHypHist( const char *name, const int &nbins ) {
   
   double
-    step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
+    step( ( fNewHypArray[ fNpoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
     xmin( fOldHypArray[ 0 ] - step ),
-    xmax( fNewHypArray[ fNPoints - 1 ] + step );
+    xmax( fNewHypArray[ fNpoints - 1 ] + step );
 
   TH1D *hist = new TH1D( name, name, nbins, xmin, xmax );
 
-  for ( int i = 0; i < fNPoints; i++ )
+  for ( int i = 0; i < fNpoints; i++ )
     hist -> Fill( fNewHypArray[ i ] );
   
   return hist;
@@ -112,13 +112,13 @@ TH1D* Analysis::CLsAnalyser::GetNewHypHist( const char *name, const int &nbins )
 TH1D* Analysis::CLsAnalyser::GetOldHypHist( const char *name, const int &nbins ) {
   
   double
-    step( ( fNewHypArray[ fNPoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
+    step( ( fNewHypArray[ fNpoints - 1 ] - fOldHypArray[ 0 ] )/2 ),
     xmin( fOldHypArray[ 0 ] - step ),
-    xmax( fNewHypArray[ fNPoints - 1 ] + step );
+    xmax( fNewHypArray[ fNpoints - 1 ] + step );
   
   TH1D *hist = new TH1D( name, name, nbins, xmin, xmax );
   
-  for ( int i = 0; i < fNPoints; i++ )
+  for ( int i = 0; i < fNpoints; i++ )
     hist -> Fill( fOldHypArray[ i ] );
   
   return hist;
@@ -140,7 +140,7 @@ double Analysis::CLsAnalyser::GetPValue( const std::vector<double> &list,
       if ( *it > t0 )
 	evts++;
   }
-  return ( double ) evts/fNPoints;
+  return ( double ) evts/fNpoints;
 }
 
 //_______________________________________________________________________________
@@ -149,43 +149,41 @@ double Analysis::CLsAnalyser::GetPValue( const std::vector<double> &list,
 double Analysis::CLsAnalyser::GetQCLs( const double &q, const char type ) {
   double tq;
   if ( type == 'N' )
-    tq = fNewHypArray[ int( q*fNPoints ) ];
+    tq = fNewHypArray[ int( q*fNpoints ) ];
   else
-    tq = fOldHypArray[ int( q*fNPoints ) ];
+    tq = fOldHypArray[ int( q*fNpoints ) ];
   return this -> GetBeta( tq )/( 1 - this -> GetAlpha( tq ) );    
 }
 
 //_______________________________________________________________________________
 // Gets the ROC curve
 TGraph* Analysis::CLsAnalyser::GetROC( const int &npoints ) {
+  
   double
     it_min( fOldHypArray[ 0 ] ),
-    step( ( fNewHypArray[ fNPoints - 1 ] - it_min )/npoints );
+    step( ( fNewHypArray[ fNpoints - 1 ] - it_min )/npoints );
+  
   TGraph *ROC = new TGraph();
-  for ( int i = 0; i < npoints; i++ )
-    ROC -> SetPoint( i,
-		     this -> GetAlpha( it_min + i*step ),
-		     1 - this -> GetBeta( it_min + i*step ) );
-  return ROC;
-}
+  for ( int i = 0; i < npoints; i++ ) {
+    
+    double
+      alpha = this -> GetAlpha( it_min + i*step ),
+      beta  = this -> GetBeta( it_min + i*step );
+    
+    ROC -> SetPoint( i, alpha, 1 - beta );
+  }
 
-//_______________________________________________________________________________
-// Sets a new hypothesis. The arrays containing the distributions of the old
-// hypothesis are cleared.
-void Analysis::CLsAnalyser::SetHypothesis( const Analysis::CLsArray &old_hyp,
-					   const Analysis::CLsArray &new_hyp,
-					   const int                &npoints ) {
-  this -> SetNewHypothesis( new_hyp );
-  this -> SetOldHypothesis( old_hyp );
-  fNPoints = npoints;
+  return ROC;
 }
 
 //_______________________________________________________________________________
 // Sets a new hypothesis. The array containing the distribution of the old new
 // hypothesis is cleared.
 void Analysis::CLsAnalyser::SetNewHypothesis( const Analysis::CLsArray &new_hyp ) {
+
   fNewHyp = new_hyp;
   fNewHypArray.clear();
+
   if ( fNewHyp.fType == 'G' )
     GetNewHypProb = &Analysis::CLsArray::GetGaussianProb;
   else

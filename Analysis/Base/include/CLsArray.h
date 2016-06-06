@@ -40,10 +40,11 @@ namespace Analysis {
     // Constructor
     CLsArray();
     CLsArray( const CLsArray &other );
-    CLsArray( const double &value, const double &sigma );
-    CLsArray( double *values, double *sigmas, const int &size );
     CLsArray( const double &value );
-    CLsArray( double *values, const int &size );
+    CLsArray( const double &value, const double &sigma );
+    CLsArray( const int &size, double *values, double *sigmas = 0 );
+    CLsArray( const std::initializer_list<double> values,
+	      const std::initializer_list<double> sigmas = {} );
 
     // Destructor
     ~CLsArray();

@@ -13,15 +13,11 @@ using namespace Analysis;
 
 int main() {
 
-  double oldH[3] = { 1.5, 1., 0.5 };
-  double stepH[3] = { 2., 4., 2. };
-  double obs[3]  = {1., 1., 1.};
-
   // Arrays have to be given as CLsArray objects
   CLsArray
-    oldHarray( oldH, 3 ),
-    stepHarray( stepH, 3 ),
-    OBSarray( obs, 3 );
+    oldHarray({ 1.5, 1., 0.5 }),
+    stepHarray({ 2., 4., 2. }),
+    OBSarray({1., 1., 1.});
 
   // Opens the output file
   TFile *file = new TFile( "Results_CLs.root", "RECREATE" );
@@ -32,7 +28,7 @@ int main() {
   // iterations fot each step
   CLsAnalyser Analyser;
   Analyser.SetOldHypothesis( oldHarray );
-  Analyser.SetNPoints( 100000 );
+  Analyser.SetNpoints( 100000 );
 
   // Number of steps, and different < mu > values for the scan
   int    np( 10 );

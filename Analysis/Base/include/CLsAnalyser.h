@@ -56,7 +56,6 @@ namespace Analysis {
     TH1D*   GetOldHypHist( const char *name, const int &nbins );
     double  GetQCLs( const double &q, const char type = 'O' );
     TGraph* GetROC( const int &npoints );
-    void    SetHypothesis( const CLsArray &old_hyp, const CLsArray &new_hyp, const int &npoints );
     void    SetNewHypothesis( const CLsArray &new_hyp );
     void    SetOldHypothesis( const CLsArray &old_hyp );
 
@@ -69,7 +68,7 @@ namespace Analysis {
     inline double GetNewHypEvt( const int &index );
     inline double GetOldHypEvt( const int &index );
     inline int    GetSize();
-    inline void   SetNPoints( const int &npoints );
+    inline void   SetNpoints( const int &npoints );
     inline double TestStat( const CLsArray &obs );
 
   protected:
@@ -77,7 +76,7 @@ namespace Analysis {
     // Attributes
     CLsArray            fNewHyp;
     std::vector<double> fNewHypArray;
-    int                 fNPoints;
+    int                 fNpoints;
     CLsArray            fOldHyp;
     std::vector<double> fOldHypArray;
 
@@ -120,9 +119,9 @@ namespace Analysis {
     return fOldHypArray[ index ];
   }
   // Gets the size of the arrays in the class
-  inline int CLsAnalyser::GetSize() { return fNPoints; }
+  inline int CLsAnalyser::GetSize() { return fNpoints; }
   // Sets a new number of points for the distributions
-  inline void CLsAnalyser::SetNPoints( const int &npoints ) { fNPoints = npoints; }
+  inline void CLsAnalyser::SetNpoints( const int &npoints ) { fNpoints = npoints; }
   // Gets the test statistics value for a given observation
   double CLsAnalyser::TestStat( const Analysis::CLsArray &obs ) {
     return -2*std::log( ( fOldHyp.*GetOldHypProb )( obs )/( fNewHyp.*GetNewHypProb )( obs ) );
