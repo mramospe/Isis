@@ -45,7 +45,7 @@ namespace General {
     bool Find( const std::string &other ) const;
 
     // Inline methods
-    inline std::string        BuildPath( const std::string &ext );
+    inline std::string        BuildFilePath( const std::string &ext );
     inline const std::string& GetName() const;
 
     // Operators
@@ -72,7 +72,7 @@ namespace General {
   // -- INLINE METHODS
 
   // Builds the complete path to a file, given the type of the file (without the dot)
-  inline std::string SmartName::BuildPath( const std::string &ext ) { return fName + "." + ext; }
+  inline std::string SmartName::BuildFilePath( const std::string &ext ) { return fName + "." + ext; }
   // Returns the current name of the class
   inline const std::string& SmartName::GetName() const { return fName; }
   
