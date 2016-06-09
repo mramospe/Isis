@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 28/03/2016                                                      //
+//  Last update: 09/06/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -24,6 +24,37 @@
 
 
 #include "Variables.h"
+
+
+//_______________________________________________________________________________
+// -- BUFFER VARIABLE
+
+//_______________________________________________________________________________
+// Constructor given the type as a character
+Analysis::BufferVariable::BufferVariable( const char &type ) : fType( type ) {
+  switch( fType ) {
+  case 'B': break; // char
+  case 'b': break; // unsigned char
+  case 'S': break; // short int
+  case 's': break; // unsigned short int
+  case 'I': break; // int
+  case 'i': break; // unsigned int
+  case 'F': break; // float
+  case 'D': break; // double
+  case 'L': break; // long long int
+  case 'l': break; // unsigned long long int
+  case 'O': break; // bool
+  default:
+    std::cerr << "ERROR: Unknown type for buffer variable < " << type << " >" << std::endl;
+    break;
+  }
+}
+
+//_______________________________________________________________________________
+// Destructor
+Analysis::BufferVariable::~BufferVariable() { }
+
+//_______________________________________________________________________________
 
 
 //_______________________________________________________________________________
