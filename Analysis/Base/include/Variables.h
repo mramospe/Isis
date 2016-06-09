@@ -76,7 +76,7 @@ namespace Analysis {
 
 
   //_______________________________________________________________________________
-  // CLASS: 
+  // CLASS: BUFFER VARIABLE
   //
   // Main class to store any kind of primitive data types. Different objects of
   // this type can be stored in the same container, while refering to different
@@ -91,6 +91,10 @@ namespace Analysis {
     // Constructors and destructor
     BufferVariable( const char &type );
     ~BufferVariable();
+
+    // Methods
+    void*       PathToValue();
+    std::string ToString() const;
 
     // Inline methods
     template<typename type> inline void ExtractValue( type &value );
@@ -156,6 +160,10 @@ namespace Analysis {
     case 'O': fBoolValue   = value; break;
     }
   }
+  
+  // ____________________
+  // NON-MEMBER OPERATORS
+  std::ostream& operator << ( std::ostream &os, const BufferVariable &var );
 
   
   //_______________________________________________________________________________
