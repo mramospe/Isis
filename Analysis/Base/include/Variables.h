@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/06/2016                                                      //
+//  Last update: 10/06/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -89,6 +89,7 @@ namespace Analysis {
   public:
     
     // Constructors and destructor
+    BufferVariable();
     BufferVariable( const char &type );
     ~BufferVariable();
 
@@ -99,6 +100,7 @@ namespace Analysis {
     // Inline methods
     template<typename type> inline void ExtractValue( type &value );
     inline const char&                  GetType() const;
+    inline void                         SetType( const char &type );
     template<typename type> inline void SetValue( const type &value );
 
   protected:
@@ -143,6 +145,8 @@ namespace Analysis {
   }
   // Returns the type of the class
   inline const char& BufferVariable::GetType() const { return fType; }
+  // Sets the type of this variable. The information stored in it is lost.
+  inline void BufferVariable::SetType( const char &type ) { fType = type; }
   // Sets the value stored in the class as that of the given variable
   template<typename type>
   void BufferVariable::SetValue( const type &value ) {
