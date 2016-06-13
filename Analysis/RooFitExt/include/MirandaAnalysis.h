@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 19/04/2016			       //
+//  Last update: 13/06/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -51,9 +51,7 @@ namespace Analysis {
 		     double       xmin,
 		     double       xmax,
 		     double       ymin,
-		     double       ymax,
-		     double       xnorm = 1,
-		     double       ynorm = 1 );
+		     double       ymax );
 
     // Destructor
     ~MirandaAnalysis();
@@ -92,10 +90,8 @@ namespace Analysis {
     AdaptiveBinning2D   fStructure;
     double              fXmax;
     double              fXmin;
-    double              fXnorm;
     double              fYmax;
     double              fYmin;
-    double              fYnorm;
 
   };
 

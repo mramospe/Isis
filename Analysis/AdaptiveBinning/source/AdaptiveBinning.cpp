@@ -62,10 +62,5 @@ void Analysis::AdaptiveBinning::DisplayInfo( const size_t &entries,
 }
 
 //______________________________________________________________________________
-// Virtual method to get the adaptive binned histogram filled with the data used
-// to construct it
-TObject* Analysis::AdaptiveBinning::GetHist( const char *name, const char *title ) { return 0; }
-
-//______________________________________________________________________________
 // Virtual method to get the a histogram with the adaptive binned structure
 TObject* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *title ) { return 0; }

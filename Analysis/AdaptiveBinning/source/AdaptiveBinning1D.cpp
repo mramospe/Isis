@@ -51,6 +51,8 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
   fMax( vmax ),
   fMin( vmin ) {
 
+  fData = new std::vector< std::pair<double, double> >;
+
   auto itv = values.begin();
   if ( weights.size() ) {
     if ( values.size() != weights.size() )
@@ -60,14 +62,14 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
     auto itw = weights.begin();
     while( itv != values.end() )
       if ( *itv >= vmin && *itv < vmax )
-	fData.push_back( std::make_pair( *itv++, *itw++ ) );
+	fData -> push_back( std::make_pair( *itv++, *itw++ ) );
     fWeighted = true;
     this -> Construct( occ );
   }
   else {
     while( itv != values.end() )
       if ( *itv >= vmin && *itv < vmax )
-	fData.push_back( std::make_pair( *itv++, 1 ) );
+	fData -> push_back( std::make_pair( *itv++, 1 ) );
     fWeighted = false;
     this -> Construct( occ );
   }
@@ -85,13 +87,15 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
   fMax( vmax ),
   fMin( vmin ) {
 
+  fData = new std::vector< std::pair<double, double> >;
+
   TLeaf *leaf = tree -> GetLeaf( vname );
   if ( wname ) {
     TLeaf *wleaf = tree -> GetLeaf( wname );
     for ( long int ievt = 0; ievt < tree -> GetEntries(); ++ievt ) {
       tree -> GetEntry( ievt );
       if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
-	fData.push_back( std::make_pair( leaf -> GetValue(), wleaf -> GetValue() ) );
+	fData -> push_back( std::make_pair( leaf -> GetValue(), wleaf -> GetValue() ) );
     }
     fWeighted = true;
     this -> Construct( occ );
@@ -100,7 +104,7 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
     for ( long int ievt = 0; ievt < tree -> GetEntries(); ++ievt ) {
       tree -> GetEntry( ievt );
       if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
-	fData.push_back( std::make_pair( leaf -> GetValue(), 1 ) );
+	fData -> push_back( std::make_pair( leaf -> GetValue(), 1 ) );
     }
     fWeighted = false;
     this -> Construct( occ );
@@ -139,16 +143,6 @@ void Analysis::AdaptiveBinning1D::BinsToTree( std::string        brname,
 }
 
 //______________________________________________________________________________
-// Returns an histogram with the adaptive bins and filled with the data used to
-// construct it
-TH1D* Analysis::AdaptiveBinning1D::GetHist( const char *name, const char *title ) {
-  TH1D *hist = this -> GetStruct( name, title );
-  for ( auto it = fData.begin(); it != fData.end(); ++it )
-    hist -> Fill( it -> first, it -> second );
-  return hist;
-}
-
-//______________________________________________________________________________
 // Returns an empty histogram with the adaptive binning structure
 TH1D* Analysis::AdaptiveBinning1D::GetStruct( const char *name, const char *title ) {
  double *bins = new double[ fBinList.size() + 1 ];
@@ -173,7 +167,7 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
 
   // Calculates the sum of weights
   double sw = 0;
-  for ( auto it = fData.begin(); it != fData.end(); ++it )
+  for ( auto it = fData -> begin(); it != fData -> end(); ++it )
     sw += it -> second;
     
   // Calculates the number of bins
@@ -187,31 +181,31 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   fBinList = std::vector<Bin1D>( nbins, Bin1D( fMax ) );
   
   // Sorts the data and the weights
-  std::sort( fData.begin(), fData.end(), [] ( std::pair<double, double> it1,
+  std::sort( fData -> begin(), fData -> end(), [] ( std::pair<double, double> it1,
 					      std::pair<double, double> it2 ) {
 	       return it1.first < it2.first; } );
   
   // Depending if it is working with weights or with entries it fills the bins
-  auto id = fData.begin();
+  auto id = fData -> begin();
   if ( fWeighted ) {
     double auxsw = sw, swpb = 0;
     size_t binsout = 0;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ++ib ) {
       swpb = auxsw/( nbins - binsout++ );
-      while ( ib -> GetSumOfWeights() < swpb && id != fData.end() ) {
+      while ( ib -> GetSumOfWeights() < swpb && id != fData -> end() ) {
 	ib -> Fill( id -> first, id -> second );
 	++id;
       }
       auxsw -= ib -> GetSumOfWeights();
     }
     // If the end of the data has not been reached, it fills the last bin with the rest of the events
-    while ( id != fData.end() )
+    while ( id != fData -> end() )
       fBinList.back().Fill( id -> first, id++ -> second );
   }
   else {
     size_t
-      enpb = fData.size() / nbins,
-      add1 = fData.size() % nbins;
+      enpb = fData -> size() / nbins,
+      add1 = fData -> size() % nbins;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ++ib ) {
       if ( add1 ) {
 	while ( ib -> GetEntries() < enpb + 1 )
@@ -228,5 +222,8 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   fBinList.front().fMin = fMin;
   
   // Displays the information of the process
-  this -> DisplayInfo( fData.size(), sw, nbins, sw/nbins );
+  this -> DisplayInfo( fData -> size(), sw, nbins, sw/nbins );
+
+  // Deletes the data allocated by the class
+  delete fData;
 }

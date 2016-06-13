@@ -57,12 +57,21 @@ int main() {
   Analysis::AdaptiveBinning2D AB( 40, 300, 1400, 300, 1400, mtree, "xVar", "yVar", 0, 1, 1 );
 
   TH2Poly *hStr = AB.GetStruct( "hStr", "hStr" );
-  TH2Poly *hAdj  = AB.GetAdjHist( "hAdj", "hAdj" );
+  TH2Poly *hAdj  = AB.GetAdjStruct( "hAdj", "hAdj" );
   TH2Poly *hAdjStr = AB.GetAdjStruct( "hAdjStr", "hAdjStr" );
+
+  double xv, yv;
+  mtree -> SetBranchAddress( "xVar", &xv );
+  mtree -> SetBranchAddress( "yVar", &yv );
+  for ( Long64_t ievt = 0; ievt < mtree -> GetEntries(); ++ievt ) {
+    mtree -> GetEntry( ievt );
+    hAdj -> Fill( xv, yv );
+  }
+
   std::cout << "Made adaptive binning histograms" << std::endl;
 
   // Generates the asymmetry histograms
-  Analysis::MirandaAnalysis MA( 40, 300, 1400, 300, 1400, 1, 1 );
+  Analysis::MirandaAnalysis MA( 40, 300, 1400, 300, 1400 );
 
   MA.SetStructTree( mtree, "xVar", "yVar" );
 

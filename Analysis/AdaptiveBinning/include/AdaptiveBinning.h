@@ -45,7 +45,6 @@ namespace Analysis {
     virtual ~AdaptiveBinning();
 
     // Methods
-    virtual TObject* GetHist( const char *name, const char *title );
     virtual TObject* GetStruct( const char *name, const char *title );
 
     // Inline method

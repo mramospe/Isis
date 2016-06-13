@@ -61,15 +61,11 @@ namespace Analysis {
 		       TTree      *tree,
 		       const char *xleaf_name,
 		       const char *yleaf_name,
-		       const char *wleaf_name = 0,
-		       double      xnorm = 1,
-		       double      ynorm = 1 );
+		       const char *wleaf_name = 0 );
     ~AdaptiveBinning2D();
 
     // Methods
-    TH2Poly* GetAdjHist( const char *name, const char *title );
     TH2Poly* GetAdjStruct( const char *name, const char *title );
-    TH2Poly* GetHist( const char *name, const char *title );
     TH2Poly* GetStruct( const char *name, const char *title );
 
     // Inline methods
@@ -84,15 +80,15 @@ namespace Analysis {
   protected:
     
     // Attributes
-    std::vector<Bin2D>  fAdjBinList;
-    std::vector<Bin2D>  fBinList;
-    std::vector<double> fXdata;
-    double              fXmax;
-    double              fXmin;
-    std::vector<double> fYdata;
-    double              fYmax;
-    double              fYmin;
-    std::vector<double> fWdata;
+    std::vector<Bin2D>         fAdjBinList;
+    std::vector<Bin2D>         fBinList;
+    const std::vector<double> *fXdata;
+    double                     fXmax;
+    double                     fXmin;
+    const std::vector<double> *fYdata;
+    double                     fYmax;
+    double                     fYmin;
+    const std::vector<double> *fWdata;
 
     // Method
     void Construct( const double &min_occ );

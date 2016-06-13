@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		               //
 //  e-mail: miguel.ramos.pernas@cern.ch		       //
 //						       //
-//  Last update: 19/04/2016			       //
+//  Last update: 13/06/2016			       //
 //   						       //
 // --------------------------------------------------- //
 //						       //
@@ -41,9 +41,7 @@ Analysis::MirandaAnalysis::MirandaAnalysis( unsigned int occ_min,
 					    double       xmin,
 					    double       xmax,
 					    double       ymin,
-					    double       ymax,
-					    double       xnorm,
-					    double       ynorm ) :
+					    double       ymax ) :
   fMinOcc( occ_min ),
   fTopTree( 0 ),
   fTopLeaves( 0 ),
@@ -51,10 +49,8 @@ Analysis::MirandaAnalysis::MirandaAnalysis( unsigned int occ_min,
   fBotLeaves( 0 ),
   fXmax( xmax ),
   fXmin( xmin ),
-  fXnorm( xnorm ),
   fYmax( ymax ),
-  fYmin( ymin ),
-  fYnorm( ynorm ) { }
+  fYmin( ymin ) { }
 
 //______________________________________________________________________________
 // Destructor
@@ -111,8 +107,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetAdjBotHist( const char *name,
 
       fBotTree -> GetEntry( ievt );
 
-      hist -> Fill( fBotLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fBotLeaves[ 1 ] -> GetValue() / fYnorm,
+      hist -> Fill( fBotLeaves[ 0 ] -> GetValue(),
+		    fBotLeaves[ 1 ] -> GetValue(),
 		    fBotLeaves[ 2 ] -> GetValue() );
     }
   else
@@ -120,8 +116,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetAdjBotHist( const char *name,
 
       fBotTree -> GetEntry( ievt );
 
-      hist -> Fill( fBotLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fBotLeaves[ 1 ] -> GetValue() / fYnorm );
+      hist -> Fill( fBotLeaves[ 0 ] -> GetValue(),
+		    fBotLeaves[ 1 ] -> GetValue() );
     }
 
   return hist;
@@ -147,8 +143,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetAdjTopHist( const char *name,
 
       fTopTree -> GetEntry( ievt );
 
-      hist -> Fill( fTopLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fTopLeaves[ 1 ] -> GetValue() / fYnorm,
+      hist -> Fill( fTopLeaves[ 0 ] -> GetValue(),
+		    fTopLeaves[ 1 ] -> GetValue(),
 		    fTopLeaves[ 2 ] -> GetValue() );
     }
   else
@@ -156,8 +152,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetAdjTopHist( const char *name,
 
       fTopTree -> GetEntry( ievt );
 
-      hist -> Fill( fTopLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fTopLeaves[ 1 ] -> GetValue() / fYnorm );
+      hist -> Fill( fTopLeaves[ 0 ] -> GetValue(),
+		    fTopLeaves[ 1 ] -> GetValue() );
     }
 
   return hist;
@@ -232,8 +228,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetTopHist( const char *name,
 
       fTopTree -> GetEntry( ievt );
 
-      hist -> Fill( fTopLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fTopLeaves[ 1 ] -> GetValue() / fYnorm,
+      hist -> Fill( fTopLeaves[ 0 ] -> GetValue(),
+		    fTopLeaves[ 1 ] -> GetValue(),
 		    fTopLeaves[ 2 ] -> GetValue() );
     }
   else
@@ -241,8 +237,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetTopHist( const char *name,
 
       fTopTree -> GetEntry( ievt );
 
-      hist -> Fill( fTopLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fTopLeaves[ 1 ] -> GetValue() / fYnorm );
+      hist -> Fill( fTopLeaves[ 0 ] -> GetValue(),
+		    fTopLeaves[ 1 ] -> GetValue() );
     }
 
   return hist;
@@ -260,8 +256,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetBotHist( const char *name,
 
       fBotTree -> GetEntry( ievt );
 
-      hist -> Fill( fBotLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fBotLeaves[ 1 ] -> GetValue() / fYnorm,
+      hist -> Fill( fBotLeaves[ 0 ] -> GetValue(),
+		    fBotLeaves[ 1 ] -> GetValue(),
 		    fBotLeaves[ 2 ] -> GetValue() );
     }
   else
@@ -269,8 +265,8 @@ TH2Poly* Analysis::MirandaAnalysis::GetBotHist( const char *name,
 
       fBotTree -> GetEntry( ievt );
 
-      hist -> Fill( fBotLeaves[ 0 ] -> GetValue() / fXnorm,
-		    fBotLeaves[ 1 ] -> GetValue() / fYnorm );
+      hist -> Fill( fBotLeaves[ 0 ] -> GetValue(),
+		    fBotLeaves[ 1 ] -> GetValue() );
     }
 
   return hist;
@@ -314,8 +310,7 @@ void Analysis::MirandaAnalysis::SetStructTree( TTree     *tree,
 					    fXmin, fXmax,
 					    fYmin, fYmax,
 					    tree,
-					    xleaf_name, yleaf_name, wleaf_name,
-					    fXnorm, fYnorm );
+					    xleaf_name, yleaf_name, wleaf_name );
 }
 
 //______________________________________________________________________________
