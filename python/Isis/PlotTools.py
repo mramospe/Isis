@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 06/06/2016                                   //
+#//  Last update: 13/06/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -151,7 +151,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         vmax   = kwargs[ 'vmax' ]
         values = [ val for val in values if val < vmax ]
     else:
-        vmax   = max( values ) + CalcMinDist( values )/2.
+        vmax   = max( values ) + CalcMinDist( values, False )/2.
     if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
     else: xtitle = name
     if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]

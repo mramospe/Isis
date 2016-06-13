@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 25/04/2016                             //
+#//  Last update: 13/06/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -308,7 +308,7 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
             if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
             else: vmin = min( smpRef + smpObs )
             if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
-            else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs )*1./2
+            else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs, False )*1./2
             smpRef = MakeHistogram( 'ref', smpRef, nbins = nbins, vmin = vmin, vmax = vmax )
             smpObs = MakeHistogram( 'obs', smpObs, nbins = nbins, vmin = vmin, vmax = vmax )
         else:

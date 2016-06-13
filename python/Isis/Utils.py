@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 26/04/2016                                //
+#//  Last update: 13/06/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -24,9 +24,14 @@ from Isis.Algebra import Matrix, SolveLU
 
 
 #_______________________________________________________________________________
-# Calculates the minimum distance between values in an iterable object
-def CalcMinDist( lst ):
-    lst = sorted( set( lst ) )
+# Calculates the minimum distance between values in an iterable object. With the
+# input parameter < allow_zero > one can prevent the function to take into
+# account elements in the list with the same value.
+def CalcMinDist( lst, allow_zero = True ):
+    if allow_zero:
+        lst = sorted( lst )
+    else:
+        lst = sorted( set( lst ) )
     lst = [ abs( lst[ i - 1 ] - lst[ i ] ) for i in xrange( 1, len( lst ) ) ]
     return min( lst )
 
