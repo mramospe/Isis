@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 20/04/2016			                     //
+//  Last update: 13/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -47,8 +47,8 @@ namespace Analysis {
     AdaptiveBinning1D( size_t  occ,
 		       double  vmin,
 		       double  vmax,
-		       std::vector<double> *values,
-		       std::vector<double> *weights = 0 );
+		       const std::vector<double> &values,
+		       const std::vector<double> &weights = std::vector<double>() );
 
     AdaptiveBinning1D( size_t  occ,
 		       double  vmin,

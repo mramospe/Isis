@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 22/04/2016			                     //
+//  Last update: 13/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -45,28 +45,28 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D() : AdaptiveBinning() { }
 Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
 						double  vmin,
 						double  vmax,
-						std::vector<double> *values,
-						std::vector<double> *weights ) :
+						const std::vector<double> &values,
+						const std::vector<double> &weights ) :
   AdaptiveBinning(),
   fMax( vmax ),
   fMin( vmin ) {
 
-  auto itv = values -> begin();
-  if ( weights ) {
-    if ( values -> size() != weights -> size() )
+  auto itv = values.begin();
+  if ( weights.size() ) {
+    if ( values.size() != weights.size() )
       std::cerr <<
 	"ERROR: The lengths of the vectors containing the values and the weights do no match"
 		<< std::endl;
-    auto itw = weights -> begin();
-    while( itv != values -> end() )
-      if ( *itv >= vmin && *itv <= vmax )
+    auto itw = weights.begin();
+    while( itv != values.end() )
+      if ( *itv >= vmin && *itv < vmax )
 	fData.push_back( std::make_pair( *itv++, *itw++ ) );
     fWeighted = true;
     this -> Construct( occ );
   }
   else {
-    while( itv != values -> end() )
-      if ( *itv >= vmin && *itv <= vmax )
+    while( itv != values.end() )
+      if ( *itv >= vmin && *itv < vmax )
 	fData.push_back( std::make_pair( *itv++, 1 ) );
     fWeighted = false;
     this -> Construct( occ );
@@ -175,17 +175,7 @@ void Analysis::AdaptiveBinning1D::Construct( const size_t &occ ) {
   double sw = 0;
   for ( auto it = fData.begin(); it != fData.end(); ++it )
     sw += it -> second;
-  
-  // Calculates the minimum distance between events
-  double new_delta, delta = std::abs( fData.front().first - fData.back().first );
-  for ( auto it1 = fData.begin(); it1 != fData.end(); ++it1 )
-    for ( auto it2 = it1 + 1; it2 != fData.end(); ++it2 ) {
-      new_delta = std::abs( it2 -> first - it1 -> first );
-      if ( new_delta < delta && new_delta != 0 )
-	delta = new_delta;
-    }
-  delta /= 2;
-  
+    
   // Calculates the number of bins
   size_t nbins = size_t( sw )/occ;
   

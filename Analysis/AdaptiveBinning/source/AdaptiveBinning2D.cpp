@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 20/04/2016			                     //
+//  Last update: 13/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -46,21 +46,21 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 						double      xmax,
 						double      ymin,
 						double      ymax,
-						std::vector<double> *xvalues,
-						std::vector<double> *yvalues,
-						std::vector<double> *weights ) :
+						const std::vector<double> &xvalues,
+						const std::vector<double> &yvalues,
+						const std::vector<double> &weights ) :
   AdaptiveBinning(),
   fXmax( xmax ),
   fXmin( xmin ),
   fYmax( ymax ),
   fYmin( ymin ) {
 
-  fWeighted = weights;
+  fWeighted = weights.size();
 
-  if ( weights )
-    fWdata = *weights;
-  fXdata = *xvalues;
-  fYdata = *yvalues;
+  if ( weights.size() )
+    fWdata = weights;
+  fXdata = xvalues;
+  fYdata = yvalues;
   this -> Construct( min_occ );
 }
 
