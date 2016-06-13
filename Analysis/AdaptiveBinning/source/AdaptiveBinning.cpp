@@ -8,17 +8,15 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 19/04/2016			                     //
+//  Last update: 13/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
 //  Description:				                     //
 //						                     //
 //  Implements the abstract class to generate adaptive binned        //
-//  histograms. Generally the structure of the output histogram is   //
-//  obtained calling the < GetStruct > method, while < GetHist >     //
-//  returns this structured histogram filled with the data used to   //
-//  make it.					                     //
+//  histograms. The structure of the output histogram is obtained    //
+//  calling the < GetStruct > method.                                //
 //						                     //
 // ----------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////
