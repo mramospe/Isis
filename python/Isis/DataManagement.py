@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 21/04/2016                                //
+#//  Last update: 15/06/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -709,6 +709,22 @@ def ListFromBranch( brname, tree ):
     tree.ResetBranchAddresses()
     tree.SetBranchStatus( '*', True )
     return lst
+
+#_______________________________________________________________________________
+# Creates a manager from the root file in < file_path > and the tree in
+# < tree_path >. By default it books all the variables, but they can be provided
+# in < **kwargs >, as well as some cuts to be applied.
+def ManagerFromTree( name, file_path, tree_path, **kwargs ):
+    if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
+    else: cuts = ''
+    if 'variables' in kwargs: variables = kwargs[ 'variables' ]
+    else: variables = [ '*' ]
+    mgr = DataManager( name, file_path, [ tree_path ] )
+    mgr.BookVariables( *variables )
+    if cuts:
+        return mgr.SubSample( cuts = cuts )
+    else:
+        return mgr
 
 #_______________________________________________________________________________
 # Creates a new tree with the lists stored in a dictionary. The name of the
