@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 13/06/2016			                     //
+//  Last update: 15/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -65,6 +65,10 @@ namespace Analysis {
     ~AdaptiveBinning2D();
 
     // Methods
+    void     BinsToTree( std::string        brname,
+			 TTree             *itree,
+			 const std::string &xvar,
+			 const std::string &yvar );
     TH2Poly* GetAdjStruct( const char *name, const char *title );
     TH2Poly* GetStruct( const char *name, const char *title );
 

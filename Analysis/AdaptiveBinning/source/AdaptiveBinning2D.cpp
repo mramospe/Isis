@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 13/06/2016			                     //
+//  Last update: 15/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -144,6 +144,37 @@ Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() { }
 
 
 // -- PUBLIC METHODS
+
+//______________________________________________________________________________
+// Generates a new branch with name < brname > in the tree < itree >, and fills
+// it with the bin number corresponding to each event.
+void Analysis::AdaptiveBinning2D::BinsToTree( std::string        brname,
+					      TTree             *itree,
+					      const std::string &xvar,
+					      const std::string &yvar ) {
+  int ibin;
+  itree -> SetBranchStatus( "*", false );
+  itree -> SetBranchStatus( xvar.c_str(), true );
+  itree -> SetBranchStatus( yvar.c_str(), true );
+  
+  TH2 *hist = this -> GetStruct( brname.c_str(), brname.c_str() );
+  
+  TLeaf
+    *xleaf = itree -> GetLeaf( xvar.c_str() ),
+    *yleaf = itree -> GetLeaf( yvar.c_str() );
+    
+  TBranch *branch = itree -> Branch( brname.c_str(), &ibin, ( brname + "/I" ).c_str() );
+  
+  for ( Long64_t ievt = 0; ievt < itree -> GetEntries(); ++ievt ) {
+    itree -> GetEntry( ievt );
+    ibin = hist -> Fill( xleaf -> GetValue(), yleaf -> GetValue() );
+    branch -> Fill();
+  }
+  itree -> AutoSave();
+  itree -> SetBranchStatus( "*", true );
+  
+  delete hist;
+}
 
 //______________________________________________________________________________
 // Makes an adjusted adaptive binned histogram

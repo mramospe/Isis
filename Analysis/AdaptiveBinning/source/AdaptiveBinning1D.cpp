@@ -8,7 +8,7 @@
 //  AUTHOR: Miguel Ramos Pernas		                             //
 //  e-mail: miguel.ramos.pernas@cern.ch		                     //
 //						                     //
-//  Last update: 13/06/2016			                     //
+//  Last update: 15/06/2016			                     //
 //   						                     //
 // ----------------------------------------------------------------- //
 //						                     //
@@ -122,16 +122,19 @@ Analysis::AdaptiveBinning1D::~AdaptiveBinning1D() { }
 
 //______________________________________________________________________________
 // Generates a new branch with name < brname > in the tree < itree >, and fills
-// it with the bin corresponding to each event.
+// it with the bin number corresponding to each event.
 void Analysis::AdaptiveBinning1D::BinsToTree( std::string        brname,
 					      TTree             *itree,
 					      const std::string &datavar ) {
   int ibin;
+  
   itree -> SetBranchStatus( "*", false );
   itree -> SetBranchStatus( datavar.c_str(), true );
+  
   TH1     *hist   = this -> GetStruct( brname.c_str(), brname.c_str() );
   TLeaf   *leaf   = itree -> GetLeaf( datavar.c_str() );
   TBranch *branch = itree -> Branch( brname.c_str(), &ibin, ( brname + "/I" ).c_str() );
+  
   for ( Long64_t ievt = 0; ievt < itree -> GetEntries(); ++ievt ) {
     itree -> GetEntry( ievt );
     ibin = hist -> Fill( leaf -> GetValue() );
@@ -139,6 +142,7 @@ void Analysis::AdaptiveBinning1D::BinsToTree( std::string        brname,
   }
   itree -> AutoSave();
   itree -> SetBranchStatus( "*", true );
+  
   delete hist;
 }
 
