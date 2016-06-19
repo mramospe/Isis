@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 15/06/2016                                //
+#//  Last update: 19/06/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -59,12 +59,8 @@ class DataManager:
             ''' First check if < ifile > is a string or if it can be used as a dictionary'''
             if isinstance( ifile, str ):
 
-                if 'ftype' in kwargs:
-                    ftype = kwargs[ 'ftype' ]
-                    del kwargs[ 'ftype' ]
-                else:
-                    ftype = 'root'
-
+                ftype = kwargs.get( 'ftype', 'root' )
+                
                 if ftype in ( 'root', 'Root', 'ROOT' ):
                     ''' This is the constructor for Root files '''
                     if ifile and tnames:
@@ -86,9 +82,6 @@ class DataManager:
             else:
                 ''' This is the constructor using a dictionary (the ftype value is omitted) '''
                 self.AddDataFromDict( ifile )
-
-        for kw in kwargs:
-            setattr( self, kw, kwargs[ kw ] )            
 
     def __add__( self, other ):
         ''' Allows merging two objects of this class. The new manager owns all the targets. '''
@@ -295,8 +288,7 @@ class DataManager:
         containing a list for each event, with the variables same order as in < args >. If
         '*' appears in < args >, there will be taken all the variables in the manager
         ordered by name '''
-        if 'EvtsInRows' in kwargs: trans = kwargs[ 'EvtsInRows' ]
-        else: trans = True
+        trans = kwargs.get( 'EvtsInRows', True )
         if '*' in args:
             args = self.Variables.keys()
             args.sort()
@@ -342,15 +334,11 @@ class DataManager:
         ''' Makes the histogram of the given variable. A selection can be applied
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
-        if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
-        else: cuts = False
-        if 'name' not in kwargs:
-            name = self.Name + '_' + var
-        else:
-            name = kwargs[ 'name' ]
-            del kwargs[ 'name' ]
-        if 'title' not in kwargs:  kwargs[ 'title' ]  = name
-        if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = var
+        cuts = kwargs.get( 'cuts', False )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
+        
         var = self.GetVarEvents( var, cuts )
         if wvar:
             wvar = self.GetVarEvents( wvar, cuts )
@@ -358,16 +346,12 @@ class DataManager:
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''
-        if 'name'   not in kwargs:
-            name = self.Name + '_' + xvar + '_vs_' + yvar
-        else:
-            name = kwargs[ 'name' ]
-            del kwargs[ 'name' ]
-        if 'title'  not in kwargs: kwargs[ 'title'  ] = name
-        if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = xvar
-        if 'ytitle' not in kwargs: kwargs[ 'ytitle' ] = yvar
-        if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
-        else: cuts = False
+        cuts = kwargs.get( 'cuts', False )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
+        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
+        
         if wvar:
             wvar = self.GetVarEvents( wvar, cuts )
         xvar = self.GetVarEvents( xvar, cuts )
@@ -376,16 +360,18 @@ class DataManager:
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''
-        if 'name'   not in kwargs: kwargs[ 'name'   ] = xvar + 'vs' + yvar
-        if 'title'  not in kwargs: kwargs[ 'title'  ] = xvar + 'vs' + yvar
-        if 'xtitle' not in kwargs: kwargs[ 'xtitle' ] = xvar
-        if 'ytitle' not in kwargs: kwargs[ 'ytitle' ] = yvar
-        if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
-        else: cuts = False
+        cuts = kwargs.get( 'cuts', False )
+        kwargs[ 'name' ]   = kwargs.get( 'name', xvar + 'vs' + yvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
+        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
+
         xvar = self.GetVarEvents( xvar, cuts )
         yvar = self.GetVarEvents( yvar, cuts )
-        if xerr: xerr = self.GetVarEvents( xerr, cuts )
-        if yerr: yerr = self.GetVarEvents( yerr, cuts )
+        if xerr:
+            xerr = self.GetVarEvents( xerr, cuts )
+        if yerr:
+            yerr = self.GetVarEvents( yerr, cuts )
         return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 
     def MakeVariable( self, varname, arg, function = False ):
@@ -418,7 +404,7 @@ class DataManager:
 
     def Print( self, *args, **kwargs ):
         ''' Prints the information of the class as well as the values for the first 20
-        events. If < events > is introduced as an input, the number of events showed
+        events. If < evts > is introduced as an input, the number of events showed
         would be that specified by the user. If < cut > is specified only will be
         showed the events that statisfy the given cut. If < prec > is given, the
         number of decimal points it sets to this value. '''
@@ -427,12 +413,10 @@ class DataManager:
             print 'ERROR:', self.Name, '=> No variables booked in this manager'
             return
         
-        if 'cut' in kwargs: cut = kwargs[ 'cut' ]
-        else: cut = False
-        if 'events' in kwargs: events = kwargs[ 'events' ]
-        else: events = False
-        if 'prec' in kwargs: prec = kwargs[ 'prec' ]
-        else: prec = 3
+        cuts = kwargs.get( 'cuts', False )
+        evts = kwargs.get( 'evts', False )
+        prec = kwargs.get( 'prec', 3 )
+
         form = '%.' + str( prec ) + 'e'
         if prec:
             prec += 1
@@ -475,15 +459,15 @@ class DataManager:
         print deco + '\n' + vout + '\n' + deco
         
         ''' Prints the values of the variables '''
-        if cut:
-            evtlst = self.GetCutList( cut )
+        if cuts:
+            evtlst = self.GetCutList( cuts )
         else:
             evtlst = xrange( self.Nentries )
 
-        if events:
+        if evts:
             i = 0
             for ievt in evtlst:
-                if i == events: break
+                if i == evts: break
                 i += 1
                 vout = '| '
                 for var in self.GetEventTuple( ievt, *args ):
@@ -517,12 +501,10 @@ class DataManager:
         output will be considered as a txt where the columns correspond to each variable in
         alphabetical order. In any case the variables to be stored can be specified using
         the keyword < variables >, providing a list with them. '''
-        if 'ftype' in kwargs: ftype = kwargs[ 'ftype' ]
-        else: ftype = 'root'
-        if 'variables' in kwargs: variables = kwargs[ 'variables' ]
-        else: variables = self.Variables.keys()
-        if 'close' in kwargs: close = kwargs[ 'close' ]
-        else: close = True
+        ftype     = kwargs.get( 'ftype', 'root' )
+        variables = kwargs.get( 'variables', self.Variables.keys() )
+        close     = kwargs.get( 'close', True )
+        
         if ftype in ( 'root', 'Root', 'ROOT' ):
             if tree_name:
                 ofile = TFile.Open( name, 'RECREATE' )
@@ -566,10 +548,8 @@ class DataManager:
                 cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst ]
         else:
             cmgr = self.Copy( name )
-        if 'evts' in kwargs: evts = kwargs[ 'evts' ]
-        else: evts = slice( 0, self.Nentries )
-        if 'varset' in kwargs: varset = kwargs[ 'varset' ]
-        else: varset = cmgr.Variables.keys()
+        evts   = kwargs.get( 'evts', slice( 0, self.Nentries ) )
+        varset = kwargs.get( 'varset', cmgr.Variables.keys() )
         for v in cmgr.Variables.keys():
             if v in varset:
                 cmgr.Variables[ v ] = cmgr.Variables[ v ][ evts ]
@@ -650,12 +630,9 @@ def DictFromTree( tree, varlist ):
 # preference over the < colidx > variable. In the case where the first row
 # does not have the names, < tnames > and < columns > must match.
 def DictFromTxt( fname, tnames = [], **kwargs ):
-    ifile = open( fname, 'rt' )
-    line  = ifile.readline().split()
-    if 'colidx' in kwargs:
-        columns = kwargs[ 'colidx' ]
-    else:
-        columns = range( len( line ) )
+    ifile   = open( fname, 'rt' )
+    line    = ifile.readline().split()
+    columns = kwargs.get( 'colidx', range( len( line ) ) )
     if all( isinstance( line[ i ], str ) for i in columns ):
         if tnames:
             columns = [ columns[ i ] for i in columns if line[ i ] in tnames ]
@@ -715,11 +692,9 @@ def ListFromBranch( brname, tree ):
 # < tree_path >. By default it books all the variables, but they can be provided
 # in < **kwargs >, as well as some cuts to be applied.
 def ManagerFromTree( name, file_path, tree_path, **kwargs ):
-    if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
-    else: cuts = ''
-    if 'variables' in kwargs: variables = kwargs[ 'variables' ]
-    else: variables = [ '*' ]
-    mgr = DataManager( name, file_path, [ tree_path ] )
+    cuts      = kwargs.get( 'cuts', '' )
+    variables = kwargs.get( 'variables', [ '*' ] )
+    mgr       = DataManager( name, file_path, [ tree_path ] )
     mgr.BookVariables( *variables )
     if cuts:
         return mgr.SubSample( cuts = cuts )
@@ -730,9 +705,9 @@ def ManagerFromTree( name, file_path, tree_path, **kwargs ):
 # Creates a new tree with the lists stored in a dictionary. The name of the
 # branches are given by the keys in the dictionary. The names are sorted.
 def TreeFromDict( name, dic, **kwargs ):
-    if 'level' not in kwargs: kwargs[ 'level' ] = 0
-    if 'title' not in kwargs: kwargs[ 'title' ] = name
-    tree      = TTree( name, kwargs[ 'title' ], kwargs[ 'level' ] )
+    level     = kwargs.get( 'level', 0 )
+    title     = kwargs.get( 'title', name )
+    tree      = TTree( name, title, level )
     variables = dic.keys()
     variables.sort()
     avars, tvals = [], []
