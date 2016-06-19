@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 13/06/2016                                //
+#//  Last update: 16/06/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -42,6 +42,14 @@ def CombinedRange( *args ):
     minlst = min( min( lst ) for lst in args )
     maxlst = max( max( lst ) for lst in args )
     return minlst, maxlst
+
+#_______________________________________________________________________________
+# Given a dictionary of lists, it returns a list of dictionaries
+def DLtoLD( dic ):
+    firstkw = dic.keys()[ 0 ]
+    length  = len( dic[ firstkw ] )
+    return [ { kw: vals[ i ] for kw, vals in dic.iteritems() }
+             for i in xrange( length ) ]
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
@@ -198,11 +206,17 @@ def LargestString( lstdic ):
     return maxlen
 
 #_______________________________________________________________________________
+# Given a list of dictionaries, it returns a dictionary of lists
+def LDtoDL( lst ):
+    keys = lst[ 0 ].keys()
+    return { kw: [ el[ kw ] for el in lst ] for kw in keys }
+
+#_______________________________________________________________________________
 # This function generates a sublist from that given, with its values between
 # < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
 # than that of < vmax > will be considered. If set to False, the values that are
 # equal to it will also be considered. By default the output list is given
-# given sorted, and this behaviour is managed trough the < sort > variable.
+# sorted, and this behaviour is managed trough the < sort > variable.
 def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
     if 'sort' in kwargs: sort = kwargs[ 'sort' ]
     else: sort = True

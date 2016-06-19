@@ -71,10 +71,8 @@ class ColorList:
 # it will return a list of None values. The draw options are set using the
 # < drawopt > keyword.
 def DrawHistograms( *args, **kwargs ):
-    if 'drawopt' in kwargs: drawopt = kwargs[ 'drawopt' ]
-    else: drawopt = ''
-    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
-    else: norm = True
+    drawopt = kwargs.get( 'drawopt', '' )
+    norm    = kwargs.get( 'norm', True )
     if norm:
         imax = [ h.GetMaximum()*1./h.GetSumOfWeights() for h in args ]
         meth = TH1.DrawNormalized
@@ -142,8 +140,7 @@ def ImportPlotModules():
 def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
 
     ''' These are the options that can be passed to the function '''
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = name
+    title = kwargs.get( 'title', name )
     if 'vmin' in kwargs:
         vmin   = kwargs[ 'vmin' ]
         values = [ val for val in values if val >= vmin ]
@@ -152,12 +149,9 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         values = [ val for val in values if val < vmax ]
     else:
         vmax   = max( values ) + CalcMinDist( values, False )/2.
-    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
-    else: xtitle = name
-    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
-    else: ytitle = 'Entries'
-    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
-    else: histcall = TH1D
+    xtitle   = kwargs.get( 'xtitle', name )
+    ytitle   = kwargs.get( 'ytitle', 'Entries' )
+    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
     
     ''' Calculates the array of weights '''
     length = len( values )
@@ -211,12 +205,9 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
 # the option < norm > is given, the histogram will be scaled in such a way that
 # the maximum value will be one.
 def MakeCumulative( hist, **kwargs ):
-    if 'name' in kwargs: name = kwargs[ 'name' ]
-    else: name = ''
-    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
-    else: norm = True
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = name
+    name  = kwargs.get( 'name', '' )
+    norm  = kwargs.get( 'norm', True )
+    title = kwargs.get( 'title', name )
     chist = hist.Clone()
     chist.SetNameTitle( name, title )
     cumulative = chist.GetBinContent( 1 )
@@ -232,20 +223,22 @@ def MakeCumulative( hist, **kwargs ):
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
 def MakeHistogram( name, var, wvar = False, **kwargs ):
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = name
-    if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
-    else: nbins = 100
-    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
-    else: xtitle = name
-    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
-    else: ytitle = 'Entries'
-    if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
-    else: vmax = max( var )
-    if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
-    else: vmin = min( var )
-    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
-    else: histcall = TH1D
+    title    = kwargs.get( 'title', name )
+    nbins    = kwargs.get( 'nbins', 100 )
+    xtitle   = kwargs.get( 'xtitle', name )
+    ytitle   = kwargs.get( 'ytitle', 'Entries' )
+    if 'vmin' in kwargs:
+        vmin = kwargs[ 'vmin' ]
+        var  = [ val for val in var if val >= vmin ]
+    else:
+        vmin = min( var )
+    if 'vmax' in kwargs:
+        vmax = kwargs[ 'vmax' ]
+        var  = [ val for val in var if val < vmax ]
+    else:
+        vmax = max( var ) + CalcMinDist( var, False )/2.
+        var  = [ val for val in var if val < vmax ]
+    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -264,27 +257,17 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
 #_______________________________________________________________________________
 # Creates a 2-dimensional histogram given two lists
 def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = name
-    if 'xbins' in kwargs: xbins = kwargs[ 'xbins' ]
-    else: xbins = 100
-    if 'ybins' in kwargs: ybins = kwargs[ 'ybins' ]
-    else: ybins = 100
-    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
-    else: xtitle = 'X'
-    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
-    else: ytitle = 'Y'
-    if 'xmax' in kwargs: xmax = kwargs[ 'xmax' ]
-    else: xmax = min( xvar )
-    if 'ymax' in kwargs: ymax = kwargs[ 'ymax' ]
-    else: ymax = min( yvar )
-    if 'xmin' in kwargs: xmin = kwargs[ 'xmin' ]
-    else: xmin = min( xvar )
-    if 'ymin' in kwargs: ymin = kwargs[ 'ymin' ]
-    else: ymin = min( yvar )
-    if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ], 2 )
-    else: histcall = TH2D
-
+    title    = kwargs.get( 'title', name )
+    xbins    = kwargs.get( 'xbins', 100 )
+    ybins    = kwargs.get( 'ybins', 100 )
+    xtitle   = kwargs.get( 'xtitle', 'X' )
+    ytitle   = kwargs.get( 'ytitle', 'Y' )
+    xmax     = kwargs.get( 'xmax', max( xvar ) )
+    ymax     = kwargs.get( 'ymax', max( yvar ) )
+    xmin     = kwargs.get( 'xmin', min( xvar ) )
+    ymin     = kwargs.get( 'ymin', min( yvar ) )
+    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 2 )
+    
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
 
     if wvar:
@@ -300,14 +283,11 @@ def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
 #_______________________________________________________________________________
 # Generates a scatter plot given two lists of data
 def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
-    if 'name' in kwargs: name = kwargs[ 'name' ]
-    else: name = ''
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = name
-    if 'xtitle' in kwargs: xtitle = kwargs[ 'xtitle' ]
-    else: xtitle = 'X'
-    if 'ytitle' in kwargs: ytitle = kwargs[ 'ytitle' ]
-    else: ytitle = 'Y'
+    name   = kwargs.get( 'name', '' )
+    title  = kwargs.get( 'title', name )
+    xtitle = kwargs.get( 'xtitle', 'X' )
+    ytitle = kwargs.get( 'ytitle', 'Y' )
+
     npoints = len( xvar )
     xvar    = array( 'd', xvar )
     yvar    = array( 'd', yvar )
@@ -336,22 +316,14 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
 def MultiPlot( mngrs, variables, **kwargs):
-    if 'colors' in kwargs: colors = ColorList( kwargs[ 'colors' ] )
-    else: colors = ColorList()
-    if 'cuts' in kwargs: cuts = kwargs[ 'cuts' ]
-    else: cuts = False
-    if 'errors' in kwargs: errors = kwargs[ 'errors' ]
-    else: errors = False
-    if 'legend' in kwargs: legend = kwargs[ 'legend' ]
-    else: legend = True
-    if 'name' in kwargs: name = kwargs[ 'name' ]
-    else: name = 'canvas'
-    if 'title' in kwargs: title = kwargs[ 'title' ]
-    else: title = 'canvas'
-    if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
-    else: nbins = 100
-    if 'norm' in kwargs: norm = kwargs[ 'norm' ]
-    else: norm = True
+    colors = ColorList( kwargs.get( 'colors', None ) )
+    cuts   = kwargs.get( 'cuts', False )
+    errors = kwargs.get( 'errors', False )
+    legend = kwargs.get( 'legend', True )
+    name   = kwargs.get( 'name', 'canvas' )
+    title  = kwargs.get( 'title', name )
+    nbins  = kwargs.get( 'nbins', 100 )
+    norm   = kwargs.get( 'norm', True )
     
     nvars   = len( variables ) + 1
     results = {}
