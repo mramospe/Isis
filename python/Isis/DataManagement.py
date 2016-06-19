@@ -335,8 +335,8 @@ class DataManager:
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
         cuts = kwargs.get( 'cuts', False )
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        name = kwargs.get( 'name', self.Name + '_' + var )
+        kwargs[ 'title' ]  = kwargs.get( 'title', name )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
         
         var = self.GetVarEvents( var, cuts )
@@ -347,8 +347,8 @@ class DataManager:
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''
         cuts = kwargs.get( 'cuts', False )
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        name = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', name )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
         
