@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 13/06/2016                                   //
+#//  Last update: 19/06/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -62,6 +62,29 @@ class ColorList:
         niter = self.Iter % len( self.Colors )
         self.Iter += 1
         return self.Colors[ niter ] + nloop
+
+#_______________________________________________________________________________
+# This function extracts the bounds of the given array of data which is
+# supposed to be used to make a histogram. It also returns the filtered list
+# of data if it is specified in < kwargs >.
+def ExtractHistBounds( var, **kwargs ):
+    if 'vmin' in kwargs:
+        vmin = kwargs[ 'vmin' ]
+    else:
+        vmin = min( var )
+    if 'vmax' in kwargs:
+        vmax = kwargs[ 'vmax' ]
+    else:
+        vmax  = max( var )
+        vmax += ( vmax - vmin )/( 2.*nbins )
+    
+    retvals = kwargs.get( 'retvals', False )
+    
+    if retvals:
+        var = [ v for v in var if v >= vmin and v < vmax ]
+        return vmin, vmax, var
+    else:
+        return vmin, vmax
 
 #_______________________________________________________________________________
 # Draws the given histograms in such an order, that the first to be drawn is
@@ -140,18 +163,11 @@ def ImportPlotModules():
 def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
 
     ''' These are the options that can be passed to the function '''
-    title = kwargs.get( 'title', name )
-    if 'vmin' in kwargs:
-        vmin   = kwargs[ 'vmin' ]
-        values = [ val for val in values if val >= vmin ]
-    if 'vmax' in kwargs:
-        vmax   = kwargs[ 'vmax' ]
-        values = [ val for val in values if val < vmax ]
-    else:
-        vmax   = max( values ) + CalcMinDist( values, False )/2.
+    title    = kwargs.get( 'title', name )
     xtitle   = kwargs.get( 'xtitle', name )
     ytitle   = kwargs.get( 'ytitle', 'Entries' )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
+    vmin, vmax, values = ExtractHistBounds( values, retvals = True, **kwargs )
     
     ''' Calculates the array of weights '''
     length = len( values )
@@ -227,18 +243,8 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
     nbins    = kwargs.get( 'nbins', 100 )
     xtitle   = kwargs.get( 'xtitle', name )
     ytitle   = kwargs.get( 'ytitle', 'Entries' )
-    if 'vmin' in kwargs:
-        vmin = kwargs[ 'vmin' ]
-        var  = [ val for val in var if val >= vmin ]
-    else:
-        vmin = min( var )
-    if 'vmax' in kwargs:
-        vmax = kwargs[ 'vmax' ]
-        var  = [ val for val in var if val < vmax ]
-    else:
-        vmax = max( var ) + CalcMinDist( var, False )/2.
-        var  = [ val for val in var if val < vmax ]
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
+    vmin, vmax, var = ExtractHistBounds( var, retvals = True, **kwargs )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -262,11 +268,21 @@ def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
     ybins    = kwargs.get( 'ybins', 100 )
     xtitle   = kwargs.get( 'xtitle', 'X' )
     ytitle   = kwargs.get( 'ytitle', 'Y' )
-    xmax     = kwargs.get( 'xmax', max( xvar ) )
-    ymax     = kwargs.get( 'ymax', max( yvar ) )
-    xmin     = kwargs.get( 'xmin', min( xvar ) )
-    ymin     = kwargs.get( 'ymin', min( yvar ) )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 2 )
+    
+    xbounds = {}
+    if 'xmin' in kwargs:
+        xbounds[ 'vmin' ] = kwargs[ 'xmin' ]
+    if 'xmax' in kwargs:
+        xbounds[ 'vmax' ] = kwargs[ 'xmax' ]
+    xmin, xmax, xvar = ExtractHistBounds( xvar, retvals = True, **xbounds )
+
+    ybounds = {}
+    if 'ymin' in kwargs:
+        ybounds[ 'ymin' ] = kwargs[ 'ymin' ]
+    if 'ymax' in kwargs:
+        ybounds[ 'ymax' ] = kwargs[ 'ymax' ]
+    ymin, ymax, yvar = ExtractHistBounds( yvar, retvals = True, **ybounds )    
     
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
 
