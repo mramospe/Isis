@@ -24,7 +24,7 @@ echo "Loading source from: $ISIS"
 if [[ $PATH != *$currpath* ]]; then
     export PATH=$currpath:$PATH
 fi
-echo "Extended shell path to $currpath"
+echo "Extended shell path from: $currpath"
 
 # The library path is updated with the Isis libraries
 if [[ $LD_LIBRARY_PATH != *$ISIS/lib* ]]; then
