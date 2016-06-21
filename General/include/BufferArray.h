@@ -38,18 +38,19 @@
 namespace General {
 
   class BufferArray {
+        
+  public:
     
+    // Definition of internal variables
     typedef General::BufferVariable BuffVar;
     typedef bool (*SortFunc)( const std::string &stra, const std::string &strb );
     typedef std::map<std::string, BuffVar*, SortFunc> BuffVarMap;
-    
-  public:
     
     // Constructor and destructor
     BufferArray( const BufferArray &other );
     BufferArray( SortFunc func = [] ( const std::string &strA,
 				      const std::string &strB ) { return strA < strB; } );
-    ~BufferArray();
+    virtual ~BufferArray();
 
     // Methods
     void        AddVariable( const std::string &name, const char &type );
