@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 02/05/2016                              //
+//  Last update: 22/06/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -172,6 +172,68 @@ void General::SplitString( std::vector<std::string> &output,
     pos = strpos + 1;
   }
   output.push_back( str.substr( pos, str.size() - pos ) );
+}
+
+//_______________________________________________________________________________
+// Filters the entries in the given vector following the rules imposed by the
+// input variable < expr >. The strings that pass the filter are attached to the
+// output vector.
+void General::StringVectorFilter( std::vector<std::string>       &output,
+				  const std::vector<std::string> &input,
+				  const std::string              &expr ) {
+
+  // Splits the input string using the character < * >
+  std::vector<std::string> splitVec;
+  General::SplitString( splitVec, expr, "*" );
+
+  // Defines two boolean variables that determine if the first or the last word provided
+  // in the expression must be checked
+  bool
+    checkstart = true,
+    checkend   = true;
+  if ( splitVec.front() == std::string() )
+    checkstart = false;
+  if ( splitVec.back() == std::string() )
+    checkend = false;
+
+  // The splitted vector will have empty values in the first and last entries depending
+  // if the < * > symbol is placed in the expression extremes, so they must be removed
+  splitVec.assign( splitVec.begin() + !checkstart, splitVec.end() - !checkend );
+  
+  // Adds each string to the new vector if they satisfy the requirements imposed by < expr >
+  for ( auto it = input.begin(); it != input.end(); ++it ) {
+    
+    size_t
+      prevPos = 0,
+      nextPos = 0;
+
+    bool cond1 = true, cond2 = true;
+
+    // If the start or the end does not coincide with the expected, the condition variable
+    // is set to < false >, so it does not enter into the following loop
+    if ( checkstart )
+      if ( it -> find( splitVec.front() ) != 0 )
+	cond1 = false;
+    if ( checkend ) {
+      size_t pos = (it -> size() - splitVec.back().size());
+      if ( it -> rfind( splitVec.back() ) != pos )
+	cond1 = false;
+    }
+    
+    for ( auto itkw = splitVec.begin(); itkw != splitVec.end() && cond1 && cond2; ++itkw ) {
+
+      nextPos = it -> find( *itkw );
+      
+      cond1 = (nextPos >= prevPos);
+      cond2 = (nextPos != std::string::npos);
+
+      prevPos = nextPos;
+    }
+
+    // Only if the iterator has reached the end the string is saved
+    if ( cond1 && cond2 )
+      output.push_back( *it );
+  }
 }
 
 //_______________________________________________________________________________

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                          //
 //  e-mail: miguel.ramos.pernas@cern.ch                  //
 //                                                       //
-//  Last update: 03/05/2016                              //
+//  Last update: 22/06/2016                              //
 //                                                       //
 // ----------------------------------------------------- //
 //                                                       //
@@ -48,6 +48,9 @@ namespace General {
   void        SplitString( std::vector<std::string> &output,
 			   const std::string        &str,
 			   const std::string        &expr );
+  void        StringVectorFilter( std::vector<std::string>       &output,
+				  const std::vector<std::string> &input,
+				  const std::string              &expr );
   void        TrimString( std::string &str, const std::string &trexpr = " " );
 
 
