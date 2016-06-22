@@ -23,6 +23,7 @@
 
 #include "TreeBuffer.h"
 #include "TreeManagement.h"
+#include "Utils.h"
 
 
 //_______________________________________________________________________________
@@ -84,7 +85,19 @@ void Analysis::TreeBuffer::LoadVariable( const std::string &name ) {
 }
 
 //_______________________________________________________________________________
-// Changes the status of the branches in the attached tree to that given to the funcion
+// Loads the variables satisfying the requirements in the given expression
+void Analysis::TreeBuffer::LoadVariables( const std::string &expr ) {
+  
+  std::vector<std::string> variables;
+  Analysis::GetBranchNames( variables, fTree, expr );
+
+  for ( auto it = variables.begin(); it != variables.end(); ++it )
+    this -> LoadVariable( *it );
+}
+
+//_______________________________________________________________________________
+// Changes the status of the branches in the attached tree to that given to the
+// function
 void Analysis::TreeBuffer::SetBranchStatus( const bool &dec ) {
   if ( dec )
     fTree -> SetBranchStatus( "*", dec );

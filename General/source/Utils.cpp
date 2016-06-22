@@ -102,51 +102,6 @@ void General::CheckParseOpts( const std::string              &str,
 }
 
 //_______________________________________________________________________________
-// Appends to a vector the names that satisfy a given expression, being these
-// located inside another vector.
-void General::ParseStringMatch( std::vector<std::string>       &output,
-				const std::vector<std::string> &vector,
-				const std::string              &expr ) {
-
-  std::vector<std::string> spltvec;
-  General::SplitString( spltvec, expr, "*" );
-  std::vector<std::string>::iterator itn;
-  size_t pos;
-    
-  bool checkfirst = true, checklast = true, add;
-  if ( spltvec.front() == "" ) {
-    spltvec.erase( spltvec.begin() );
-    checkfirst = false;
-  }
-  if ( spltvec.back() == "" ) {
-    spltvec.erase( spltvec.end() - 1 );
-    checklast = false;
-  }
-  
-  for ( auto it = vector.begin(); it != vector.end(); it++ ) {
-    add = true;
-    pos = 0;
-
-    itn = spltvec.begin();
-    while ( itn != spltvec.end() && ( pos = it -> find( *itn, pos ) ) != std::string::npos )
-      pos += itn++ -> size();
-    
-    if ( itn == spltvec.end() ) {
-      
-      if ( checkfirst && checklast )
-	add = ( it -> find( spltvec.front() ) == 0 &&
-		it -> rfind( spltvec.back() ) + spltvec.back().size() == it -> size() );
-      else if ( checkfirst )
-	add = ( it -> find( spltvec.front() ) == 0 );
-      else if ( checklast )
-	add = ( it -> rfind( spltvec.back() ) + spltvec.back().size() == it -> size() );
-      if ( add )
-	output.push_back( *it );
-    }
-  }
-}
-
-//_______________________________________________________________________________
 // This function replaces all the substrings of the strings storaged in a vector
 // with another
 void General::ReplaceNames( std::vector<std::string> &vector, std::string istr, std::string ostr ) {

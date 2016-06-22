@@ -52,6 +52,7 @@ namespace Analysis {
     void AttachTree( TTree *tree );
     void CreateVariable( const std::string &name, const char &type );
     void LoadVariable( const std::string &name );
+    void LoadVariables( const std::string &expr );
     void SetBranchStatus( const bool &dec );
 
     // Inline methods

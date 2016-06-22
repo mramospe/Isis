@@ -39,9 +39,6 @@ namespace General {
   std::string CenterString( const std::string &str, const size_t &size, const char &ch = ' ' );
   void        CheckParseOpts( const std::string              &str,
 			      const std::vector<std::string> &lst = {} );
-  void        ParseStringMatch( std::vector<std::string>       &output,
-				const std::vector<std::string> &vector,
-				const std::string              &expr );
   void        ReplaceNames( std::vector<std::string> &vector,
 			    std::string               istr,
 			    std::string               ostr );

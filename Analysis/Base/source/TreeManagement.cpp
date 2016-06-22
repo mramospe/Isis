@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                         //
 //  e-mail: miguel.ramos.pernas@cern.ch                 //
 //                                                      //
-//  Last update: 10/03/2016                             //
+//  Last update: 22/06/2016                             //
 //                                                      //
 // ---------------------------------------------------- //
 //                                                      //
@@ -43,7 +43,7 @@ void Analysis::GetBranchNames( std::vector<std::string> &vector,
   for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetName();
   if ( expr.size() )
-    General::ParseStringMatch( vector, brVector, expr );
+    General::StringVectorFilter( vector, brVector, expr );
   else
     vector.insert( vector.end(), brVector.begin(), brVector.end() );
 }
@@ -58,7 +58,7 @@ void Analysis::GetBranchTitles( std::vector<std::string> &vector,
   for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
   if ( expr.size() )
-    General::ParseStringMatch( vector, brVector, expr );
+    General::StringVectorFilter( vector, brVector, expr );
   else
     vector.insert( vector.end(), brVector.begin(), brVector.end() );
 }
