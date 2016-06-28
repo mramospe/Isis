@@ -102,17 +102,17 @@ namespace General {
   template<typename type>
   void BufferVariable::SetValue( const type &value ) {
     switch( fType ) {
-    case 'B': value = *static_cast<char*>                   ( fPath ) = value; break;
-    case 'b': value = *static_cast<unsigned char*>          ( fPath ) = value; break;
-    case 'S': value = *static_cast<short int*>              ( fPath ) = value; break;
-    case 's': value = *static_cast<unsigned short int*>     ( fPath ) = value; break;
-    case 'I': value = *static_cast<int*>                    ( fPath ) = value; break;
-    case 'i': value = *static_cast<unsigned int*>           ( fPath ) = value; break;
-    case 'F': value = *static_cast<float*>                  ( fPath ) = value; break;
-    case 'D': value = *static_cast<double*>                 ( fPath ) = value; break;
-    case 'L': value = *static_cast<long long int*>          ( fPath ) = value; break;
-    case 'l': value = *static_cast<unsigned long long int*> ( fPath ) = value; break;
-    case 'O': value = *static_cast<bool*>                   ( fPath ) = value; break;
+    case 'B': *static_cast<char*>                   ( fPath ) = value; break;
+    case 'b': *static_cast<unsigned char*>          ( fPath ) = value; break;
+    case 'S': *static_cast<short int*>              ( fPath ) = value; break;
+    case 's': *static_cast<unsigned short int*>     ( fPath ) = value; break;
+    case 'I': *static_cast<int*>                    ( fPath ) = value; break;
+    case 'i': *static_cast<unsigned int*>           ( fPath ) = value; break;
+    case 'F': *static_cast<float*>                  ( fPath ) = value; break;
+    case 'D': *static_cast<double*>                 ( fPath ) = value; break;
+    case 'L': *static_cast<long long int*>          ( fPath ) = value; break;
+    case 'l': *static_cast<unsigned long long int*> ( fPath ) = value; break;
+    case 'O': *static_cast<bool*>                   ( fPath ) = value; break;
     default :
       std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl;
       break;
