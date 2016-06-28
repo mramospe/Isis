@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                               //
 //  e-mail: miguel.ramos.pernas@cern.ch                                       //
 //                                                                            //
-//  Last update: 20/06/2016                                                   //
+//  Last update: 28/06/2016                                                   //
 //                                                                            //
 // -------------------------------------------------------------------------- //
 //                                                                            //
@@ -15,9 +15,11 @@
 //                                                                            //
 //  Definition of the buffer to store different types of data in the same     //
 //  vector. The variables are accessed as in a common map, using the          //
-//  operator < [] > or the method < Get >. In order to modify them, one must  //
-//  use the operator. To add a new variable, one must use the method          //
-//  < AddVariable >, specifying the name and the type.                        //
+//  operator < [] > or the method < Get >. This class uses pointers to the    //
+//  variables since the class BufferVariable does not support a copy          //
+//  constructor. In order to modify them, one must use the operator. To add a //
+//  new variable, one must use the method < AddVariable >, specifying the     //
+//  name and the type.                                                        //
 //                                                                            //
 // -------------------------------------------------------------------------- //
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +79,7 @@ namespace General {
   //__________________
   // -- INLINE METHODS
   inline bool BufferArray::Contains( const std::string &name ) const {
-    return (fVarMap.find( name ) != fVarMap.end());
+    return fVarMap.count( name );
   }
   inline const BufferArray::BuffVar& BufferArray::Get( const std::string &name ) const {
     return *(fVarMap.at( name ));
