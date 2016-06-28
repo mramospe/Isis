@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch                                         //
 //                                                                              //
-//  Last update: 20/06/2016                                                     //
+//  Last update: 28/06/2016                                                     //
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 //                                                                              //
@@ -16,8 +16,7 @@
 //  Main class to store any kind of primitive data types. Different objects of  //
 //  this type can be stored in the same container, while refering to different  //
 //  data types. It results very useful when dealing with buffers were each      //
-//  variable has a different type. Since it uses a < union >, the size of this  //
-//  objects is defined as that of the larger type for the computer.             //
+//  variable has a different type.                                              //
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 //////////////////////////////////////////////////////////////////////////////////
@@ -38,38 +37,31 @@ namespace General {
 
   public:
     
-    // Constructors and destructor
-    BufferVariable();
-    BufferVariable( const char &type );
+    // Constructor and destructor
+    BufferVariable( const char &type = '\0' );
     ~BufferVariable();
 
     // Methods
-    void*       PathToValue();
     std::string ToString() const;
 
     // Inline methods
     template<typename type> inline void ExtractValue( type &value );
     inline const char&                  GetType() const;
+    inline void*                        PathToValue();
     inline void                         SetType( const char &type );
     template<typename type> inline void SetValue( const type &value );
 
   protected:
 
     // Attributes
-    char                     fType;
-    union {
-      char                   fCharValue;
-      unsigned char          fUCharValue;
-      short int              fSIntValue;
-      unsigned short int     fUSIntValue;
-      unsigned int           fUIntValue;
-      int                    fIntValue;
-      float                  fFloatValue;
-      double                 fDoubleValue;
-      long long int          fLLIntValue;
-      unsigned long long int fULLIntValue;
-      bool                   fBoolValue;
-    };
+    char  fType;
+    void *fPath;
+
+  private:
+    
+    // Methods
+    void Construct();
+    void Delete();
 
   };
 
@@ -80,38 +72,50 @@ namespace General {
   template<typename type>
   void BufferVariable::ExtractValue( type &value ) {
     switch( fType ) {
-    case 'B': value = fCharValue;   break;
-    case 'b': value = fUCharValue;  break;
-    case 'S': value = fSIntValue;   break;
-    case 's': value = fUSIntValue;  break;
-    case 'I': value = fIntValue;    break;
-    case 'i': value = fUIntValue;   break;
-    case 'F': value = fFloatValue;  break;
-    case 'D': value = fDoubleValue; break;
-    case 'L': value = fLLIntValue;  break;
-    case 'l': value = fULLIntValue; break;
-    case 'O': value = fBoolValue;   break;
+    case 'B': value = *static_cast<char*>                   ( fPath ); break;
+    case 'b': value = *static_cast<unsigned char*>          ( fPath ); break;
+    case 'S': value = *static_cast<short int*>              ( fPath ); break;
+    case 's': value = *static_cast<unsigned short int*>     ( fPath ); break;
+    case 'I': value = *static_cast<int*>                    ( fPath ); break;
+    case 'i': value = *static_cast<unsigned int*>           ( fPath ); break;
+    case 'F': value = *static_cast<float*>                  ( fPath ); break;
+    case 'D': value = *static_cast<double*>                 ( fPath ); break;
+    case 'L': value = *static_cast<long long int*>          ( fPath ); break;
+    case 'l': value = *static_cast<unsigned long long int*> ( fPath ); break;
+    case 'O': value = *static_cast<bool*>                   ( fPath ); break;
+    default :
+      std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl;
+      break;
     }
   }
   // Returns the type of the class
   inline const char& BufferVariable::GetType() const { return fType; }
+  // Returns the void pointer to the value stored by this class
+  inline void* BufferVariable::PathToValue() { return fPath; }
   // Sets the type of this variable. The information stored in it is lost.
-  inline void BufferVariable::SetType( const char &type ) { fType = type; }
+  inline void BufferVariable::SetType( const char &type ) {
+    this -> Delete();
+    fType = type;
+    this -> Construct();
+  }
   // Sets the value stored in the class as that of the given variable
   template<typename type>
   void BufferVariable::SetValue( const type &value ) {
     switch( fType ) {
-    case 'B': fCharValue   = value; break;
-    case 'b': fUCharValue  = value; break;
-    case 'S': fSIntValue   = value; break;
-    case 's': fUSIntValue  = value; break;
-    case 'I': fIntValue    = value; break;
-    case 'i': fUIntValue   = value; break;
-    case 'F': fFloatValue  = value; break;
-    case 'D': fDoubleValue = value; break;
-    case 'L': fLLIntValue  = value; break;
-    case 'l': fULLIntValue = value; break;
-    case 'O': fBoolValue   = value; break;
+    case 'B': value = *static_cast<char*>                   ( fPath ) = value; break;
+    case 'b': value = *static_cast<unsigned char*>          ( fPath ) = value; break;
+    case 'S': value = *static_cast<short int*>              ( fPath ) = value; break;
+    case 's': value = *static_cast<unsigned short int*>     ( fPath ) = value; break;
+    case 'I': value = *static_cast<int*>                    ( fPath ) = value; break;
+    case 'i': value = *static_cast<unsigned int*>           ( fPath ) = value; break;
+    case 'F': value = *static_cast<float*>                  ( fPath ) = value; break;
+    case 'D': value = *static_cast<double*>                 ( fPath ) = value; break;
+    case 'L': value = *static_cast<long long int*>          ( fPath ) = value; break;
+    case 'l': value = *static_cast<unsigned long long int*> ( fPath ) = value; break;
+    case 'O': value = *static_cast<bool*>                   ( fPath ) = value; break;
+    default :
+      std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl;
+      break;
     }
   }
   

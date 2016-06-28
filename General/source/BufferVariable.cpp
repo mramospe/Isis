@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch                                         //
 //                                                                              //
-//  Last update: 20/06/2016                                                     //
+//  Last update: 28/06/2016                                                     //
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 //                                                                              //
@@ -16,8 +16,7 @@
 //  Main class to store any kind of primitive data types. Different objects of  //
 //  this type can be stored in the same container, while refering to different  //
 //  data types. It results very useful when dealing with buffers were each      //
-//  variable has a different type. Since it uses a < union >, the size of this  //
-//  objects is defined as that of the larger type for the computer.             //
+//  variable has a different type.                                              //
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 //////////////////////////////////////////////////////////////////////////////////
@@ -32,33 +31,14 @@
 // -- CONSTRUCTOR AND DESTRUCTOR
 
 //_______________________________________________________________________________
-// Main constructor
-General::BufferVariable::BufferVariable() { }
-
-//_______________________________________________________________________________
 // Constructor given the type as a character
 General::BufferVariable::BufferVariable( const char &type ) : fType( type ) {
-  switch( fType ) {
-  case 'B': break; // char
-  case 'b': break; // unsigned char
-  case 'S': break; // short int
-  case 's': break; // unsigned short int
-  case 'I': break; // int
-  case 'i': break; // unsigned int
-  case 'F': break; // float
-  case 'D': break; // double
-  case 'L': break; // long long int
-  case 'l': break; // unsigned long long int
-  case 'O': break; // bool
-  default:
-    std::cerr << "ERROR: Unknown type for buffer variable < " << type << " >" << std::endl;
-    break;
-  }
+  this -> Construct();
 }
 
 //_______________________________________________________________________________
 // Destructor
-General::BufferVariable::~BufferVariable() { }
+General::BufferVariable::~BufferVariable() { this -> Delete(); }
 
 //_______________________________________________________________________________
 
@@ -66,42 +46,72 @@ General::BufferVariable::~BufferVariable() { }
 // -- PUBLIC METHODS
 
 //_______________________________________________________________________________
-// Returns a void pointer to the value that is being used
-void* General::BufferVariable::PathToValue() {
+// Converts this class to a string
+std::string General::BufferVariable::ToString() const {
   switch( fType ) {
-  case 'B': return &fCharValue;
-  case 'b': return &fUCharValue;
-  case 'S': return &fSIntValue;
-  case 's': return &fUSIntValue;
-  case 'I': return &fIntValue;
-  case 'i': return &fUIntValue;
-  case 'F': return &fFloatValue;
-  case 'D': return &fDoubleValue;
-  case 'L': return &fLLIntValue;
-  case 'l': return &fULLIntValue;
-  case 'O': return &fBoolValue;
-  default:  return 0;
+  case 'B': return std::string( 1, *static_cast<char*>                   ( fPath ) );
+  case 'b': return std::string( 1, *static_cast<unsigned char*>          ( fPath ) );
+  case 'S': return std::to_string( *static_cast<short int*>              ( fPath ) );
+  case 's': return std::to_string( *static_cast<unsigned short int*>     ( fPath ) );
+  case 'I': return std::to_string( *static_cast<int*>                    ( fPath ) );
+  case 'i': return std::to_string( *static_cast<unsigned int*>           ( fPath ) );
+  case 'F': return std::to_string( *static_cast<float*>                  ( fPath ) );
+  case 'D': return std::to_string( *static_cast<double*>                 ( fPath ) );
+  case 'L': return std::to_string( *static_cast<long long int*>          ( fPath ) );
+  case 'l': return std::to_string( *static_cast<unsigned long long int*> ( fPath ) );
+  case 'O': return std::to_string( *static_cast<bool*>                   ( fPath ) );
+  default :
+    std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl;
+    return std::string();
   }
 }
 
 //_______________________________________________________________________________
-// Converts this class to a string
-std::string General::BufferVariable::ToString() const {
+
+
+// -- PRIVATE METHODS
+
+//_______________________________________________________________________________
+// Method to construct this class, given the type
+void General::BufferVariable::Construct() {
   switch( fType ) {
-  case 'B': return std::string( 1, fCharValue );
-  case 'b': return std::string( 1, fUCharValue );
-  case 'S': return std::to_string( fSIntValue );
-  case 's': return std::to_string( fUSIntValue );
-  case 'I': return std::to_string( fIntValue );
-  case 'i': return std::to_string( fUIntValue );
-  case 'F': return std::to_string( fFloatValue );
-  case 'D': return std::to_string( fDoubleValue );
-  case 'L': return std::to_string( fLLIntValue );
-  case 'l': return std::to_string( fULLIntValue );
-  case 'O': return std::to_string( fBoolValue );
-  default:  return std::string();
+  case 'B' : fPath = new char;                   break;
+  case 'b' : fPath = new unsigned char;          break;
+  case 'S' : fPath = new short int;              break;
+  case 's' : fPath = new unsigned short int;     break;
+  case 'I' : fPath = new int;                    break;
+  case 'i' : fPath = new unsigned int;           break;
+  case 'F' : fPath = new float;                  break;
+  case 'D' : fPath = new double;                 break;
+  case 'L' : fPath = new long long int;          break;
+  case 'l' : fPath = new unsigned long long int; break;
+  case 'O' : fPath = new bool;                   break;
+  case '\0': fPath = 0;                          break;
+  default:
+    std::cerr << "ERROR: Unknown type for buffer variable < " << fType << " >" << std::endl;
+    break;
   }
 }
+
+//_______________________________________________________________________________
+// Method to delete the value stored
+void General::BufferVariable::Delete() {
+  if ( fPath )
+    switch( fType ) {
+    case 'B': delete static_cast<char*>                   ( fPath ); break;
+    case 'b': delete static_cast<unsigned char*>          ( fPath ); break;
+    case 'S': delete static_cast<short int*>              ( fPath ); break;
+    case 's': delete static_cast<unsigned short int*>     ( fPath ); break;
+    case 'I': delete static_cast<int*>                    ( fPath ); break;
+    case 'i': delete static_cast<unsigned int*>           ( fPath ); break;
+    case 'F': delete static_cast<float*>                  ( fPath ); break;
+    case 'D': delete static_cast<double*>                 ( fPath ); break;
+    case 'L': delete static_cast<long long int*>          ( fPath ); break;
+    case 'l': delete static_cast<unsigned long long int*> ( fPath ); break;
+    case 'O': delete static_cast<bool*>                   ( fPath ); break;
+    }
+}
+
 
 //_______________________________________________________________________________
 
