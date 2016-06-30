@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                               //
 //  e-mail: miguel.ramos.pernas@cern.ch                                       //
 //                                                                            //
-//  Last update: 28/06/2016                                                   //
+//  Last update: 30/06/2016                                                   //
 //                                                                            //
 // -------------------------------------------------------------------------- //
 //                                                                            //
@@ -60,6 +60,7 @@ namespace General {
     std::string ToString() const;
     
     // Inline methods
+    inline void              Clear();
     inline bool              Contains( const std::string &name ) const;
     inline const BuffVar&    Get( const std::string &name ) const;
     inline const BuffVarMap& GetMap() const;
@@ -78,22 +79,35 @@ namespace General {
 
   //__________________
   // -- INLINE METHODS
+  
+  // Removes the variables booked in this class
+  inline void BufferArray::Clear() {
+    for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
+      delete it -> second;
+    fVarMap.clear();
+  }
+  // Checks whether the given variable is already booked
   inline bool BufferArray::Contains( const std::string &name ) const {
     return fVarMap.count( name );
   }
+  // Returns the variable related to the name given
   inline const BufferArray::BuffVar& BufferArray::Get( const std::string &name ) const {
     return *(fVarMap.at( name ));
   }
+  // Returns the map containing all the variables
   inline const BufferArray::BuffVarMap& BufferArray::GetMap() const {
     return fVarMap;
   }
+  // Returns the size of the map
   inline size_t BufferArray::GetSize() const { return fVarMap.size(); }
+  // Reconstructs the map following the given sort function
   inline void BufferArray::Sort( SortFunc func ) {
     fVarMap = BufferArray::BuffVarMap( fVarMap.begin(), fVarMap.end(), func );
   }
 
   //____________
   // -- OPERATOR
+  
   inline General::BufferVariable& BufferArray::operator [] ( const std::string &name ) {
     return *(fVarMap.at( name ));
   }
