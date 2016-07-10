@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 19/06/2016                                //
+#//  Last update: 11/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -335,20 +335,20 @@ class DataManager:
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too. '''
         cuts = kwargs.get( 'cuts', False )
-        name = kwargs.get( 'name', self.Name + '_' + var )
-        kwargs[ 'title' ]  = kwargs.get( 'title', name )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
         
         var = self.GetVarEvents( var, cuts )
         if wvar:
             wvar = self.GetVarEvents( wvar, cuts )
-        return MakeHistogram( name, var, wvar, **kwargs )
+        return MakeHistogram( var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         ''' Makes the 2-dimensional histogram of the given variables '''
         cuts = kwargs.get( 'cuts', False )
-        name = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', name )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
         
@@ -356,7 +356,7 @@ class DataManager:
             wvar = self.GetVarEvents( wvar, cuts )
         xvar = self.GetVarEvents( xvar, cuts )
         yvar = self.GetVarEvents( yvar, cuts )
-        return MakeHistogram2D( name, xvar, yvar, wvar, **kwargs )
+        return MakeHistogram2D( xvar, yvar, wvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         ''' Creates a graph object with the points corresponding to two variables '''

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                         //
 #//  e-mail: miguel.ramos.pernas@cern.ch                 //
 #//                                                      //
-#//  Last update: 13/06/2016                             //
+#//  Last update: 11/07/2016                             //
 #//                                                      //
 #// ---------------------------------------------------- //
 #//                                                      //
@@ -22,8 +22,9 @@
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
-from Isis.PlotTools import MakeAdaptiveBinnedHist, MakeCumulative, MakeHistogram
+from Isis.PlotTools import HistFromType, MakeAdaptiveBinnedHist, MakeCumulative, MakeHistogram
 from Isis.Utils import CalcMinDist
+from array import array
 from math import sqrt
 
 
@@ -88,16 +89,11 @@ class FisherDiscriminant:
     def PlotFisherQuality( self, **kwargs ):
         ''' Plots the histograms of the fisher discriminant values for the two training
         samples '''
-        if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
-        else: nbins = 100
-        if 'npoints' in kwargs: npoints = kwargs[ 'npoints' ]
-        else: npoints = 100
-        if 'nsig' in kwargs: nsig = kwargs[ 'nsig' ]
-        else: nsig = 1000
-        if 'nbkg' in kwargs: nbkg = kwargs[ 'nbkg' ]
-        else: nbkg = 1000
-        if 'offset' in kwargs: offset = kwargs[ 'offset' ]
-        else: offset = 0
+        nbins   = kwargs.get( 'nbins', 100 )
+        npoints = kwargs.get( 'npoints', 100 )
+        nsig    = kwargs.get( 'nsig', 1000 )
+        nbkg    = kwargs.get( 'nbkg', 1000 )
+        offset  = kwargs.get( 'offset', 0 )
 
         ''' Gets the fisher discriminant values for the samples '''
         fisherSig, fisherBkg = self.GetTrainFisherValues()
@@ -214,8 +210,7 @@ class IntegralTransformer:
         one can control the number of bin for the input sample with the input parameter
         < ntrbins >. '''
 
-        if 'verbose' in kwargs: verbose = kwargs[ 'verbose' ]
-        else: verbose = True
+        verbose = kwargs.get( 'verbose', True )
         
         if isinstance( arg, TH1 ):
             if verbose:
@@ -226,8 +221,7 @@ class IntegralTransformer:
             self.MainHist = arg
             self.Nbins    = nbins
         else:
-            if 'adaptbin' in kwargs: self.AdaptBin = kwargs[ 'adaptbin' ]
-            else: self.AdaptBin = False
+            self.AdaptBin = kwargs.get( 'adaptbin', False )
             
             if self.AdaptBin:
                 if verbose:
@@ -235,47 +229,58 @@ class IntegralTransformer:
                             'Is constructed as: x in bin if x > min and x <= max.' )
                 
                 length = len( arg )
-                self.MainHist   = MakeAdaptiveBinnedHist( '', length/nbins, arg )
-                self.MainTRhist = self.MainHist.Clone()
-                self.Nbins      = nbins
+                self.MainHist = MakeAdaptiveBinnedHist( '', length/nbins, arg )
+                self.Nbins    = nbins
             
                 for val in arg:
                     self.MainHist.Fill( val )
             else:
-                if 'ntrbins' in kwargs: nbins = kwargs[ 'ntrbins' ]
-                else: nbins = 100
-                self.__init__( nbins, MakeHistogram( '', arg, nbins = nbins ) )
+                ntrbins = kwargs.get( 'ntrbins', 100 )
+                self.__init__( nbins, MakeHistogram( arg, nbins = ntrbins ) )
                 
         self.CumulativeHist = MakeCumulative( self.MainHist )
     
-    def Transform( self, name, values, **kwargs ):
-        ''' Transforms the distribution from the given set of values using the class distribution.
-        One must provide the name of the output histogram and an iterable with the values. The
-        title and the type of histogram are set using the < title > and < htype > parameters. '''
+    def Transform( self, name, arg, **kwargs ):
+        ''' Transforms the distribution from the given set of values using the class
+        distribution. One must provide the name of the output histogram and an argument.
+        This argument can be a histogram or an iterable. The title and the type of histogram
+        are set using the < title > and < htype > parameters. '''
 
-        if 'title' in kwargs: title = kwargs[ 'title' ]
-        else: title = name
-        if 'htype' in kwargs: histcall = HistFromType( kwargs[ 'htype' ] )
-        else: histcall = TH1D
+        title    = kwargs.get( 'title', name )
+        histcall = HistFromType( kwargs.get( 'htype', 'double' ) )
         
         transf = histcall( name, title, self.Nbins, 0, 1 )
         
-        if self.AdaptBin:
-            abhist = self.MainHist.Clone()
-            abhist.Clear()
-            for val in values:
-                abhist.Fill( val )
-            for ib in xrange( 1, self.MainHist.GetNbinsX() + 1 ):
-                cont   = int( abhist.GetBinContent( ib ) )
-                transf.SetBinContent( ib, cont )
+        '''
+        If the argument is an histogram, it creates the list with the values and
+        associated weights.
+        '''
+        if isinstance( arg, TH1 ):
+            values = [ ( arg.GetBinCenter( ib ), arg.GetBinContent( ib ) )
+                       for ib in xrange( 1, arg.GetNbinsX() + 1 ) ]
         else:
-            addifone = 1 - transf.GetBinWidth( 1 )/2
-            for val in values:
+            values = zip( arg, len( arg )*[ 1. ] )
+
+        if self.AdaptBin:
+            nbins  = self.MainHist.GetNbinsX()
+            blist  = [ self.MainHist.GetBinLowEdge( ib ) for ib in xrange( 1, nbins + 2 ) ]
+            bins   = array( 'd', blist )
+            abhist = self.MainHist.__class__( '', '', nbins, bins )
+            for val, wgt in values:
+                abhist.Fill( val, wgt )
+            sw = abhist.GetSumOfWeights()
+            for ib in xrange( 1, self.MainHist.GetNbinsX() + 1 ):
+                cont = abhist.GetBinContent( ib )
+                transf.SetBinContent( ib, cont/sw )
+                transf.SetBinError( ib, sqrt( cont/sw**2 + sw*cont**2/sw**4 ) )
+        else:
+            addifone = 1 - transf.GetBinWidth( 1 )/2.
+            for val, wgt in values:
                 fval = self.CumulativeHist.Interpolate( val )
                 if fval != 1:
-                    transf.Fill( fval )
+                    transf.Fill( fval, wgt )
                 else:
-                    transf.Fill( addifone )
+                    transf.Fill( addifone, wgt )
         
         return transf
 
@@ -286,8 +291,7 @@ class IntegralTransformer:
 # a list or similar class is provided, by default the analysis will be unbinned,
 # controlling it with the < binned > option.
 def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
-    if 'binned' in kwargs: binned = kwargs[ 'binned' ]
-    else: binned = False
+    binned = kwargs.get( 'binned', False )
     if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
         ''' If the classes are histograms it works using the bins contents '''
         nbins = smpRef.GetNbinsX()
@@ -303,18 +307,15 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
     else:
         if binned:
             ''' This is the task performed when one wants to consider binned lists '''
-            if 'nbins' in kwargs: nbins = kwargs[ 'nbins' ]
-            else: nbins = 100
-            if 'vmin' in kwargs: vmin = kwargs[ 'vmin' ]
-            else: vmin = min( smpRef + smpObs )
-            if 'vmax' in kwargs: vmax = kwargs[ 'vmax' ]
-            else: vmax = max( smpRef + smpObs ) + CalcMinDist( smpRef + smpObs, False )*1./2
-            smpRef = MakeHistogram( 'ref', smpRef, nbins = nbins, vmin = vmin, vmax = vmax )
-            smpObs = MakeHistogram( 'obs', smpObs, nbins = nbins, vmin = vmin, vmax = vmax )
+            nbins = kwargs.get( 'nbins', 100 )
+            vmin  = kwargs.get( 'vmin', min( smpRef + smpObs ) )
+            vmax  = kwargs.get( 'vmax', max( smpRef + smpObs ) +
+                                CalcMinDist( smpRef + smpObs, False )*1./2 )
+            smpRef = MakeHistogram( smpRef, name = 'ref', nbins = nbins, vmin = vmin, vmax = vmax )
+            smpObs = MakeHistogram( smpObs, name = 'obs', nbins = nbins, vmin = vmin, vmax = vmax )
         else:
             ''' This is what is performed when one works with unbinned distributions '''
-            if 'npoints' in kwargs: npoints = kwargs[ 'npoints' ]
-            else: npoints = 100
+            npoints = kwargs.get( 'npoints', 100 )
             smpRef  = list( smpRef )
             smpObs  = list( smpObs )
             mainlst = smpRef + smpObs

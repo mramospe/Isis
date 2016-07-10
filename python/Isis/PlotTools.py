@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 19/06/2016                                   //
+#//  Last update: 11/07/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -64,29 +64,6 @@ class ColorList:
         return self.Colors[ niter ] + nloop
 
 #_______________________________________________________________________________
-# This function extracts the bounds of the given array of data which is
-# supposed to be used to make a histogram. It also returns the filtered list
-# of data if it is specified in < kwargs >.
-def ExtractHistBounds( var, nbins, **kwargs ):
-    if 'vmin' in kwargs:
-        vmin = kwargs[ 'vmin' ]
-    else:
-        vmin = min( var )
-    if 'vmax' in kwargs:
-        vmax = kwargs[ 'vmax' ]
-    else:
-        vmax  = max( var )
-        vmax += ( vmax - vmin )/( 2.*nbins )
-    
-    retvals = kwargs.get( 'retvals', False )
-    
-    if retvals:
-        var = [ v for v in var if v >= vmin and v < vmax ]
-        return vmin, vmax, var
-    else:
-        return vmin, vmax
-
-#_______________________________________________________________________________
 # Draws the given histograms in such an order, that the first to be drawn is
 # that with the maximum value for the Y axis. If the variable < norm > is set
 # to True, then the histograms will be normalized and the function will return
@@ -111,6 +88,29 @@ def DrawHistograms( *args, **kwargs ):
     for i in lst:
         hlst[ i ] = meth( args[ i ], drawopt )
     return hlst
+
+#_______________________________________________________________________________
+# This function extracts the bounds of the given array of data which is
+# supposed to be used to make a histogram. It also returns the filtered list
+# of data if it is specified in < kwargs >.
+def ExtractHistBounds( var, nbins, **kwargs ):
+    if 'vmin' in kwargs:
+        vmin = kwargs[ 'vmin' ]
+    else:
+        vmin = min( var )
+    if 'vmax' in kwargs:
+        vmax = kwargs[ 'vmax' ]
+    else:
+        vmax  = max( var )
+        vmax += ( vmax - vmin )/( 2.*nbins )
+    
+    retvals = kwargs.get( 'retvals', False )
+    
+    if retvals:
+        var = [ v for v in var if v >= vmin and v < vmax ]
+        return vmin, vmax, var
+    else:
+        return vmin, vmax
 
 #_______________________________________________________________________________
 # Returns the histogram constructor given the type as a string
@@ -178,7 +178,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         sw      = float( length )
         nbins   = length/minocc
 
-    vmin, vmax, values = ExtractHistBounds( values, nbins, retvals = True, **kwargs )
+    vmin, vmax, values = ExtractHistBounds( values, nbins, retvals = True )
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
@@ -239,13 +239,14 @@ def MakeCumulative( hist, **kwargs ):
 # Function to generate a Root histogram given a list. By default no ytitle is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
-def MakeHistogram( name, var, wvar = False, **kwargs ):
+def MakeHistogram( var, wvar = False, **kwargs ):
+    name     = kwargs.get( 'name', '' )
     title    = kwargs.get( 'title', name )
     nbins    = kwargs.get( 'nbins', 100 )
     xtitle   = kwargs.get( 'xtitle', name )
     ytitle   = kwargs.get( 'ytitle', 'Entries' )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
-    vmin, vmax, var = ExtractHistBounds( var, nbins, retvals = True, **kwargs )
+    vmin, vmax, var = ExtractHistBounds( var, nbins, retvals = True )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -263,7 +264,8 @@ def MakeHistogram( name, var, wvar = False, **kwargs ):
 
 #_______________________________________________________________________________
 # Creates a 2-dimensional histogram given two lists
-def MakeHistogram2D( name, xvar, yvar, wvar = False, **kwargs ):
+def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
+    name     = kwargs.get( 'name', '' )
     title    = kwargs.get( 'title', name )
     xbins    = kwargs.get( 'xbins', 100 )
     ybins    = kwargs.get( 'ybins', 100 )
@@ -388,8 +390,8 @@ def MultiPlot( mngrs, variables, **kwargs):
             vmin, vmax, hists = min( totlst ), max( totlst ), []
             for im, mngr in enumerate( mngrs ):
                 hname = mngr.Name + '_' + var
-                hists.append( mngr.MakeHistogram( hname,
-                                                  var,
+                hists.append( mngr.MakeHistogram( var,
+                                                  name  = hname,
                                                   title = var,
                                                   nbins = nbins,
                                                   vmin  = vmin,
