@@ -25,6 +25,7 @@ from Isis.Algebra import Matrix, Inv
 from Isis.PlotTools import HistFromType, MakeAdaptiveBinnedHist, MakeCumulative, MakeHistogram
 from Isis.Utils import CalcMinDist
 from array import array
+from bisect import bisect
 from math import sqrt
 
 
@@ -209,20 +210,20 @@ class IntegralTransformer:
         binning technique is set by the < adaptbin > parameter. If no such technique is used,
         one can control the number of bin for the input sample with the input parameter
         < ntrbins >. '''
-
-        verbose = kwargs.get( 'verbose', True )
         
+        verbose = kwargs.get( 'verbose', True )
+
+        self.AdaptBin = kwargs.get( 'adaptbin', False )
         if isinstance( arg, TH1 ):
             if verbose:
                 print ( 'INFO: After the transformation, all the values greater than one will be ' +
                         'attached to the last bin' )
-                        
+            if self.AdaptBin:
+                print 'WARNING: Adaptive binned method not available with a TH1 object as input'
             self.AdaptBin = False
             self.MainHist = arg
             self.Nbins    = nbins
         else:
-            self.AdaptBin = kwargs.get( 'adaptbin', False )
-            
             if self.AdaptBin:
                 if verbose:
                     print ( 'INFO: The output histogram comes from an adaptive binned transformation. ' +
@@ -283,6 +284,20 @@ class IntegralTransformer:
                     transf.Fill( addifone, wgt )
         
         return transf
+
+    def DeTransfValue( self, value, retallinfo = False ):
+        '''
+        Returns the de-transformated value associated to that given. If the option
+        < retallinfo > is set to True, it will return the bin center and the bin width
+        associated with that value.
+        '''
+        hist    = self.CumulativeHist
+        binvals = [ hist.GetBinContent( ib ) for ib in xrange( 1, hist.GetNbinsX() + 1 ) ]
+        pos     = bisect( binvals, value ) - 1
+        if retallinfo:
+            return hist.GetBinCenter( pos ), hist.GetBinWidth( pos )
+        else:
+            return hist.GetBinCenter( pos )
 
 #_______________________________________________________________________________
 # Returns the two Kolmogorov-Smirnov factors. The input parameters can be

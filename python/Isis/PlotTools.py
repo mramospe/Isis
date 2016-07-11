@@ -231,6 +231,7 @@ def MakeCumulative( hist, **kwargs ):
     for i in xrange( 2, hist.GetNbinsX() + 1 ):
         cumulative += hist.GetBinContent( i )
         chist.SetBinContent( i, cumulative )
+        chist.SetBinError( i, sqrt( cumulative ) )
     if norm:
         chist.Scale( 1./chist.GetMaximum() )
     return chist
