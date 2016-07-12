@@ -826,5 +826,9 @@ def TreeVarsFromExpr( tree, exprs ):
     brnames   = [ el.GetName() for el in tree.GetListOfBranches() ]
     truenames = []
     for expr in exprs:
-        truenames += StringListFilter( brnames, expr )
+        addlst = StringListFilter( brnames, expr )
+        if addlst != []:
+            truenames += addlst
+        else:
+            print 'WARNING: No variables found matching expression <', expr, '>'
     return truenames
