@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 11/07/2016                                //
+#//  Last update: 12/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -223,12 +223,12 @@ class DataManager:
         if len( var_names ) == 1 and var_names[ 0 ] == '*':
             tlist     = self.GetListOfTrees()
             brlist    = tlist[ 0 ].GetListOfBranches()
-            var_names = [ brlist.At( i ).GetName() for i in xrange( brlist.GetSize() ) ]
+            var_names = [ br.GetName() for br in brlist ]
             for tree in tlist[ 1: ]:
                 brlist        = tree.GetListOfBranches()
                 new_var_names = []
-                for i in xrange( brlist.GetSize() ):
-                    brname = brlist.At( i ).GetName()
+                for br in brlist:
+                    brname = br.GetName()
                     if brname in var_names:
                         new_var_names.append( brname )
                 for name in var_names:
@@ -640,15 +640,15 @@ def ArrayType( branch ):
         elif '/I' in branch:
             return array( 'i', [ 0 ] )
         elif '/i' in branch:
-            return array( 'I', [ 0 ] )
+            return array( 'i', [ 0 ] )
         elif '/F' in branch:
             return array( 'f', [ 0 ] )
         elif '/D' in branch:
             return array( 'd', [ 0 ] )
         elif '/L' in branch:
-            return array( 'l', [ 0 ] )
+            return array( 'L', [ 0L ] )
         elif '/l' in branch:
-            return array( 'L', [ 0 ] )
+            return array( 'L', [ 0L ] )
         elif '/O' in branch:
             return array( 'b', [ 0 ] )
         else:
@@ -658,6 +658,8 @@ def ArrayType( branch ):
             return array( 'd', [ 0 ] )
         elif isinstance( branch[ 0 ], int ):
             return array( 'i', [ 0 ] )
+        elif isinstance( branch[ 0 ], long ):
+            return array( 'L', [ 0L ] )
         else:
             print 'ERROR: Could not extract the type in <', branch[ 0 ], '>'
 
@@ -690,7 +692,9 @@ def DictFromTree( tree, varlist ):
     varlist = []
     for el in auxlist:
         brtitle = brlist.FindObject( el ).GetTitle()
-        if any( [ brtitle.endswith( '/B' ), brtitle.endswith( '/b' ) ] ):
+        if any( [ brtitle.endswith( '/C' ),
+                  brtitle.endswith( '/B' ),
+                  brtitle.endswith( '/b' ) ] ):
             print 'WARNING: Variable type from <', brtitle, ' > not allowed; not booked'
         else:
             varlist.append( el )
@@ -784,6 +788,8 @@ def ManagerFromTree( name, file_path, tree_path, **kwargs ):
     cuts      = kwargs.get( 'cuts', '' )
     variables = kwargs.get( 'variables', [ '*' ] )
     mgr       = DataManager( name, file_path, [ tree_path ] )
+    if variables == '*':
+        variables = [ '*' ]
     mgr.BookVariables( *variables )
     if cuts:
         return mgr.SubSample( cuts = cuts )

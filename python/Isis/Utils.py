@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 16/06/2016                                //
+#//  Last update: 12/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -280,24 +280,17 @@ def SharedRange( *args ):
 # returns another list with those that satisfy it.
 def StringListFilter( lst, pattern ):
     pattern = pattern.split( '*' )
-    checkstart, checkend = False, False
+    checkstart = not pattern[  0 ] == ''
+    checkend   = not pattern[ -1 ] == ''
     while '' in pattern:
-        pos = pattern.index( '' )
-        if pos:
-            del pattern[ pos ]
-            checkstart = True
-        else:
-            del pattern[ pos ]
-            checkend   = True
-    if checkstart and checkend:
-        checkstart, checkend = False, False
+        del pattern[ pattern.index( '' ) ]
     output = []
     for el in lst:
         add = True
         if checkstart:
             if not el.startswith( pattern[ 0 ] ):
                 add = False
-        elif checkend:
+        if checkend:
             if not el.endswith( pattern[ -1 ] ):
                 add = False
         if add:
