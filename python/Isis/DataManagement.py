@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 12/07/2016                                //
+#//  Last update: 13/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -58,32 +58,34 @@ class DataManager:
         ''' The constructor starts here '''
         if name != False:
             self.Name = name
-            ''' First check if < ifile > is a string or if it can be used as a dictionary'''
-            if isinstance( ifile, str ):
-
-                ftype = kwargs.get( 'ftype', 'root' )
-                
-                if ftype in ( 'root', 'Root', 'ROOT' ):
-                    ''' This is the constructor for Root files '''
-                    if ifile and tnames:
-                        self.AddTarget( ifile, tnames )
-                    elif ifile and not tnames:
-                        print 'WARNING:', self.Name, 'Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
-
-                elif ftype in ( 'txt', 'TXT' ):
-                    ''' This is the constructor for txt files '''
-                    if ifile and tnames:
-                        self.AddDataFromTxt( ifile, tnames, **kwargs )
-                    elif ifile and not tnames:
-                        print 'WARNING:', self.Name, '=> Arguments for DataManager class using txt files are < file path > and < variables names >'
-                
-                else:
-                    ''' If the type specified is not recognised a warning message is sent '''
-                    print 'WARNING:', self.Name, '=> File format <', ftype, '> for DataManager class not known'
             
-            else:
-                ''' This is the constructor using a dictionary (the ftype value is omitted) '''
-                self.AddDataFromDict( ifile )
+            if ifile:
+                ''' First check if < ifile > is a string or if it can be used as a dictionary'''
+                if isinstance( ifile, str ):
+
+                    ftype = kwargs.get( 'ftype', 'root' )
+                
+                    if ftype in ( 'root', 'Root', 'ROOT' ):
+                        ''' This is the constructor for Root files '''
+                        if ifile and tnames:
+                            self.AddTarget( ifile, tnames )
+                        elif ifile and not tnames:
+                            print 'WARNING:', self.Name, 'Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
+
+                    elif ftype in ( 'txt', 'TXT' ):
+                        ''' This is the constructor for txt files '''
+                        if ifile and tnames:
+                            self.AddDataFromTxt( ifile, tnames, **kwargs )
+                        elif ifile and not tnames:
+                            print 'WARNING:', self.Name, '=> Arguments for DataManager class using txt files are < file path > and < variables names >'
+                
+                    else:
+                        ''' If the type specified is not recognised a warning message is sent '''
+                        print 'WARNING:', self.Name, '=> File format <', ftype, '> for DataManager class not known'
+            
+                else:
+                    ''' This is the constructor using a dictionary (the ftype value is omitted) '''
+                    self.AddDataFromDict( ifile )
 
     def __add__( self, other ):
         '''
@@ -270,7 +272,7 @@ class DataManager:
                 for itree in self.Targets[ ifile ]:
                     itree = 0
                 ifile.Close()
-                del self.Targets[ ifile ]
+            self.Targets.clear()
         else:
             print 'WARNING:', self.Name, 'This DataManager does not own its targets'
 
@@ -610,8 +612,10 @@ class DataManager:
         can be specified (as a slice object), as well as the variables to be copied. By default
         the entire class is copied.
         '''
+        if name == '':
+            name = self.Name + '_SubSample'
         if 'cuts' in kwargs:
-            cmgr    = DataManager()
+            cmgr   = DataManager( name )
             evtlst = self.GetCutList( kwargs[ 'cuts' ] )
             for kw, vlist in self.Variables.iteritems():
                 cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst ]

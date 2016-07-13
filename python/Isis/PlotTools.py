@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                               //
 #//  e-mail: miguel.ramos.pernas@cern.ch                       //
 #//                                                            //
-#//  Last update: 11/07/2016                                   //
+#//  Last update: 13/07/2016                                   //
 #//                                                            //
 #// ---------------------------------------------------------- //
 #//                                                            //
@@ -94,17 +94,11 @@ def DrawHistograms( *args, **kwargs ):
 # supposed to be used to make a histogram. It also returns the filtered list
 # of data if it is specified in < kwargs >.
 def ExtractHistBounds( var, nbins, **kwargs ):
-    if 'vmin' in kwargs:
-        vmin = kwargs[ 'vmin' ]
-    else:
-        vmin = min( var )
-    if 'vmax' in kwargs:
-        vmax = kwargs[ 'vmax' ]
-    else:
-        vmax  = max( var )
-        vmax += ( vmax - vmin )/( 2.*nbins )
-    
     retvals = kwargs.get( 'retvals', False )
+    vmin    = kwargs.get( 'vmin', min( var ) )
+    vmax    = kwargs.get( 'vmax', max( var ) )
+    if 'vmax' not in kwargs:
+        vmax += ( vmax - vmin )/( 2.*nbins )
     
     if retvals:
         var = [ v for v in var if v >= vmin and v < vmax ]
@@ -247,7 +241,12 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     xtitle   = kwargs.get( 'xtitle', name )
     ytitle   = kwargs.get( 'ytitle', 'Entries' )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
-    vmin, vmax, var = ExtractHistBounds( var, nbins, retvals = True )
+    histbds  = { 'retvals': True }
+    if 'vmin' in kwargs:
+        histbds[ 'vmin' ] = kwargs[ 'vmin' ]
+    if 'vmax' in kwargs:
+        histbds[ 'vmax' ] = kwargs[ 'vmax' ]
+    vmin, vmax, var = ExtractHistBounds( var, nbins, **histbds )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     

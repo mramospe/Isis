@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 12/07/2016                                //
+#//  Last update: 13/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -20,6 +20,7 @@
 
 
 import os, fcntl, math, struct, termios
+import __builtin__
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -83,9 +84,14 @@ def FormatEvalExpr( expr, mathmod = math ):
     variables = variables.replace( ' ', '' )
     for el in ( '==', '!=', '<=', '>=', '>', '<',
                 'and', 'or', '(', ')',
-                '*', '/' ):
+                '*', '/',
+                '!', ',' ):
         variables = variables.replace( el, '|' )
-    ''' This lines allow the management of float values given with an < e/E > '''
+    ''' These lines are needed to replace the C negation operator < ! > by < not >'''
+    expr = expr.replace( '!=', '%%%' )
+    expr = expr.replace( '!', ' not ' )
+    expr = expr.replace( '%%%', '!=' )
+    ''' These lines allow the management of float values given with an < e/E > '''
     if variables[ 0 ] in ( '+', '-' ):
         variables = '|' + variables[ 1: ]
     i, n = 1, len( variables )
@@ -104,14 +110,20 @@ def FormatEvalExpr( expr, mathmod = math ):
     while '' in variables:
         variables.remove( '' )
     truevars = []
-    flist    = dir( mathmod )
+    fmlist   = dir( mathmod )
+    fblist   = dir( __builtin__ )
     mathmod  = mathmod.__name__ + '.'
     for el in variables:
         try:
             float( el )
         except:
-            if el in flist:
+            if el in fmlist:
+                while el in variables:
+                    variables.remove( el )
                 expr = expr.replace( el, mathmod + el )
+            elif el in fblist:
+                while el in variables:
+                    variables.remove( el )
             else:
                 truevars.append( el )
     ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
