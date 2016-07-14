@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 13/07/2016                                //
+#//  Last update: 14/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -84,7 +84,7 @@ def FormatEvalExpr( expr, mathmod = math ):
     variables = variables.replace( ' ', '' )
     for el in ( '==', '!=', '<=', '>=', '>', '<',
                 'and', 'or', '(', ')',
-                '*', '/',
+                '*', '/', '+', '-',
                 '!', ',' ):
         variables = variables.replace( el, '|' )
     
@@ -93,25 +93,28 @@ def FormatEvalExpr( expr, mathmod = math ):
     expr = expr.replace( '!', ' not ' )
     expr = expr.replace( '%%%', '!=' )
     
-    ''' These lines allow the management of float values given with an < e/E > '''
-    if variables[ 0 ] in ( '+', '-' ):
-        variables = '|' + variables[ 1: ]
-    i, n = 1, len( variables )
-    while ( i != n ):
-        el = variables[ i ]
-        if el in ( '+', '-' ):
-            el = variables[ i - 1 ]
-            if el != 'e' and el != 'E':
-                variables = variables[ :i ] + '|' + variables[ i + 1: ]
-            else:
-                i += 1
-        else:
-            i += 1
-    
     ''' Splits the elements, so only the variables and the numbers remain '''
     variables = variables.split( '|' )
     while '' in variables:
         variables.remove( '' )
+
+    ''' These lines allow the management of float values given with an < e/E > '''
+    for idx, el in enumerate( variables ):
+        epos = el.find( 'e' )
+        Epos = el.find( 'E' )
+        dec1 = ( epos != -1 )
+        dec2 = ( Epos != -1 )
+        if ( dec1 or dec2 ) and not ( dec1 and dec2 ):
+            if dec1:
+                numvar = el[ :epos ]
+            else:
+                numvar = el[ :Epos ]
+            try:
+                float( numvar )
+                variables[ idx ] += '0'
+            except:
+                pass
+    
     truevars = []
     fmlist   = dir( mathmod )
     fblist   = dir( __builtin__ )
