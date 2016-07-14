@@ -87,10 +87,12 @@ def FormatEvalExpr( expr, mathmod = math ):
                 '*', '/',
                 '!', ',' ):
         variables = variables.replace( el, '|' )
+    
     ''' These lines are needed to replace the C negation operator < ! > by < not >'''
     expr = expr.replace( '!=', '%%%' )
     expr = expr.replace( '!', ' not ' )
     expr = expr.replace( '%%%', '!=' )
+    
     ''' These lines allow the management of float values given with an < e/E > '''
     if variables[ 0 ] in ( '+', '-' ):
         variables = '|' + variables[ 1: ]
@@ -105,6 +107,7 @@ def FormatEvalExpr( expr, mathmod = math ):
                 i += 1
         else:
             i += 1
+    
     ''' Splits the elements, so only the variables and the numbers remain '''
     variables = variables.split( '|' )
     while '' in variables:
@@ -113,20 +116,30 @@ def FormatEvalExpr( expr, mathmod = math ):
     fmlist   = dir( mathmod )
     fblist   = dir( __builtin__ )
     mathmod  = mathmod.__name__ + '.'
-    for el in variables:
+    
+    ''' This must be done to avoid replacing multiple times the same function by
+    < module.function >'''
+    idx    = 0
+    length = len( variables )
+    while idx < length:
+        el = variables[ idx ]
         try:
             float( el )
+            idx += 1
         except:
             if el in fmlist:
+                nc = 0
                 while el in variables:
                     variables.remove( el )
+                    nc += 1
+                length -= nc
                 expr = expr.replace( el, mathmod + el )
-            elif el in fblist:
-                while el in variables:
-                    variables.remove( el )
             else:
-                truevars.append( el )
-    ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
+                idx += 1
+                if el not in fblist:
+                    truevars.append( el )
+    
+    ''' Sorts the list on a reversed way is necessary to prevent missreplacement of
     the variables '''
     truevars.sort()
     truevars.reverse()
