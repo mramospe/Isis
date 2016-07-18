@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 14/07/2016                                //
+#//  Last update: 18/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -77,59 +77,86 @@ def FormatTime( itime ):
 # into account the mathematical functions and the logical operators. The module
 # containing the mathematical functions can be specified.
 def FormatEvalExpr( expr, mathmod = math ):
-    expr      = expr.replace( '&&' , ' and ' )
-    expr      = expr.replace( '||' , ' or '  )
-    expr      = expr.replace( 'abs', 'fabs'  )
+    expr = TranslateCExpr( expr )
     variables = expr
-    variables = variables.replace( ' ', '' )
     for el in ( '==', '!=', '<=', '>=', '>', '<',
-                'and', 'or', '(', ')',
+                'and', 'or', 'not', '(', ')',
                 '*', '/', '+', '-',
                 '!', ',' ):
         variables = variables.replace( el, '|' )
-    
-    ''' These lines are needed to replace the C negation operator < ! > by < not >'''
-    expr = expr.replace( '!=', '%%%' )
-    expr = expr.replace( '!', ' not ' )
-    expr = expr.replace( '%%%', '!=' )
+    variables = variables.replace( ' ', '' )
     
     ''' Splits the elements, so only the variables and the numbers remain '''
     variables = variables.split( '|' )
     while '' in variables:
         variables.remove( '' )
 
-    ''' These lines allow the management of float values given with an < e/E > '''
-    for idx, el in enumerate( variables ):
-        epos = el.find( 'e' )
-        Epos = el.find( 'E' )
-        dec1 = ( epos != -1 )
-        dec2 = ( Epos != -1 )
-        if ( dec1 or dec2 ) and not ( dec1 and dec2 ):
-            if dec1:
-                numvar = el[ :epos ]
-            else:
-                numvar = el[ :Epos ]
-            try:
-                float( numvar )
-                variables[ idx ] += '0'
-            except:
-                pass
+    ''' Iterates over the expression to find the variables and the constants in it. The use
+    of a < while > loop becomes necessary to avoid replacing multiple times the same function
+    by < module.function >. '''
     
     truevars = []
     fmlist   = dir( mathmod )
     fblist   = dir( __builtin__ )
     mathmod  = mathmod.__name__ + '.'
     
-    ''' This must be done to avoid replacing multiple times the same function by
-    < module.function >'''
     idx    = 0
     length = len( variables )
+
     while idx < length:
+        
         el = variables[ idx ]
-        try:
-            float( el )
+
+        isfloat = False
+        
+        ''' These lines allow the management of float values given with an < e/E > '''
+        epos = el.find( 'e' )
+        Epos = el.find( 'E' )
+        dec1 = ( epos != -1 )
+        dec2 = ( Epos != -1 )
+        if ( dec1 or dec2 ) and not ( dec1 and dec2 ):
+            try:
+                float( el )
+                isfloat = True
+            except:
+                ''' The number may not be a float '''
+                if dec1:
+                    left, right = el[ :epos ], el[ epos + 1: ]
+                else:
+                    left, right = el[ :Epos ], el[ Epos + 1: ]
+                try:
+                    float( left )
+                    if right:
+                        print 'ERROR: Unable to parse expression <', el, '>'
+                        return
+                    else:
+                        try:
+                            ''' The < 0 > is added since it could find a string like < 1e > '''
+                            float( variables[ idx + 1 ] + '0' )
+                        except:
+                            print 'ERROR: Unable to parse expression; error in floating constant'
+                            return
+                    isfloat = True
+                except:
+                    isfloat = False
+        else:
+            ''' Here it determines if the element is a number or a variable '''
+            try:
+                float( el )
+                isfloat = True
+            except:
+                it = el[ 0 ]
+                if it.isdigit() or it == '.':
+                    print 'ERROR: Unable to parse expression <', el, '>'
+                    return
+                else:
+                    isfloat = False
+
+        ''' If it is a float it continues the loop. If it is an expression, tries to find it
+        in the builtin and math modules. '''
+        if isfloat:
             idx += 1
-        except:
+        else:
             if el in fmlist:
                 nc = 0
                 while el in variables:
@@ -142,7 +169,7 @@ def FormatEvalExpr( expr, mathmod = math ):
                 if el not in fblist:
                     truevars.append( el )
     
-    ''' Sorts the list on a reversed way is necessary to prevent missreplacement of
+    ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
     the variables '''
     truevars.sort()
     truevars.reverse()
@@ -388,3 +415,14 @@ def TerminalSize():
     if not cr:
         cr = ( os.environ.get( 'LINES', 25 ), os.environ.get( 'COLUMNS', 80 ) )
     return int( cr[ 0 ] ), int( cr[ 1 ] )
+
+#_______________________________________________________________________________
+# Translates a C expression into a python expression
+def TranslateCExpr( expr ):
+    expr = expr.replace( '&&' , ' and ' )
+    expr = expr.replace( '||' , ' or '  )
+    expr = expr.replace( 'abs', 'fabs'  )
+    expr = expr.replace( '!=', '%%%' )
+    expr = expr.replace( '!', ' not ' )
+    expr = expr.replace( '%%%', '!=' )
+    return expr
