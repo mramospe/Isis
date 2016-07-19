@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 13/07/2016                                //
+#//  Last update: 19/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -276,23 +276,23 @@ class DataManager:
         else:
             print 'WARNING:', self.Name, 'This DataManager does not own its targets'
 
-    def GetCutList( self, cut ):
+    def GetCutList( self, cut, mathmod = math ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
-        cut, variables = FormatEvalExpr( cut, math )
+        cut, variables = FormatEvalExpr( cut, mathmod )
         values = [ self.Variables[ var ] for var in variables ]
         for ivar in xrange( len( variables ) ):
             cut = cut.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
         return eval( '[ ievt for ievt in xrange( self.Nentries ) if ' + cut + ' ]' )
 
-    def GetEntries( self, selection = False ):
+    def GetEntries( self, selection = False, mathmod = math ):
         '''
         Gets the number of entries of the class. If a cut selection is given, it is
         calculated the number of events that satisfy those cuts.
         '''
         if selection:
-            return len( self.GetCutList( selection ) )
+            return len( self.GetCutList( selection ), mathmod )
         else:
             return self.Nentries
 
@@ -355,25 +355,44 @@ class DataManager:
         self.OwnsTargets = False
         return self.Targets
 
-    def GetVarEvents( self, arg, cut = False ):
+    def GetVarEvents( self, *args, **kwargs ):
         '''
-        If < arg > is a variable, it gets the list of values for it. If it is an expression,
-        it returns a list with the values corresponding to it.
+        If an element in < args > is a variable, it gets the list of values for it. If
+        it is an expression, it returns a list with the values corresponding to it.
         '''
-        if cut:
-            entries = self.GetCutList( cut )
+        cuts    = kwargs.get( 'cuts', False )
+        mathmod = kwargs.get( 'mathmod', math )
+        
+        if cuts:
+            entries = self.GetCutList( cuts, mathmod )
         else:
             entries = xrange( self.Nentries )
-        if arg in self.Variables:
-            values = self.Variables[ arg ]
-            return [ values[ ievt ] for ievt in entries ]
-        else:
-            arg, variables = FormatEvalExpr( arg, math )
-            values = [ self.Variables[ var ] for var in variables ]
-            nvars  = len( variables )
+        
+        variables = []
+        trueargs  = []
+        for v in args:
+            if v in self.Variables:
+                variables.add( v )
+            else:
+                v, newv = FormatEvalExpr( v, mathmod )
+                variables += newv 
+            trueargs.append( v )
+        
+        variables = list( set( variables ) )
+        variables.sort()
+        variables.reverse()
+        
+        values = [ self.Variables[ var ] for var in variables ]
+        nvars  = len( variables )
+        output = []
+        for iv, arg in enumerate( trueargs ):
             for ivar in xrange( nvars ):
                 arg = arg.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
-            return eval( '[ %s for ievt in entries ]' %arg )
+            output.append( eval( '[ %s for ievt in entries ]' %arg ) )
+        cmd = 'output[ 0 ]'
+        for i in xrange( 1, len( output ) ):
+            cmd += ', output[ %i ]' %i
+        return eval( cmd )
 
     def GetVarNames( self ):
         '''
@@ -387,48 +406,57 @@ class DataManager:
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too.
         '''
-        cuts = kwargs.get( 'cuts', False )
+        cuts    = kwargs.get( 'cuts', False )
+        mathmod = kwargs.get( 'mathmod', math )
         kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
         
-        var = self.GetVarEvents( var, cuts )
         if wvar:
-            wvar = self.GetVarEvents( wvar, cuts )
+            var, wvar = self.GetVarEvents( var, wvar, cuts = cuts, mathmod = mathmod )
+        else:
+            var = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
+
         return MakeHistogram( var, wvar, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         '''
         Makes the 2-dimensional histogram of the given variables
         '''
-        cuts = kwargs.get( 'cuts', False )
+        cuts    = kwargs.get( 'cuts', False )
+        mathmod = kwargs.get( 'mathmod', math )
         kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
         
         if wvar:
-            wvar = self.GetVarEvents( wvar, cuts )
-        xvar = self.GetVarEvents( xvar, cuts )
-        yvar = self.GetVarEvents( yvar, cuts )
+            xvar, yvar, wvar = self.GetVarEvents( xvar, yvar, wvar, cuts = cuts, mathmod = mathmod )
+        else:
+            xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
+        
         return MakeHistogram2D( xvar, yvar, wvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         '''
         Creates a graph object with the points corresponding to two variables
         '''
-        cuts = kwargs.get( 'cuts', False )
+        cuts    = kwargs.get( 'cuts', False )
+        mathmod = kwargs.get( 'mathmod', math )
         kwargs[ 'name' ]   = kwargs.get( 'name', xvar + 'vs' + yvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
 
-        xvar = self.GetVarEvents( xvar, cuts )
-        yvar = self.GetVarEvents( yvar, cuts )
-        if xerr:
-            xerr = self.GetVarEvents( xerr, cuts )
-        if yerr:
-            yerr = self.GetVarEvents( yerr, cuts )
+        if not xerr and not yerr:
+            xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
+        elif xerr and yerr:
+            xvar, yvar, xerr, yerr = self.GetVarEvents( xvar, yvar, xerr, yerr, cuts = cuts, mathmod = mathmod )
+        elif xerr:
+            xvar, yvar, xerr = self.GetVarEvents( xvar, yvar, xerr, cuts = cuts, mathmod = mathmod )
+        else:
+            xvar, yvar, yerr = self.GetVarEvents( xvar, yvar, yerr, cuts = cuts, mathmod = mathmod )
+        
         return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 
     def MakeVariable( self, varname, arg, function = False ):
@@ -476,9 +504,10 @@ class DataManager:
             print 'ERROR:', self.Name, '=> No variables booked in this manager'
             return
         
-        cuts = kwargs.get( 'cuts', False )
-        evts = kwargs.get( 'evts', False )
-        prec = kwargs.get( 'prec', 3 )
+        cuts    = kwargs.get( 'cuts', False )
+        mathmod = kwargs.get( 'mathmod', math )
+        evts    = kwargs.get( 'evts', False )
+        prec    = kwargs.get( 'prec', 3 )
 
         form = '%.' + str( prec ) + 'e'
         if prec:
@@ -523,7 +552,7 @@ class DataManager:
         
         ''' Prints the values of the variables '''
         if cuts:
-            evtlst = self.GetCutList( cuts )
+            evtlst = self.GetCutList( cuts, mathmod )
         else:
             evtlst = xrange( self.Nentries )
 
@@ -615,8 +644,9 @@ class DataManager:
         if name == '':
             name = self.Name + '_SubSample'
         if 'cuts' in kwargs:
-            cmgr   = DataManager( name )
-            evtlst = self.GetCutList( kwargs[ 'cuts' ] )
+            mathmod = kwargs.get( 'mathmod', math )
+            cmgr    = DataManager( name )
+            evtlst  = self.GetCutList( kwargs[ 'cuts' ], mathmod )
             for kw, vlist in self.Variables.iteritems():
                 cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst ]
         else:
@@ -790,13 +820,14 @@ def ListFromBranch( brname, tree ):
 # in < **kwargs >, as well as some cuts to be applied.
 def ManagerFromTree( name, file_path, tree_path, **kwargs ):
     cuts      = kwargs.get( 'cuts', '' )
+    mathmod   = kwargs.get( 'mathmod', math )
     variables = kwargs.get( 'variables', [ '*' ] )
     mgr       = DataManager( name, file_path, [ tree_path ] )
     if variables == '*':
         variables = [ '*' ]
     mgr.BookVariables( *variables )
     if cuts:
-        return mgr.SubSample( cuts = cuts )
+        return mgr.SubSample( cuts = cuts, mathmod = mathmod )
     else:
         return mgr
 
