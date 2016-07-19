@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 04/07/2016                                //
+#//  Last update: 19/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -280,13 +280,14 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
             el[ 'pdf' ] = frame.getCurve( name )
     else:
         pdf.plotOn( frame, Name( 'pdf0' ) )
-        graphDst = frame.getCurve( 'pdf0' )
+        graphPdf = frame.getCurve( 'pdf0' )
     
     xbin = Double( 0. )
     ybin = Double( 0. )
     
     ''' Makes a loop over all the points in the graph to correct them '''
     maxerr = 0
+    accept = True
     for ib in xrange( nbins ):
 
         graphDst.GetPoint( ib, xbin, ybin )
@@ -297,12 +298,9 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
             for kw, el in limdic.iteritems():
                 graphPdf   = el[ 'pdf' ]
                 vmin, vmax = el[ 'range' ]
-                if vmin < xbin and xbin < vmax:
+                if vmin <= xbin and xbin < vmax:
                     accept = True
                     break
-        else:
-            graphPdf = pdfCurves[ 0 ]
-            accept = True
         
         ''' If the point is not accepted it is removed from the graph at the end of the process '''
         if accept:
