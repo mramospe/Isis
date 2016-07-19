@@ -372,11 +372,12 @@ class DataManager:
         trueargs  = []
         for v in args:
             if v in self.Variables:
-                variables.add( v )
+                variables.append( v )
             else:
                 v, newv = FormatEvalExpr( v, mathmod )
                 variables += newv 
-            trueargs.append( v )
+            ''' The module is not imported, so the name must change '''
+            trueargs.append( v.replace( mathmod.__name__, 'mathmod' ) )
         
         variables = list( set( variables ) )
         variables.sort()
