@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 19/07/2016                                //
+#//  Last update: 21/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -260,7 +260,7 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
         limdic = {}
         for el in limits:
             ibin = roovar.getBinningPtr( el )
-            limdic[ el ] = { 'pdf': 0, 'range': [ ibin.binLow( 0 ), ibin.binHigh( 0 ) ] }
+            limdic[ el ] = { 'pdf': 0, 'range': ( ibin.lowBound(), ibin.highBound() ) }
     delpoints = []
     
     frame = roovar.frame()
@@ -305,11 +305,15 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
         ''' If the point is not accepted it is removed from the graph at the end of the process '''
         if accept:
 
-            error = graphDst.GetErrorY( ib )
             errhi = graphDst.GetErrorYhigh( ib )
             errlo = graphDst.GetErrorYlow( ib )
 
             dst = ybin - graphPdf.Eval( xbin )
+
+            if dst > 0:
+                error = errhi
+            else:
+                error = errlo
         
             if pull:
                 dst /= error
