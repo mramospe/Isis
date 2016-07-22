@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/05/2016                                                      //
+//  Last update: 22/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -35,6 +35,9 @@ namespace Analysis {
   class Cluster {
 
   public:
+
+    // Internal definition
+    typedef std::vector<ClusterPoint> PointArray;
   
     // Constructor and destructor
     Cluster();
@@ -49,23 +52,20 @@ namespace Analysis {
     void   Normalize( const std::vector<double> &values );
   
     // Inline methods
-    inline void AddPoint( const std::vector<double> &values );
-    inline void Clear();
-    inline double DistanceToCluster( const ClusterPoint &point ) const;
+    inline void                AddPoint( const std::vector<double> &values );
+    inline void                Clear();
+    inline double              DistanceToCluster( const ClusterPoint &point ) const;
     inline const ClusterPoint& GetCenterOfMass() const;
-    inline const std::vector<ClusterPoint>& GetPoints() const;
-    inline const double GetSumOfWeights() const;
-    inline const double GetWeight() const;
-    inline void NormalizeCenterOfMass( const std::vector<double> &values );
-    inline void SetCenterOfMass( const ClusterPoint &com );
-    inline void SetWeights( const std::vector<double> &weights );
+    inline const PointArray&   GetPoints() const;
+    inline const double        GetSumOfWeights() const;
+    inline const double        GetWeight() const;
+    inline void                NormalizeCenterOfMass( const std::vector<double> &values );
+    inline void                SetCenterOfMass( const ClusterPoint &com );
+    inline void                SetWeights( const std::vector<double> &weights );
 
     // Static method
     static Cluster MergeClusters( const Cluster &clusterA, const Cluster &clusterB );
-
-    // Internal definition
-    typedef std::vector<ClusterPoint> PointArray;
-
+    
   protected:
   
     // Attributes
@@ -74,7 +74,7 @@ namespace Analysis {
     std::vector<double> fWeights;
     
   };
-
+  
   // Adds a new point given a vector
   void Cluster::AddPoint( const std::vector<double> &values ) {
     this -> AddPoint( ClusterPoint( values ) );

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/05/2016                                                      //
+//  Last update: 22/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -48,10 +48,10 @@ namespace Analysis {
     ~ClusterFactory();
 
     // Methods
-    void   CalculateClusters();
-    void   Configure( const std::string &opts );
-    void   PrintCentersOfMass( std::string title = std::string() );
-    void   PrintDistances( std::string title = std::string() );
+    void CalculateClusters();
+    void Configure( const std::string &opts );
+    void PrintCentersOfMass( std::string title = std::string() );
+    void PrintDistances( std::string title = std::string() );
   
     // Inline methods
     inline void                  AddVariable( const std::string &name, const double &wgt = 1 );

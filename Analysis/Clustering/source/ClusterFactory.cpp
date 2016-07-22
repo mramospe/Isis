@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/05/2016                                                      //
+//  Last update: 22/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -89,22 +89,21 @@ void Analysis::ClusterFactory::CalculateClusters() {
   std::random_shuffle( fPoints.begin(), fPoints.end() );
   std::cout << "Input points randomly sorted" << std::endl;
   
-  // Applies the normalization
+  // Applies the normalization using the standard deviation of each sample to do it
   std::cout << "Normalizing values in points" << std::endl;
-  double min, max;
+  size_t npoints = fPoints.size();
   for ( size_t inr = 0; inr < fVarNorm.size(); ++inr ) {
-    min = std::min_element( fPoints.begin(),
-			    fPoints.end(),
-			    [ inr ] ( const Analysis::ClusterPoint &itl,
-				      const Analysis::ClusterPoint &itr ) {
-			      return itl.GetValue( inr ) < itr.GetValue( inr ); } )
-      -> GetValue( inr );
-    max = std::max_element( fPoints.begin(), fPoints.end(),
-			    [ inr ] ( const Analysis::ClusterPoint &itl,
-				      const Analysis::ClusterPoint &itr ) {
-			      return itl.GetValue( inr ) < itr.GetValue( inr ); } )
-      -> GetValue( inr );
-    fVarNorm[ inr ] = max - min;
+    
+    double
+      mean  = 0,
+      mean2 = 0;
+    
+    for ( auto itp = fPoints.cbegin(); itp != fPoints.cend(); ++itp ) {
+      double val = itp -> GetValue( inr );
+      mean  += val;
+      mean2 += val*val;
+    }
+    fVarNorm[ inr ] = std::sqrt( mean2/npoints - mean/( npoints*npoints ) );
   }
   for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
     it -> Normalize( fVarNorm );
@@ -560,6 +559,11 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
   std::vector<double> comdists( fClusters.size() );
   do {
     
+    // Gets the position of the centers of mass to calculate the variation of their position
+    itc = fClusters.begin();
+    for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
+      *nitc = itc -> GetCenterOfMass();
+
     // Call to the main method to define the clusters
     this -> DistanceMerging();
     
@@ -569,11 +573,7 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
     
     while ( itc != fClusters.end() )
       *itd++ = itc++ -> DistanceToCluster( *itp++ );
-    
-    itc = fClusters.begin();
-    for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-      *nitc = itc -> GetCenterOfMass();
-    
+        
   } while ( *std::max_element( comdists.begin(), comdists.end() ) > maxdst && ++iiter < fNiter );
 
   // Also returns < true > if the limit of iterations has not been reached
@@ -674,7 +674,7 @@ bool Analysis::ClusterFactory::ManageClusters() {
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++itdr )
     *itdr = it -> Dispersion();
   
-  // Iterates over the clusters to apply get the decision
+  // Iterates over the clusters to apply the decision
   double nstddev2 = fNcomStdDev*fNcomStdDev;
   itdr = dispersions.begin();
   for ( auto itcr = fClusters.begin(); itcr != fClusters.end(); ++itcr, ++itdr ) {

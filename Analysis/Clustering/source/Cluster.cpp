@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/05/2016                                                      //
+//  Last update: 22/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -59,7 +59,7 @@ Analysis::Cluster::~Cluster() { }
 // Adds a new point to the cluster. The center of mass is automatically calculated.
 void Analysis::Cluster::AddPoint( const Analysis::ClusterPoint &point ) {
 
-  fCenterOfMass = ClusterPoint::CenterOfMass( fCenterOfMass, point, fWeights );
+  fCenterOfMass   = ClusterPoint::CenterOfMass( fCenterOfMass, point, fWeights );
   fPoints.push_back( point );
 }
 

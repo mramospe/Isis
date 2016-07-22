@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 09/05/2016                                                      //
+//  Last update: 22/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -42,11 +42,11 @@ namespace Analysis {
     ~ClusterPoint();
     
     // Inline methods
-    inline const double GetValue( const size_t &index ) const;
+    inline const double               GetValue( const size_t &index ) const;
     inline const std::vector<double>& GetValues() const;
-    inline const double GetWeight() const;
-    inline void Normalize( const std::vector<double> &norm );
-    inline void SetValues( const std::vector<double> &values );
+    inline const double               GetWeight() const;
+    inline void                       Normalize( const std::vector<double> &norm );
+    inline void                       SetValues( const std::vector<double> &values );
 
     // Static method
     static ClusterPoint CenterOfMass( const ClusterPoint        &pointA,
