@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/07/2016                                                      //
+//  Last update: 23/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -50,6 +50,7 @@ namespace Analysis {
     // Methods
     void CalculateClusters();
     void Configure( const std::string &opts );
+    void HackClustersMoS();
     void PrintCentersOfMass( std::string title = std::string() );
     void PrintDistances( std::string title = std::string() );
   
@@ -81,7 +82,7 @@ namespace Analysis {
     bool   fVerbose;
 
   private:
-
+    
     // Method to print information inside the processes
     void Display( void (ClusterFactory::*funcptr)( std::string title ),
 		  const std::string &title = std::string() );
@@ -96,13 +97,16 @@ namespace Analysis {
     bool IterativeMethod();
     bool ManageClusters();
   };
-
+  
+  //__________________
+  // -- INLINE METHODS
+  
   // Adds a new variable, attaching also its weight
   void ClusterFactory::AddVariable( const std::string &name, const double &wgt ) {
     fVarNorm.push_back( 0 );
     fVarOrder.push_back( name );
     fWeights.push_back( wgt );
-    fCenterOfMass = ClusterPoint( fVarNorm.size(), 0 );
+    fCenterOfMass.AddDimension();
   }
   // Gets the cluster at position < icl >
   Cluster* ClusterFactory::GetCluster( const size_t &icl ) { return &fClusters[ icl ]; }

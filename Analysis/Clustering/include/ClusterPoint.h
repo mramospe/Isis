@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/07/2016                                                      //
+//  Last update: 23/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -39,27 +39,26 @@ namespace Analysis {
     // Constructor and destructor
     ClusterPoint( const size_t &nvars = 0, const double &wgt = 1 );
     ClusterPoint( const std::vector<double> &values, const double &wgt = 1 );
-    ~ClusterPoint();
+    virtual ~ClusterPoint();
     
     // Inline methods
     inline const double               GetValue( const size_t &index ) const;
     inline const std::vector<double>& GetValues() const;
     inline const double               GetWeight() const;
     inline void                       Normalize( const std::vector<double> &norm );
-    inline void                       SetValues( const std::vector<double> &values );
-
-    // Static method
-    static ClusterPoint CenterOfMass( const ClusterPoint        &pointA,
-				      const ClusterPoint        &pointB,
-				      const std::vector<double> &weights );
+    inline void                       SetValues( const std::vector<double> &values,
+						 const double              &wgt = 1 );
 
   protected:
   
     // Attributes
     std::vector<double> fValues;
     double              fWeight;
-
+    
   };
+
+  //__________________
+  // -- INLINE METHODS
 
   // Returns the value for the variable at position < index >
   const double ClusterPoint::GetValue( const size_t &index ) const { return fValues[ index ]; }
@@ -75,7 +74,10 @@ namespace Analysis {
       *itv++ /= *itm++;
   }
   // Sets the values for this point
-  void ClusterPoint::SetValues( const std::vector<double> &values ) { fValues = values; }
+  void ClusterPoint::SetValues( const std::vector<double> &values, const double &wgt ) {
+    fValues = values;
+    fWeight = wgt;
+  }
 
 }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/07/2016                                                      //
+//  Last update: 23/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -477,10 +477,37 @@ inline void Analysis::ClusterFactory::Display( void (ClusterFactory::*funcptr)( 
 }
 
 //_______________________________________________________________________________
+// Modifies the mean of squares in all the clusters in order to avoid divisions
+// by zero in the calculation of the distances for the first points. The mean
+// of squares are set in such a way that the variance matches that of the whole
+// distribution of the points in the main cluster.
+void Analysis::ClusterFactory::HackClustersMoS() {
+
+  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
+    
+    auto &center = const_cast<ClusterCenterOfMass&>( itc -> GetCenterOfMass() );
+    auto &mofs   = const_cast<std::vector<double>&>( center.GetMeanOfSquares() );
+    auto its     = mofs.begin();
+    auto
+      itm = center.GetValues().cbegin(),
+      itv = fVarNorm.cbegin();
+      
+    while ( its != mofs.end() ) {
+      
+      *its = (*itv)*(*itv) + (*itm)*(*itm);
+      
+      ++its;
+      ++itv;
+      ++itm;
+    }
+  }
+}
+
+//_______________________________________________________________________________
 // Method to calculate the initial centers of mass of the clusters taking into
 // account the minimum position allowed between clusters.
 void Analysis::ClusterFactory::DistanceCentersOfMass() {
-
+  
   // First calculates the distances from the points to the center of mass of the main cluster
   std::cout << "Calculating distance from points to the main center of mass" << std::endl;
   std::vector< std::pair<PointArray::iterator, double> > distances( fPoints.size() );
@@ -503,20 +530,28 @@ void Analysis::ClusterFactory::DistanceCentersOfMass() {
   double mindist = distances.front().second;
   itd = distances.begin();
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
-    it -> SetCenterOfMass( *(itd++ -> first) );
+    
+    it -> InitCenterOfMass( *(itd++ -> first) );
+    
     for ( auto itc = fClusters.begin(); itc != it; ++itc )
-      while ( it -> DistanceToCluster( itc -> GetCenterOfMass() ) < mindist && itd != distances.end() )
-	it -> SetCenterOfMass( *(itd++ -> first) );
+      while ( it -> DistanceToCluster( itc -> GetCenterOfMass() ) < mindist &&
+	      itd != distances.end() )
+	it -> InitCenterOfMass( *(itd++ -> first) );
+    
     if ( itd == distances.end() ) {
       std::cerr <<
-	"WARNING: The number of clusters could be so high; using a smaller limit distance"
+	"WARNING: The number of clusters could be too high; using a smaller limit distance"
 		<< std::endl;
       mindist /= 2;
+      
       it  = fClusters.begin();
       itd = distances.begin();
     }
   }
   std::cout << "Defined initial centers of mass" << std::endl;
+
+  // Hacks the mean of squares of the clusters
+  this -> HackClustersMoS();
 }
 
 //_______________________________________________________________________________
@@ -537,7 +572,10 @@ void Analysis::ClusterFactory::RandomCentersOfMass() {
   std::vector<Cluster>::iterator it;
   std::vector<size_t>::iterator itp;
   for ( it = fClusters.begin(), itp = positions.begin(); it != fClusters.end(); ++it, ++itp )
-    it -> SetCenterOfMass( fPoints[ *itp ] );
+    it -> InitCenterOfMass( fPoints[ *itp ] );
+
+  // Hacks the mean of squares of the clusters
+  this -> HackClustersMoS();
 }
 
 //_______________________________________________________________________________
@@ -552,13 +590,14 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
   for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
     *nitc = itc -> GetCenterOfMass();
   
-  // Loops till the maximum variation on the center of mass is smaller than that required or till
-  // the maximum number of iterations is satisfied.
+  // Loops till the maximum variation on the center of mass is smaller than that required
+  // or till the maximum number of iterations is satisfied.
   size_t iiter = 0;
   double maxdst = fMaxComVar*fVarNorm.size();
   std::vector<double> comdists( fClusters.size() );
+
   do {
-    
+
     // Gets the position of the centers of mass to calculate the variation of their position
     itc = fClusters.begin();
     for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )

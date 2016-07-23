@@ -59,35 +59,53 @@ Analysis::Cluster::~Cluster() { }
 // Adds a new point to the cluster. The center of mass is automatically calculated.
 void Analysis::Cluster::AddPoint( const Analysis::ClusterPoint &point ) {
 
-  fCenterOfMass   = ClusterPoint::CenterOfMass( fCenterOfMass, point, fWeights );
+  fCenterOfMass.AttachPoint( point );
   fPoints.push_back( point );
 }
 
 //_______________________________________________________________________________
-// Calculates the dispersion (squared standard deviation) of the points in the cluster
+// Calculates the dispersion (squared standard deviation) of the points in the
+// cluster. The same could be achieved summing all the distances of the points
+// to the cluster, dividing by the number of points.
 double Analysis::Cluster::Dispersion() const {
+  
+  auto
+    &mean  = fCenterOfMass.GetValues(),
+    &mean2 = fCenterOfMass.GetMeanOfSquares();
+  auto
+    itm = mean.cbegin(),
+    it2 = mean2.cbegin();
 
   double s2 = 0;
-  for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
-    s2 += this -> DistanceToCluster( *it );
-
-  return s2/( fPoints.size() - 1 );
+  while ( itm != mean.cend() ) {
+    s2 += (*it2) - (*itm)*(*itm);
+    ++itm;
+    ++it2;
+  }
+  
+  return s2;
 }
 
 //_______________________________________________________________________________
 // Returns the weighted distance between two points. The weight is dividing since
 // as its value grows, the distance must turn smaller.
-double Analysis::Cluster::Distance( const Analysis::ClusterPoint &pointA,
-				    const Analysis::ClusterPoint &pointB ) const {
+double Analysis::Cluster::DistanceToCluster( const Analysis::ClusterPoint &point ) const {
 
-  double dist2 = 0, val;
   auto
-    itc = pointA.GetValues().cbegin(),
-    itv = pointB.GetValues().cbegin(),
-    itw = fWeights.cbegin();
-  
-  while ( itc != pointA.GetValues().end() ) {
-    val    = ( (*itv++) - (*itc++) )/(*itw++);
+    itc = fCenterOfMass.GetValues().cbegin(),
+    itv = point.GetValues().cbegin(),
+    itw = fWeights.cbegin(),
+    its = fCenterOfMass.GetMeanOfSquares().cbegin();
+
+  double dist2 = 0;
+  while ( itc != fCenterOfMass.GetValues().end() ) {
+    double
+      pnt = (*itv++),
+      ctr = (*itc++),
+      wgt = (*itw++),
+      val = ( pnt - ctr )/wgt,
+      s2  = (*its++) - ctr*ctr;
+    
     dist2 += val*val;
   }
   
@@ -101,17 +119,17 @@ Analysis::Cluster Analysis::Cluster::MergeClusters( const Cluster &clusterA,
 
   Cluster cluster( clusterA );
 
-  std::vector<double> weights( clusterA.fWeights );
+  std::vector<double> &weights = cluster.fWeights;
   auto itwB = clusterB.fWeights.begin();
   auto itw  = weights.begin();
   
   while ( itw != weights.end() )
     *itw++ += *itwB++;
 
-  cluster.fPoints.insert( cluster.fPoints.end(), clusterB.fPoints.cbegin(), cluster.fPoints.cend() );
-  cluster.fCenterOfMass = Analysis::ClusterPoint::CenterOfMass( clusterA.fCenterOfMass,
-								clusterB.fCenterOfMass,
-								weights );
+  Cluster::PointArray &array = cluster.fPoints;
+  array.insert( array.end(), clusterB.fPoints.cbegin(), array.cend() );
+  cluster.fCenterOfMass.AttachPoint( clusterB.fCenterOfMass );
+  
   return cluster;
 }
 
