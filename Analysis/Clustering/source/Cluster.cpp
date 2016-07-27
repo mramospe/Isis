@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 22/07/2016                                                      //
+//  Last update: 27/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -56,14 +56,6 @@ Analysis::Cluster::~Cluster() { }
 // -- PUBLIC METHODS
 
 //_______________________________________________________________________________
-// Adds a new point to the cluster. The center of mass is automatically calculated.
-void Analysis::Cluster::AddPoint( const Analysis::ClusterPoint &point ) {
-
-  fCenterOfMass.AttachPoint( point );
-  fPoints.push_back( point );
-}
-
-//_______________________________________________________________________________
 // Calculates the dispersion (squared standard deviation) of the points in the
 // cluster. The same could be achieved summing all the distances of the points
 // to the cluster, dividing by the number of points.
@@ -81,6 +73,7 @@ double Analysis::Cluster::Dispersion() const {
     s2 += (*it2) - (*itm)*(*itm);
     ++itm;
     ++it2;
+
   }
   
   return s2;
@@ -89,24 +82,24 @@ double Analysis::Cluster::Dispersion() const {
 //_______________________________________________________________________________
 // Returns the weighted distance between two points. The weight is dividing since
 // as its value grows, the distance must turn smaller.
-double Analysis::Cluster::DistanceToCluster( const Analysis::ClusterPoint &point ) const {
-
+double Analysis::Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
+						 const ClusterPoint &pointB ) const {
   auto
-    itc = fCenterOfMass.GetValues().cbegin(),
-    itv = point.GetValues().cbegin(),
+    itc = pointA.GetValues().cbegin(),
+    itv = pointB.GetValues().cbegin(),
     itw = fWeights.cbegin(),
     its = fCenterOfMass.GetMeanOfSquares().cbegin();
-
+  
   double dist2 = 0;
-  while ( itc != fCenterOfMass.GetValues().end() ) {
+  while ( itc != pointA.GetValues().end() ) {
     double
       pnt = (*itv++),
       ctr = (*itc++),
       wgt = (*itw++),
       val = ( pnt - ctr )/wgt,
-      s2  = (*its++) - ctr*ctr;
+      sm2 = (*its++) - ctr*ctr;
     
-    dist2 += val*val;
+    dist2 += val*val;///sm2;
   }
   
   return dist2;
@@ -123,8 +116,12 @@ Analysis::Cluster Analysis::Cluster::MergeClusters( const Cluster &clusterA,
   auto itwB = clusterB.fWeights.begin();
   auto itw  = weights.begin();
   
-  while ( itw != weights.end() )
-    *itw++ += *itwB++;
+  while ( itw != weights.end() ) {
+    *itw = ( (*itw) + (*itwB) )/2.;
+
+    ++itw;
+    ++itwB;
+  }
 
   Cluster::PointArray &array = cluster.fPoints;
   array.insert( array.end(), clusterB.fPoints.cbegin(), array.cend() );

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/07/2016                                                      //
+//  Last update: 27/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -36,9 +36,11 @@ namespace Analysis {
 
     // Constructor and destructor
     ClusterCenterOfMass();
+    ClusterCenterOfMass( const ClusterPoint &point );
     ~ClusterCenterOfMass();
 
     // Methods
+    bool AnyNullSigma() const;
     void AttachPoint( const ClusterPoint &point );
     void Normalize( const std::vector<double> &norm );
     void SetValues( const std::vector<double> &values );
@@ -56,7 +58,7 @@ namespace Analysis {
 
     // Attribute
     std::vector<double> fMeanOfSquares;
-
+    
   };
   
   //__________________

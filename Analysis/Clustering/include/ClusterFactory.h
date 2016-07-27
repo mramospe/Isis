@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/07/2016                                                      //
+//  Last update: 27/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -48,9 +48,9 @@ namespace Analysis {
     ~ClusterFactory();
 
     // Methods
+    void BuildCentersOfMass();
     void CalculateClusters();
     void Configure( const std::string &opts );
-    void HackClustersMoS();
     void PrintCentersOfMass( std::string title = std::string() );
     void PrintDistances( std::string title = std::string() );
   
@@ -67,6 +67,7 @@ namespace Analysis {
     // Attributes
     std::vector<Cluster>                    fClusters;
     std::map< size_t, std::vector<double> > fClusterWeights;
+    std::vector<PointArray::iterator>       fPointsToAvoid;
     std::vector<double>                     fVarNorm;
     std::vector<std::string>                fVarOrder;
   
@@ -93,8 +94,10 @@ namespace Analysis {
 
     // Clustering methods
     bool ConvergenceMethod();
-    void DistanceMerging();
     bool IterativeMethod();
+
+    // Auxiliar methods
+    void DistanceMerging();
     bool ManageClusters();
   };
   

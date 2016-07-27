@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 23/07/2016                                                      //
+//  Last update: 27/07/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -47,20 +47,20 @@ namespace Analysis {
     virtual ~Cluster();
 
     // Methods
-    void   AddPoint( const ClusterPoint &point );
     double Dispersion() const;
-    double DistanceToCluster( const ClusterPoint &point ) const;
+    double DistanceBetweenPoints( const ClusterPoint &pointA, const ClusterPoint &pointB ) const;
     void   Normalize( const std::vector<double> &values );
   
     // Inline methods
-    inline void                       AddPoint( const std::vector<double> &values );
-    inline void                       Clear();
+    inline void                       AddPoint( const ClusterPoint &point );
+    inline double                     DistanceToCluster( const ClusterPoint &point ) const;
     inline const ClusterCenterOfMass& GetCenterOfMass() const;
     inline const PointArray&          GetPoints() const;
     inline const double               GetSumOfWeights() const;
     inline const double               GetWeight() const;
     inline void                       InitCenterOfMass( const ClusterPoint &com );
     inline void                       NormalizeCenterOfMass( const std::vector<double> &values );
+    inline void                       RemovePoints();
     inline void                       SetCenterOfMass( const ClusterPoint &com );
     inline void                       SetWeights( const std::vector<double> &weights );
 
@@ -79,12 +79,15 @@ namespace Analysis {
   //_______________
   // INLINE METHODS
 
-  // Adds a new point given a vector
-  void Cluster::AddPoint( const std::vector<double> &values ) {
-    this -> AddPoint( ClusterPoint( values ) );
+  // Adds a new point given a cluster point
+  inline void Cluster::AddPoint( const ClusterPoint &point ) {
+    fCenterOfMass.AttachPoint( point );
+    fPoints.push_back( point );
   }
-  // Clears the current cluster
-  void Cluster::Clear() { fPoints.clear(); }
+  // Returns the distance to the center of mass
+  double Cluster::DistanceToCluster( const Analysis::ClusterPoint &point ) const {
+    return this -> DistanceBetweenPoints( fCenterOfMass, point );
+  }
   // Returns the current center of mass
   const ClusterCenterOfMass& Cluster::GetCenterOfMass() const { return fCenterOfMass; }
   // Returns the vector of points in the cluster
@@ -99,6 +102,8 @@ namespace Analysis {
   void Cluster::NormalizeCenterOfMass( const std::vector<double> &values ) {
     fCenterOfMass.Normalize( values );
   }
+  // Removes the points of the current cluster
+  void Cluster::RemovePoints() { fPoints.clear(); }
   // Sets a new point as the center of mass
   void Cluster::SetCenterOfMass( const ClusterPoint &com ) { fCenterOfMass = com; }
   // Sets the weights for each variable in the points for this cluster
