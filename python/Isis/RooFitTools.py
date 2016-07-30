@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 21/07/2016                                //
+#//  Last update: 28/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -311,9 +311,9 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
             dst = ybin - graphPdf.Eval( xbin )
 
             if dst > 0:
-                error = errhi
-            else:
                 error = errlo
+            else:
+                error = errhi
         
             if pull:
                 dst /= error
@@ -326,8 +326,8 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
                 factor = 5*error
 
             '''
-            Displays a warning message if any point if more far than 5 times the error from the
-            fit curve
+            Displays a warning message if any point if more far than 5 times the error
+            from the fit curve
             '''
             if abs( dst ) > factor:
                 print 'WARNING: Point %i at < %.2f > exceeds 5 sigma from the fit curve' %(ib, xbin)

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 18/07/2016                                //
+#//  Last update: 30/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -19,7 +19,7 @@
 #/////////////////////////////////////////////////////////////
 
 
-import os, fcntl, math, struct, termios
+import os, fcntl, math, struct, termios, sys
 import __builtin__
 from Isis.Algebra import Matrix, SolveLU
 
@@ -318,6 +318,117 @@ def MergeDicts( *args ):
         for dic in args:
             rdic[ key ] += dic[ key ]
     return rdic
+
+#_______________________________________________________________________________
+# This class allows to save/read environments to/from a file, which are
+# saved as classes. This is very useful when peforming an analysis with many
+# results from different categories that can not be easily written into any
+# other kind of file.
+class PythonEnvMgr:
+
+    def __init__( self, filename, **kwargs ):
+        '''
+        The name of the input/output file must be provided. The option < addbot >
+        takes control of the position to insert the new lines. If the option
+        < overwrite > is set to True, a new file will be created, replacing the
+        possible existing one.
+        '''
+
+        addbot = kwargs.get( 'addbot', True )
+        ovrwrt = kwargs.get( 'overwrite', False )
+
+        self.File = filename
+        
+        if addbot:
+            self.Mode = 'at+'
+        else:
+            self.Mode = 'wt+'
+
+        if ovrwrt or not os.path.isfile( filename ):
+            f = open( filename, 'wt' )
+            print 'Created new python file: <', filename, '>'
+            f.close()
+        else:
+            print 'Updating python file: <', filename, '>'
+        
+    def _make_env_str( self, dic ):
+        '''
+        Internal function to create the string to be added to the output file
+        '''
+        outstr = ''
+        maxlen = max( len(str( it )) for it in dic )
+        srtkws = dic.keys()
+        srtkws.sort()
+        for kw in srtkws:
+            whtsp   = ( maxlen - len( kw ) )*' '
+            outstr += '\t' + kw + whtsp + ' = ' + str( dic[ kw ] ) + '\n'
+        return outstr
+    
+    def ReadEnv( self, name, **kwargs ):
+        '''
+        Reads the asigned file. By default the class is returned, but it can
+        be given as a dictionary if specified in **kwargs.
+        '''
+        removepath = kwargs.get( 'rmpath', True )
+        returndict = kwargs.get( 'retdict', False )
+
+        pathtofile = self.File.name().split( '/' )[ :-1 ]
+        if pathtofile not in sys.path:
+            sys.path.append( pathtofile )
+
+        mod = getattr( __import__( self.File.name ), name )
+
+        if removepath:
+            del sys.path[ -1 ]
+        
+        if returndict:
+            return { kw: el for kw, el in mod.__dict__.iteritems()
+                     if not kw.startswith( '__' ) }
+        else:
+            return mod
+
+    def SaveEnv( self, name, **kwargs ):
+        '''
+        Method to save a set of values inside a class called < name > in the file attached
+        to this class.
+        '''
+        ofile = open( self.File, self.Mode )
+        
+        ofile.seek( 0 )
+        lines = ofile.readlines()
+        ofile.seek( 0 )
+        clname = 'class ' + name + ':\n'
+
+        if any( line.startswith( name ) for line in lines ):
+            print 'WARNING: Overwriting in <', ofile.name, \
+                '>; a variable called <', name, '> already exists'
+
+        if clname in lines:
+
+            print 'WARNING: Replacing existing environment <', name,\
+                '> in file <', ofile.name, '>'
+        
+            ofile.truncate()
+            start = lines.index( clname )
+            end   = start + 1
+        
+            length = len( lines )
+            while end != length and lines[ end ].startswith( '\t' ):
+                end += 1
+        
+            for line in lines[ :start ]:
+                ofile.write( line )
+        
+            ostr = self._make_env_str( kwargs )
+            ofile.write( clname + ostr )
+            
+            for line in lines[ end: ]:
+                ofile.write( line )
+        else:
+            ostr = self._make_env_str( kwargs )
+            ofile.write( clname + ostr )
+
+        ofile.close()
 
 #_______________________________________________________________________________
 # Returns the minimum and maximum values for the shared range among lists. If
