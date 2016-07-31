@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 28/07/2016                                //
+#//  Last update: 31/07/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -20,10 +20,79 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import RooArgSet, TRandom3, Double
+from ROOT import gRandom, RooArgList, RooArgSet, RooFormulaVar, RooConstVar, TRandom3, Double
 from ROOT.RooFit import Binning, Name, NormRange, Range, Save
 from Isis.PlotTools import MakeHistogram
 
+
+#_______________________________________________________________________________
+# This class allows to perform blind analysis. A random quantity is added to the
+# existing variable, allowing it even to take values with the opposite sign. In
+# order to do so, the range of the input variable is changed according to a
+# given scale.
+class BlindVar:
+    
+    def __init__( self, roovar, **kwargs ):
+        '''
+        To build the class, the variable to be blinded must be provided. In < scale >
+        one modifies the range of values for the blinded variable. Also the names for
+        the constant variable and the generated formula can be modified.
+        '''
+        
+        name = roovar.GetName()
+
+        scale     = kwargs.get( 'scale', 1000 )
+        constname = name + '_BlindFactor'
+        eqname    = kwargs.get( 'bvarname', name + '_BlindExpr' )
+        
+        print 'Defining a new blinded variable for <', name, '>'
+
+        vmin = roovar.getMax()
+        vmax = roovar.getMax()
+
+        maxval = scale*max( vmin, vmax )
+
+        print 'Set new range for variable <', roovar.GetName(),\
+            '> to [%d, %d]' %( -maxval, +maxval )
+        roovar.setMin( -maxval )
+        roovar.setMax( +maxval )
+        
+        rndm      = gRandom.Uniform( -maxval, maxval )
+        blindVar  = RooConstVar( constname, constname, rndm )
+
+        formula = name + ' + ' + constname        
+        varlist = RooArgList( roovar, blindVar )
+        blindEq = RooFormulaVar( eqname, eqname, formula, varlist )
+
+        self.BlindEq  = blindEq
+        self.BlindVar = blindVar
+        self.TrueVar  = roovar
+
+    def GetTrueValue( self ):
+        '''
+        Returns the true value of the blinded variable
+        '''
+        truevar  = self.TrueVar
+        blindvar = self.BlindVar
+        result   = truevar.getVal() + blindvar.getVal()
+        error    = truevar.getError()
+        errorlo  = truevar.getErrorLo()
+        errorhi  = truevar.getErrorHi()
+        return result, error, errorlo, errorhi
+    
+    def GetUnblindVar( self ):
+        '''
+        Returns the RooFormulaVar object that must be used to do the fit
+        '''
+        return self.BlindEq
+
+    def PrintTrueValue( self ):
+        '''
+        Displays the true value of the blinded variable
+        '''
+        name   = self.TrueVar.GetName()
+        outstr = ( name, ) + self.GetTrueValue()
+        print 'Unblinded result: %s = %.4f +/- %.4f (%.4f) (+%.4f)' % outstr
 
 #_______________________________________________________________________________
 # This function extracts the values of a pull to a list, useful to check if
