@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 31/07/2016                                //
+#//  Last update: 03/08/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -20,7 +20,7 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import gRandom, RooArgList, RooArgSet, RooFormulaVar, RooConstVar, TRandom3, Double
+from ROOT import gRandom, RooArgList, RooArgSet, RooConstVar, RooFormulaVar, RooRealVar, TRandom3, Double
 from ROOT.RooFit import Binning, Name, NormRange, Range, Save
 from Isis.PlotTools import MakeHistogram
 
@@ -40,44 +40,49 @@ class BlindVar:
         '''
         
         name = roovar.GetName()
-
-        scale     = kwargs.get( 'scale', 1000 )
-        constname = name + '_BlindFactor'
-        eqname    = kwargs.get( 'bvarname', name + '_BlindExpr' )
-        
         print 'Defining a new blinded variable for <', name, '>'
 
-        vmin = roovar.getMax()
+        scale  = kwargs.get( 'scale', 1000 )
+        eqname = kwargs.get( 'bvarname', name + '_BlindExpr' )
+
+        print 'Generating new set of random bounds'
+        vmin = roovar.getMin()
+        boundlo = gRandom.Uniform( vmin, vmin*scale )
         vmax = roovar.getMax()
+        boundhi = gRandom.Uniform( vmax, vmax*scale )
 
-        maxval = scale*max( vmin, vmax )
-
-        print 'Set new range for variable <', roovar.GetName(),\
-            '> to [%d, %d]' %( -maxval, +maxval )
-        roovar.setMin( -maxval )
-        roovar.setMax( +maxval )
+        clonename = name + '_BLIND'
+        blindVar = RooRealVar( clonename, clonename, roovar.getVal(), boundlo, boundhi )
+        print 'Created clone variable named <', clonename, '>'
         
-        rndm      = gRandom.Uniform( -maxval, maxval )
-        blindVar  = RooConstVar( constname, constname, rndm )
+        alpha = ( vmax - vmin )/( boundhi - boundlo )
+        beta  = ( vmax*boundlo - vmin*boundhi )/( vmax - vmin )
 
-        formula = name + ' + ' + constname        
-        varlist = RooArgList( roovar, blindVar )
+        blindVar.setVal( alpha*( roovar.getVal() - beta ) )
+
+        alpha = RooConstVar( 'alpha', 'alpha', alpha )
+        beta  = RooConstVar( 'beta', 'beta', beta )
+        
+        formula = 'alpha*( %s - beta)' % clonename
+        varlist = RooArgList( blindVar, alpha, beta )
         blindEq = RooFormulaVar( eqname, eqname, formula, varlist )
-
+        print 'The blinding formula is:', formula
+        
+        self.Alpha    = alpha
+        self.Beta     = beta
         self.BlindEq  = blindEq
         self.BlindVar = blindVar
-        self.TrueVar  = roovar
 
     def GetTrueValue( self ):
         '''
         Returns the true value of the blinded variable
         '''
-        truevar  = self.TrueVar
-        blindvar = self.BlindVar
-        result   = truevar.getVal() + blindvar.getVal()
-        error    = truevar.getError()
-        errorlo  = truevar.getErrorLo()
-        errorhi  = truevar.getErrorHi()
+        alpha   = self.Alpha.getVal()
+        truevar = self.BlindVar
+        result  = alpha*( truevar.getVal() - self.Beta.getVal() )
+        error   = alpha*truevar.getError()
+        errorlo = alpha*truevar.getErrorLo()
+        errorhi = alpha*truevar.getErrorHi()
         return result, error, errorlo, errorhi
     
     def GetUnblindVar( self ):
@@ -90,9 +95,9 @@ class BlindVar:
         '''
         Displays the true value of the blinded variable
         '''
-        name   = self.TrueVar.GetName()
+        name   = self.BlindVar.GetName()
         outstr = ( name, ) + self.GetTrueValue()
-        print 'Unblinded result: %s = %.4f +/- %.4f (%.4f) (+%.4f)' % outstr
+        print 'Unblinded result: %s = %.4g +/- %.4g (%.4g) (+%.4g)' % outstr
 
 #_______________________________________________________________________________
 # This function extracts the values of a pull to a list, useful to check if
@@ -157,7 +162,7 @@ class FitContainer( dict ):
             errlo = dic['errorlo']
             errhi = dic['errorhi']
             for el in (val, err, errlo, errhi):
-                addstr  = '%.4f' % el
+                addstr  = '%.4g' % el
                 out    += ( 13 - len(addstr) )*' ' + addstr
             out += '\n'
 
