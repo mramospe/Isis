@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 03/08/2016                                //
+#//  Last update: 04/08/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -45,11 +45,13 @@ class BlindVar:
         scale  = kwargs.get( 'scale', 1000 )
         eqname = kwargs.get( 'bvarname', name + '_BlindExpr' )
 
+        ''' The seed is different for each call, which guarantees the blinding procedure '''
         print 'Generating new set of random bounds'
+        rndm = TRandom3( 0 )
         vmin = roovar.getMin()
-        boundlo = gRandom.Uniform( vmin, vmin*scale )
+        boundlo = rndm.Uniform( vmin, vmin*scale )
         vmax = roovar.getMax()
-        boundhi = gRandom.Uniform( vmax, vmax*scale )
+        boundhi = rndm.Uniform( vmax, vmax*scale )
 
         clonename = name + '_BLIND'
         blindVar = RooRealVar( clonename, clonename, roovar.getVal(), boundlo, boundhi )
