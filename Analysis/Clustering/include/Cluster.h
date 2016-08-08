@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 27/07/2016                                                      //
+//  Last update: 08/08/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -61,6 +61,7 @@ namespace Analysis {
     inline void                       InitCenterOfMass( const ClusterPoint &com );
     inline void                       NormalizeCenterOfMass( const std::vector<double> &values );
     inline void                       RemovePoints();
+    inline void                       ResetCenterOfMassWeight();
     inline void                       SetCenterOfMass( const ClusterPoint &com );
     inline void                       SetWeights( const std::vector<double> &weights );
 
@@ -104,6 +105,9 @@ namespace Analysis {
   }
   // Removes the points of the current cluster
   void Cluster::RemovePoints() { fPoints.clear(); }
+
+  void Cluster::ResetCenterOfMassWeight() { fCenterOfMass.ResetWeight(); }
+
   // Sets a new point as the center of mass
   void Cluster::SetCenterOfMass( const ClusterPoint &com ) { fCenterOfMass = com; }
   // Sets the weights for each variable in the points for this cluster

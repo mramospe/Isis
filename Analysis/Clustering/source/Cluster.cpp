@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 27/07/2016                                                      //
+//  Last update: 08/08/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -70,10 +70,11 @@ double Analysis::Cluster::Dispersion() const {
 
   double s2 = 0;
   while ( itm != mean.cend() ) {
+    
     s2 += (*it2) - (*itm)*(*itm);
+    
     ++itm;
     ++it2;
-
   }
   
   return s2;

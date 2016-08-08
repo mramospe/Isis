@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 27/07/2016                                                      //
+//  Last update: 08/08/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -171,7 +171,7 @@ void Analysis::ClusterFactory::CalculateClusters() {
       (this ->* fComDefMethod)();
       (this ->* fClusteringMethod)();
       bool newstatus = this -> ManageClusters();
-
+      
       // If the status changes it exits the loop
       if ( newstatus != oldstatus ) {
 	dec = false;
@@ -566,9 +566,9 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
   double maxdst = fMaxComVar*fVarNorm.size();
   std::vector<double> comdists( fClusters.size() );
   PointArray centersOfMass( fClusters.size() );
-
+  
   do {
-
+    
     // Gets the position of the centers of mass to calculate the variation of their position
     auto itc = fClusters.begin();
     for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
@@ -602,12 +602,13 @@ void Analysis::ClusterFactory::BuildCentersOfMass() {
   
   // Removes the points stored in the clusters
   std::cout << "Removing points in clusters" << std::endl;
-  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc )
+  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
+    itc -> ResetCenterOfMassWeight();
     itc -> RemovePoints();
-
+  }
+  fPointsToAvoid.clear();
 
   std::cout << "Building centers of mass" << std::endl;
-  fPointsToAvoid.clear();
   
   // Loops over the clusters to set the initial points
   for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
@@ -659,6 +660,11 @@ void Analysis::ClusterFactory::BuildCentersOfMass() {
 // Main clustering method that calculates the distances between the different
 // points and the clusters and attaches them using this quantity
 inline void Analysis::ClusterFactory::DistanceMerging() {
+
+  // Removes the points stored in the clusters
+  std::cout << "Removing points in clusters" << std::endl;
+  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc )
+    itc -> RemovePoints();
   
   // Generates the clusters taking into account the distances from the points to them
   std::cout << "Merging process started" << std::endl;
@@ -678,7 +684,7 @@ inline void Analysis::ClusterFactory::DistanceMerging() {
     }
   }
   std::cout << "Generated new set of clusters" << std::endl;
-
+  
   if ( fVerbose )
     this -> Display( &ClusterFactory::PrintDistances, "Normalized distances" );
 }
@@ -754,10 +760,14 @@ bool Analysis::ClusterFactory::ManageClusters() {
     
     while ( itcc != fClusters.end() ) {
       double dist = itcr -> DistanceToCluster( itcc -> GetCenterOfMass() );
-      if ( dist < nstddev2*( (*itdr) + (*itdc) ) )
+      if ( dist < nstddev2*( (*itdr) + (*itdc) ) ) {
+	std::cout << "Removing cluster: two clusters are too close" << std::endl;
 	return false;
-      else if ( itcr -> GetPoints().size() < fMinNpoints )
+      }
+      else if ( itcr -> GetPoints().size() < fMinNpoints ) {
+	std::cout << "Removing cluster: number of points in cluster too small" << std::endl;
 	return false;
+      }
       else {
 	++itcc;
 	++itdc;

@@ -49,6 +49,7 @@ namespace Analysis {
     inline void                       AddDimension();
     inline const std::vector<double>& GetMeanOfSquares() const;
     inline void                       InitPosition( const ClusterPoint &com );
+    inline void                       ResetWeight();
 
     // Operators
     inline void operator = ( const ClusterCenterOfMass &point );
@@ -81,6 +82,7 @@ namespace Analysis {
     for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
       *it *= (*it); 
   }
+  inline void ClusterCenterOfMass::ResetWeight() { fWeight = 0; }
 
   //_____________
   // -- OPERATORS
