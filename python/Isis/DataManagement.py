@@ -426,7 +426,7 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
@@ -444,7 +444,7 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', xvar + 'vs' + yvar )
+        kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
