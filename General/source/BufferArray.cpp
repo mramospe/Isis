@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                               //
 //  e-mail: miguel.ramos.pernas@cern.ch                                       //
 //                                                                            //
-//  Last update: 28/06/2016                                                   //
+//  Last update: 26/08/2016                                                   //
 //                                                                            //
 // -------------------------------------------------------------------------- //
 //                                                                            //
@@ -80,9 +80,8 @@ void General::BufferArray::AddVariable( const std::string &name, const char &typ
 // Appends to the new vector the names of the current array
 void General::BufferArray::ExtractNames( std::vector<std::string> &names ) {
   
-  std::vector<std::string> vec;
   for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
-    vec.push_back( it -> first );
+    names.push_back( it -> first );
 }
 
 //_______________________________________________________________________________

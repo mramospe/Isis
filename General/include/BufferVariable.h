@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                 //
 //  e-mail: miguel.ramos.pernas@cern.ch                                         //
 //                                                                              //
-//  Last update: 28/06/2016                                                     //
+//  Last update: 26/08/2016                                                     //
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 //                                                                              //
@@ -45,7 +45,7 @@ namespace General {
     std::string ToString() const;
 
     // Inline methods
-    template<typename type> inline void ExtractValue( type &value );
+    template<typename type> inline void ExtractValue( type &value ) const;
     inline const char&                  GetType() const;
     inline void*                        PathToValue();
     inline void                         SetType( const char &type );
@@ -70,7 +70,7 @@ namespace General {
   
   // Sets the given variable as the value stored in the class
   template<typename type>
-  void BufferVariable::ExtractValue( type &value ) {
+  void BufferVariable::ExtractValue( type &value ) const {
     switch( fType ) {
     case 'B': value = *static_cast<char*>                   ( fPath ); break;
     case 'b': value = *static_cast<unsigned char*>          ( fPath ); break;
