@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas                            //
 #//  e-mail: miguel.ramos.pernas@cern.ch                    //
 #//                                                         //
-#//  Last update: 04/08/2016                                //
+#//  Last update: 09/09/2016                                //
 #//                                                         //
 #// ------------------------------------------------------- //
 #//                                                         //
@@ -393,8 +393,12 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
         
             if pull:
                 dst /= error
-                graphDst.SetPointEYhigh( ib, 1 )
-                graphDst.SetPointEYlow( ib, 1 )
+                if dst > 0:
+                    graphDst.SetPointEYhigh( ib, errhi/error )
+                    graphDst.SetPointEYlow( ib, 1 )
+                else:
+                    graphDst.SetPointEYhigh( ib, 1 )
+                    graphDst.SetPointEYlow( ib, errlo/error )
                 factor = 5
             else:
                 if error > maxerr:
