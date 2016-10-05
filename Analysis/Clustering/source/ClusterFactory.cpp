@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 08/08/2016                                                      //
+//  Last update: 05/10/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -448,6 +448,18 @@ void Analysis::ClusterFactory::SetClusterWeights( const int &index, const std::v
 // -- PRIVATE METHODS
 
 //_______________________________________________________________________________
+// This method resets the all the clusters stored in the factory. The infomation
+// about the center of mass and the points to avoid is also lost.
+inline void Analysis::ClusterFactory::Reset() {
+
+  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
+    itc -> ResetCenterOfMassWeight();
+    itc -> RemovePoints();}
+
+  fPointsToAvoid.clear();
+}
+
+//_______________________________________________________________________________
 // Funcion used to display the information inside the different methods. Here the
 // clusters are normalized if required.
 inline void Analysis::ClusterFactory::Display( void (ClusterFactory::*funcptr)( std::string ),
@@ -602,11 +614,7 @@ void Analysis::ClusterFactory::BuildCentersOfMass() {
   
   // Removes the points stored in the clusters
   std::cout << "Removing points in clusters" << std::endl;
-  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
-    itc -> ResetCenterOfMassWeight();
-    itc -> RemovePoints();
-  }
-  fPointsToAvoid.clear();
+  this -> Reset();
 
   std::cout << "Building centers of mass" << std::endl;
   
@@ -663,8 +671,7 @@ inline void Analysis::ClusterFactory::DistanceMerging() {
 
   // Removes the points stored in the clusters
   std::cout << "Removing points in clusters" << std::endl;
-  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc )
-    itc -> RemovePoints();
+  this -> Reset();
   
   // Generates the clusters taking into account the distances from the points to them
   std::cout << "Merging process started" << std::endl;

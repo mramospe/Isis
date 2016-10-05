@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 27/07/2016                                                      //
+//  Last update: 05/10/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -84,6 +84,9 @@ namespace Analysis {
 
   private:
     
+    // Resets the clusters and the points to be avoided
+    void Reset();
+
     // Method to print information inside the processes
     void Display( void (ClusterFactory::*funcptr)( std::string title ),
 		  const std::string &title = std::string() );

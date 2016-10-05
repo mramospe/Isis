@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas                                                  //
 //  e-mail: miguel.ramos.pernas@cern.ch                                          //
 //                                                                               //
-//  Last update: 08/08/2016                                                      //
+//  Last update: 05/10/2016                                                      //
 //                                                                               //
 // ----------------------------------------------------------------------------- //
 //                                                                               //
@@ -88,8 +88,7 @@ double Analysis::Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
   auto
     itc = pointA.GetValues().cbegin(),
     itv = pointB.GetValues().cbegin(),
-    itw = fWeights.cbegin(),
-    its = fCenterOfMass.GetMeanOfSquares().cbegin();
+    itw = fWeights.cbegin();
   
   double dist2 = 0;
   while ( itc != pointA.GetValues().end() ) {
@@ -97,10 +96,9 @@ double Analysis::Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
       pnt = (*itv++),
       ctr = (*itc++),
       wgt = (*itw++),
-      val = ( pnt - ctr )/wgt,
-      sm2 = (*its++) - ctr*ctr;
+      val = ( pnt - ctr )/wgt;
     
-    dist2 += val*val;///sm2;
+    dist2 += val*val;
   }
   
   return dist2;
