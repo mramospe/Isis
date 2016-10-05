@@ -1,24 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  General package                                                              //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 07/06/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements a class to help adding strings separated by one character. This   //
-//  is useful, for example, to manage paths or file names, which are separated   //
-//  by < / > and < _ > symbols respectively. When two classes of this type are   //
-//  added, the separator is taken to that of the right hand in the addition.     //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 07/06/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements a class to help adding strings separated by one character. This
+//  is useful, for example, to manage paths or file names, which are separated
+//  by < / > and < _ > symbols respectively. When two classes of this type are
+//  added, the separator is taken to that of the right hand in the addition.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

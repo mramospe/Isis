@@ -1,22 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  General package                                                              //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 02/03/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the class Vector, that allows to compute and perform operations   //
-//  that concern three-dimensional vectors.                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 02/03/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class Vector, that allows to compute and perform operations
+//  that concern three-dimensional vectors.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

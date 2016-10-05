@@ -1,28 +1,28 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  General package                                                              //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 02/01/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the class to generate an array of indices to perform loops. This  //
-//  class is useful when one defines a general method to perform a number of     //
-//  loops ( usually "for" statements ) that can vary depending on different      //
-//  external conditions. This class behaves in the same way as a concatenation   //
-//  of "for" statements. Using the < ++ > operator, it will add units to the     //
-//  last index till the maximum is reached, when it is reset and a new unit is   //
-//  added to the previous one, on a recursively process. The maximum number of   //
-//  loops is obtained using the < GetNloops > method.                            //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 02/01/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to generate an array of indices to perform loops. This
+//  class is useful when one defines a general method to perform a number of
+//  loops ( usually "for" statements ) that can vary depending on different
+//  external conditions. This class behaves in the same way as a concatenation
+//  of "for" statements. Using the < ++ > operator, it will add units to the
+//  last index till the maximum is reached, when it is reset and a new unit is
+//  added to the previous one, on a recursively process. The maximum number of
+//  loops is obtained using the < GetNloops > method.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

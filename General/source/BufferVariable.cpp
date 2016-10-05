@@ -1,24 +1,24 @@
 //////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-//  General package                                                             //
-//                                                                              //
-// ---------------------------------------------------------------------------- //
-//                                                                              //
-//  AUTHOR: Miguel Ramos Pernas                                                 //
-//  e-mail: miguel.ramos.pernas@cern.ch                                         //
-//                                                                              //
-//  Last update: 28/06/2016                                                     //
-//                                                                              //
-// ---------------------------------------------------------------------------- //
-//                                                                              //
-//  Description:                                                                //
-//                                                                              //
-//  Main class to store any kind of primitive data types. Different objects of  //
-//  this type can be stored in the same container, while refering to different  //
-//  data types. It results very useful when dealing with buffers were each      //
-//  variable has a different type.                                              //
-//                                                                              //
-// ---------------------------------------------------------------------------- //
+//
+//  General package
+//
+// -------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 26/08/2016
+//
+// -------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Main class to store any kind of primitive data types. Different objects of
+//  this type can be stored in the same container, while refering to different
+//  data types. It results very useful when dealing with buffers were each
+//  variable has a different type.
+//
+// -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 
 

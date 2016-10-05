@@ -1,29 +1,29 @@
 ////////////////////////////////////////////////////////////////////////////////////
-//                                                                                //
-//  General package                                                               //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  AUTHOR: Miguel Ramos Pernas                                                   //
-//  e-mail: miguel.ramos.pernas@cern.ch                                           //
-//                                                                                //
-//  Last update: 16/02/2016                                                       //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  Description:                                                                  //
-//                                                                                //
-//  Implements the class to generate tables in c++ output. It allows both to      //
-//  construct the table and then print it, or print the lines manually. Do not    //
-//  forget to rewind the class before making another print. The precision of      //
-//  the numbers displayed, as well as the length of the strings can be modified.  //
-//  The characters decorating the table can be modified too when calling the      //
-//  methods < Print > or < Start >. The inputs can be performed wih the < << >    //
-//  operator or with the < AppendStream > method. Calling the operator < >> >     //
-//  one can get the elements one by one from the buffer. In this case the user    //
-//  has to control the number of times that has to call this operator.            //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
+//
+//  General package
+//
+// ---------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 16/02/2016
+//
+// ---------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to generate tables in c++ output. It allows both to
+//  construct the table and then print it, or print the lines manually. Do not
+//  forget to rewind the class before making another print. The precision of
+//  the numbers displayed, as well as the length of the strings can be modified.
+//  The characters decorating the table can be modified too when calling the
+//  methods < Print > or < Start >. The inputs can be performed wih the < << >
+//  operator or with the < AppendStream > method. Calling the operator < >> >
+//  one can get the elements one by one from the buffer. In this case the user
+//  has to control the number of times that has to call this operator.
+//
+// ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
 
 

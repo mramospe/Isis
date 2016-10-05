@@ -1,25 +1,25 @@
 ///////////////////////////////////////////////////////////////////////
-//                                                                   //
-//  General package                                                  //
-//                                                                   //
-// ----------------------------------------------------------------- //
-//                                                                   //
-//  AUTHOR: Miguel Ramos Pernas                                      //
-//  e-mail: miguel.ramos.pernas@cern.ch                              //
-//                                                                   //
-//  Last update: 23/08/2016                                          //
-//                                                                   //
-// ----------------------------------------------------------------- //
-//                                                                   //
-//  Description:                                                     //
-//                                                                   //
-//  This class facilitates the specification of the input variables  //
-//  for a c++ executable. The types of the variables are specified   //
-//  via the < BookVariable > method. Once they are all set, the      //
-//  method < ParseArgs > must be called, introducing the same        //
-//  variables as those in the < main > function.                     //
-//                                                                   //
-// ----------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 23/08/2016
+//
+// --------------------------------------------------------------------
+//
+//  Description:
+//
+//  This class facilitates the specification of the input variables
+//  for a c++ executable. The types of the variables are specified
+//  via the < BookVariable > method. Once they are all set, the
+//  method < ParseArgs > must be called, introducing the same
+//  variables as those in the < main > function.
+//
+// --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 

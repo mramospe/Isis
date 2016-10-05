@@ -1,27 +1,27 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  General package                                                              //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 31/03/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the functions to convert expressions given as strings to bool     //
-//  and double values. If one wants to evaluate or calculate expressions many    //
-//  times, since the < Calculate > and < Evaluate > check the input string       //
-//  every time they are called, it is much faster to check it once via           //
-//  < CheckCalcExpression > and < CheckEvalExpression >, where a keyword or a    //
-//  set of them can be provided. In this case the function will replace that     //
-//  word(s) by < 1 >, so the expression can be checked.                          //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 19/02/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the functions to convert expressions given as strings to bool
+//  and double values. If one wants to evaluate or calculate expressions many
+//  times, since the < Calculate > and < Evaluate > check the input string
+//  every time they are called, it is much faster to check it once via
+//  < CheckCalcExpression > and < CheckEvalExpression >, where a keyword or a
+//  set of them can be provided. In this case the function will replace that
+//  word(s) by < 1 >, so the expression can be checked.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 
