@@ -1,24 +1,23 @@
 ///////////////////////////////////////////////////////////////////////
-// ----------------------------------------------------------------- //
-//						                     //
-//  Analysis package	  			                     //
-//        					                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  AUTHOR: Miguel Ramos Pernas		                             //
-//  e-mail: miguel.ramos.pernas@cern.ch		                     //
-//						                     //
-//  Last update: 13/06/2016			                     //
-//   						                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  Description:				                     //
-//						                     //
-//  Implements the abstract class to generate adaptive binned        //
-//  histograms. The structure of the output histogram is obtained    //
-//  calling the < GetStruct > method.                                //
-//						                     //
-// ----------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 13/06/2016
+//
+// --------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the abstract class to generate adaptive binned
+//  histograms. The structure of the output histogram is obtained
+//  calling the < GetStruct > method.
+//
+// --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 

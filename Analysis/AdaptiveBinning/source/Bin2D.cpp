@@ -1,23 +1,22 @@
 ///////////////////////////////////////////////////////////////////////
-// ----------------------------------------------------------------- //
-//						                     //
-//  Analysis package	  			                     //
-//        					                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  AUTHOR: Miguel Ramos Pernas		                             //
-//  e-mail: miguel.ramos.pernas@cern.ch		                     //
-//						                     //
-//  Last update: 19/04/2016			                     //
-//   						                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  Description:				                     //
-//						                     //
-//  Implements the two-dimensional bin class to work together with   //
-//  AdaptiveBinning2D to create adaptive binned histograms.          //
-//						                     //
-// ----------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 19/04/2016
+//
+// --------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the two-dimensional bin class to work together with
+//  AdaptiveBinning2D to create adaptive binned histograms.
+//
+// --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 

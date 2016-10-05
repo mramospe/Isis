@@ -1,24 +1,23 @@
 ///////////////////////////////////////////////////////////////////////
-// ----------------------------------------------------------------- //
-//						                     //
-//  Analysis package	  			                     //
-//        					                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  AUTHOR: Miguel Ramos Pernas		                             //
-//  e-mail: miguel.ramos.pernas@cern.ch		                     //
-//						                     //
-//  Last update: 13/06/2016			                     //
-//   						                     //
-// ----------------------------------------------------------------- //
-//						                     //
-//  Description:				                     //
-//						                     //
-//  Implements the class to make one-dimensional adaptive binning    //
-//  histograms. The construction can be made given a set of vectors  //
-//  or a TTree object and the name of the leaves.                    //
-//						                     //
-// ----------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 13/06/2016
+//
+// --------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to make one-dimensional adaptive binning
+//  histograms. The construction can be made given a set of vectors
+//  or a TTree object and the name of the leaves.
+//
+// --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 
