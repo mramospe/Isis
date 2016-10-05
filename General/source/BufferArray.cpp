@@ -1,27 +1,27 @@
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//  General package                                                           //
-//                                                                            //
-// -------------------------------------------------------------------------- //
-//                                                                            //
-//  AUTHOR: Miguel Ramos Pernas                                               //
-//  e-mail: miguel.ramos.pernas@cern.ch                                       //
-//                                                                            //
-//  Last update: 28/06/2016                                                   //
-//                                                                            //
-// -------------------------------------------------------------------------- //
-//                                                                            //
-//  Description:                                                              //
-//                                                                            //
-//  Definition of the buffer to store different types of data in the same     //
-//  vector. The variables are accessed as in a common map, using the          //
-//  operator < [] > or the method < Get >. This class uses pointers to the    //
-//  variables since the class BufferVariable does not support a copy          //
-//  constructor. In order to modify them, one must use the operator. To add a //
-//  new variable, one must use the method < AddVariable >, specifying the     //
-//  name and the type.                                                        //
-//                                                                            //
-// -------------------------------------------------------------------------- //
+//
+//  General package
+//
+// -----------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 30/06/2016
+//
+// -----------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Definition of the buffer to store different types of data in the same
+//  vector. The variables are accessed as in a common map, using the
+//  operator < [] > or the method < Get >. This class uses pointers to the
+//  variables since the class BufferVariable does not support a copy
+//  constructor. In order to modify them, one must use the operator. To add a
+//  new variable, one must use the method < AddVariable >, specifying the
+//  name and the type.
+//
+// -----------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -80,9 +80,8 @@ void General::BufferArray::AddVariable( const std::string &name, const char &typ
 // Appends to the new vector the names of the current array
 void General::BufferArray::ExtractNames( std::vector<std::string> &names ) {
   
-  std::vector<std::string> vec;
   for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
-    vec.push_back( it -> first );
+    names.push_back( it -> first );
 }
 
 //_______________________________________________________________________________

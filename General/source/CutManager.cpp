@@ -1,33 +1,33 @@
 ///////////////////////////////////////////////////////////
-//                                                       //
-//  General package                                      //
-//                                                       //
-// ----------------------------------------------------- //
-//                                                       //
-//  AUTHOR: Miguel Ramos Pernas                          //
-//  e-mail: miguel.ramos.pernas@cern.ch                  //
-//                                                       //
-//  Last update: 14/04/2016                              //
-//                                                       //
-// ----------------------------------------------------- //
-//                                                       //
-//  Description:                                         //
-//                                                       //
-//  Class to storage cuts present in a cuts-file. This   //
-//  files have to be written in the way:                 //
-//                                                       //
-//  cut1 = j > 0 and b > 1                               //
-//                                                       //
-//  cut2 = $cut1$ or c == 0                              //
-//                                                       //
-//  The symbol < $ > before and after a word means that  //
-//  is a cut, so the class is going to get that and      //
-//  place it instead. This class is going to search      //
-//  for the given keys, so one can comment anything as   //
-//  long as no key has the same string value as it,      //
-//  being situated at the beginning of the line.         //
-//                                                       //
-// ----------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 05/04/2016
+//
+// --------------------------------------------------------
+//
+//  Description:
+//
+//  Class to storage cuts present in a cuts-file. This
+//  files have to be written in the way:
+//
+//  cut1 = j > 0 and b > 1
+//
+//  cut2 = $cut1$ or c == 0
+//
+//  The symbol < $ > before and after a word means that
+//  is a cut, so the class is going to get that and
+//  place it instead. This class is going to search
+//  for the given keys, so one can comment anything as
+//  long as no key has the same string value as it,
+//  being situated at the beginning of the line.
+//
+// --------------------------------------------------------
 ///////////////////////////////////////////////////////////
 
 

@@ -1,22 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  General package                                                              //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 02/03/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the LorentzVector class, that allows to compute and perform       //
-//  operations concerning the 4-vector physics of particles.                     //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 02/03/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the LorentzVector class, that allows to compute and perform
+//  operations concerning the 4-vector physics of particles.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

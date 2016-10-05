@@ -1,23 +1,23 @@
 ////////////////////////////////////////////////////////////////////////////////////
-//                                                                                //
-//  Analysis package                                                              //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  AUTHOR: Miguel Ramos Pernas                                                   //
-//  e-mail: miguel.ramos.pernas@cern.ch                                           //
-//                                                                                //
-//  Last update: 19/04/2016                                                       //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  Description:                                                                  //
-//                                                                                //
-//  This class defines a multivariable bin. The bin has information about the     //
-//  variables, the number of entries and an associated weight. This is a friend   //
-//  class of < VarWeighter >.                                                     //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
+//
+//  Analysis package
+//
+// ---------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 16/02/2016
+//
+// ---------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  This class defines a multivariable bin. The bin has information about the
+//  variables, the number of entries and an associated weight. This is a friend
+//  class of < VarWeighter >.
+//
+// ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
 
 

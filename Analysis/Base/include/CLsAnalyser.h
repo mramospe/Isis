@@ -1,23 +1,23 @@
 /////////////////////////////////////////////////////////
-//                                                     //
-//  Analysis package                                   //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //
-//  AUTHOR: Miguel Ramos Pernas                        //
-//  e-mail: miguel.ramos.pernas@cern.ch                //
-//                                                     //
-//  Last update: 06/06/2016                            //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //
-//  Description:                                       //
-//                                                     //
-//  Implements the class to perform CLs analysis,      //
-//  providing the tools to make a mu-scan, get the     //
-//  p-values and the ROC curve, etc.                   //
-//                                                     //
-// --------------------------------------------------- //
+//
+//  Analysis package
+//
+// ------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 06/06/2016
+//
+// ------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to perform CLs analysis,
+//  providing the tools to make a mu-scan, get the
+//  p-values and the ROC curve, etc.
+//
+// ------------------------------------------------------
 /////////////////////////////////////////////////////////                               
 
 

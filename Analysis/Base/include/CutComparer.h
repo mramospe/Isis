@@ -1,27 +1,27 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  Analysis package                                                             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 28/03/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the class to perform comparisons among different TreeCategory     //
-//  classes. One has to define the different variables that are going to be      //
-//  compared together with those to cut over. This class will work in the        //
-//  current directory so one has to construct a TFile or a TDirectoryFile        //
-//  object in order to use it. All the histograms will be saved in the           //
-//  different folders, together with the cut information and the canvas with     //
-//  all the histograms.                                                          //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 28/03/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to perform comparisons among different TreeCategory
+//  classes. One has to define the different variables that are going to be
+//  compared together with those to cut over. This class will work in the
+//  current directory so one has to construct a TFile or a TDirectoryFile
+//  object in order to use it. All the histograms will be saved in the
+//  different folders, together with the cut information and the canvas with
+//  all the histograms.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

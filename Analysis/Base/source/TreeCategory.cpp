@@ -1,24 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  Analysis package                                                             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 02/03/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Implements the class TreeCategory. It allows to manage subsets of data       //
-//  located in TTree objects that satisfy a given set of cuts. Also provides     //
-//  a method to obtain a subset of the TreeCategory object itself, returning     //
-//  the index of the entries.                                                    //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 05/01/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class TreeCategory. It allows to manage subsets of data
+//  located in TTree objects that satisfy a given set of cuts. Also provides
+//  a method to obtain a subset of the TreeCategory object itself, returning
+//  the index of the entries.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

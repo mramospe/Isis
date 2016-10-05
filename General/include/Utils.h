@@ -1,22 +1,22 @@
 ///////////////////////////////////////////////////////////
-//                                                       //
-//  General package                                      //
-//                                                       //
-// ----------------------------------------------------- //
-//                                                       //
-//  AUTHOR: Miguel Ramos Pernas                          //
-//  e-mail: miguel.ramos.pernas@cern.ch                  //
-//                                                       //
-//  Last update: 22/06/2016                              //
-//                                                       //
-// ----------------------------------------------------- //
-//                                                       //
-//  Description:                                         //
-//                                                       //
-//  Template file that contains some utils to work with  //
-//  c++ classes.                                         //
-//                                                       //
-// ----------------------------------------------------- //
+//
+//  General package
+//
+// --------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 23/08/2016
+//
+// --------------------------------------------------------
+//
+//  Description:
+//
+//  Template file that contains some utils to work with
+//  c++ classes.
+//
+// --------------------------------------------------------
 ///////////////////////////////////////////////////////////
 
 
@@ -49,7 +49,17 @@ namespace General {
 				  const std::vector<std::string> &input,
 				  const std::string              &expr );
   void        TrimString( std::string &str, const std::string &trexpr = " " );
-
+  
+  //_______________________________________________________________________________
+  // This function checks if the given string can be converted to a variable of the
+  // type specified
+  template <typename type>
+  bool CheckStringType( const std::string &input ) {
+    std::istringstream iss( input );
+    type value;
+    iss >> std::noskipws >> value;
+    return iss.eof() && !iss.fail();
+  }
 
   //_______________________________________________________________________________
   // This function sets < value > to the assignement given in the expression

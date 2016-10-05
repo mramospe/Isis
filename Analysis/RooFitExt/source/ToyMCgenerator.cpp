@@ -1,27 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////////////
-//                                                                                 //
-//  Analysis package                                                               //
-//                                                                                 //
-// ------------------------------------------------------------------------------- //
-//                                                                                 //
-//  AUTHOR: Miguel Ramos Pernas                                                    //
-//  e-mail: miguel.ramos.pernas@cern.ch                                            //
-//                                                                                 //
-//  Last update: 19/04/2016                                                        //
-//                                                                                 //
-// ------------------------------------------------------------------------------- //
-//                                                                                 //
-//  Description:                                                                   //
-//                                                                                 //
-//  Implements the two classes to generate Toy-MonteCarlo samples. Particles are   //
-//  constructed with the <DecayParticle> class, which allows to define them given  //
-//  its mass, width and/or resolution, or a TF1/PDF. All the particles and links   //
-//  between them (daughters, granddaughters...) have to be specified before the    //
-//  Monte-Carlo generation. It is performed via the <ToyMCgenerator> class, which  //
-//  uses the information of a mother particle or the distributions of a given      //
-//  TTree.                                                                         //
-//                                                                                 //
-// ------------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// ----------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 24/10/2015
+//
+// ----------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the two classes to generate Toy-MonteCarlo samples. Particles are
+//  constructed with the <DecayParticle> class, which allows to define them given
+//  its mass, width and/or resolution, or a TF1/PDF. All the particles and links
+//  between them (daughters, granddaughters...) have to be specified before the
+//  Monte-Carlo generation. It is performed via the <ToyMCgenerator> class, which
+//  uses the information of a mother particle or the distributions of a given
+//  TTree.
+//
+// ----------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////
 
 

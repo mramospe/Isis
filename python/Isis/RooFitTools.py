@@ -1,29 +1,105 @@
 #/////////////////////////////////////////////////////////////
-#//                                                         //
-#//  Python modules                                         //
-#//                                                         //
-#// ------------------------------------------------------- //
-#//                                                         //
-#//  AUTHOR: Miguel Ramos Pernas                            //
-#//  e-mail: miguel.ramos.pernas@cern.ch                    //
-#//                                                         //
-#//  Last update: 21/07/2016                                //
-#//                                                         //
-#// ------------------------------------------------------- //
-#//                                                         //
-#//  Description:                                           //
-#//                                                         //
-#//  Definition of some tools to perform analysis using     //
-#//  the package RooFit.                                    //
-#//                                                         //
-#// ------------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// ----------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 09/09/2016
+#//
+#// ----------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  Definition of some tools to perform analysis using
+#//  the package RooFit.
+#//
+#// ----------------------------------------------------------
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import RooArgSet, TRandom3, Double
+from ROOT import gRandom, RooArgList, RooArgSet, RooConstVar, RooFormulaVar, RooRealVar, TRandom3, Double
 from ROOT.RooFit import Binning, Name, NormRange, Range, Save
 from Isis.PlotTools import MakeHistogram
 
+
+#_______________________________________________________________________________
+# This class allows to perform blind analysis. A random quantity is added to the
+# existing variable, allowing it even to take values with the opposite sign. In
+# order to do so, the range of the input variable is changed according to a
+# given scale.
+class BlindVar:
+    
+    def __init__( self, roovar, **kwargs ):
+        '''
+        To build the class, the variable to be blinded must be provided. In < scale >
+        one modifies the range of values for the blinded variable. Also the names for
+        the constant variable and the generated formula can be modified.
+        '''
+        
+        name = roovar.GetName()
+        print 'Defining a new blinded variable for <', name, '>'
+
+        scale  = kwargs.get( 'scale', 1000 )
+        eqname = kwargs.get( 'bvarname', name + '_BlindExpr' )
+
+        ''' The seed is different for each call, which guarantees the blinding procedure '''
+        print 'Generating new set of random bounds'
+        rndm = TRandom3( 0 )
+        vmin = roovar.getMin()
+        boundlo = rndm.Uniform( vmin, vmin*scale )
+        vmax = roovar.getMax()
+        boundhi = rndm.Uniform( vmax, vmax*scale )
+
+        clonename = name + '_BLIND'
+        blindVar = RooRealVar( clonename, clonename, roovar.getVal(), boundlo, boundhi )
+        print 'Created clone variable named <', clonename, '>'
+        
+        alpha = ( vmax - vmin )/( boundhi - boundlo )
+        beta  = ( vmax*boundlo - vmin*boundhi )/( vmax - vmin )
+
+        blindVar.setVal( alpha*( roovar.getVal() - beta ) )
+
+        alpha = RooConstVar( 'alpha', 'alpha', alpha )
+        beta  = RooConstVar( 'beta', 'beta', beta )
+        
+        formula = 'alpha*( %s - beta)' % clonename
+        varlist = RooArgList( blindVar, alpha, beta )
+        blindEq = RooFormulaVar( eqname, eqname, formula, varlist )
+        print 'The blinding formula is:', formula
+        
+        self.Alpha    = alpha
+        self.Beta     = beta
+        self.BlindEq  = blindEq
+        self.BlindVar = blindVar
+
+    def GetTrueValue( self ):
+        '''
+        Returns the true value of the blinded variable
+        '''
+        alpha   = self.Alpha.getVal()
+        truevar = self.BlindVar
+        result  = alpha*( truevar.getVal() - self.Beta.getVal() )
+        error   = alpha*truevar.getError()
+        errorlo = alpha*truevar.getErrorLo()
+        errorhi = alpha*truevar.getErrorHi()
+        return result, error, errorlo, errorhi
+    
+    def GetUnblindVar( self ):
+        '''
+        Returns the RooFormulaVar object that must be used to do the fit
+        '''
+        return self.BlindEq
+
+    def PrintTrueValue( self ):
+        '''
+        Displays the true value of the blinded variable
+        '''
+        name   = self.BlindVar.GetName()
+        outstr = ( name, ) + self.GetTrueValue()
+        print 'Unblinded result: %s = %.4g +/- %.4g (%.4g) (+%.4g)' % outstr
 
 #_______________________________________________________________________________
 # This function extracts the values of a pull to a list, useful to check if
@@ -88,7 +164,7 @@ class FitContainer( dict ):
             errlo = dic['errorlo']
             errhi = dic['errorhi']
             for el in (val, err, errlo, errhi):
-                addstr  = '%.4f' % el
+                addstr  = '%.4g' % el
                 out    += ( 13 - len(addstr) )*' ' + addstr
             out += '\n'
 
@@ -311,14 +387,18 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
             dst = ybin - graphPdf.Eval( xbin )
 
             if dst > 0:
-                error = errhi
-            else:
                 error = errlo
+            else:
+                error = errhi
         
             if pull:
                 dst /= error
-                graphDst.SetPointEYhigh( ib, 1 )
-                graphDst.SetPointEYlow( ib, 1 )
+                if dst > 0:
+                    graphDst.SetPointEYhigh( ib, errhi/error )
+                    graphDst.SetPointEYlow( ib, 1 )
+                else:
+                    graphDst.SetPointEYhigh( ib, 1 )
+                    graphDst.SetPointEYlow( ib, errlo/error )
                 factor = 5
             else:
                 if error > maxerr:
@@ -326,8 +406,8 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
                 factor = 5*error
 
             '''
-            Displays a warning message if any point if more far than 5 times the error from the
-            fit curve
+            Displays a warning message if any point if more far than 5 times the error
+            from the fit curve
             '''
             if abs( dst ) > factor:
                 print 'WARNING: Point %i at < %.2f > exceeds 5 sigma from the fit curve' %(ib, xbin)

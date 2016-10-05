@@ -1,22 +1,22 @@
 #////////////////////////////////////////////////////////////////
-#//                                                            //
-#//  Python modules                                            //
-#//                                                            //
-#// ---------------------------------------------------------- //
-#//                                                            //
-#//  AUTHOR: Miguel Ramos Pernas                               //
-#//  e-mail: miguel.ramos.pernas@cern.ch                       //
-#//                                                            //
-#//  Last update: 13/07/2016                                   //
-#//                                                            //
-#// ---------------------------------------------------------- //
-#//                                                            //
-#//  Description:                                              //
-#//                                                            //
-#//  This module implements different tools to generate plots  //
-#//  using Root objects.                                       //
-#//                                                            //
-#// ---------------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// -------------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 13/07/2016
+#//
+#// -------------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  This module implements different tools to generate plots
+#//  using Root objects.
+#//
+#// -------------------------------------------------------------
 #////////////////////////////////////////////////////////////////
 
 
@@ -90,21 +90,14 @@ def DrawHistograms( *args, **kwargs ):
     return hlst
 
 #_______________________________________________________________________________
-# This function extracts the bounds of the given array of data which is
-# supposed to be used to make a histogram. It also returns the filtered list
-# of data if it is specified in < kwargs >.
-def ExtractHistBounds( var, nbins, **kwargs ):
-    retvals = kwargs.get( 'retvals', False )
-    vmin    = kwargs.get( 'vmin', min( var ) )
-    vmax    = kwargs.get( 'vmax', max( var ) )
+# This function extracts the points of the given array of data which are
+# supposed to be used to make a histogram
+def ExtractHistPoints( varlst, nbins, **kwargs ):
+    vmin = kwargs.get( 'vmin', min( varlst ) )
+    vmax = kwargs.get( 'vmax', max( varlst ) )
     if 'vmax' not in kwargs:
         vmax += ( vmax - vmin )/( 2.*nbins )
-    
-    if retvals:
-        var = [ v for v in var if v >= vmin and v < vmax ]
-        return vmin, vmax, var
-    else:
-        return vmin, vmax
+    return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
 
 #_______________________________________________________________________________
 # Returns the histogram constructor given the type as a string
@@ -171,8 +164,10 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
         weights = length*[ 1. ]
         sw      = float( length )
         nbins   = length/minocc
-
-    vmin, vmax, values = ExtractHistBounds( values, nbins, retvals = True )
+    
+    idxs   = ExtractHistPoints( values, nbins )
+    values = [ values[ i ] for i in idxs ]
+    vmax   = max( values )
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
@@ -241,12 +236,15 @@ def MakeHistogram( var, wvar = False, **kwargs ):
     xtitle   = kwargs.get( 'xtitle', name )
     ytitle   = kwargs.get( 'ytitle', 'Entries' )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
-    histbds  = { 'retvals': True }
+    histpts  = {}
     if 'vmin' in kwargs:
-        histbds[ 'vmin' ] = kwargs[ 'vmin' ]
+        histpts[ 'vmin' ] = kwargs[ 'vmin' ]
     if 'vmax' in kwargs:
-        histbds[ 'vmax' ] = kwargs[ 'vmax' ]
-    vmin, vmax, var = ExtractHistBounds( var, nbins, **histbds )
+        histpts[ 'vmax' ] = kwargs[ 'vmax' ]
+    idxs = ExtractHistPoints( var, nbins, **histpts )
+    var  = [ var[ i ] for i in idxs ]
+    vmin = histpts.get( 'vmin', min( var ) )
+    vmax = histpts.get( 'vmax', max( var ) )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -273,19 +271,30 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
     ytitle   = kwargs.get( 'ytitle', 'Y' )
     histcall = HistFromType( kwargs.get( 'htype', 'double' ), 2 )
     
-    xbounds = {}
+    xpoints = {}
     if 'xmin' in kwargs:
-        xbounds[ 'vmin' ] = kwargs[ 'xmin' ]
+        xpoints[ 'vmin' ] = kwargs[ 'xmin' ]
     if 'xmax' in kwargs:
-        xbounds[ 'vmax' ] = kwargs[ 'xmax' ]
-    xmin, xmax, xvar = ExtractHistBounds( xvar, xbins, retvals = True, **xbounds )
+        xpoints[ 'vmax' ] = kwargs[ 'xmax' ]
+    xidxs = ExtractHistPoints( xvar, xbins, **xpoints )
 
-    ybounds = {}
+    ypoints = {}
     if 'ymin' in kwargs:
-        ybounds[ 'vmin' ] = kwargs[ 'ymin' ]
+        ypoints[ 'vmin' ] = kwargs[ 'ymin' ]
     if 'ymax' in kwargs:
-        ybounds[ 'vmax' ] = kwargs[ 'ymax' ]
-    ymin, ymax, yvar = ExtractHistBounds( yvar, ybins, retvals = True, **ybounds )    
+        ypoints[ 'vmax' ] = kwargs[ 'ymax' ]
+    yidxs = ExtractHistPoints( yvar, ybins, **ypoints )
+
+    ''' The values used are the intersection between the two lists '''
+    idxs = set( xidxs ) & set( yidxs )
+
+    xvar = [ xvar[ i ] for i in idxs ]
+    xmin = xpoints.get( 'vmin', min( xvar ) )
+    xmax = xpoints.get( 'vmax', max( xvar ) )
+
+    yvar = [ yvar[ i ] for i in idxs ]
+    ymin = ypoints.get( 'vmin', min( yvar ) )
+    ymax = ypoints.get( 'vmax', max( yvar ) )
     
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
 

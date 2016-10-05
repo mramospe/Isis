@@ -1,27 +1,27 @@
 /////////////////////////////////////////////////////////
-//                                                     //
-//  Analysis package                                   //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //       
-//  AUTHOR: Miguel Ramos Pernas                        //
-//  e-mail: miguel.ramos.pernas@cern.ch                //
-//                                                     //
-//  Last update: 13/11/2015                            //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //
-//  Description:                                       //
-//                                                     //
-//  Implements two classes perform analysis with the   //
-//  TMVA package. BDTClassifier is the class that      //
-//  allows to storage and manage all possible methods  //
-//  provided by TMVA and to get the weights related    //
-//  to one of them from a signal and a background      //
-//  files. BDTApplier allows to apply some or all of   //
-//  this methods in various data files.                //
-//                                                     //
-// --------------------------------------------------- //
+//
+//  Analysis package
+//
+// ------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 13/11/2015
+//
+// ------------------------------------------------------
+//
+//  Description:
+//
+//  Implements two classes perform analysis with the
+//  TMVA package. BDTClassifier is the class that
+//  allows to storage and manage all possible methods
+//  provided by TMVA and to get the weights related
+//  to one of them from a signal and a background
+//  files. BDTApplier allows to apply some or all of
+//  this methods in various data files.
+//
+// ------------------------------------------------------
 /////////////////////////////////////////////////////////
 
 

@@ -1,27 +1,26 @@
 /////////////////////////////////////////////////////////
-// --------------------------------------------------- //
-//						       //
-//  Analysis package	  			       //
-//        					       //
-// --------------------------------------------------- //
-//						       //
-//  AUTHOR: Miguel Ramos Pernas		               //
-//  e-mail: miguel.ramos.pernas@cern.ch		       //
-//						       //
-//  Last update: 13/06/2016			       //
-//   						       //
-// --------------------------------------------------- //
-//						       //
-//  Description:				       //
-//						       //
-//  Implements the class to calculate the asymmetries  //
-//  bin to bin using two-dimensional adaptive binning  //
-//  histograms. Be careful using sWeighted data        //
-//  because for large amount of bins they could        //
-//  appear variation in the number of entries in each  //
-//  bin.					       //
-//						       //
-// --------------------------------------------------- //
+//
+//  Analysis package
+//
+// ------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 13/06/2016
+//
+// ------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the class to calculate the asymmetries
+//  bin to bin using two-dimensional adaptive binning
+//  histograms. Be careful using sWeighted data
+//  because for large amount of bins they could
+//  appear variation in the number of entries in each
+//  bin.
+//
+// ------------------------------------------------------
 /////////////////////////////////////////////////////////
 
 

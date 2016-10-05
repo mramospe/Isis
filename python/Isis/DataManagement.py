@@ -1,22 +1,22 @@
 #/////////////////////////////////////////////////////////////
-#//                                                         //
-#//  Python modules                                         //
-#//                                                         //
-#// ------------------------------------------------------- //
-#//                                                         //
-#//  AUTHOR: Miguel Ramos Pernas                            //
-#//  e-mail: miguel.ramos.pernas@cern.ch                    //
-#//                                                         //
-#//  Last update: 19/07/2016                                //
-#//                                                         //
-#// ------------------------------------------------------- //
-#//                                                         //
-#//  Description:                                           //
-#//                                                         //
-#//  Defines classes and functions to manage data from/to   //
-#//  Root files and trees.                                  //
-#//                                                         //
-#// ------------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// ----------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 26/09/2016
+#//
+#// ----------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  Defines classes and functions to manage data from/to
+#//  Root files and trees.
+#//
+#// ----------------------------------------------------------
 #/////////////////////////////////////////////////////////////
 
 
@@ -213,7 +213,7 @@ class DataManager:
         if self.Variables:
             dictlist = [ DictFromTree( tree, self.Variables.keys() ) for tree in tlist ]
             self.Variables.update( MergeDicts( *dictlist ) )
-            self.Nentries = len( self.Variables[ self.Variables.keys()[ 0 ] ] )
+            self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
             
     def BookVariables( self, *var_names ):
         '''
@@ -250,7 +250,7 @@ class DataManager:
                     print 'WARNING:', self.Name, '=> Variable <', name, '> already booked'
             dictlist = [ DictFromTree( tree, truevars ) for tree in tlist ]
             self.Variables.update( MergeDicts( *dictlist ) )
-            self.Nentries = len( self.Variables[ dictlist[ 0 ].keys()[ 0 ] ] )
+            self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
         else:
             print 'WARNING: ', self.Name, '=> No targets added to the manager, could not book variables:', var_names
 
@@ -281,6 +281,10 @@ class DataManager:
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
         cut, variables = FormatEvalExpr( cut, mathmod )
+        varstoadd = [ v for v in variables if v not in self.Variables ]
+        if varstoadd:
+            print 'WARNING: Loading additional variables to apply the cuts:', varstoadd
+            self.BookVariables( *varstoadd )
         values = [ self.Variables[ var ] for var in variables ]
         for ivar in xrange( len( variables ) ):
             cut = cut.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
@@ -426,7 +430,7 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + xvar + '_vs_' + yvar )
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
@@ -444,7 +448,7 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', xvar + 'vs' + yvar )
+        kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
         kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )

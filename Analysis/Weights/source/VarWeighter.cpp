@@ -1,24 +1,24 @@
 ////////////////////////////////////////////////////////////////////////////////////
-//                                                                                //
-//  Analysis package                                                              //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  AUTHOR: Miguel Ramos Pernas                                                   //
-//  e-mail: miguel.ramos.pernas@cern.ch                                           //
-//                                                                                //
-//  Last update: 19/04/2016                                                       //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
-//                                                                                //
-//  Description:                                                                  //
-//                                                                                //
-//  This class allows to perform a weighting process for the events of a tree     //
-//  trying to reproduce the shape of the events of another one. The process is    //
-//  performed generating a multivariable bin map where the information of the     //
-//  entries on each bin is computed, as well as the associated weight.            //
-//                                                                                //
-// ------------------------------------------------------------------------------ //
+//
+//  Analysis package
+//
+// ---------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 19/04/2016
+//
+// ---------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  This class allows to perform a weighting process for the events of a tree
+//  trying to reproduce the shape of the events of another one. The process is
+//  performed generating a multivariable bin map where the information of the
+//  entries on each bin is computed, as well as the associated weight.
+//
+// ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
 
 
