@@ -1,27 +1,27 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  Analysis package                                                             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 05/10/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Main class to perform cluster analysis. It can work by two different ways:   //
-//  the first of them implies that the number of clusters has to be defined      //
-//  previously, while in the second is the proper class which defines the        //
-//  number of clusters that fit the given data. The different options are set    //
-//  using the constructor or the method < Configure >. All methods work better   //
-//  with gaussian distributions. One must specify after the construction, the    //
-//  variables to work with, in order to avoid dimensional errors.                //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 05/10/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Main class to perform cluster analysis. It can work by two different ways:
+//  the first of them implies that the number of clusters has to be defined
+//  previously, while in the second is the proper class which defines the
+//  number of clusters that fit the given data. The different options are set
+//  using the constructor or the method < Configure >. All methods work better
+//  with gaussian distributions. One must specify after the construction, the
+//  variables to work with, in order to avoid dimensional errors.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 

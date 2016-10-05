@@ -1,23 +1,23 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  Analysis package                                                             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 08/08/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  This class defines a set of cluster points. It has attached the weights for  //
-//  each variable, the points and a center of mass, which is automatically       //
-//  recalculated each time another point is attached.                            //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 08/08/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  This class defines a set of cluster points. It has attached the weights for
+//  each variable, the points and a center of mass, which is automatically
+//  recalculated each time another point is attached.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 
