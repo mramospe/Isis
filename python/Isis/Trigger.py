@@ -1,22 +1,22 @@
 #///////////////////////////////////////////////////////////////////////////////
-#//                                                                           //
-#//  Python modules                                                           //
-#//                                                                           //
-#// ------------------------------------------------------------------------- //
-#//                                                                           //
-#//  AUTHOR: Miguel Ramos Pernas                                              //
-#//  e-mail: miguel.ramos.pernas@cern.ch                                      //
-#//                                                                           //
-#//  Last update: 13/05/2016                                                  //
-#//                                                                           //
-#// --------------------------------------------------------------------------//
-#//                                                                           //
-#//  Description:                                                             //
-#//                                                                           //
-#//  Class to perform trigger analysis. This class uses DataManager class to  //
-#//  administrate the data for signal and minimum bias events.                //
-#//                                                                           //
-#// ------------------------------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// ----------------------------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 13/05/2016
+#//
+#// ----------------------------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  Class to perform trigger analysis. This class uses DataManager class to
+#//  administrate the data for signal and minimum bias events.
+#//
+#// ----------------------------------------------------------------------------
 #///////////////////////////////////////////////////////////////////////////////
 
 

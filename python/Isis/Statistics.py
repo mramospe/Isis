@@ -1,22 +1,22 @@
 #//////////////////////////////////////////////////////////
-#//                                                      //
-#//  Python modules                                      //
-#//                                                      //
-#// ---------------------------------------------------- //
-#//                                                      //
-#//  AUTHOR: Miguel Ramos Pernas                         //
-#//  e-mail: miguel.ramos.pernas@cern.ch                 //
-#//                                                      //
-#//  Last update: 11/07/2016                             //
-#//                                                      //
-#// ---------------------------------------------------- //
-#//                                                      //
-#//  Description:                                        //
-#//                                                      //
-#//  Defines different statistical functions and class   //
-#//  to manage data stored in lists.                     //
-#//                                                      //
-#// ---------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// -------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 11/07/2016
+#//
+#// -------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  Defines different statistical functions and class
+#//  to manage data stored in lists.
+#//
+#// -------------------------------------------------------
 #//////////////////////////////////////////////////////////
 
 

@@ -1,32 +1,32 @@
 #///////////////////////////////////////////////////////////
-#//                                                       //
-#//  Python modules                                       //
-#//                                                       //
-#// ----------------------------------------------------- //
-#//                                                       //
-#//  AUTHOR: Miguel Ramos Pernas                          //
-#//  e-mail: miguel.ramos.pernas@cern.ch                  //
-#//                                                       //
-#//  Last update: 14/04/2016                              //
-#//                                                       //
-#// ----------------------------------------------------- //
-#//                                                       //
-#//  Description:                                         //
-#//                                                       //
-#//  Class to storage cuts present in a cuts-file. This   //
-#//  files have to be written in the way:                 //
-#//                                                       //
-#//  cut1 = j > 0 and b > 1                               //
-#//                                                       //
-#//  cut2 = $cut1$ or c == 0                              //
-#//                                                       //
-#//  The symbol < $ > before and after a word means that  //
-#//  is a cut, so the class is going to get that and      //
-#//  place it instead. This class is going to search      //
-#//  long as no key has the same string value as it,      //
-#//  being situated at the beginning of the line.         //
-#//                                                       //
-#// ----------------------------------------------------- //
+#//
+#//  Python modules
+#//
+#// --------------------------------------------------------
+#//
+#//  AUTHOR: Miguel Ramos Pernas
+#//  e-mail: miguel.ramos.pernas@cern.ch
+#//
+#//  Last update: 14/04/2016
+#//
+#// --------------------------------------------------------
+#//
+#//  Description:
+#//
+#//  Class to storage cuts present in a cuts-file. This
+#//  files have to be written in the way:
+#//
+#//  cut1 = j > 0 and b > 1
+#//
+#//  cut2 = $cut1$ or c == 0
+#//
+#//  The symbol < $ > before and after a word means that
+#//  is a cut, so the class is going to get that and
+#//  place it instead. This class is going to search
+#//  long as no key has the same string value as it,
+#//  being situated at the beginning of the line.
+#//
+#// --------------------------------------------------------
 #///////////////////////////////////////////////////////////
 
 
