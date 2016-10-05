@@ -1,23 +1,23 @@
 /////////////////////////////////////////////////////////
-//                                                     //
-//  Analysis package                                   //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //       
-//  AUTHOR: Miguel Ramos Pernas                        //
-//  e-mail: miguel.ramos.pernas@cern.ch                //
-//                                                     //
-//  Last update: 08/03/2016                            //
-//                                                     //
-// --------------------------------------------------- //
-//                                                     //
-//  Description:                                       //
-//                                                     //
-//  Implements the main methods to be owned by all     //
-//  the posible classes which need to manage various   //
-//  files.                                             //
-//                                                     //
-// --------------------------------------------------- //
+//
+//  Analysis package
+//
+// ------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 08/03/2016
+//
+// ------------------------------------------------------
+//
+//  Description:
+//
+//  Implements the main methods to be owned by all
+//  the posible classes which need to manage various
+//  files.
+//
+// ------------------------------------------------------
 /////////////////////////////////////////////////////////
 
 

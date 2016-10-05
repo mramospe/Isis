@@ -1,23 +1,23 @@
 ///////////////////////////////////////////////////////////////////////////////////
-//                                                                               //
-//  Analysis package                                                             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  AUTHOR: Miguel Ramos Pernas                                                  //
-//  e-mail: miguel.ramos.pernas@cern.ch                                          //
-//                                                                               //
-//  Last update: 21/06/2016                                                      //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
-//                                                                               //
-//  Description:                                                                 //
-//                                                                               //
-//  Defines the class to help when performing input/output operations from Root  //
-//  TTree objects. It is meant to be used to allow the user to work with the     //
-//  variables that are present in the tree without knowing its type.             //
-//                                                                               //
-// ----------------------------------------------------------------------------- //
+//
+//  Analysis package
+//
+// --------------------------------------------------------------------------------
+//
+//  AUTHOR: Miguel Ramos Pernas
+//  e-mail: miguel.ramos.pernas@cern.ch
+//
+//  Last update: 21/06/2016
+//
+// --------------------------------------------------------------------------------
+//
+//  Description:
+//
+//  Defines the class to help when performing input/output operations from Root
+//  TTree objects. It is meant to be used to allow the user to work with the
+//  variables that are present in the tree without knowing its type.
+//
+// --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 
