@@ -121,21 +121,6 @@ namespace General {
   }
 
   //_______________________________________________________________________________
-  // Prints a given vector
-  template<typename type> void PrintVector( const std::vector<type> &vector ) {
-    std::stringstream ss;
-    if ( vector.size() ) {
-      ss << "[ " << vector[ 0 ];
-      for ( auto it = vector.begin() + 1; it != vector.end(); ++it )
-	ss << ", " << *it;
-      ss << " ]";
-    }
-    else
-      ss << "[]";
-    std::cout << ss.str() << std::endl;
-  }
-
-  //_______________________________________________________________________________
   // Returns a given vector as a string
   template<typename type> std::string VectorToString( const std::vector<type> &vector ) {
     std::stringstream ss;

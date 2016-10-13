@@ -27,6 +27,7 @@
 #ifndef CONFIG_PARSER
 #define CONFIG_PARSER
 
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -39,8 +40,9 @@ namespace General {
 
   class ConfigParser {
 
-    typedef std::map<std::string, std::string>                StrMap;
-    typedef std::vector< std::pair<std::string, const char> > TypeVec;
+    typedef std::pair< std::string, std::vector<std::string> > ConfigOptPair;
+    typedef std::map<std::string, ConfigOptPair>               ConfigMap;
+    typedef std::vector< std::pair<std::string, const char> >  TypeVec;
 
   public:
 
@@ -49,7 +51,9 @@ namespace General {
     ~ConfigParser();
 
     // Methods
-    void BookConfigOpt( const std::string &name, const char &type );
+    void BookConfigOpt( const std::string &name,
+			const char &type,
+			const std::vector<std::string> &poss = {} );
     void ParseArgs( const int &nargs, const char *argv[] );
 
     // Template method
@@ -59,7 +63,8 @@ namespace General {
   protected:
     
     // Attributes
-    StrMap            fArgs;
+    ConfigMap         fArgs;
+    bool              fParsed;
     std::stringstream fParser;
     TypeVec           fVariables;
     
@@ -71,7 +76,9 @@ namespace General {
   // Extracts the value for the given variable
   template <typename type>
   void ConfigParser::Extract( const std::string &name, type &value ) {
-    fParser << fArgs[ name ];
+    if ( !fParsed )
+      std::cerr << "ERROR: No arguments have been parsed yet; unable to extract value" << std::endl;
+    fParser << fArgs[ name ].first;
     fParser >> value;
     fParser.clear();
   }

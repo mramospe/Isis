@@ -27,7 +27,7 @@
 #include "ConfigParser.h"
 #include "Utils.h"
 
-#include <iostream>
+#include <algorithm>
 
 
 //_______________________________________________________________________________
@@ -37,7 +37,7 @@
 
 //_______________________________________________________________________________
 // Main constructor
-General::ConfigParser::ConfigParser() { }
+General::ConfigParser::ConfigParser() : fParsed( false ) { }
 
 //_______________________________________________________________________________
 // Destructor
@@ -50,7 +50,9 @@ General::ConfigParser::~ConfigParser() { }
 
 //_______________________________________________________________________________
 // Books a new variable, storing also its type
-void General::ConfigParser::BookConfigOpt( const std::string &name, const char &type ) {
+void General::ConfigParser::BookConfigOpt( const std::string &name,
+					   const char &type,
+					   const std::vector<std::string> &poss ) {
     
   switch ( type ) {
   case 'D':
@@ -66,7 +68,7 @@ void General::ConfigParser::BookConfigOpt( const std::string &name, const char &
     return;
   }
 
-  fArgs[ name ] = std::string();
+  fArgs[ name ] = std::make_pair( std::string(), poss );
   fVariables.push_back( { name, type } );
 }
 
@@ -75,6 +77,10 @@ void General::ConfigParser::BookConfigOpt( const std::string &name, const char &
 // those passed to the executable.
 void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
 
+  // Allows the class to extract values
+  fParsed = true;
+
+  // The first argument is the name of the script
   const size_t truenargs = nargs - 1;
 
   // An error is displayed if the number of parameters in the main function is not
@@ -106,7 +112,14 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
       break;
     }
     
-    fArgs[ name ] = arg;
+    auto def = fArgs[ name ].second;
+    if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
+      std::cerr << "ERROR: Input for < " << name <<
+	" > does not match any of the possibilities: " << General::VectorToString( def ) << std::endl;
+      return;
+    }
+    else
+      fArgs[ name ].first = arg;
 
     // An error is displayed when an argument can not be parsed
     if ( !status )
