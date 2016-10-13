@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/07/2016
+#//  Last update: 11/10/2016
 #//
 #// -------------------------------------------------------------
 #//
@@ -344,7 +344,7 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
 def MultiPlot( mngrs, variables, **kwargs):
-    colors = ColorList( kwargs.get( 'colors', None ) )
+    colors = kwargs.get( 'colors', False )
     cuts   = kwargs.get( 'cuts', False )
     errors = kwargs.get( 'errors', False )
     legend = kwargs.get( 'legend', True )
@@ -353,6 +353,11 @@ def MultiPlot( mngrs, variables, **kwargs):
     nbins  = kwargs.get( 'nbins', 100 )
     norm   = kwargs.get( 'norm', True )
     
+    if colors:
+        colors = ColorList( colors )
+    else:
+        colors = ColorList()
+
     nvars   = len( variables ) + 1
     results = {}
     if all( var in mngr.Variables for mngr in mngrs for var in variables ):

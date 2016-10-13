@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/07/2016
+#//  Last update: 11/10/2016
 #//
 #// ----------------------------------------------------------
 #//
@@ -304,13 +304,15 @@ def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
         return cplst.__class__( lst[ el ] for el in order )
 
 #_______________________________________________________________________________
-# This function merges the values in various dictionaries into one
+# This function merges the values from various dictionaries into one. Only the
+# variables that appear in all the dictionaries are considered.
 def MergeDicts( *args ):
     kvars = args[ 0 ].keys()
     for dic in args[ 1: ]:
         keys = dic.keys()
         for key in kvars:
             if key not in keys:
+                print 'WARNING: Key <', key, '> does not appear in all dictionaries; not merged'
                 kvars.remove( key )
     rdic = {}
     for key in kvars:

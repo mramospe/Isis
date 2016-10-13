@@ -7,17 +7,18 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/08/2016
+//  Last update: 11/10/2016
 //
 // --------------------------------------------------------------------
 //
 //  Description:
 //
 //  This class facilitates the specification of the input variables
-//  for a c++ executable. The types of the variables are specified
-//  via the < BookVariable > method. Once they are all set, the
-//  method < ParseArgs > must be called, introducing the same
-//  variables as those in the < main > function.
+//  for a c++ executable. The types of the variables are defined
+//  via the < BookConfigOpt > method. They can be doubles (D),
+//  integers (I), or strings (S). Once they are all set, the method
+//  < ParseArgs > must be called, introducing the same variables as
+//  those in the < main > function.
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ General::ConfigParser::~ConfigParser() { }
 
 //_______________________________________________________________________________
 // Books a new variable, storing also its type
-void General::ConfigParser::BookVariable( const std::string &name, const char &type ) {
+void General::ConfigParser::BookConfigOpt( const std::string &name, const char &type ) {
     
   switch ( type ) {
   case 'D':
