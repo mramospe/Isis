@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/06/2016
+//  Last update: 09/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -74,6 +74,17 @@ void Analysis::TreeBuffer::CreateVariable( const std::string &name, const char &
 }
 
 //_______________________________________________________________________________
+// Loads the variables satisfying the requirements in the given expression
+void Analysis::TreeBuffer::Load( const std::string &expr ) {
+  
+  std::vector<std::string> variables;
+  Analysis::GetBranchNames( variables, fTree, expr );
+
+  for ( auto it = variables.begin(); it != variables.end(); ++it )
+    this -> LoadVariable( *it );
+}
+
+//_______________________________________________________________________________
 // Loads a variable from the attached tree. Automatically determines the type of
 // the variable and constructs a General::BufferVariable class to set the branch
 // address to.
@@ -82,17 +93,6 @@ void Analysis::TreeBuffer::LoadVariable( const std::string &name ) {
   this -> AddVariable( name, Analysis::GetVarType( fTree, name ) );
   void *path = fVarMap[ name ] -> PathToValue();
   fTree -> SetBranchAddress( name.c_str(), path );
-}
-
-//_______________________________________________________________________________
-// Loads the variables satisfying the requirements in the given expression
-void Analysis::TreeBuffer::LoadVariables( const std::string &expr ) {
-  
-  std::vector<std::string> variables;
-  Analysis::GetBranchNames( variables, fTree, expr );
-
-  for ( auto it = variables.begin(); it != variables.end(); ++it )
-    this -> LoadVariable( *it );
 }
 
 //_______________________________________________________________________________

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/06/2016
+//  Last update: 09/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -51,8 +51,8 @@ namespace Analysis {
     // Methods
     void AttachTree( TTree *tree );
     void CreateVariable( const std::string &name, const char &type );
+    void Load( const std::string &expr );
     void LoadVariable( const std::string &name );
-    void LoadVariables( const std::string &expr );
     void SetBranchStatus( const bool &dec );
 
     // Inline methods

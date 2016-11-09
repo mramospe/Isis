@@ -13,7 +13,6 @@ currpath=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 
 # Exports the different folders of the project
 export ISIS=${currpath:0:(${#currpath}-4)}
-export ISIS_MAKEFILES=$ISIS/Makefiles
 export ISIS_PYTHON=$ISIS/python
 export ISIS_TOOLS=$ISIS/Tools
 
