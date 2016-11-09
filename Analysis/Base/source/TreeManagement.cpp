@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2016
+//  Last update: 09/11/2016
 //
 // -------------------------------------------------------
 //
@@ -39,8 +39,8 @@ void Analysis::GetBranchNames( std::vector<std::string> &vector,
 			       TTree *inputTree,
 			       const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
-  std::vector<std::string> brVector( brList -> GetSize() );
-  for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
+  std::vector<std::string> brVector( brList -> GetEntries() );
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetName();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
@@ -54,8 +54,8 @@ void Analysis::GetBranchTitles( std::vector<std::string> &vector,
 				TTree *inputTree,
 				const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
-  std::vector<std::string> brVector( brList -> GetSize() );
-  for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ )
+  std::vector<std::string> brVector( brList -> GetEntries() );
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ )
     brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
@@ -77,7 +77,7 @@ size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
-  for ( int ibr = 0; ibr < brList -> GetSize(); ibr++ ) {
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ ) {
     title = brList -> At( ibr ) -> GetTitle();
     if ( title.back() == type )
       counter++;
@@ -254,7 +254,7 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
   }
 
   // Searches for the variables of the input type
-  for ( size_t ibr = 0; ibr < (size_t) brList -> GetSize(); ibr++ ) {
+  for ( size_t ibr = 0; ibr < (size_t) brList -> GetEntries(); ibr++ ) {
     brname  = brList -> At( ibr ) -> GetName();
     brtitle = brList -> At( ibr ) -> GetTitle();
     if ( brtitle.find( tail ) != std::string::npos ) {
