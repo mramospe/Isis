@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/01/2016
+//  Last update: 09/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -56,7 +56,7 @@ Analysis::TreeExpression::TreeExpression( std::string expr, TTree *itree ) :
   std::string brname;
   size_t backpos, pos;
   std::vector<std::pair<std::string, size_t> > brvect;
-  for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
+  for ( long int ibr = 0; ibr < brlist -> GetEntries(); ibr++ ) {
     brname  = brlist -> At( ibr ) -> GetName();
     backpos = 0;
     while ( ( pos = fExpression.find( brname, backpos ) ) != std::string::npos ) {
@@ -148,7 +148,7 @@ void Analysis::TreeExpression::ReplaceBranchNames( std::string &expr, TTree *itr
   std::string brname;
   size_t backpos, pos;
   std::vector<std::string> brvect;
-  for ( long int ibr = 0; ibr < brlist -> GetSize(); ibr++ ) {
+  for ( long int ibr = 0; ibr < brlist -> GetEntries(); ibr++ ) {
     brname  = brlist -> At( ibr ) -> GetName();
     backpos = 0;
     while ( ( pos = expr.find( brname, backpos ) ) != std::string::npos ) {
