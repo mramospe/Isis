@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/11/2016
+//  Last update: 10/11/2016
 //
 // -------------------------------------------------------
 //
@@ -40,7 +40,7 @@ void Analysis::GetBranchNames( std::vector<std::string> &vector,
 			       const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::vector<std::string> brVector( brList -> GetEntries() );
-  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ )
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
     brVector[ ibr ] = brList -> At( ibr ) -> GetName();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
@@ -55,7 +55,7 @@ void Analysis::GetBranchTitles( std::vector<std::string> &vector,
 				const std::string &expr ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::vector<std::string> brVector( brList -> GetEntries() );
-  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ )
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
     brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
@@ -77,10 +77,10 @@ size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
-  for ( int ibr = 0; ibr < brList -> GetEntries(); ibr++ ) {
+  for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr ) {
     title = brList -> At( ibr ) -> GetTitle();
     if ( title.back() == type )
-      counter++;
+      ++counter;
   }
   return counter;
 }
@@ -93,10 +93,10 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
-  for ( auto it = vector.begin(); it != vector.end(); it++ ) {
+  for ( auto it = vector.begin(); it != vector.end(); ++it ) {
     title = brList -> FindObject( it -> c_str() ) -> GetTitle();
     if ( title.back() == type )
-      counter++;
+      ++counter;
   }
   return counter;
 }
@@ -129,7 +129,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   std::cout << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << std::endl;
 
   // Deactivates the branches of the input variables
-  for ( auto it = ivars.begin(); it != ivars.end(); it++ )
+  for ( auto it = ivars.begin(); it != ivars.end(); ++it )
     inputTree -> SetBranchStatus( it -> c_str(), false );
 
   // Clones the input tree
@@ -139,7 +139,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   outputTree -> Write();
 
   // Reactivates the branches of the input variables
-  for ( auto it = ivars.begin(); it != ivars.end(); it++ )
+  for ( auto it = ivars.begin(); it != ivars.end(); ++it )
     inputTree -> SetBranchStatus( it -> c_str(), true );
 
   // Generates a set of vectors to almacenate the data
@@ -163,7 +163,7 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   std::string           title;
   TLeaf                *leaf;
   size_t                pos;
-  for ( size_t i = 0; i != ivars.size(); i++ ) {
+  for ( size_t i = 0; i != ivars.size(); ++i ) {
     leaf  = inputTree -> GetLeaf( ivars[ i ].c_str() );
     title = inputTree -> GetBranch( ivars[ i ].c_str() ) -> GetTitle();
     if ( ( pos = title.find( "/F" ) ) != std::string::npos ) {
@@ -202,20 +202,20 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   std::vector< std::pair<int   , TLeaf*> >::iterator iit;
   std::vector< std::pair<bool  , TLeaf*> >::iterator bit;
   std::vector< TBranch* >::iterator brit;
-  for ( Long64_t ievt = 0; ievt < inputTree -> GetEntries(); ievt++ ) {
+  for ( Long64_t ievt = 0; ievt < inputTree -> GetEntries(); ++ievt ) {
 
     inputTree -> GetEntry( ievt );
 
-    for ( fit = fvector.begin(); fit != fvector.end(); fit++ )
+    for ( fit = fvector.begin(); fit != fvector.end(); ++fit )
       fit -> first = fit -> second -> GetValue();
-    for ( dit = dvector.begin(); dit != dvector.end(); dit++ )
+    for ( dit = dvector.begin(); dit != dvector.end(); ++dit )
       dit -> first = dit -> second -> GetValue();
-    for ( iit = ivector.begin(); iit != ivector.end(); iit++ )
+    for ( iit = ivector.begin(); iit != ivector.end(); ++iit )
       iit -> first = iit -> second -> GetValue();
-    for ( bit = bvector.begin(); bit != bvector.end(); bit++ )
+    for ( bit = bvector.begin(); bit != bvector.end(); ++bit )
       bit -> first = bit -> second -> GetValue();
 
-    for ( brit = brList.begin(); brit != brList.end(); brit++ )
+    for ( brit = brList.begin(); brit != brList.end(); ++brit )
       (*brit) -> Fill();
 
     if ( ievt % 100000 == 0 )
@@ -254,13 +254,13 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
   }
 
   // Searches for the variables of the input type
-  for ( size_t ibr = 0; ibr < (size_t) brList -> GetEntries(); ibr++ ) {
+  for ( size_t ibr = 0; ibr < (size_t) brList -> GetEntries(); ++ibr ) {
     brname  = brList -> At( ibr ) -> GetName();
     brtitle = brList -> At( ibr ) -> GetTitle();
     if ( brtitle.find( tail ) != std::string::npos ) {
       inputTree -> SetBranchStatus( brname.c_str(), false );
       vars[ brname ] = std::make_pair( 0, 0 );
-      nvars++;
+      ++nvars;
     }
   }
   std::cout << "Found " << nvars << " " << vtype << " variables" << std::endl;
@@ -276,7 +276,7 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
   
   // Depending on the input type the address from the TTree is changed
   if ( itype == 'F' )
-    for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+    for ( auto it = vars.begin(); it != vars.end(); ++it ) {
       brname  = it -> first;
       brtitle = brname + "/D";
       inputTree  ->
@@ -285,7 +285,7 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 	Branch( brname.c_str(), &( it -> second ).second, brtitle.c_str() );
     }
   else
-    for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+    for ( auto it = vars.begin(); it != vars.end(); ++it ) {
       brname  = it -> first;
       brtitle = brname + "/F";
       inputTree  ->
@@ -300,9 +300,9 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
   // Performs the loop over the input tree to fill the output variables depending on the input
   // variable type
   if ( itype == 'F' )
-    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
+    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ++ievt ) {
       inputTree -> GetEntry( ievt );
-      for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+      for ( auto it = vars.begin(); it != vars.end(); ++it ) {
 	pair = &( it -> second );
 	pair -> second = pair -> first;
       }
@@ -311,9 +311,9 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 	outputTree -> AutoSave();
     }
   else
-    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ievt++ ) {
+    for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ++ievt ) {
       inputTree -> GetEntry( ievt );
-      for ( auto it = vars.begin(); it != vars.end(); it++ ) {
+      for ( auto it = vars.begin(); it != vars.end(); ++it ) {
 	pair = &( it -> second );
 	pair -> first = pair -> second;
       }
