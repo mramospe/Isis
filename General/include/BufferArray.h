@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2016
+//  Last update: 15/11/2016
 //
 // -----------------------------------------------------------------------------
 //
@@ -55,9 +55,9 @@ namespace General {
     virtual ~BufferArray();
 
     // Methods
-    void        AddVariable( const std::string &name, const char &type );
-    void        ExtractNames( std::vector<std::string> &vector );
-    std::string ToString() const;
+    BufferVariable* AddVariable( const std::string &name, const char &type );
+    void            ExtractNames( std::vector<std::string> &vector );
+    std::string     ToString() const;
     
     // Inline methods
     inline void              Clear();

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/11/2016
+//  Last update: 15/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -65,12 +65,13 @@ void Analysis::TreeBuffer::AttachTree( TTree *tree ) {
 
 //_______________________________________________________________________________
 // Creates a new variable in the attached tree given the name and its type
-void Analysis::TreeBuffer::CreateVariable( const std::string &name, const char &type ) {
+General::BufferVariable* Analysis::TreeBuffer::CreateVariable( const std::string &name, const char &type ) {
 
-  this -> AddVariable( name, type );
-  void *path      = fVarMap[ name ] -> PathToValue();
+  General::BufferVariable *var = this -> AddVariable( name, type );
+  void *path      = var -> PathToValue();
   TBranch *branch = fTree -> Branch( name.c_str(), path, (name + '/' + type).c_str() );
   fBranchVector.push_back( branch );
+  return var;
 }
 
 //_______________________________________________________________________________
@@ -88,11 +89,13 @@ void Analysis::TreeBuffer::Load( const std::string &expr ) {
 // Loads a variable from the attached tree. Automatically determines the type of
 // the variable and constructs a General::BufferVariable class to set the branch
 // address to.
-void Analysis::TreeBuffer::LoadVariable( const std::string &name ) {
+General::BufferVariable* Analysis::TreeBuffer::LoadVariable( const std::string &name ) {
 
-  this -> AddVariable( name, Analysis::GetVarType( fTree, name ) );
-  void *path = fVarMap[ name ] -> PathToValue();
+  General::BufferVariable *var = this ->
+    AddVariable( name, Analysis::GetVarType( fTree, name ) );
+  void *path = var -> PathToValue();
   fTree -> SetBranchAddress( name.c_str(), path );
+  return var;
 }
 
 //_______________________________________________________________________________

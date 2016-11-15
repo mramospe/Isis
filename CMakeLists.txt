@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas                                                #
 #  e-mail: miguel.ramos.pernas@cern.ch                                        #
 #                                                                             #
-#  Last update: 20/04/2016                                                    #
+#  Last update: 15/11/2016                                                    #
 #                                                                             #
 #  Description:                                                               #
 #                                                                             #
@@ -125,12 +125,13 @@ message("-- Output library directory set to: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 #----------------------------------------------------------------------------
 # Adds the different main packages of the project. The list of libraries is
-# reversed to avoid linking problems.
+# reversed to avoid linking problems. The python subdirectory depends on the
+# project libraries, so it must be added after the list is reversed.
 set(PROJECT_LIBRARIES)
 add_subdirectory(General)
 add_subdirectory(Analysis)
-add_subdirectory(python)
 list(REVERSE PROJECT_LIBRARIES)
+add_subdirectory(python)
 
 #----------------------------------------------------------------------------
 # Specifies the scripts of the tools to be compiled, and copies the .C and

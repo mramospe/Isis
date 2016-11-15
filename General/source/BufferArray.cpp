@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2016
+//  Last update: 15/11/2016
 //
 // -----------------------------------------------------------------------------
 //
@@ -68,12 +68,16 @@ General::BufferArray::~BufferArray() {
 
 //_______________________________________________________________________________
 // Adds a new variable to the buffer, given the name and the type
-void General::BufferArray::AddVariable( const std::string &name, const char &type ) {
+General::BufferVariable* General::BufferArray::AddVariable( const std::string &name, const char &type ) {
 
   if ( fVarMap.count( name ) )
     std::cerr << "ERROR: Variable with name < " << name << " > already booked" << std::endl;
-  else
-    fVarMap[ name ] = new BuffVar( type );
+  else {
+    General::BufferVariable *var = new BuffVar( type );
+    fVarMap[ name ] = var;
+    return var;
+  }
+  return 0;
 }
 
 //_______________________________________________________________________________

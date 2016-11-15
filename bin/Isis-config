@@ -6,14 +6,14 @@
 #=======================================================#
 
 # C++ flags
-cflags="-Wall -std=c++11 -pthread"
+cflags="-Wall -std=c++11 -pthread -Wno-unused-local-typedefs"
 
 # Paths to the include folders
 iinclude=-I$ISIS/include
 rinclude=-I`root-config --incdir`
 
 # C++ libraries (both Root and Isis)
-rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lTMVA"
+rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lTMVA -lPyROOT"
 ilibs=-L$ISIS/lib" "-lRFExt" "-lAdBin" "-lAnalysis" "-lWgts" "-lCluster" "-lGeneral
 
 out=""

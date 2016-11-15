@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/11/2016
+//  Last update: 15/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -49,11 +49,11 @@ namespace Analysis {
     ~TreeBuffer();
     
     // Methods
-    void AttachTree( TTree *tree );
-    void CreateVariable( const std::string &name, const char &type );
-    void Load( const std::string &expr );
-    void LoadVariable( const std::string &name );
-    void SetBranchStatus( const bool &dec );
+    void                     AttachTree( TTree *tree );
+    General::BufferVariable* CreateVariable( const std::string &name, const char &type );
+    void                     Load( const std::string &expr );
+    General::BufferVariable* LoadVariable( const std::string &name );
+    void                     SetBranchStatus( const bool &dec );
 
     // Inline methods
     inline void          Fill();
