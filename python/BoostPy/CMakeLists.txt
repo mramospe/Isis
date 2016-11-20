@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Name of the project
-project(IBoostPy)
+project(BoostPy)
 
 #----------------------------------------------------------------------------
 # Look for the Boost and python libraries

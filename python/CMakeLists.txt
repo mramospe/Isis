@@ -8,7 +8,7 @@ set(PYBINARY ${PROJECT_BINARY_DIR}/Isis)
 #----------------------------------------------------------------------------
 # Defines the dependencies on the boost implementations to python
 set(BOOST_TARGETS "")
-add_subdirectory(IBoostPy)
+add_subdirectory(BoostPy)
 
 #----------------------------------------------------------------------------
 # Target for the python source
