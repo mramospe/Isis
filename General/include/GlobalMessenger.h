@@ -38,12 +38,12 @@ namespace General {
     enum Colors { aBlack, aRed, aGreen, aYellow, aBlue, aMagenta, aCyan, aWhite };
     enum Styles { aNormal, aBold, aFaint, aItalic, aUnderline };
 
-    const bool ColoredStdOut = isatty( STDOUT_FILENO );
     const bool ColoredStdErr = isatty( STDERR_FILENO );
-    
+    const bool ColoredStdOut = isatty( STDOUT_FILENO );
+
+    extern int ErrorColor;
     extern int InfoColor;
     extern int WarningColor;
-    extern int ErrorColor;
   }
   
   std::string FormatMsg( const std::string &msg,

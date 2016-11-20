@@ -138,7 +138,7 @@ void General::ProgressBar::End() {
 
 //______________________________________________________________________________
 // If the required percentage of the loop is achieved, it prints the progress
-void General::ProgressBar::Print( size_t &entry ) {
+void General::ProgressBar::Print( const size_t &entry ) {
 
   if ( entry % ( fNentries*fPercentage/100 ) == 0 ) {
     
@@ -147,7 +147,7 @@ void General::ProgressBar::Print( size_t &entry ) {
       std::cout << "\033[" << fColors[ "Bar" ] << "m[";
   
       for ( size_t i = 0; i < fBarWidth; i++ ){
-    
+	
 	if ( i < fBarWidth*( entry + 1 ) / fNentries )
 	  std::cout << "|";
 	else

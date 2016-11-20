@@ -32,6 +32,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYBINARY}/${PROJECT_NAME})
 #----------------------------------------------------------------------------
 # Specify the custom boost packages
 add_subdirectory(RootTree)
+add_subdirectory(PyGeneral)
 
 #----------------------------------------------------------------------------
 # Pass the boost targets to the parent scope. This must be done after all

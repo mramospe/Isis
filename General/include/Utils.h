@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 13/10/2016
+//  Last update: 20/11/2016
 //
 // --------------------------------------------------------
 //
@@ -59,6 +59,16 @@ namespace General {
     type value;
     iss >> std::noskipws >> value;
     return iss.eof() && !iss.fail();
+  }
+
+  //_______________________________________________________________________________
+  // Integer power function
+  template<typename type>
+  type IPow( const type &value, size_t pw ) {
+    type res = 1;
+    while ( pw-- )
+      res *= value;
+    return res;
   }
 
   //_______________________________________________________________________________

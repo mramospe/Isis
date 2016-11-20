@@ -31,9 +31,9 @@ using namespace General::ANSIFormat;
 
 //_______________________________________________________________________________
 // Default values for the colors in the output messages
+int General::ANSIFormat::ErrorColor   = aRed;
 int General::ANSIFormat::InfoColor    = aGreen;
 int General::ANSIFormat::WarningColor = aYellow;
-int General::ANSIFormat::ErrorColor   = aRed;
 
 //_______________________________________________________________________________
 // Formats the input message following whe given foreground and background colors

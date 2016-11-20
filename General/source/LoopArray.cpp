@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 02/01/2016
+//  Last update: 20/11/2016
 //
 // --------------------------------------------------------------------------------
 //
@@ -27,7 +27,15 @@
 
 
 #include "LoopArray.h"
+#include "Utils.h"
 
+
+//_______________________________________________________________________________
+// Nested struct class
+General::LoopArray::LoopArrayIndex::LoopArrayIndex( const size_t &min,
+						    const size_t &max ) :
+  Index( min ), Min( min ), Max( max ) { }
+General::LoopArray::LoopArrayIndex::~LoopArrayIndex() { }
 
 //_______________________________________________________________________________
 
@@ -35,33 +43,23 @@
 // -- CONSTRUCTORS AND DESTRUCTOR
 
 //_______________________________________________________________________________
-// Main constructor
-General::LoopArray::LoopArray() : fNloops( 1 ) { }
+// Main constructor. The number of loops must be one since as new entries are
+// added, this number is multiplied by their range.
+General::LoopArray::LoopArray() : fNloops( 1 ), fPos( 0 ) { }
 
 //_______________________________________________________________________________
 // Copy constructor
-General::LoopArray::LoopArray( const LoopArray &other ) {
-  fNloops = other.fNloops;
-  fVector = other.fVector;
-}
+General::LoopArray::LoopArray( const LoopArray &other ) :
+  fNloops( other.fNloops ), fPos( 0 ), fVector( other.fVector ) { }
 
 //_______________________________________________________________________________
 // Constructor given the sice of the array and the maximum loop value
-General::LoopArray::LoopArray( size_t size, size_t max ) :
-  fNloops( size*max ),
-  fVector( std::vector<std::pair<size_t, size_t> >( size, std::make_pair( 0, max ) ) ) { }
-
-//_______________________________________________________________________________
-// Constructor given the size of the array and a function that defines, for each
-// index, the maximum value of the loop
-General::LoopArray::LoopArray( size_t size, size_t ( *func )( size_t ) ) :
-  fNloops( 1 ),
-  fVector( std::vector<std::pair<size_t, size_t> >( size, std::make_pair( 0, 0 ) ) ) {
-  for ( size_t i = 0; i < size; i++ ) {
-    fVector[ i ].second = func( i );
-    fNloops *= fVector[ i ].second;
-  }
-}
+General::LoopArray::LoopArray( const size_t &size,
+			       const size_t &min,
+			       const size_t &max ) :
+  fNloops( General::IPow( max - min, size ) ),
+  fPos( 0 ),
+  fVector( std::vector<LoopArrayIndex> ( size, LoopArrayIndex( min, max ) ) ) { }
 
 //_______________________________________________________________________________
 // Destructor
@@ -77,13 +75,14 @@ General::LoopArray::~LoopArray() { }
 // last index stored. If it reaches the associated maximum value it is reset,
 // and a unit is added to the next index ( doing this recursively ).
 General::LoopArray& General::LoopArray::operator ++ () {
-  fVector.back().first++;
+  fVector.back().Index++;
   auto it = fVector.rbegin();
-  while ( it -> first == it -> second ) {
-    it -> first = 0;
+  while ( it -> Index == it -> Max ) {
+    it -> Index = it -> Min;
     if ( it + 1 != fVector.rend() )
-      ( ++it ) -> first++;
+      ( ++it ) -> Index++;
   }
+  ++fPos;
   return *this;
 }
 
@@ -99,5 +98,5 @@ General::LoopArray General::LoopArray::operator ++ ( int ) {
 //_______________________________________________________________________________
 // Returns the value of the index at position < index >
 const size_t General::LoopArray::operator [] ( size_t index ) const {
-  return fVector[ index ].first;
+  return fVector[ index ].Index;
 }

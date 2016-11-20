@@ -37,56 +37,45 @@
 #include <cstring>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <utility>
 
 
-//_______________________________________________________________________________       
+//_______________________________________________________________________________
 
 
 // -- CONSTRUCTORS AND DESTRUCTOR
 
-//_______________________________________________________________________________       
+//_______________________________________________________________________________
 // Main constructor
-General::CutManager::CutManager( const std::string &file_path ) {
-  fOptions[ "and" ] = "&&" ;
-  fOptions[ "or"  ] = "||" ;
+General::CutManager::CutManager( const std::string &file_path ) :
+  fFile( new std::ifstream ), fOptions( { {"and", "&&"}, {"or", "||"} } ) {
   if ( file_path.size() )
     this -> Open( file_path );
 }
 
-//_______________________________________________________________________________       
-// Destructor
-General::CutManager::~CutManager() { if ( fFile.is_open() ) fFile.close(); }
+//_______________________________________________________________________________
+// Copy constructor
+General::CutManager::CutManager( const General::CutManager &other ) {
+  fCuts    = other.fCuts;
+  fFile    = other.fFile;
+  fOptions = other.fOptions;
+}
 
-//_______________________________________________________________________________       
+//_______________________________________________________________________________
+// Destructor
+General::CutManager::~CutManager() {
+  if ( fFile.use_count() == 1 && (*fFile).is_open() )
+    (*fFile).close();
+}
+
+//_______________________________________________________________________________
 
 
 // -- METHODS
 
-//_______________________________________________________________________________       
-// Appends to the given vector the cuts of the current class
-void General::CutManager::AppendCuts( std::vector<std::string> &vector ) {
-  std::vector<std::string> appvec( fCuts.size() );
-  auto itv = appvec.begin();
-  auto itm = fCuts.begin();
-  while ( itm != fCuts.end() )
-    *itv++ = itm++ -> second;
-  vector.insert( vector.end(), appvec.begin(), appvec.end() );
-}
-
-//_______________________________________________________________________________       
-// Appends to the given map the cuts of the current class. If the cut already
-// exists, a warning message is displayed and the cut is replaced.
-void General::CutManager::AppendCuts( std::map<std::string, std::string> &map ) {
-  for ( auto itm = fCuts.begin(); itm != fCuts.end(); ++itm ) {
-    if ( map.find( itm -> first ) != map.end() )
-      std::cout << "WARNING: Replacing existing cut < " << itm -> first << " >" << std::endl;
-    map[ itm -> first ] = itm -> second;
-  }
-}
-
-//_______________________________________________________________________________       
+//_______________________________________________________________________________
 // Almacenates a new cut from the cuts-file
 std::string General::CutManager::BookCut( const std::string &key, const bool &print ) {
   if ( fCuts.find( key ) != fCuts.end() ) {
@@ -107,14 +96,14 @@ std::string General::CutManager::BookCut( const std::string &key, const bool &pr
 std::string General::CutManager::GetCut( const std::string &key ) {
 
   // Each time a cut is obtained the pointer to the file is set to its start
-  fFile.clear();
-  fFile.seekg( 0 );
+  (*fFile).clear();
+  (*fFile).seekg( 0 );
 
   std::string cuts, newcut, sstr;
   std::string::size_type pos, ifirst, ilast, fpos;
   bool cond( true ), mismatch;
 
-  while ( cond && std::getline( fFile, cuts ) ) {
+  while ( cond && std::getline( *fFile, cuts ) ) {
 
     // Checks whether the line is empty
     if ( !cuts.empty() ) {
@@ -153,17 +142,17 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	  }
 
 	  // Replaces the cut name by its value
-	  fpos  = fFile.tellg();
+	  fpos  = (*fFile).tellg();
 	  newcut = this -> GetCut( sstr );	  
 	  cuts.replace( ifirst, ilast + 1 - ifirst, newcut );
-	  fFile.seekg( fpos );
+	  (*fFile).seekg( fpos );
 	}
 
 	cond = false;
       }
     }
 
-    if ( fFile.eof() && cond ) {
+    if ( (*fFile).eof() && cond ) {
       std::cerr << "ERROR: Cut with name < " << key << " > does not exist." << std::endl;
       return 0;
     }
@@ -189,19 +178,19 @@ std::string General::CutManager::MakeMergedCut( std::string joinop ) {
   return gcut;
 }
 
-//_______________________________________________________________________________       
+//_______________________________________________________________________________
 // Opens the file in the given path. The old file will be closed first.
 void General::CutManager::Open( const std::string &file_path ) {
-  if ( fFile.is_open() )
-    fFile.close();
-  fFile.open( file_path.c_str() );
-  if ( !fFile ) {
+  if ( fFile.use_count() == 1 && (*fFile).is_open() )
+    (*fFile).close();
+  (*fFile).open( file_path.c_str() );
+  if ( !(*fFile) ) {
     std::cerr << "ERROR: File < " << file_path << " > does not exist" << std::endl;
     return;
   }
   std::string line, str;
   size_t nl = 0, pos, newpos;
-  while ( std::getline( fFile, line ) ) {
+  while ( std::getline( (*fFile), line ) ) {
     ++nl;
     if ( line.size() )
       if ( line.front() != '#' ) {
@@ -242,13 +231,13 @@ void General::CutManager::Open( const std::string &file_path ) {
 	    " > not a cut line; must be commented (starting by #)" << std::endl;
       }
   }
-  fFile.clear();
-  fFile.seekg( 0 );
+  (*fFile).clear();
+  (*fFile).seekg( 0 );
 }
 
 //_______________________________________________________________________________       
 // Prints the cuts attached to this class
-void General::CutManager::Print() {
+void General::CutManager::Print() const {
   size_t maxsize = std::max_element( fCuts.begin(),
 				     fCuts.end(),
 				     [] ( const std::pair<std::string, std::string> &p1,

@@ -70,7 +70,7 @@ namespace General {
 
     // Methods
     void End();
-    void Print( size_t &entry );
+    void Print( const size_t &entry );
     void SetColor( const char *opts );
     void Start( size_t nentries );
 
