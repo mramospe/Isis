@@ -367,16 +367,18 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
+        
+        if wvar:
+            vals, wvar = self.GetVarEvents( var, wvar, cuts = cuts, mathmod = mathmod )
+        else:
+            vals = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
+
         kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
         kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
-        
-        if wvar:
-            var, wvar = self.GetVarEvents( var, wvar, cuts = cuts, mathmod = mathmod )
-        else:
-            var = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
+        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
 
-        return MakeHistogram( var, wvar, **kwargs )
+        return MakeHistogram( vals, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         '''
@@ -384,17 +386,19 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
-        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
         
         if wvar:
             xvar, yvar, wvar = self.GetVarEvents( xvar, yvar, wvar, cuts = cuts, mathmod = mathmod )
         else:
             xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
-        
-        return MakeHistogram2D( xvar, yvar, wvar, **kwargs )
+
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
+        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
+        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
+            
+        return MakeHistogram2D( xvar, yvar, **kwargs )
 
     def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
         '''
@@ -402,10 +406,6 @@ class DataManager:
         '''
         cuts    = kwargs.get( 'cuts', False )
         mathmod = kwargs.get( 'mathmod', math )
-        kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
-        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
 
         if not xerr and not yerr:
             xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
@@ -415,6 +415,11 @@ class DataManager:
             xvar, yvar, xerr = self.GetVarEvents( xvar, yvar, xerr, cuts = cuts, mathmod = mathmod )
         else:
             xvar, yvar, yerr = self.GetVarEvents( xvar, yvar, yerr, cuts = cuts, mathmod = mathmod )
+
+        kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
+        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
         
         return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 11/10/2016
+#//  Last update: 30/11/2016
 #//
 #// -------------------------------------------------------------
 #//
@@ -64,38 +64,38 @@ class ColorList:
         return self.Colors[ niter ] + nloop
 
 #_______________________________________________________________________________
-# Draws the given histograms in such an order, that the first to be drawn is
-# that with the maximum value for the Y axis. If the variable < norm > is set
-# to True, then the histograms will be normalized and the function will return
-# the list with the clone histograms. On the other hand, if it is set to True,
-# it will return a list of None values. The draw options are set using the
+# Draws the given list of histograms. If the variable < norm > is set to True,
+# then the histograms will be normalized and the function will return
+# the list with the clone histograms. It always returns a list with at least an
+# histogram used to give format to the plot. The draw options are set using the
 # < drawopt > keyword.
-def DrawHistograms( *args, **kwargs ):
-    drawopt = kwargs.get( 'drawopt', '' )
-    norm    = kwargs.get( 'norm', True )
+def DrawHistograms( hlst, drawopt = '', norm = True ):
     if norm:
-        imax = [ h.GetMaximum()*1./h.GetSumOfWeights() for h in args ]
+        imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
+        imin = min( h.GetMinimum()*1./h.GetSumOfWeights() for h in hlst )
         meth = TH1.DrawNormalized
     else:
-        imax = [ h.GetMaximum() for h in args ]
+        imax = max( h.GetMaximum() for h in hlst )
+        imin = min( h.GetMinimum() for h in hlst )
         meth = TH1.Draw
-    imax = imax.index( max( imax ) )
-    hlst = len( args )*[ 0 ]
-    lst  = range( len( args ) )
-    lst.remove( imax )
-    hlst[ imax ] = meth( args[ imax ], drawopt )
+    offset = ( imax + imin )/10.
+    vmin   = min( h.GetXaxis().GetXmin() for h in hlst )
+    vmax   = max( h.GetXaxis().GetXmax() for h in hlst )
+    hformat = hlst[ 0 ].__class__( 'HistFormat', 'HistFormat', 1, vmin, vmax )
+    hformat.SetBinContent( 1, imin )
+    hformat.GetYaxis().SetRangeUser( imin, imax + offset )
+    hformat.Draw()
     drawopt += 'SAME'
-    for i in lst:
-        hlst[ i ] = meth( args[ i ], drawopt )
-    return hlst
+    return [ hformat ] + [ meth( h, drawopt ) for h in hlst ]
 
 #_______________________________________________________________________________
 # This function extracts the points of the given array of data which are
 # supposed to be used to make a histogram
-def ExtractHistPoints( varlst, nbins, **kwargs ):
-    vmin = kwargs.get( 'vmin', min( varlst ) )
-    vmax = kwargs.get( 'vmax', max( varlst ) )
-    if 'vmax' not in kwargs:
+def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
+    if vmin == None:
+        vmin = min( varlst )
+    if vmax == None:
+        vmax  = max( varlst )
         vmax += ( vmax - vmin )/( 2.*nbins )
     return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
 
@@ -147,13 +147,18 @@ def ImportPlotModules():
 #_______________________________________________________________________________
 # This function creates a 1-D adaptive binning histogram given a name, the
 # minimum occupancy value and a list. Adding a list of weights is also possible.
-def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
+def MakeAdaptiveBinnedHist( name, minocc, values,
+                            htype   = 'double',
+                            title   = None,
+                            weights = False,
+                            xtitle  = None,
+                            ytitle  = 'Entries' ):
 
-    ''' These are the options that can be passed to the function '''
-    title    = kwargs.get( 'title', name )
-    xtitle   = kwargs.get( 'xtitle', name )
-    ytitle   = kwargs.get( 'ytitle', 'Entries' )
-    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
+    if title == None:
+        title = name
+    if not xtitle:
+        xtitle = name
+    histcall = HistFromType( htype, 1 )
     
     ''' Calculates the array of weights '''
     length = len( values )
@@ -210,10 +215,9 @@ def MakeAdaptiveBinnedHist( name, minocc, values, weights = False, **kwargs ):
 # Returns a histogram containing the cumulative distribution of that given. If
 # the option < norm > is given, the histogram will be scaled in such a way that
 # the maximum value will be one.
-def MakeCumulative( hist, **kwargs ):
-    name  = kwargs.get( 'name', '' )
-    norm  = kwargs.get( 'norm', True )
-    title = kwargs.get( 'title', name )
+def MakeCumulative( hist, name = '', norm = True, title = None ):
+    if title == None:
+        title = name
     chist = hist.Clone()
     chist.SetNameTitle( name, title )
     cumulative = chist.GetBinContent( 1 )
@@ -229,22 +233,25 @@ def MakeCumulative( hist, **kwargs ):
 # Function to generate a Root histogram given a list. By default no ytitle is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
-def MakeHistogram( var, wvar = False, **kwargs ):
-    name     = kwargs.get( 'name', '' )
-    title    = kwargs.get( 'title', name )
-    nbins    = kwargs.get( 'nbins', 100 )
-    xtitle   = kwargs.get( 'xtitle', name )
-    ytitle   = kwargs.get( 'ytitle', 'Entries' )
-    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 1 )
-    histpts  = {}
-    if 'vmin' in kwargs:
-        histpts[ 'vmin' ] = kwargs[ 'vmin' ]
-    if 'vmax' in kwargs:
-        histpts[ 'vmax' ] = kwargs[ 'vmax' ]
-    idxs = ExtractHistPoints( var, nbins, **histpts )
+def MakeHistogram( var,
+                   name   = '',
+                   nbins  = 100,
+                   htype  = 'double',
+                   title  = None,
+                   vmin   = None,
+                   vmax   = None,
+                   wvar   = False,
+                   xtitle = None,
+                   ytitle = 'Entries' ):
+    
+    if title == None:
+        title = name
+    histcall = HistFromType( htype, 1 )
+
+    idxs = ExtractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
     var  = [ var[ i ] for i in idxs ]
-    vmin = histpts.get( 'vmin', min( var ) )
-    vmax = histpts.get( 'vmax', max( var ) )
+    vmin = min( v for v in var + [ vmin ] if v != None )
+    vmax = max( v for v in var + [ vmin ] if v != None )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -262,39 +269,33 @@ def MakeHistogram( var, wvar = False, **kwargs ):
 
 #_______________________________________________________________________________
 # Creates a 2-dimensional histogram given two lists
-def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
-    name     = kwargs.get( 'name', '' )
-    title    = kwargs.get( 'title', name )
-    xbins    = kwargs.get( 'xbins', 100 )
-    ybins    = kwargs.get( 'ybins', 100 )
-    xtitle   = kwargs.get( 'xtitle', 'X' )
-    ytitle   = kwargs.get( 'ytitle', 'Y' )
-    histcall = HistFromType( kwargs.get( 'htype', 'double' ), 2 )
-    
-    xpoints = {}
-    if 'xmin' in kwargs:
-        xpoints[ 'vmin' ] = kwargs[ 'xmin' ]
-    if 'xmax' in kwargs:
-        xpoints[ 'vmax' ] = kwargs[ 'xmax' ]
-    xidxs = ExtractHistPoints( xvar, xbins, **xpoints )
+def MakeHistogram2D( xvar, yvar,
+                     name   = '',
+                     htype  = 'double',
+                     title  = None,
+                     wvar   = False,
+                     xbins  = 100,
+                     xtitle = 'X',
+                     ybins  = 100,
+                     ytitle = 'Y' ):
 
-    ypoints = {}
-    if 'ymin' in kwargs:
-        ypoints[ 'vmin' ] = kwargs[ 'ymin' ]
-    if 'ymax' in kwargs:
-        ypoints[ 'vmax' ] = kwargs[ 'ymax' ]
-    yidxs = ExtractHistPoints( yvar, ybins, **ypoints )
+    if title == None:
+        title = name
+    histcall = HistFromType( htype, 2 )
+    
+    xidxs = ExtractHistPoints( xvar, xbins, vmin = xmin, vmax = xmax )
+    yidxs = ExtractHistPoints( yvar, ybins, vmin = ymin, vmax = ymax )
 
     ''' The values used are the intersection between the two lists '''
     idxs = set( xidxs ) & set( yidxs )
 
     xvar = [ xvar[ i ] for i in idxs ]
-    xmin = xpoints.get( 'vmin', min( xvar ) )
-    xmax = xpoints.get( 'vmax', max( xvar ) )
+    xmin = min( v for v in xvar + [ vmin ] if v != None )
+    xmax = max( v for v in xvar + [ vmin ] if v != None  )
 
     yvar = [ yvar[ i ] for i in idxs ]
-    ymin = ypoints.get( 'vmin', min( yvar ) )
-    ymax = ypoints.get( 'vmax', max( yvar ) )
+    ymin = min( v for v in yvar + [ vmin ] if v != None )
+    ymax = max( v for v in yvar + [ vmin ] if v != None )
     
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
 
@@ -310,12 +311,14 @@ def MakeHistogram2D( xvar, yvar, wvar = False, **kwargs ):
 
 #_______________________________________________________________________________
 # Generates a scatter plot given two lists of data
-def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
-    name   = kwargs.get( 'name', '' )
-    title  = kwargs.get( 'title', name )
-    xtitle = kwargs.get( 'xtitle', 'X' )
-    ytitle = kwargs.get( 'ytitle', 'Y' )
+def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
+                     name   = '',
+                     title  = None,
+                     xtitle = 'X',
+                     ytitle = 'Y' ):
 
+    if title == None:
+        title = name
     npoints = len( xvar )
     xvar    = array( 'd', xvar )
     yvar    = array( 'd', yvar )
@@ -343,15 +346,18 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False, **kwargs ):
 # This function plots in the same canvas the distributions of the given
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
-def MultiPlot( mngrs, variables, **kwargs):
-    colors = kwargs.get( 'colors', False )
-    cuts   = kwargs.get( 'cuts', False )
-    errors = kwargs.get( 'errors', False )
-    legend = kwargs.get( 'legend', True )
-    name   = kwargs.get( 'name', 'canvas' )
-    title  = kwargs.get( 'title', name )
-    nbins  = kwargs.get( 'nbins', 100 )
-    norm   = kwargs.get( 'norm', True )
+def MultiPlot( mngrs, variables,
+               colors = False,
+               cuts   = False,
+               errors = False,
+               legend = True,
+               name   = 'canvas',
+               nbins  = 100,
+               norm   = True,
+               title  = None ):
+
+    if title == None:
+        title = name
     
     if colors:
         colors = ColorList( colors )
