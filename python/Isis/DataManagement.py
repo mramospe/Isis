@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 26/09/2016
+#//  Last update: 30/11/2016
 #//
 #// ----------------------------------------------------------
 #//
@@ -23,6 +23,7 @@
 from ROOT import TFile, TTree, gDirectory
 from array import array
 import math
+from Isis.BoostPy.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
 from Isis.Algebra import LongVector, Matrix
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
@@ -51,7 +52,6 @@ class DataManager:
         self.Iterator    = 0
         self.Name        = ''
         self.Nentries    = 0
-        self.OwnsTargets = False
         self.Targets     = {}
         self.Variables   = {}
 
@@ -89,7 +89,7 @@ class DataManager:
 
     def __add__( self, other ):
         '''
-        Allows merging two objects of this class. The new manager owns all the targets.
+        Allows merging two objects of this class
         '''
         mgr          = DataManager()
         mgr.Nentries = self.Nentries + other.Nentries
@@ -98,8 +98,6 @@ class DataManager:
         true_vars = [ var for var in self.Variables if var in other.Variables ]
         for var in true_vars:
             mgr.Variables[ var ] = self.Variables[ var ] + other.Variables[ var ]
-        self.OwnsTargets  = False
-        other.OwnsTargets = False
         mgr.Name = self.Name + '+' + other.Name
         return mgr
 
@@ -110,22 +108,9 @@ class DataManager:
         '''
         if self.Nentries:
             mgr = self + other
-            other.OwnsTargets = False
             return self + other
         else:
             self = other.Copy()
-            other.OwnsTargets = False
-
-    def __del__( self ):
-        '''
-        Definition of the delete destructor. If this class owns the target files
-        they are closed.
-        '''
-        if self.OwnsTargets:
-            for tgt in self.Targets:
-                for tree in self.Targets[ tgt ]:
-                    tree = 0
-                tgt.Close()
 
     def __getitem__( self, var ):
         '''
@@ -156,6 +141,17 @@ class DataManager:
         else:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
+        
+    def _getVarNames( self, regexps ):
+        '''
+        Get the variable names for the trees booked in the targets of this class. If < regexps >
+        is provided, only the variables matching the expressions in it will be returned.
+        '''
+        vnames = []
+        for fname, tlist in self.Targets.iteritems():
+            for tpath in tlist:
+                vnames.append( VarsInRootTree( fname = fname, tpath = tpath, regexps = regexps ) )
+        return vnames
     
     def AddDataFromDict( self, dict2add ):
         '''
@@ -199,19 +195,14 @@ class DataManager:
         Adds a new target file and/or tree to the class. One has to provide the file
         name and the tree names.
         '''
-        if not self.OwnsTargets: self.OwnsTargets = True
-        if fname not in [ ifile.GetName() for ifile in self.Targets ]:
-            ifile = TFile.Open( fname, 'READ' )
-            tlist = [ ifile.Get( tname ) for tname in tnames ]
-            self.Targets[ ifile ]  = tlist
+        if fname not in self.Targets.keys():
+            self.Targets[ fname ] = tnames
             print self.Name, '=> Added target <', fname, '> and trees:', tnames
         else:
-            ifile = [ ifile for ifile in self.Targets if ifile.GetName() == fname ][ 0 ]
-            tlist = [ ifile.Get( tname ) for tname in tnames ]
-            self.Targets[ ifile ] += tlist
-            print self.Name, '=> Added trees: ', list( tlist ), 'from target <', ifile.GetName(), '>'
+            self.Targets[ fname ] += tnames
+            print self.Name, '=> Added trees: ', list( tnames ), 'from target <', fname, '>'
         if self.Variables:
-            dictlist = [ DictFromTree( tree, self.Variables.keys() ) for tree in tlist ]
+            dictlist = [ DictFromTree( fname, tpath, self.Variables.keys(), cuts ) for tpath in tnames ]
             self.Variables.update( MergeDicts( *dictlist ) )
             self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
             
@@ -223,32 +214,27 @@ class DataManager:
         variables are set as those that are common for all the trees.
         '''
         if len( var_names ) == 1 and var_names[ 0 ] == '*':
-            tlist     = self.GetListOfTrees()
-            brlist    = tlist[ 0 ].GetListOfBranches()
-            var_names = [ br.GetName() for br in brlist ]
-            for tree in tlist[ 1: ]:
-                brlist        = tree.GetListOfBranches()
-                new_var_names = []
-                for br in brlist:
-                    brname = br.GetName()
-                    if brname in var_names:
-                        new_var_names.append( brname )
-                for name in var_names:
-                    if name not in new_var_names:
-                        var_names.remove( name )
+            vnames    = self._getVarNames()
+            var_names = set( vnames[ 0 ] )
+            for lst in vnames[ 1: ]:
+                var_names = var_names.intersection( lst )
             self.BookVariables( *var_names )
-            return
-        if len( self.Targets ):
+        elif len( self.Targets ):
+            vnames    = self._getVarNames( var_names )
+            var_names = set( vnames[ 0 ] )
+            for lst in vnames[ 1: ]:
+                var_names = var_names.intersection( lst )
             truevars = []
-            tlist    = self.GetListOfTrees()
-            var_names = [ TreeVarsFromExpr( tree, var_names ) for tree in tlist ]
-            var_names = reduce( lambda lsta, lstb: [ el for el in lsta if el in lstb ], var_names )
             for name in var_names:
                 if name not in self.Variables:
                     truevars.append( name )
                 else:
                     print 'WARNING:', self.Name, '=> Variable <', name, '> already booked'
-            dictlist = [ DictFromTree( tree, truevars ) for tree in tlist ]
+            
+            ''' Load the variables for each of the targets '''
+            dictlist = []
+            for fname, tlist in self.Targets.iteritems():
+                dictlist += [ DictFromTree( fname, tpath, truevars ) for tpath in tlist ]
             self.Variables.update( MergeDicts( *dictlist ) )
             self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
         else:
@@ -256,26 +242,12 @@ class DataManager:
 
     def Copy( self, name = '' ):
         '''
-        Returns a copy of this class that does not own the targets. This method is meant to
-        generate a copy with no other requirement.
+        Returns a copy of this class
         '''
         if not name:
             name = self.Name + '_copy'
         return DataManager( name, self.Variables )
     
-    def CloseFiles( self ):
-        '''
-        Closes all the target files if they are owned by the class
-        '''
-        if self.OwnsTargets:
-            for ifile in self.Targets:
-                for itree in self.Targets[ ifile ]:
-                    itree = 0
-                ifile.Close()
-            self.Targets.clear()
-        else:
-            print 'WARNING:', self.Name, 'This DataManager does not own its targets'
-
     def GetCutList( self, cut, mathmod = math ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
@@ -316,16 +288,6 @@ class DataManager:
         else:
             return tuple( [ values[ ievt ] for var, values in self.Variables.iteritems() ] )
 
-    def GetListOfTrees( self ):
-        '''
-        Returns a list with the trees attached to the class
-        '''
-        tlist   = []
-        rawlist = [ self.Targets[ ifile ] for ifile in self.Targets ]
-        for el in rawlist:
-            tlist += el
-        return tlist
-
     def GetMatrix( self, *args, **kwargs ):
         '''
         Returns a matrix containing the values of the variables specified in < args >.
@@ -350,14 +312,6 @@ class DataManager:
         Gets the number of variables in the class
         '''
         return len( self.Variables )
-
-    def GetTargets( self ):
-        '''
-        Gets the targets directory of the class. If this method is called, the class
-        automatically frees the targets, so their destruction are left to the new owner.
-        '''
-        self.OwnsTargets = False
-        return self.Targets
 
     def GetVarEvents( self, *args, **kwargs ):
         '''
@@ -531,9 +485,9 @@ class DataManager:
         ''' Prints the targets '''
         if self.Targets:
             print '\nFiles attached:'
-            for ifile in self.Targets:
+            for ifile, tlist in self.Targets.iteritems():
                 out = ' - ' + ifile.GetName() + ': '
-                for tree in self.Targets[ ifile ]:
+                for tree in tlist:
                     out += tree.GetName() + ', '
                 print out[ :-2 ]
 
@@ -641,10 +595,10 @@ class DataManager:
 
     def SubSample( self, name = '', **kwargs ):
         '''
-        Returns a copy of this class satisfying the given requirements. The new manager will
-        not own the targets. A set of cuts can be specified. The range of the events to be copied
-        can be specified (as a slice object), as well as the variables to be copied. By default
-        the entire class is copied.
+        Returns a copy of this class satisfying the given requirements. A set of cuts can
+        be specified. The range of the events to be copied can be specified (as a slice
+        object), as well as the variables to be copied. By default the entire class is
+        copied.
         '''
         if name == '':
             name = self.Name + '_SubSample'
@@ -665,93 +619,6 @@ class DataManager:
                 del cmgr.Variables[ v ]
         cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
         return cmgr
-
-#_______________________________________________________________________________
-# If the input is a string, returns an array with values of a certain type
-# depending on the identifier located in the title. If the input is a list, it
-# finds the type of values located on it, and returns the apropiated array.
-def ArrayType( branch ):
-    if isinstance( branch, str ):
-        if   '/S' in branch:
-            return array( 'h', [ 0 ] )
-        elif '/s' in branch:
-            return array( 'H', [ 0 ] )
-        elif '/I' in branch:
-            return array( 'i', [ 0 ] )
-        elif '/i' in branch:
-            return array( 'i', [ 0 ] )
-        elif '/F' in branch:
-            return array( 'f', [ 0 ] )
-        elif '/D' in branch:
-            return array( 'd', [ 0 ] )
-        elif '/L' in branch:
-            return array( 'L', [ 0L ] )
-        elif '/l' in branch:
-            return array( 'L', [ 0L ] )
-        elif '/O' in branch:
-            return array( 'b', [ 0 ] )
-        else:
-            print 'ERROR: Type not found in <', branch, '>'
-    else:
-        if   isinstance( branch[ 0 ], float ):
-            return array( 'd', [ 0 ] )
-        elif isinstance( branch[ 0 ], int ):
-            return array( 'i', [ 0 ] )
-        elif isinstance( branch[ 0 ], long ):
-            return array( 'L', [ 0L ] )
-        else:
-            print 'ERROR: Could not extract the type in <', branch[ 0 ], '>'
-
-#_______________________________________________________________________________
-# This function creates a new branch in the given tree using the values stored
-# in a list
-def BranchFromList( brname, tree, lst ):
-    if len( lst ) != tree.GetEntries():
-        print 'ERROR: The size of the input list and the tree is not the same'
-    tree.SetBranchStatus( '*', False )
-    var    = ArrayType( lst )
-    branch = tree.Branch( brname, var, brname + '/' + var.typecode.upper() )
-    for ievt in xrange( tree.GetEntries() ):
-        tree.GetEntry( ievt )
-        var[ 0 ] = lst[ ievt ]
-        branch.Fill()
-    branch.Write()
-    tree.SetBranchStatus( '*', True )
-
-#_______________________________________________________________________________
-# Creates a new dictionary containing the values of the variables stored in a
-# TTree object. The input is composed by the tree and the variables to be
-# stored ( given in a list ).
-def DictFromTree( tree, varlist ):
-    brlist = tree.GetListOfBranches()
-    if varlist == '*':
-        auxlist = [ el.GetName() for el in brlist ]
-    else:
-        auxlist = varlist
-    varlist = []
-    for el in auxlist:
-        brtitle = brlist.FindObject( el ).GetTitle()
-        if any( [ brtitle.endswith( '/C' ),
-                  brtitle.endswith( '/B' ),
-                  brtitle.endswith( '/b' ) ] ):
-            print 'WARNING: Variable type from <', brtitle, ' > not allowed; not booked'
-        else:
-            varlist.append( el )
-    tree.SetBranchStatus( '*', False )
-    avars, tvals = [], []
-    for var in varlist:
-        tree.SetBranchStatus( var, True )
-        avars.append( ArrayType( tree.GetBranch( var ).GetTitle() ) )
-        tvals.append( [] )
-        tree.SetBranchAddress( var, avars[ -1 ] )
-    rvars = range( len( varlist ) )
-    for ievt in xrange( tree.GetEntries() ):
-        tree.GetEntry( ievt )
-        for i in rvars:
-            tvals[ i ].append( avars[ i ][ 0 ] )
-    tree.ResetBranchAddresses()
-    tree.SetBranchStatus( '*', True )
-    return dict( ( var, tvals[ i ] ) for var, i in zip( varlist, rvars ) )
 
 #_______________________________________________________________________________
 # Creates a new dictionary containing the values of the variables stored on
@@ -803,23 +670,6 @@ def DictFromTxt( fname, tnames = [], **kwargs ):
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
 
 #_______________________________________________________________________________
-# This function almacenates the values of a leaf in a TTree into a list, given
-# the tree and the branch name
-def ListFromBranch( brname, tree ):
-    tree.SetBranchStatus( '*', False )
-    tree.SetBranchStatus( brname, True )
-    branch = tree.GetBranch( brname )
-    var    = ArrayType( branch.GetTitle() )
-    tree.SetBranchAddress( brname, var )
-    lst = []
-    for ievt in xrange( tree.GetEntries() ):
-        tree.GetEntry( ievt )
-        lst.append( var[ 0 ] )
-    tree.ResetBranchAddresses()
-    tree.SetBranchStatus( '*', True )
-    return lst
-
-#_______________________________________________________________________________
 # Creates a manager from the root file in < file_path > and the tree in
 # < tree_path >. By default it books all the variables, but they can be provided
 # in < **kwargs >, as well as some cuts to be applied.
@@ -837,38 +687,24 @@ def ManagerFromTree( name, file_path, tree_path, **kwargs ):
         return mgr
 
 #_______________________________________________________________________________
-# Creates a new tree with the lists stored in a dictionary. The name of the
-# branches are given by the keys in the dictionary. The names are sorted.
-def TreeFromDict( name, dic, **kwargs ):
-    level     = kwargs.get( 'level', 0 )
-    title     = kwargs.get( 'title', name )
-    tree      = TTree( name, title, level )
-    variables = dic.keys()
-    variables.sort()
-    avars, tvals = [], []
-    for var in variables:
-        avars.append( ArrayType( dic[ var ] ) )
-        tvals.append( dic[ var ] )
-        tree.Branch( var, avars[ -1 ], var + '/' + avars[ -1 ].typecode.upper() )
-    rvars = range( len( tvals ) )
-    for ievt in xrange( len( dic[ var ] ) ):
-        for i in rvars:
-            avars[ i ][ 0 ] = tvals[ i ][ ievt ]
-        tree.Fill()
-        if ievt % 100000 == 0:
-            tree.AutoSave()
-    tree.AutoSave()
-    return tree
-
-#_______________________________________________________________________________
-# Returns the name of the variables in a tree that match a given expressions
-def TreeVarsFromExpr( tree, exprs ):
-    brnames   = [ el.GetName() for el in tree.GetListOfBranches() ]
-    truenames = []
-    for expr in exprs:
-        addlst = StringListFilter( brnames, expr )
-        if addlst != []:
-            truenames += addlst
-        else:
-            print 'WARNING: No variables found matching expression <', expr, '>'
-    return truenames
+# Return variables in a tree. If < regexps > are provided, only variables
+# matching it will be returned.
+def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
+    if not tree:
+        rfile = TFile.Open( fname )
+        tree  = rfile.Get( tpath )
+    brnames = [ el.GetName()
+                for el in tree.GetListOfBranches() ]
+    if not tree:
+        rfile.Close()
+    if regexps != []:
+        truenames = []
+        for expr in regexps:
+            addlst = StringListFilter( brnames, expr )
+            if addlst != []:
+                truenames += addlst
+            else:
+                print 'WARNING: No variables found matching expression <', expr, '>'
+        return truenames
+    else:
+        return brnames
