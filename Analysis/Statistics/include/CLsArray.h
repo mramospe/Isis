@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 06/06/2016
+//  Last update: 02/12/2016
 //
 // -----------------------------------------------------------
 //
@@ -34,6 +34,8 @@ namespace Analysis {
   class CLsArray {
 
     friend class CLsAnalyser;
+
+    using DVector = std::vector<double>;
   
   public:
   
@@ -42,12 +44,13 @@ namespace Analysis {
     CLsArray( const CLsArray &other );
     CLsArray( const double &value );
     CLsArray( const double &value, const double &sigma );
-    CLsArray( const int &size, double *values, double *sigmas = 0 );
-    CLsArray( const std::initializer_list<double> values,
-	      const std::initializer_list<double> sigmas = {} );
+    CLsArray( const DVector &values, const DVector &sigmas = {} );
 
     // Destructor
     ~CLsArray();
+
+    // Inline methods
+    inline size_t GetSize() const;
 
     // Methods
     CLsArray&        operator =  ( const CLsArray &other );
@@ -61,11 +64,10 @@ namespace Analysis {
   protected:
     
     // Attributes
-    TRandom3    fGenerator;
-    double     *fMeans;
-    double     *fSigmas;
-    int         fSize;
-    char        fType;
+    TRandom3 fGenerator;
+    DVector  fMeans;
+    DVector  fSigmas;
+    char     fType;
 
     // Methods
     CLsArray  GenerateGaussian();
@@ -75,6 +77,10 @@ namespace Analysis {
 
   };
 
+  //_______________
+  // INLINE METHODS
+  inline size_t CLsArray::GetSize() const { return fMeans.size(); }
+  
   // Other functions
   inline double GetGaussian( const double &mean, const double &sigma, const double &value );
   inline double GetPoisson( const double &mean, const double &value );

@@ -54,7 +54,7 @@ int main() {
   std::cout << "Created main tree" << std::endl;
 
   // Makes the adaptive binning histograms
-  Analysis::AdaptiveBinning2D AB( 40, 300, 1400, 300, 1400, mtree, "xVar", "yVar", 0, 1, 1 );
+  Analysis::AdaptiveBinning2D AB( 40, 300, 1400, 300, 1400, mtree, "xVar", "yVar" );
 
   TH2Poly *hStr = AB.GetStruct( "hStr", "hStr" );
   TH2Poly *hAdj  = AB.GetAdjStruct( "hAdj", "hAdj" );
