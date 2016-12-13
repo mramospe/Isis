@@ -368,30 +368,39 @@ class DataManager:
         introducing < cuts >, as well as the name and the title can be defined in a
         similar way too.
         '''
-        cuts    = kwargs.get( 'cuts', False )
-        mathmod = kwargs.get( 'mathmod', math )
+        if 'cuts' in kwargs:
+            cuts = kwargs.pop( 'cuts' )
+        else:
+            cuts = False
+        if 'mathmod' in kwargs:
+            mathmod = kwargs.pop( 'mathmod' )
+        else:
+            mathmod = math
         
         if wvar:
             vals, wvar = self.GetVarEvents( var, wvar, cuts = cuts, mathmod = mathmod )
         else:
             vals = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
 
-        name = self.Name + '_' + var
-        mkhdict = {
-            'name'  : kwargs.get( 'name'  , name ),
-            'title' : kwargs.get( 'title' , name ),
-            'xtitle': kwargs.get( 'xtitle', var ),
-            'wvar'  : kwargs.get( 'wvar'  , wvar )
-        }
+        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
+        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
+        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
+        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
         
-        return MakeHistogram( vals, **mkhdict )
+        return MakeHistogram( vals, **kwargs )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         '''
         Makes the 2-dimensional histogram of the given variables
         '''
-        cuts    = kwargs.get( 'cuts', False )
-        mathmod = kwargs.get( 'mathmod', math )
+        if 'cuts' in kwargs:
+            cuts = kwargs.pop( 'cuts' )
+        else:
+            cuts = False
+        if 'mathmod' in kwargs:
+            mathmod = kwargs.pop( 'mathmod' )
+        else:
+            mathmod = math
         
         if wvar:
             xvar, yvar, wvar = self.GetVarEvents( xvar, yvar, wvar, cuts = cuts, mathmod = mathmod )
