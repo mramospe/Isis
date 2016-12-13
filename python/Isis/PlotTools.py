@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/11/2016
+#//  Last update: 13/12/2016
 #//
 #// -------------------------------------------------------------
 #//
@@ -33,21 +33,107 @@ from Isis.Utils import CalcMinDist
 
 
 #_______________________________________________________________________________
-# This class allows to generate a color list to iter over. The colors are given
-# by < __getitem__ > method or in an iteration process. The number of times the
-# given index is greater than the number of colors in the list, corresponds to
-# the number that is added to the remainder that araises from the division.
-class ColorList:
+# Output class for an iteration over a < FormatList > instance. This class
+# stores the information of the color, line style and fill style. It also has
+# features to apply it to Root objects.
+class FormatListIter:
 
-    def __init__( self, *args ):
-        ''' A set of colors can be specified in the constructor as < args > '''
+    def __init__( self, color, linest, markst, fillst ):
+        '''
+        The color and the line, marker and fill styles are passed to the class
+        '''
+        self.Color  = color
+        self.LineSt = linest
+        self.MarkSt = markst
+        self.FillSt = fillst
+
+    def GetStyles( self ):
+        '''
+        Returns the members of this class in a tuple
+        '''
+        return tuple( el for el in ( self.Color, self.LineSt, self.MarkSt, self.FillSt )
+                      if el != None )
+        
+    def ApplyFormat( self, obj, lw = 2 ):
+        '''
+        Apply the format stored to a Root object. By default the line width is also
+        set to < 2 >.
+        '''
+        obj.SetLineWidth( lw )
+        obj.SetLineColor( self.Color )
+        obj.SetMarkerColor( self.Color )
+        obj.SetLineColor( self.Color )
+        obj.SetMarkerStyle( self.MarkSt )
+        if self.LineSt != None:
+            obj.SetLineStyle( self.LineSt )
+        if self.FillSt != None:
+            obj.SetFillColor( self.Color )
+            obj.SetFillStyle( self.FillSt )
+
+#_______________________________________________________________________________
+# This class allows to generate a list storing colors and line, marker and fill
+# styles, so one can iterate over it. The formats are extracted using
+# < __getitem__ > or on an iteration process. If the index is greater than the
+# number of colors in the list, the color will correspond to the loop number,
+# added to the remainder araising from the division. For the other features
+# the quantity is directly extracted from the remainder.
+class FormatList:
+
+    def __init__( self, colors = None, linest = None, markst = None, fillst = False ):
+        '''
+        Any of the input arguments can be passed explicitily to the class. However,
+        this class stores default values for each input parameter. By default the fill
+        style is not used, since Root automatically fills the histogram if it is set.
+        If a list is passed to any of the input arguments, a check will be made to see
+        that all of them have the same length (beware of the length of the default
+        arguments). If only one value is specified, all the objects using these formats
+        will have the same value of that quantity too.
+        '''
         self.Iter = 0
-        if args: self.Colors = args
-        else:    self.Colors = [ kBlue, kRed, kOrange, kGreen, kMagenta, kCyan ]
+        if colors != None:
+            self.Colors = colors
+        else:
+            self.Colors = [ kBlue, kRed, kOrange, kGreen, kMagenta, kCyan ]
+        if linest != None:
+            self.LineSt = linest
+        else:
+            self.LineSt = range( 1, 7 )
+        if markst != None:
+            self.MarkSt = markst
+        else:
+            self.MarkSt = range( 20, 26 )
+        if fillst != None:
+            self.FillSt = fillst
+        else:
+            self.FillSt = range( 3000, 3006 )
+            
+        ''' Check that all the lists given have the same length '''
+        lgths = [ len( lst ) for lst in ( self.Colors, self.LineSt,
+                                          self.MarkSt, self.FillSt )
+                  if isinstance( lst, list ) ]
+        if len( set( lgths ) ) != 1:
+            print 'ERROR: Lists passed to FormatList instance have different lengths'
 
     def __getitem__( self, idx ):
-        ''' Gets the color for the given index '''
-        return self.Colors[ idx % len( self.Colors ) ] + idx/len( self.Colors )
+        ''' Gets the format for the given index '''
+        if isinstance( self.Colors, list ):
+            lst = self.Colors
+        elif isinstance( self.LineSt, list ):
+            lst = self.LineSt
+        elif isinstance( self.MarkSt, list ):
+            lst = self.MarkSt
+        elif isinstance( self.FillSt, list ):
+            lst = self.FillSt
+        else:
+            lst = [ 0 ]
+        n     = len( lst )
+        nloop = idx / n
+        niter = idx % n
+        col   = self._getit( self.Colors, niter, nloop )
+        lst   = self._getit( self.LineSt, niter )
+        mst   = self._getit( self.MarkSt, niter )
+        fst   = self._getit( self.FillSt, niter )
+        return FormatListIter( col, lst, mst, fst )
 
     def __iter__( self ):
         ''' Definition of the iterator '''
@@ -55,14 +141,27 @@ class ColorList:
         return self
 
     def next( self ):
-        ''' Sets the new value for the iteration. In order to use this class in an
+        '''
+        Sets the new value for the iteration. In order to use this class in an
         iterative mode, another iterable object has to be the one that raises the
-        exception to stop the iteration. '''
-        nloop = self.Iter / len( self.Colors )
-        niter = self.Iter % len( self.Colors )
+        exception to stop the iteration.
+        '''
+        frmt = self.__getitem__( self.Iter )
         self.Iter += 1
-        return self.Colors[ niter ] + nloop
+        return frmt
 
+    def _getit( self, lst, idx, nloop = False ):
+        '''
+        Auxiliar function to get the content of the next item in a list (if any)
+        '''
+        if lst:
+            if isinstance( lst, list ):
+                return lst[ idx ] + nloop
+            else:
+                return lst
+        else:
+            return
+        
 #_______________________________________________________________________________
 # Draws the given list of histograms. If the variable < norm > is set to True,
 # then the histograms will be normalized and the function will return
@@ -347,9 +446,9 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
 def MultiPlot( mngrs, variables,
-               colors = False,
                cuts   = False,
                errors = False,
+               flist  = FormatList(),
                legend = True,
                name   = 'canvas',
                nbins  = 100,
@@ -359,11 +458,6 @@ def MultiPlot( mngrs, variables,
     if title == None:
         title = name
     
-    if colors:
-        colors = ColorList( colors )
-    else:
-        colors = ColorList()
-
     nvars   = len( variables ) + 1
     results = {}
     if all( var in mngr.Variables for mngr in mngrs for var in variables ):
@@ -396,7 +490,7 @@ def MultiPlot( mngrs, variables,
             rlegend.SetHeader( '#bf{-- Legend --}' )
             rlegend.SetTextAlign( 22 )
             rlegend.SetTextSize( 0.075 )
-            rlegend.SetFillColor( 17 )
+            rlegend.SetFillColor( 15 )
             rtxtinf = TPaveText( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
             rtxtinf.AddText( '-- Number of entries --' )
             rtxtinf.SetTextSize( 0.075 )
@@ -420,8 +514,9 @@ def MultiPlot( mngrs, variables,
                 h = hists[ -1 ]
                 if norm:
                     h.Scale( float( norm )/h.GetEntries() )
-                h.SetLineColor( colors[ im ] )
-                h.SetMarkerColor( colors[ im ] )
+
+                flist[ im ].ApplyFormat( h )
+                    
                 if legend and iv == 0:
                     ''' In the first iteration adds the entries to the legend '''
                     rlegend.AddEntry( h, '#bf{' + mngr.Name + '}', 'L' )

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/11/2016
+#//  Last update: 13/12/2016
 #//
 #// ----------------------------------------------------------
 #//
@@ -206,22 +206,25 @@ class DataManager:
             self.Variables.update( MergeDicts( *dictlist ) )
             self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
             
-    def BookVariables( self, *var_names ):
+    def BookVariables( self, *exp_names ):
         '''
         Books a new variable(s) to the class. The variable's values list is filled
         with the variable's values contained in the targets. If a variable already
         exists in the class the process is omited. If < * > is specified, the
         variables are set as those that are common for all the trees.
         '''
-        if len( var_names ) == 1 and var_names[ 0 ] == '*':
-            vnames    = self._getVarNames()
+        vnames = self._getVarNames( exp_names )
+        try:
             var_names = set( vnames[ 0 ] )
+        except:
+            print 'WARNING: No variables found matching expressions:', exp_names
+            return
+            
+        if len( exp_names ) == 1 and exp_names[ 0 ] == '*':
             for lst in vnames[ 1: ]:
                 var_names = var_names.intersection( lst )
             self.BookVariables( *var_names )
         elif len( self.Targets ):
-            vnames    = self._getVarNames( var_names )
-            var_names = set( vnames[ 0 ] )
             for lst in vnames[ 1: ]:
                 var_names = var_names.intersection( lst )
             truevars = []
@@ -373,12 +376,15 @@ class DataManager:
         else:
             vals = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
 
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
-        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
-
-        return MakeHistogram( vals, **kwargs )
+        name = self.Name + '_' + var
+        mkhdict = {
+            'name'  : kwargs.get( 'name'  , name ),
+            'title' : kwargs.get( 'title' , name ),
+            'xtitle': kwargs.get( 'xtitle', var ),
+            'wvar'  : kwargs.get( 'wvar'  , wvar )
+        }
+        
+        return MakeHistogram( vals, **mkhdict )
 
     def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
         '''
