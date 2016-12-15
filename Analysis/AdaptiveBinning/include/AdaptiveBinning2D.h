@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/06/2016
+//  Last update: 15/12/2016
 //
 // --------------------------------------------------------------------
 //
@@ -52,15 +52,6 @@ namespace Analysis {
 		       const std::vector<double> &xvalues,
 		       const std::vector<double> &yvalues,
 		       const std::vector<double> &weights = std::vector<double>() );
-    AdaptiveBinning2D( size_t      min_occ,
-		       double      xmin,
-		       double      xmax,
-		       double      ymin,
-		       double      ymax,
-		       TTree      *tree,
-		       const char *xleaf_name,
-		       const char *yleaf_name,
-		       const char *wleaf_name = 0 );
     ~AdaptiveBinning2D();
 
     // Methods

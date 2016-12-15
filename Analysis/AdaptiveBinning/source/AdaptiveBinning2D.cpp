@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/06/2016
+//  Last update: 15/12/2016
 //
 // --------------------------------------------------------------------
 //
@@ -54,90 +54,25 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   fYmax( ymax ),
   fYmin( ymin ),
   fWdata( 0 ) {
-
-  fWeighted = weights.size();
-
-  if ( weights.size() )
-    fWdata = &weights;
+  
   fXdata = &xvalues;
   fYdata = &yvalues;
-  this -> Construct( min_occ );
-}
 
-//______________________________________________________________________________
-// Constructor using a TTree object
-Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
-						double      xmin,
-						double      xmax,
-						double      ymin,
-						double      ymax,
-						TTree      *tree,
-						const char *xleaf_name,
-						const char *yleaf_name,
-						const char *wleaf_name ) :
-  AdaptiveBinning(),
-  fXmax( xmax ),
-  fXmin( xmin ),
-  fYmax( ymax ),
-  fYmin( ymin ),
-  fWdata( 0 ) {
-  
-  fWeighted = wleaf_name;
-  
-  std::vector<double>
-    *xdata = new std::vector<double>,
-    *ydata = new std::vector<double>,
-    *wdata;
-  
-  size_t nentries = tree -> GetEntries();
-  TLeaf
-    *xleaf = tree -> GetLeaf( xleaf_name ),
-    *yleaf = tree -> GetLeaf( yleaf_name );
-  double x, y, w;
-  // Gets the data and fills the vectors that contain the points and the weights
-  if ( wleaf_name ) {
-    wdata = new std::vector<double>;
-    TLeaf *wleaf( tree -> GetLeaf( wleaf_name ) );
-    for ( size_t ievt = 0; ievt < nentries; ievt++ ) {
-      tree -> GetEntry( ievt );
-      x = xleaf -> GetValue();
-      y = yleaf -> GetValue();
-      w = wleaf -> GetValue();
-      if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
-	xdata -> push_back( x );
-	ydata -> push_back( y );
-	wdata -> push_back( w );
-      }
-    }
+  if ( weights.size() ) {
+    fWeighted = false;
+    fWdata    = &weights;
   }
   else {
-    for ( size_t ievt = 0; ievt < nentries; ievt++ ) {
-      tree -> GetEntry( ievt );
-      x = xleaf -> GetValue();
-      y = yleaf -> GetValue();
-      if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
-	xdata -> push_back( x );
-	ydata -> push_back( y );
-      }
-    }
-    wdata = new std::vector<double> ( xdata -> size(), 1 );
+    fWeighted = true;
+    fWdata    = new std::vector<double>( fXdata -> size(), 1 );
   }
 
-  fXdata = xdata;
-  fYdata = ydata;
-  fWdata = wdata;
-
   this -> Construct( min_occ );
-
-  // Deletes the memory allocated by the class
-  delete fXdata;
-  delete fYdata;
-  delete fWdata;
 }
 
 //______________________________________________________________________________
 // Destructor
-Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() { }
+Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() { if ( fWeighted ) delete fWdata; }
 
 //______________________________________________________________________________
 
@@ -210,14 +145,14 @@ void Analysis::AdaptiveBinning2D::Construct( const double &min_occ ) {
     delta_y = std::abs( fYdata -> front() - fYdata -> back() ),
     delta,
     new_delta;
-
+  
   for ( auto it1 = fXdata -> begin(); it1 != fXdata -> end(); it1++ )
     for ( auto it2 = it1 + 1; it2 != fXdata -> end(); it2++ ) {	  
       new_delta = std::abs( *it2 - *it1 );
       if ( new_delta < delta_x )
 	delta_x = new_delta;
     }
-
+  
   for ( auto it1 = fYdata -> begin(); it1 != fYdata -> end(); it1++ )
     for ( auto it2 = it1 + 1; it2 != fYdata -> end(); it2++ ) {
       new_delta = std::abs( *it2 - *it1 );
@@ -226,7 +161,8 @@ void Analysis::AdaptiveBinning2D::Construct( const double &min_occ ) {
     }
   delta = std::min( delta_x, delta_y )/2;
 
-  // Modifies the minimum and maximum values of the axis to properly construct the histograms
+  // Modifies the minimum and maximum values of the axis to properly construct
+  // the histograms
   fXmin -= delta;
   fXmax += delta;
   fYmin -= delta;
@@ -253,7 +189,7 @@ void Analysis::AdaptiveBinning2D::Construct( const double &min_occ ) {
 	     *std::min_element( fXdata -> begin(), fXdata -> end() ) ),
     yrange( *std::max_element( fYdata -> begin(), fYdata -> end() ) -
 	     *std::min_element( fYdata -> begin(), fYdata -> end() ) );
-
+  
   for ( size_t i = 0; i < max_iter; i++ ) {
     for ( size_t ibin = 0; ibin < nbins; ibin++ ) {
       for ( size_t ievt = 0; ievt < fWdata -> size(); ievt++ )
@@ -273,7 +209,7 @@ void Analysis::AdaptiveBinning2D::Construct( const double &min_occ ) {
   fAdjBinList = std::vector<Analysis::Bin2D>( fBinList );
   for ( auto itbin = fAdjBinList.begin(); itbin != fAdjBinList.end(); itbin++ )
     itbin -> AdjustBin( fXmin, fXmax, fYmin, fYmax, delta );
-  
+
   // Displays the information of the process
   this -> DisplayInfo( fWdata -> size(), sum_of_evts, nbins, sum_of_evts );
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 13/06/2016
+//  Last update: 15/12/2016
 //
 // --------------------------------------------------------------------
 //
@@ -69,42 +69,6 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
     while( itv != values.end() )
       if ( *itv >= vmin && *itv < vmax )
 	fData -> push_back( std::make_pair( *itv++, 1 ) );
-    fWeighted = false;
-    this -> Construct( occ );
-  }
-}
-
-//______________________________________________________________________________
-// Constructor given a TTree object
-Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
-						double  vmin,
-						double  vmax,
-						TTree  *tree,
-						const char *vname,
-						const char *wname ) :
-  AdaptiveBinning(),
-  fMax( vmax ),
-  fMin( vmin ) {
-
-  fData = new std::vector< std::pair<double, double> >;
-
-  TLeaf *leaf = tree -> GetLeaf( vname );
-  if ( wname ) {
-    TLeaf *wleaf = tree -> GetLeaf( wname );
-    for ( long int ievt = 0; ievt < tree -> GetEntries(); ++ievt ) {
-      tree -> GetEntry( ievt );
-      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
-	fData -> push_back( std::make_pair( leaf -> GetValue(), wleaf -> GetValue() ) );
-    }
-    fWeighted = true;
-    this -> Construct( occ );
-  }
-  else {
-    for ( long int ievt = 0; ievt < tree -> GetEntries(); ++ievt ) {
-      tree -> GetEntry( ievt );
-      if ( leaf -> GetValue() >= vmin && leaf -> GetValue() < vmax )
-	fData -> push_back( std::make_pair( leaf -> GetValue(), 1 ) );
-    }
     fWeighted = false;
     this -> Construct( occ );
   }
