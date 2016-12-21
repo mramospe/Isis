@@ -1,16 +1,16 @@
 ###############################################################################
-#                                                                             #
-#  AUTHOR: Miguel Ramos Pernas                                                #
-#  e-mail: miguel.ramos.pernas@cern.ch                                        #
-#                                                                             #
-#  Last update: 15/11/2016                                                    #
-#                                                                             #
-#  Description:                                                               #
-#                                                                             #
-#  The compilation can be performed in the same directory as the source code  #
-#  or in another one. If the flag BUILD_EXAMPLES is set to ON, all the cpp    #
-#  examples will be built.                                                    #
-#                                                                             #
+#
+#  AUTHOR: Miguel Ramos Pernas
+#  e-mail: miguel.ramos.pernas@cern.ch
+#
+#  Last update: 21/12/2016
+#
+#  Description:
+#
+#  The compilation can be performed in the same directory as the source code
+#  or in another one. If the flag BUILD_EXAMPLES is set to ON, all the cpp
+#  examples will be built.
+#
 ###############################################################################
 
 
@@ -84,13 +84,13 @@ endfunction()
 # the project. In spite of this, one can define another way to perform this
 # task, as long as the library is correctly exported.
 function(self_build_package libname deps)
-  file(GLOB files ${PROJECT_SOURCE_DIR}/include/*)
+  file(GLOB files ${PROJECT_SOURCE_DIR}/src/*.h)
   foreach(file ${files})
     self_copy_file(${file}, ${BINARY_INCLUDE_DIR})
   endforeach()
   include_directories(${BINARY_INCLUDE_DIR})
-  file(GLOB source ${PROJECT_SOURCE_DIR}/source/*.cpp)
-  set(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/lib/lib${libname}.so)
+  file(GLOB source ${PROJECT_SOURCE_DIR}/src/*.cpp)
+  set(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/lib/${libname})
   add_library(${libname} SHARED ${source})
   if(deps)
     add_dependencies(${libname} ${deps})
