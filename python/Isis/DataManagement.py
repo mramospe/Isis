@@ -34,7 +34,7 @@ from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 # and trees
 class DataManager:
 
-    def __init__( self, name = False ):
+    def __init__( self, name = '' ):
         '''
         The constructor only gets a name. The data must be added using the
         methods < AddDataFrom... >
