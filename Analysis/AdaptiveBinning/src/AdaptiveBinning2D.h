@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/12/2016
+//  Last update: 26/12/2016
 //
 // --------------------------------------------------------------------
 //
@@ -55,7 +55,7 @@ namespace Analysis {
     ~AdaptiveBinning2D();
 
     // Methods
-    TH2Poly* GetAdjStruct( const char *name, const char *title ) const;
+    TH2Poly* GetAdjStruct( const char *name = "", const char *title = "" ) const;
     TH2Poly* GetStruct( const char *name = "", const char *title = "" ) const;
 
     // Inline methods

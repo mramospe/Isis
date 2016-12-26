@@ -61,24 +61,25 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   // Gets the minimum distance between points
   double
     delta_x = std::abs( xvalues.front() - xvalues.back() ),
-    delta_y = std::abs( yvalues.front() - yvalues.back() ),
-    delta,
-    new_delta;
+    delta_y = std::abs( yvalues.front() - yvalues.back() );
+
+  std::vector<double> xvals( xvalues.begin(), xvalues.end() );
+  std::sort( xvals.begin(), xvals.end() );
+  for ( auto it = xvals.begin() + 1; it != xvals.end(); ++it ) {
+    double new_delta = std::abs( *it - *(it - 1) );
+    if ( new_delta != 0 && new_delta < delta_x )
+      delta_x = new_delta;
+  }
   
-  for ( auto it1 = xvalues.begin(); it1 != xvalues.end(); ++it1 )
-    for ( auto it2 = it1 + 1; it2 != xvalues.end(); ++it2 ) {	  
-      new_delta = std::abs( *it2 - *it1 );
-      if ( new_delta < delta_x )
-	delta_x = new_delta;
-    }
-  
-  for ( auto it1 = yvalues.begin(); it1 != yvalues.end(); ++it1 )
-    for ( auto it2 = it1 + 1; it2 != yvalues.end(); ++it2 ) {
-      new_delta = std::abs( *it2 - *it1 );
-      if ( new_delta < delta_y )
-	delta_y = new_delta;
-    }
-  delta = std::min( delta_x, delta_y )/2;
+  std::vector<double> yvals( yvalues.begin(), yvalues.end() );
+  std::sort( yvals.begin(), yvals.end() );
+  for ( auto it = yvals.begin() + 1; it != yvals.end(); ++it ) {
+    double new_delta = std::abs( *it - *(it - 1) );
+    if ( new_delta != 0 && new_delta < delta_y )
+      delta_y = new_delta;
+  }
+
+  double delta = std::min( delta_x, delta_y )/2;
 
   // Modifies the minimum and maximum values of the axis to properly construct
   // the histograms
@@ -99,15 +100,15 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   size_t
     max_iter = std::floor( std::log( sum_of_evts/min_occ )/std::log( 2 ) ),
     nbins    = 1;
-
+  
   if ( max_iter == 0 )
     std::cerr << " ERROR: minimum occupancy is so big, decrease it." << std::endl;
 
   double
     xrange( *std::max_element( xvalues.begin(), xvalues.end() ) -
-	     *std::min_element( xvalues.begin(), xvalues.end() ) ),
+	    *std::min_element( xvalues.begin(), xvalues.end() ) ),
     yrange( *std::max_element( yvalues.begin(), yvalues.end() ) -
-	     *std::min_element( yvalues.begin(), yvalues.end() ) );
+	    *std::min_element( yvalues.begin(), yvalues.end() ) );
   
   for ( size_t i = 0; i < max_iter; ++i ) {
     for ( size_t ibin = 0; ibin < nbins; ++ibin ) {

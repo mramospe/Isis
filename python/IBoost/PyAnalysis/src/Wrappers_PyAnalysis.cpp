@@ -126,6 +126,16 @@ namespace AdBin2D {
     return Constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
   }
 
+  PyObject* GetAdjStruct( const an::AdaptiveBinning2D &adbin,
+			  const char *name = "",
+			  const char *title = "" ) {
+    return TPython::ObjectProxy_FromVoidPtr( adbin.GetAdjStruct(name, title),
+					     "TH2Poly",
+					     false );
+  }
+
+  BOOST_PYTHON_FUNCTION_OVERLOADS(GetAdjStruct_Overloads, GetAdjStruct, 1, 3);
+  
   PyObject* GetStruct( const an::AdaptiveBinning2D &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
@@ -162,6 +172,7 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     ("AdaptiveBinning2D", py::no_init)
     .def("__init__"     , py::make_constructor(&AdBin2D::Constructor))
     .def("__init__"     , py::make_constructor(&AdBin2D::Constructor_NoWgts))
+    .def("GetAdjStruct" , &AdBin2D::GetAdjStruct, AdBin2D::GetAdjStruct_Overloads())
     .def("GetStruct"    , &AdBin2D::GetStruct, AdBin2D::GetStruct_Overloads())
     .def_readonly("Xmax", &an::AdaptiveBinning2D::GetXmax)
     .def_readonly("Xmin", &an::AdaptiveBinning2D::GetXmin)
