@@ -28,6 +28,8 @@
 
 #include "TObject.h"
 
+#include "Bin.h"
+
 
 //______________________________________________________________________________
 
@@ -40,30 +42,32 @@ namespace Analysis {
     // Constructors and destructor
     AdaptiveBinning();
     virtual ~AdaptiveBinning();
+    
+    // Method
+    virtual TObject* GetStruct( const char *name = "",
+				const char *title = "" ) const;
 
-    // Methods
-    virtual TObject* GetStruct( const char *name, const char *title );
-
-    // Inline method
-    inline bool IsWeighted();
+    // Inline methods
+    inline const std::vector<Bin*>& GetBinList() const;
+    inline size_t                   GetNbins() const;
 
   protected:
     
     // Attribute
-    bool fWeighted;
-
-    // Methods
-    virtual void Construct( const size_t &occ );
-    void         DisplayInfo( const size_t &entries,
-			      const double &sw,
-			      const size_t &nbins,
-			      const double &occ );
+    std::vector<Bin*> fBinList;
+        
   };
 
-  //______________
-  // INLINE METHOD
-  inline bool AdaptiveBinning::IsWeighted() { return fWeighted; }
+  //_______________
+  // INLINE METHODS
 
+  const std::vector<Bin*>& AdaptiveBinning::GetBinList() const {
+    return fBinList;
+  }
+  // Returns the number of bins
+  inline size_t AdaptiveBinning::GetNbins() const {
+    return fBinList.size();
+  }
 }
 
 #endif

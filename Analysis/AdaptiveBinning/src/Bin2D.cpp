@@ -100,7 +100,7 @@ void Analysis::Bin2D::Fill( const double &x, const double &y, const double &w ) 
 
 //______________________________________________________________________________
 // Divides the bin in two, given the range of the < x > and < y > axis
-Analysis::Bin2D Analysis::Bin2D::Divide( const double &xrange, const double &yrange ) {
+Analysis::Bin2D* Analysis::Bin2D::Divide( const double &xrange, const double &yrange ) {
   double tmp;
   this -> CalcMedians();
   if ( std::min( fXmedian - fXmin, fXmax - fXmedian )/xrange > 
@@ -108,13 +108,13 @@ Analysis::Bin2D Analysis::Bin2D::Divide( const double &xrange, const double &yra
     tmp   = fXmax;
     fXmax = fXmedian;
     this -> Clear();
-    return Bin2D( fXmedian, tmp, fYmin, fYmax );
+    return new Bin2D( fXmedian, tmp, fYmin, fYmax );
   }
   else {
     tmp   = fYmax;
     fYmax = fYmedian;
     this -> Clear();
-    return Bin2D( fXmin, fXmax, fYmedian, tmp );
+    return new Bin2D( fXmin, fXmax, fYmedian, tmp );
   }
 }
 

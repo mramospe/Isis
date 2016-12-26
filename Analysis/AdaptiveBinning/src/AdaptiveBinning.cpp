@@ -35,29 +35,19 @@ Analysis::AdaptiveBinning::AdaptiveBinning() { }
 
 //______________________________________________________________________________
 // Destructor
-Analysis::AdaptiveBinning::~AdaptiveBinning() { }
+Analysis::AdaptiveBinning::~AdaptiveBinning() {
 
-//______________________________________________________________________________
-
-
-// -- METHODS
-
-//______________________________________________________________________________
-// Virtual method to construct the class once filled the vectors of data
-void Analysis::AdaptiveBinning::Construct( const size_t &occ ) { }
-
-//______________________________________________________________________________
-// Displays the information of the construction
-void Analysis::AdaptiveBinning::DisplayInfo( const size_t &entries,
-					     const double &sw,
-					     const size_t &nbins,
-					     const double &occ ) {
-  std::cout << "- Entries used:      " << entries << std::endl;
-  std::cout << "- Sum of weights:    " << sw      << std::endl;
-  std::cout << "- Number of bins:    " << nbins   << std::endl;
-  std::cout << "- Occupancy per bin: " << occ     << std::endl;
+  for ( auto it = fBinList.begin(); it != fBinList.end(); ++it )
+    delete (*it);
 }
 
 //______________________________________________________________________________
+
+
+// -- METHOD
+
+//______________________________________________________________________________
 // Virtual method to get the a histogram with the adaptive binned structure
-TObject* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *title ) { return 0; }
+TObject* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *title ) const {
+  return 0;
+}

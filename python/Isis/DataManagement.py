@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/12/2016
+#//  Last update: 26/12/2016
 #//
 #// ----------------------------------------------------------
 #//
@@ -23,7 +23,7 @@
 from ROOT import TFile, TTree, gDirectory
 from array import array
 import math
-from Isis.BoostPy.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
+from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
 from Isis.Algebra import LongVector, Matrix
 from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter

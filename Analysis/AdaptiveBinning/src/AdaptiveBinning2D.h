@@ -44,80 +44,51 @@ namespace Analysis {
     
     // Constructors and destructor
     AdaptiveBinning2D();
-    AdaptiveBinning2D( size_t      min_occ,
-		       double      xmin,
-		       double      xmax,
-		       double      ymin,
-		       double      ymax,
+    AdaptiveBinning2D( size_t min_occ,
+		       double xmin,
+		       double xmax,
+		       double ymin,
+		       double ymax,
 		       const std::vector<double> &xvalues,
 		       const std::vector<double> &yvalues,
 		       const std::vector<double> &weights = std::vector<double>() );
     ~AdaptiveBinning2D();
 
     // Methods
-    void     BinsToTree( std::string        brname,
-			 TTree             *itree,
-			 const std::string &xvar,
-			 const std::string &yvar );
-    TH2Poly* GetAdjStruct( const char *name, const char *title );
-    TH2Poly* GetStruct( const char *name, const char *title );
+    TH2Poly* GetAdjStruct( const char *name, const char *title ) const;
+    TH2Poly* GetStruct( const char *name = "", const char *title = "" ) const;
 
     // Inline methods
-    inline std::vector<Analysis::Bin2D>::const_iterator AdjBinListBegin();
-    inline std::vector<Analysis::Bin2D>::const_iterator AdjBinListEnd();
-    inline std::vector<Analysis::Bin2D>::const_iterator BinListBegin();
-    inline std::vector<Analysis::Bin2D>::const_iterator BinListEnd();
-    inline const std::vector<Analysis::Bin2D>           GetAdjBinList() const;
-    inline const std::vector<Analysis::Bin2D>           GetBinList() const;
-    inline size_t                                       GetNbins() const;
+    inline const std::vector<Bin2D*>& GetAdjBinList() const;
+    inline double GetXmax() const;
+    inline double GetXmin() const;
+    inline double GetYmax() const;
+    inline double GetYmin() const;
 
   protected:
     
     // Attributes
-    std::vector<Bin2D>         fAdjBinList;
-    std::vector<Bin2D>         fBinList;
-    const std::vector<double> *fXdata;
-    double                     fXmax;
-    double                     fXmin;
-    const std::vector<double> *fYdata;
-    double                     fYmax;
-    double                     fYmin;
-    const std::vector<double> *fWdata;
-
-    // Method
-    void Construct( const double &min_occ );
+    std::vector<Bin2D*> fAdjBinList;
+    double              fXmax;
+    double              fXmin;
+    double              fYmax;
+    double              fYmin;
 
   };
 
   //_______________
   // INLINE METHODS
 
-  // Different inline methods to get the iterators of the vector of bins
-  inline std::vector<Analysis::Bin2D>::const_iterator AdaptiveBinning2D::AdjBinListBegin() {
-    return fAdjBinList.cbegin();
-  }
-  inline std::vector<Analysis::Bin2D>::const_iterator AdaptiveBinning2D::AdjBinListEnd() {
-    return fAdjBinList.cend();
-  }
-  inline std::vector<Analysis::Bin2D>::const_iterator AdaptiveBinning2D::BinListBegin() {
-    return fBinList.cbegin();
-  }
-  inline std::vector<Analysis::Bin2D>::const_iterator AdaptiveBinning2D::BinListEnd() {
-    return fBinList.cend();
-  }
-  // Returns a copy of the list of adjusted adaptive bins
-  inline const std::vector<Analysis::Bin2D> AdaptiveBinning2D::GetAdjBinList() const {
+  // Returns the list of adjusted adaptive bins
+  inline const std::vector<Bin2D*>& AdaptiveBinning2D::GetAdjBinList() const {
     return fAdjBinList;
   }
-  // Returns a copy of the list of adaptive bins
-  inline const std::vector<Analysis::Bin2D> AdaptiveBinning2D::GetBinList() const {
-    return fBinList;
-  }
-  // Returns the number of bins
-  inline size_t AdaptiveBinning2D::GetNbins() const {
-    return fBinList.size();
-  }
-
+  // Return the limits of the histogram after the construction
+  inline double AdaptiveBinning2D::GetXmax() const { return fXmax; }
+  inline double AdaptiveBinning2D::GetXmin() const { return fXmin; }
+  inline double AdaptiveBinning2D::GetYmax() const { return fYmax; }
+  inline double AdaptiveBinning2D::GetYmin() const { return fYmin; }
+  
 }
 
 #endif

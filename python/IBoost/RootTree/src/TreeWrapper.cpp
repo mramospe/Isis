@@ -89,7 +89,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
   std::map<const char*, IBoost::BuffVarWriter*> outmap;
   for ( py::ssize_t i = 0; i < nvars; ++i ) {
 
-    auto var = IBoost::ExtractFromIndex<const char*>( vars, i );
+    auto var = IBoost::ExtractFromIndex<const char*>(vars, i);
 
     // Do not swap these two lines, since the path must be set after the
     // variable is enabled
@@ -138,7 +138,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   TTree *tree = 0;
   if ( kwargs.has_key( py::object("tree") ) ) {
     py::object el = kwargs["tree"];
-    TObject *treeproxy  = (TObject*) TPython::ObjectProxy_AsVoidPtr( el.ptr() );
+    TObject *treeproxy = (TObject*) TPython::ObjectProxy_AsVoidPtr( el.ptr() );
     tree = dynamic_cast<TTree*>( treeproxy );
   }
   const char *tname = 0;

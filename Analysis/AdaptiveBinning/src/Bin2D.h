@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 19/04/2016
+//  Last update: 26/12/2016
 //
 // --------------------------------------------------------------------
 //
@@ -40,8 +40,9 @@ namespace Analysis {
 
   public:
 
-    // Constructor
-    Bin2D( const double &xmin, const double &xmax, const double &ymin, const double &ymax );
+    // Constructors
+    Bin2D( const double &xmin, const double &xmax,
+	   const double &ymin, const double &ymax );
 
     // Destructor
     ~Bin2D();
@@ -56,10 +57,10 @@ namespace Analysis {
 
     // Inline methods
     inline const double GetNpoints() const;
-    inline const double GetXmin() const;
     inline const double GetXmax() const;
-    inline const double GetYmin() const;
+    inline const double GetXmin() const;
     inline const double GetYmax() const;
+    inline const double GetYmin() const;
     
     // Attributes
     double              fXmax;
@@ -79,14 +80,15 @@ namespace Analysis {
   protected:
 
     // Methods
-    Bin2D Divide( const double &xrange, const double &yrange );
+    Bin2D* Divide( const double &xrange, const double &yrange );
     
   private:
 
     // Methods
     void                CalcMedians();
     void                Clear();
-    std::vector<double> Sort( std::vector<double> &dvector, std::vector<double> &wvector );
+    std::vector<double> Sort( std::vector<double> &dvector,
+			      std::vector<double> &wvector );
 
   };
 

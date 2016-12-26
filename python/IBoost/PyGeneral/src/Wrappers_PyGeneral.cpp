@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/11/2016
+//  Last update: 26/12/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -36,24 +36,28 @@ namespace gl = General;
 
 //_______________________________________________________________________________
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CutManager_BookCut_Overloads,
-				       gl::CutManager::BookCut,
-				       1, 2);
+// Wrappers for the class CutManager
+namespace CutMgr {
+  
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(BookCut_Overloads,
+					 gl::CutManager::BookCut,
+					 1, 2);
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(CutManager_MakeMergedCut_Overloads,
-				       gl::CutManager::MakeMergedCut,
-				       0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MakeMergedCut_Overloads,
+					 gl::CutManager::MakeMergedCut,
+					 0, 1);
+}
 
 BOOST_PYTHON_MODULE( PyGeneral ) {
 
   // Wrapper from CutManager.h
   py::class_<gl::CutManager>("CutManager", py::init<const std::string&>())
     .def(py::init<const gl::CutManager&>())
-    .def("BookCut"      , &gl::CutManager::BookCut, CutManager_BookCut_Overloads())
+    .def("BookCut"      , &gl::CutManager::BookCut, CutMgr::BookCut_Overloads())
     .def("Clear"        , &gl::CutManager::Clear)
     .def("Close"        , &gl::CutManager::Close)
     .def("GetCut"       , &gl::CutManager::GetCut)
-    .def("MakeMergedCut", &gl::CutManager::MakeMergedCut, CutManager_MakeMergedCut_Overloads())
+    .def("MakeMergedCut", &gl::CutManager::MakeMergedCut, CutMgr::MakeMergedCut_Overloads())
     .def("Open"         , &gl::CutManager::Open)
     .def("Print"        , &gl::CutManager::Print)
     .def("Remove"       , &gl::CutManager::Remove)

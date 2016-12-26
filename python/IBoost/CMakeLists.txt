@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Name of the project
-project(BoostPy)
+project(IBoost)
 
 #----------------------------------------------------------------------------
 # Look for the Boost and python libraries
@@ -22,10 +22,10 @@ function(self_build_boost_package libname)
   include_directories(${PROJECT_SOURCE_DIR}/src)
   set(${PROJECT_NAME} ${BOOST_OUTPUT_LIBRARY_DIR}/${libname})
   add_library(${libname} SHARED ${source})
-  set(libs BoostPy ${BOOSTPY_LIBS})
+  set(libs IBoost ${BOOSTPY_LIBS})
   target_link_libraries(${libname} ${libs})
   set_target_properties(${libname} PROPERTIES PREFIX "")
-  add_dependencies(${libname} BoostPy Analysis General)
+  add_dependencies(${libname} IBoost Analysis General)
   set(BOOST_TARGETS ${BOOST_TARGETS} ${libname} PARENT_SCOPE)
 endfunction()
 
@@ -51,6 +51,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYBINARY}/${PROJECT_NAME})
 # Specify the custom boost packages
 add_subdirectory(RootTree)
 add_subdirectory(PyGeneral)
+add_subdirectory(PyAnalysis)
 
 #----------------------------------------------------------------------------
 # Pass the boost targets to the parent scope. This must be done after all
