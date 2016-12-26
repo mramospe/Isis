@@ -34,58 +34,16 @@ from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 # and trees
 class DataManager:
 
-    def __init__( self, name = False, ifile = False, tnames = [], **kwargs ):
+    def __init__( self, name = False ):
         '''
-        The constructor works in three different ways. If < ifile > is a dictionary,
-        the current variables in the class are set to those stored in it. If < ifile >
-        is a string, by default it is considered that the input file is a Root file,
-        and < tnames > has to be the list of TTree names in the file. In < kwargs >, you
-        can specify the file type ( ftype = 'root'/'txt' ). If it is set to 'txt', then
-        < tnames > could be a list containing the names of the different variables or,
-        if it is left in blanck, it will take the names of the variables situated in the
-        first line of the file. The number of variables specified should match the number
-        of columns in the file. Otherwise one has to specify via < colidx = [ 1, 6, ... ] >
-        the index for the columns to be stored. Other attributes can be added too.
+        The constructor only gets a name. The data must be added using the
+        methods < AddDataFrom... >
         '''
-
-        ''' These are the main attributes that this class has '''
         self.Iterator    = 0
-        self.Name        = ''
+        self.Name        = name
         self.Nentries    = 0
         self.Targets     = {}
         self.Variables   = {}
-
-        ''' The constructor starts here '''
-        if name != False:
-            self.Name = name
-            
-            if ifile:
-                ''' First check if < ifile > is a string or if it can be used as a dictionary'''
-                if isinstance( ifile, str ):
-
-                    ftype = kwargs.get( 'ftype', 'root' )
-                
-                    if ftype in ( 'root', 'Root', 'ROOT' ):
-                        ''' This is the constructor for Root files '''
-                        if ifile and tnames:
-                            self.AddTarget( ifile, tnames )
-                        elif ifile and not tnames:
-                            print 'WARNING:', self.Name, 'Arguments for DataManager class using root files are < name > < file path > and  < tree name >'
-
-                    elif ftype in ( 'txt', 'TXT' ):
-                        ''' This is the constructor for txt files '''
-                        if ifile and tnames:
-                            self.AddDataFromTxt( ifile, tnames, **kwargs )
-                        elif ifile and not tnames:
-                            print 'WARNING:', self.Name, '=> Arguments for DataManager class using txt files are < file path > and < variables names >'
-                
-                    else:
-                        ''' If the type specified is not recognised a warning message is sent '''
-                        print 'WARNING:', self.Name, '=> File format <', ftype, '> for DataManager class not known'
-            
-                else:
-                    ''' This is the constructor using a dictionary (the ftype value is omitted) '''
-                    self.AddDataFromDict( ifile )
 
     def __add__( self, other ):
         '''
@@ -180,17 +138,7 @@ class DataManager:
             self.Variables = dict2add
             self.Nentries  = lgth
 
-    def AddDataFromTxt( self, fname, tnames = [], **kwargs ):
-        '''
-        Method to store the values almacenated on a txt file. To see the functionality
-        of this method take a look at the function < DictFromTxt >.
-        '''
-        if not tnames and not kwargs:
-            tnames = self.Variables.keys()
-        self.AddDataFromDict( DictFromTxt( fname, tnames, **kwargs ) )
-        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
-
-    def AddTarget( self, fname, tnames ):
+    def AddDataFromTree( self, fname, tnames ):
         '''
         Adds a new target file and/or tree to the class. One has to provide the file
         name and the tree names.
@@ -205,6 +153,16 @@ class DataManager:
             dictlist = [ DictFromTree( fname, tpath, self.Variables.keys(), cuts ) for tpath in tnames ]
             self.Variables.update( MergeDicts( *dictlist ) )
             self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
+
+    def AddDataFromTxt( self, fname, tnames = [], colid = [] ):
+        '''
+        Method to store the values almacenated on a txt file. To see the functionality
+        of this method take a look at the function < DictFromTxt >.
+        '''
+        if tnames == [] and colid == []:
+            tnames = self.Variables.keys()
+        self.AddDataFromDict( DictFromTxt( fname, tnames, colid ) )
+        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
             
     def BookVariables( self, *exp_names ):
         '''
@@ -291,20 +249,15 @@ class DataManager:
         else:
             return tuple( [ values[ ievt ] for var, values in self.Variables.iteritems() ] )
 
-    def GetMatrix( self, *args, **kwargs ):
+    def GetMatrix( self, variables = '*', trans = True ):
         '''
-        Returns a matrix containing the values of the variables specified in < args >.
-        If the option < EvtsInRows > is set to False, the matrix will be created as a list
-        containing a list for each of the variables. Otherwise the matrix will be a list
-        containing a list for each event, with the variables same order as in < args >. If
-        '*' appears in < args >, there will be taken all the variables in the manager
-        ordered by name
+        Returns a list with the values from < variables > for each event. If < trans >
+        is set to true, then it returns a list of lists with the values for each variable.
         '''
-        trans = kwargs.get( 'EvtsInRows', True )
-        if '*' in args:
-            args = self.Variables.keys()
-            args.sort()
-        matrix = Matrix( [ self.Variables[ var ] for var in args ] )
+        if variables == '*':
+            variables = self.Variables.keys()
+            variables.sort()
+        matrix = Matrix( [ self.Variables[ var ] for var in variables ] )
         if trans:
             return matrix.Transpose()
         else:
@@ -316,40 +269,39 @@ class DataManager:
         '''
         return len( self.Variables )
 
-    def GetVarEvents( self, *args, **kwargs ):
+    def GetVarEvents( self, variables, cuts = '', mathmod = math ):
         '''
-        If an element in < args > is a variable, it gets the list of values for it. If
-        it is an expression, it returns a list with the values corresponding to it.
+        Return a list of lists with the values associated with < variables >. If
+        an element in < variables > is a variable, it gets the list of values for
+        it. If it is an expression, it returns a list with the corresponding values.
         '''
-        cuts    = kwargs.get( 'cuts', False )
-        mathmod = kwargs.get( 'mathmod', math )
         
-        if cuts:
+        if cuts != '':
             entries = self.GetCutList( cuts, mathmod )
         else:
             entries = xrange( self.Nentries )
         
-        variables = []
-        trueargs  = []
-        for v in args:
+        fvars    = []
+        truevars = []
+        for v in variables:
             if v in self.Variables:
-                variables.append( v )
+                fvars.append( v )
             else:
                 v, newv = FormatEvalExpr( v, mathmod )
-                variables += newv 
+                fvars += newv 
             ''' The module is not imported, so the name must change '''
-            trueargs.append( v.replace( mathmod.__name__, 'mathmod' ) )
+            truevars.append( v.replace( mathmod.__name__, 'mathmod' ) )
         
-        variables = list( set( variables ) )
-        variables.sort()
-        variables.reverse()
+        fvars = list( set( fvars ) )
+        fvars.sort()
+        fvars.reverse()
         
-        values = [ self.Variables[ var ] for var in variables ]
-        nvars  = len( variables )
+        values = [ self.Variables[ var ] for var in fvars ]
+        nvars  = len( fvars )
         output = []
-        for iv, arg in enumerate( trueargs ):
+        for iv, arg in enumerate( truevars ):
             for ivar in xrange( nvars ):
-                arg = arg.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
+                arg = arg.replace( fvars[ ivar ], 'values[ %i ][ ievt ]' %ivar )
             output.append( eval( '[ %s for ievt in entries ]' %arg ) )
         cmd = 'output[ 0 ]'
         for i in xrange( 1, len( output ) ):
@@ -470,7 +422,7 @@ class DataManager:
             values.append( dic[ key ] )
         self.Nentries += 1
 
-    def Print( self, *args, **kwargs ):
+    def Print( self, variables = [], cuts = '', mathmod = math, evts = -1, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -483,19 +435,14 @@ class DataManager:
             print 'ERROR:', self.Name, '=> No variables booked in this manager'
             return
         
-        cuts    = kwargs.get( 'cuts', False )
-        mathmod = kwargs.get( 'mathmod', math )
-        evts    = kwargs.get( 'evts', False )
-        prec    = kwargs.get( 'prec', 3 )
-
         form = '%.' + str( prec ) + 'e'
         if prec:
             prec += 1
         
         ''' If no variables are specified all are printed '''
-        if not args:
-            args = self.Variables.keys()
-        args.sort()
+        if variables == []:
+            variables = self.Variables.keys()
+            variables.sort()
         
         ''' Prints the name of the manager '''
         if self.Name:
@@ -516,7 +463,7 @@ class DataManager:
         maxsize   = 7 + prec
         vout      = ' '
         shortvars = []
-        for var in args:
+        for var in variables:
             vout += var + ', '
             if len( var ) > maxsize:
                 shortvars.append( var[ :maxsize ] + '*' )
@@ -530,18 +477,18 @@ class DataManager:
         print deco + '\n' + vout + '\n' + deco
         
         ''' Prints the values of the variables '''
-        if cuts:
+        if cuts != '':
             evtlst = self.GetCutList( cuts, mathmod )
         else:
             evtlst = xrange( self.Nentries )
 
-        if evts:
+        if evts != -1:
             i = 0
             for ievt in evtlst:
                 if i == evts: break
                 i += 1
                 vout = '| '
-                for var in self.GetEventTuple( ievt, *args ):
+                for var in self.GetEventTuple( ievt, *variables ):
                     vout += ( form %var ).rjust( maxsize ) + ' |'
                 print vout
             print deco + '\n'
@@ -552,7 +499,7 @@ class DataManager:
                         '< Introduce q to exit, and any other input to continue printing >: '
                         ) == 'q': break
                 vout = '| '
-                for var in self.GetEventTuple( ievt, *args ):
+                for var in self.GetEventTuple( ievt, *variables ):
                     vout += ( form %var ).rjust( maxsize ) + ' |'
                 print vout
             if ievt + 1 == len( evtlst ):
@@ -564,22 +511,20 @@ class DataManager:
         '''
         del self.Variables[ var ]
 
-    def Save( self, name, tree_name = False, **kwargs ):
+    def Save( self, name, tree_name = False, ftype = 'root', variables = [], close = True ):
         '''
         Saves the given class values in a TTree. If only < name > is defined, it is
         considered as the tree name, so it is written in the external directory ( to
         be constructed and accesible in the main program ), if two names are provided
         the first one is considered as the file name and the second the tree name. If
         < close > is provided, and if its value is false, this method will return
-        the output file. If in < kwargs > the < ftype > key is set to 'txt', then the
-        output will be considered as a txt where the columns correspond to each variable in
-        alphabetical order. In any case the variables to be stored can be specified using
-        the keyword < variables >, providing a list with them.
+        the output file. If < ftype > is set to 'txt', then the output will be
+        considered as a txt where the columns correspond to each variable in alphabetical
+        order. In any case the variables to be stored can be specified using the keyword
+        < variables >, providing a list with them.
         '''
-        ftype     = kwargs.get( 'ftype', 'root' )
-        variables = kwargs.get( 'variables', self.Variables.keys() )
-        close     = kwargs.get( 'close', True )
-        
+        if variables == []:
+            variables = self.Variables.keys()
         if ftype in ( 'root', 'Root', 'ROOT' ):
             if tree_name:
                 ofile = TFile.Open( name, 'RECREATE' )
@@ -613,63 +558,63 @@ class DataManager:
         '''
         self.Name = name
 
-    def SubSample( self, name = '', **kwargs ):
+    def SubSample( self, name = '', cuts = '', mathmod = math, evts = -1, varset = '*' ):
         '''
         Returns a copy of this class satisfying the given requirements. A set of cuts can
         be specified. The range of the events to be copied can be specified (as a slice
         object), as well as the variables to be copied. By default the entire class is
         copied.
         '''
+        if evts == -1:
+            evts = xrange( 0, self.Nentries )
+        if varset == '*':
+            varset = self.Variables.keys()
         if name == '':
             name = self.Name + '_SubSample'
-        if 'cuts' in kwargs:
-            mathmod = kwargs.get( 'mathmod', math )
-            cmgr    = DataManager( name )
-            evtlst  = self.GetCutList( kwargs[ 'cuts' ], mathmod )
-            for kw, vlist in self.Variables.iteritems():
-                cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst ]
+        if 'cuts' != '':
+            evtlst = self.GetCutList( cuts, mathmod )
         else:
-            cmgr = self.Copy( name )
-        evts   = kwargs.get( 'evts', slice( 0, self.Nentries ) )
-        varset = kwargs.get( 'varset', cmgr.Variables.keys() )
-        for v in cmgr.Variables.keys():
-            if v in varset:
-                cmgr.Variables[ v ] = cmgr.Variables[ v ][ evts ]
-            else:
-                del cmgr.Variables[ v ]
+            evtlst = evts
+            
+        cmgr = DataManager( name )
+        for kw in varset:
+            vlist = self.Variables[ kw ]
+            cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]
         cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
+        
         return cmgr
 
 #_______________________________________________________________________________
 # Creates a new dictionary containing the values of the variables stored on
 # a txt file. The file path is specified in < fname >, while the names of the
-# variables are given as a list in < tnames >. In < kwargs >, the column index
-# to be read has to be given as colidx = [ 1, 3, 5, ... ]. If < tnames > is
-# provided, and the first row has the names of the variables, it has
-# preference over the < colidx > variable. In the case where the first row
-# does not have the names, < tnames > and < columns > must match.
-def DictFromTxt( fname, tnames = [], **kwargs ):
+# variables are given as a list in < tnames >. As a keyword argument, the column
+# index to be read has to be given as colid = [ 1, 3, 4, ... ]. If < tnames >
+# is provided, and the first row has the names of the variables, it has
+# preference over the < colid > variable. In the case where the first row
+# does not have the names, < tnames > and < colid > must match.
+def DictFromTxt( fname, tnames = [], colid = [] ):
     ifile   = open( fname, 'rt' )
     line    = ifile.readline().split()
-    columns = kwargs.get( 'colidx', range( len( line ) ) )
-    if all( isinstance( line[ i ], str ) for i in columns ):
+    if colid == []:
+        colid = range( len( line ) )
+    if all( isinstance( line[ i ], str ) for i in colid ):
         if tnames:
-            columns = [ columns[ i ] for i in columns if line[ i ] in tnames ]
+            colid = [ colid[ i ] for i in colid if line[ i ] in tnames ]
         else:
-            tnames = [ line[ i ] for i in columns ]
+            tnames = [ line[ i ] for i in colid ]
         line = ifile.readline().split()
-    elif any( isinstance( line[ i ], str ) for i in columns ):
+    elif any( isinstance( line[ i ], str ) for i in colid ):
         print 'ERROR: The first line of the input file has not the correct format'
         return
     else:
         if not tnames:
-            print 'ERROR: The names of the variables in the columns have to be specified'
+            print 'ERROR: The names of the variables in the colid have to be specified'
             return
-        elif len( tnames ) != len( columns ):
+        elif len( tnames ) != len( colid ):
             print 'ERROR: The names of the variables and the column index must match'
             return
     convfuncs, varvalues = [], []
-    for index, icol in enumerate( columns ):
+    for index, icol in enumerate( colid ):
         value = line[ icol ]
         try:
             int( value )
@@ -684,20 +629,16 @@ def DictFromTxt( fname, tnames = [], **kwargs ):
         varvalues.append( [ convfuncs[ -1 ]( value ) ] )
     for line in ifile:
         line = line.split()
-        for index, icol in enumerate( columns ):
+        for index, icol in enumerate( colid ):
             varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
     ifile.close()
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
 
 #_______________________________________________________________________________
 # Creates a manager from the root file in < file_path > and the tree in
-# < tree_path >. By default it books all the variables, but they can be provided
-# in < **kwargs >, as well as some cuts to be applied.
-def ManagerFromTree( name, file_path, tree_path, **kwargs ):
-    cuts      = kwargs.get( 'cuts', '' )
-    mathmod   = kwargs.get( 'mathmod', math )
-    variables = kwargs.get( 'variables', [ '*' ] )
-    mgr       = DataManager( name, file_path, [ tree_path ] )
+# < tree_path >. By default it books all the variables.
+def ManagerFromTree( name, file_path, tree_path, cuts = '', mathmod = math, variables = '*' ):
+    mgr = DataManager( name, file_path, [ tree_path ] )
     if variables == '*':
         variables = [ '*' ]
     mgr.BookVariables( *variables )
