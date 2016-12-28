@@ -60,7 +60,7 @@ namespace IBoost {
 
   // Transform a python list into a standard vector
   template<class type>
-  std::vector<type> PyListToStdVec( boost::python::list &lst ) {
+  std::vector<type> BoostListToStdVec( boost::python::list &lst ) {
 
     size_t lgth = boost::python::len( lst );
     std::vector<type> res( lgth );
@@ -74,7 +74,7 @@ namespace IBoost {
 
   // Transform a standard vector into a python list
   template<class type>
-  boost::python::list StdVecToPyList( const std::vector<type> &vector ) {
+  boost::python::list StdVecToBoostList( const std::vector<type> &vector ) {
     boost::python::list list;
     for ( auto it = vector.begin(); it != vector.end(); ++it )
       list.append( *it );

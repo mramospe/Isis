@@ -175,7 +175,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   // track of the types for each variable.
   Analysis::TreeBuffer buffer( tree );
 
-  auto vars = IBoost::PyListToStdVec<std::string>( varkeys );
+  auto vars = IBoost::BoostListToStdVec<std::string>( varkeys );
 
   std::map<const char*, IBoost::BuffVarWriter*> varmap;
   

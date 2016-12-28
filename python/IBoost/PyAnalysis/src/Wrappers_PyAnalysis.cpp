@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 26/12/2016
+//  Last update: 28/12/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -46,7 +46,7 @@ namespace AdBin {
 
   py::list GetBinList( const an::AdaptiveBinning &adbin ) {
   
-    return IBoost::StdVecToPyList( adbin.GetBinList() );
+    return IBoost::StdVecToBoostList( adbin.GetBinList() );
   }
 
   PyObject* GetStruct( const an::AdaptiveBinning &adbin,
@@ -67,8 +67,8 @@ namespace AdBin1D {
 							py::list values,
 							py::list weights ) {
   
-    auto vec_values  = IBoost::PyListToStdVec<double>( values );
-    auto vec_weights = IBoost::PyListToStdVec<double>( weights );
+    auto vec_values  = IBoost::BoostListToStdVec<double>( values );
+    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
     auto adbin       = new an::AdaptiveBinning1D(occ, vmin, vmax,
 						 vec_values, vec_weights);
   
@@ -103,9 +103,9 @@ namespace AdBin2D {
 							py::list yvalues,
 							py::list weights ) {
   
-    auto vec_xvalues = IBoost::PyListToStdVec<double>( xvalues );
-    auto vec_yvalues = IBoost::PyListToStdVec<double>( yvalues );
-    auto vec_weights = IBoost::PyListToStdVec<double>( weights );
+    auto vec_xvalues = IBoost::BoostListToStdVec<double>( xvalues );
+    auto vec_yvalues = IBoost::BoostListToStdVec<double>( yvalues );
+    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
     auto adbin       = new an::AdaptiveBinning2D(occ,
 						 xmin, xmax,
 						 ymin, ymax,
