@@ -32,49 +32,67 @@ from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 #_______________________________________________________________________________
 # Class to manage data, specially designed to work together with Root files
 # and trees
-class DataManager:
+class DataManager( dict ):
 
-    def __init__( self, name = '' ):
+    def __init__( self, name = '', path = '', tree = 'DecayTree', variables = [ '*' ], colid = [], ftype = 'root' ):
         '''
-        The constructor only gets a name. The data must be added using the
-        methods < AddDataFrom... >
+        The constructor provides the possibility of loading data from root or
+        txt files, or from dictionary-like classes:
+        
+        - name:  Name of this class.
+        - path:  If it is a string it is the path to the input file. If not
+        it is considered to be dictionary-like.
+        - ftype: Type for the input file.
+        - variables: List of variables to be booked.
+        - colid: In case of loading a txt file, it refers to the columns to be
+        added (see function < DictFromTxt >.
+        
+        All the constructors finally call the constructor given a
+        dictionary-like class.
         '''
-        self.Iterator    = 0
-        self.Name        = name
-        self.Nentries    = 0
-        self.Targets     = {}
-        self.Variables   = {}
+
+        self.Iterator = 0
+        self.Name     = name
+        
+        if isinstance( path, str ):
+            if ftype:
+                if ftype == 'root':
+                    self.__init__( name, DictFromTree( path, tree, variables ) )
+                elif ftype == 'txt':
+                    self.__init__( name, DictFromTxt( path, variables, colid ) )
+                else:
+                    print 'ERROR:', self.Name, '=> Unknown input file type <', ftype, '>'
+            else:
+                print 'ERROR:', self.Name, '=> The input file type must be specified'
+        else:
+            for kw, lst in path.iteritems():
+                self[ kw ] = list( lst )
+        
+        wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) != 1 )
+        if wrong:
+            print 'ERROR:', self.Name, '=> The lists stored in the manager have different lengths'
 
     def __add__( self, other ):
         '''
         Allows merging two objects of this class
         '''
-        mgr          = DataManager()
-        mgr.Nentries = self.Nentries + other.Nentries
-        mgr.Targets.update( self.Targets  )
-        mgr.Targets.update( other.Targets )
-        true_vars = [ var for var in self.Variables if var in other.Variables ]
+        mgr = DataManager( self.Name + '__' + other.Name )
+        true_vars = [ var for var in self if var in other ]
         for var in true_vars:
-            mgr.Variables[ var ] = self.Variables[ var ] + other.Variables[ var ]
-        mgr.Name = self.Name + '+' + other.Name
+            mgr[ var ] = self[ var ] + other[ var ]
+        no_booked = set( self.keys() + other.keys() ).difference( true_vars )
+        if no_booked:
+            print 'WARNING:', mgr.Name, '=> The following variables are not booked:', no_booked
         return mgr
 
     def __iadd__( self, other ):
         '''
-        Allows adding another manager variables to this class. The manager added
-        looses the possession of the targets.
+        Allows adding another manager variables to this class
         '''
-        if self.Nentries:
-            mgr = self + other
+        if len( self ):
             return self + other
         else:
             self = other.Copy()
-
-    def __getitem__( self, var ):
-        '''
-        Gets the values for variable < var >
-        '''
-        return self.Variables[ var ]
 
     def __iter__( self ):
         '''
@@ -87,141 +105,40 @@ class DataManager:
         '''
         Gets the number of entries in the class
         '''
-        return self.Nentries
+        return len( next( self.itervalues() ) )
 
     def next( self ):
         '''
         Sets the new value for the iteration. If it reaches the limit the exception
         is raised.
         '''
-        if self.Iterator == self.Nentries:
+        if self.Iterator == len( self ):
             raise StopIteration
         else:
             self.Iterator += 1
             return self.GetEventDict( self.Iterator - 1 )
-        
-    def _getVarNames( self, regexps ):
-        '''
-        Get the variable names for the trees booked in the targets of this class. If < regexps >
-        is provided, only the variables matching the expressions in it will be returned.
-        '''
-        vnames = []
-        for fname, tlist in self.Targets.iteritems():
-            for tpath in tlist:
-                vnames.append( VarsInRootTree( fname = fname, tpath = tpath, regexps = regexps ) )
-        return vnames
-    
-    def AddDataFromDict( self, dict2add ):
-        '''
-        Adds data from a dictionary of lists. First checks that all the lists in the
-        dictionary have the same size. Then a check is made to see if some variables are
-        present in the current manager. If so, all of them have to be present.
-        '''
-        lgth = len( next( dict2add.itervalues() ) )
-        if not all( len( values ) == lgth for kw, values in dict2add.iteritems() ):
-            print 'WARNING:', self.Name, '=> The lists to add have not got the same size. Data not merged.'
-            return
-        if self.Nentries:
-            if lgth != self.Nentries:
-                print 'WARNING:', self.Name, '=> The length of the data to merge does not match the size of the manager. Data not merged.'
-                return
-            if all( el in self.Variables for el in dict2add ):
-                for el, values in dict2add.iteritems():
-                    self.Variables[ el ] += values
-                    self.Nentries        += lgth
-            for kw, values in dict2add.iteritems():
-                if kw in self.Variables:
-                    print 'WARNING:', self.Name, '=> Variable <', kw, '> already in the manager; not stored'
-                else:
-                    self.Variables[ kw ] = values
-        else:
-            self.Variables = dict2add
-            self.Nentries  = lgth
-
-    def AddDataFromTree( self, fname, tnames ):
-        '''
-        Adds a new target file and/or tree to the class. One has to provide the file
-        name and the tree names.
-        '''
-        if fname not in self.Targets.keys():
-            self.Targets[ fname ] = tnames
-            print self.Name, '=> Added target <', fname, '> and trees:', tnames
-        else:
-            self.Targets[ fname ] += tnames
-            print self.Name, '=> Added trees: ', list( tnames ), 'from target <', fname, '>'
-        if self.Variables:
-            dictlist = [ DictFromTree( fname, tpath, self.Variables.keys(), cuts ) for tpath in tnames ]
-            self.Variables.update( MergeDicts( *dictlist ) )
-            self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
-
-    def AddDataFromTxt( self, fname, tnames = [], colid = [] ):
-        '''
-        Method to store the values almacenated on a txt file. To see the functionality
-        of this method take a look at the function < DictFromTxt >.
-        '''
-        if tnames == [] and colid == []:
-            tnames = self.Variables.keys()
-        self.AddDataFromDict( DictFromTxt( fname, tnames, colid ) )
-        print self.Name, '=> Stored', len( tnames ), 'variables from txt file <', fname, '>'
             
-    def BookVariables( self, *exp_names ):
-        '''
-        Books a new variable(s) to the class. The variable's values list is filled
-        with the variable's values contained in the targets. If a variable already
-        exists in the class the process is omited. If < * > is specified, the
-        variables are set as those that are common for all the trees.
-        '''
-        vnames = self._getVarNames( exp_names )
-        try:
-            var_names = set( vnames[ 0 ] )
-        except:
-            print 'WARNING: No variables found matching expressions:', exp_names
-            return
-            
-        if len( exp_names ) == 1 and exp_names[ 0 ] == '*':
-            for lst in vnames[ 1: ]:
-                var_names = var_names.intersection( lst )
-            self.BookVariables( *var_names )
-        elif len( self.Targets ):
-            for lst in vnames[ 1: ]:
-                var_names = var_names.intersection( lst )
-            truevars = []
-            for name in var_names:
-                if name not in self.Variables:
-                    truevars.append( name )
-                else:
-                    print 'WARNING:', self.Name, '=> Variable <', name, '> already booked'
-            
-            ''' Load the variables for each of the targets '''
-            dictlist = []
-            for fname, tlist in self.Targets.iteritems():
-                dictlist += [ DictFromTree( fname, tpath, truevars ) for tpath in tlist ]
-            self.Variables.update( MergeDicts( *dictlist ) )
-            self.Nentries = len( self.Variables.items()[ 0 ][ 1 ] )
-        else:
-            print 'WARNING: ', self.Name, '=> No targets added to the manager, could not book variables:', var_names
-
     def Copy( self, name = '' ):
         '''
         Returns a copy of this class
         '''
         if not name:
             name = self.Name + '_copy'
-        return DataManager( name, self.Variables )
+        return DataManager( name, self )
     
     def GetCutList( self, cut, mathmod = math ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
         cut, variables = FormatEvalExpr( cut, mathmod )
-        varstoadd = [ v for v in variables if v not in self.Variables ]
+        varstoadd = [ v for v in variables if v not in self ]
         if varstoadd:
-            print 'WARNING: Loading additional variables to apply the cuts:', varstoadd
-            self.BookVariables( *varstoadd )
-        values = [ self.Variables[ var ] for var in variables ]
+            print 'ERROR: Need to load additional variables to apply the cuts:', varstoadd
+            return
+        values = [ self[ var ] for var in variables ]
         for ivar in xrange( len( variables ) ):
             cut = cut.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
-        return eval( '[ ievt for ievt in xrange( self.Nentries ) if ' + cut + ' ]' )
+        return eval( '[ ievt for ievt in xrange( len( self ) ) if ' + cut + ' ]' )
 
     def GetEntries( self, selection = False, mathmod = math ):
         '''
@@ -231,13 +148,13 @@ class DataManager:
         if selection:
             return len( self.GetCutList( selection ), mathmod )
         else:
-            return self.Nentries
+            return len( self )
 
     def GetEventDict( self, ievt ):
         '''
         Returns a dictionary with the values of the variables at the given entry
         '''
-        return dict( ( var, values[ ievt ] ) for var, values in self.Variables.iteritems() )
+        return dict( ( var, values[ ievt ] ) for var, values in self.iteritems() )
 
     def GetEventTuple( self, ievt, *args ):
         '''
@@ -245,9 +162,9 @@ class DataManager:
         in the order specified.
         '''
         if len( args ):
-            return tuple( [ self.Variables[ var ][ ievt ] for var in args ] )
+            return tuple( [ self[ var ][ ievt ] for var in args ] )
         else:
-            return tuple( [ values[ ievt ] for var, values in self.Variables.iteritems() ] )
+            return tuple( [ values[ ievt ] for var, values in self.iteritems() ] )
 
     def GetMatrix( self, variables = '*', trans = True ):
         '''
@@ -255,9 +172,9 @@ class DataManager:
         is set to true, then it returns a list of lists with the values for each variable.
         '''
         if variables == '*':
-            variables = self.Variables.keys()
+            variables = self.keys()
             variables.sort()
-        matrix = Matrix( [ self.Variables[ var ] for var in variables ] )
+        matrix = Matrix( [ self[ var ] for var in variables ] )
         if trans:
             return matrix.Transpose()
         else:
@@ -267,7 +184,7 @@ class DataManager:
         '''
         Gets the number of variables in the class
         '''
-        return len( self.Variables )
+        return len( self.keys() )
 
     def GetVarEvents( self, variables, cuts = False, mathmod = math ):
         '''
@@ -279,12 +196,12 @@ class DataManager:
         if cuts:
             entries = self.GetCutList( cuts, mathmod )
         else:
-            entries = xrange( self.Nentries )
+            entries = xrange( len( self ) )
         
         fvars    = []
         truevars = []
         for v in variables:
-            if v in self.Variables:
+            if v in self:
                 fvars.append( v )
             else:
                 v, newv = FormatEvalExpr( v, mathmod )
@@ -296,7 +213,7 @@ class DataManager:
         fvars.sort()
         fvars.reverse()
         
-        values = [ self.Variables[ var ] for var in fvars ]
+        values = [ self[ var ] for var in fvars ]
         nvars  = len( fvars )
         output = []
         for iv, arg in enumerate( truevars ):
@@ -307,12 +224,6 @@ class DataManager:
         for i in xrange( 1, len( output ) ):
             cmd += ', output[ %i ]' %i
         return eval( cmd )
-
-    def GetVarNames( self ):
-        '''
-        Gets the name of the variables in the class
-        '''
-        return self.Variables.keys()
 
     def MakeHistogram( self, var, wvar = False, **kwargs ):
         '''
@@ -403,24 +314,23 @@ class DataManager:
         expression.
         '''
         if function:
-            new_variable = self.Nentries*[ 0. ]
-            var_tensor   = [ self.Variables[ vname ] for vname in arg ]
+            new_variable = len( self )*[ 0. ]
+            var_tensor   = [ self[ vname ] for vname in arg ]
             lvars        = xrange( len( arg ) )
-            for ievt in xrange( self.Nentries ):
+            for ievt in xrange( len( self ) ):
                 values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
                 new_variable[ ievt ] = function( *values )
-            self.Variables[ varname ] = new_variable
+            self[ varname ] = new_variable
         else:
-            self.Variables[ varname ] = self.GetVarEvents( arg )
+            self[ varname ] = self.GetVarEvents( arg )
 
     def NewEvent( self, dic ):
         '''
         Adds a new event to the manager. Values for all the variables have to be
         provided.
         '''
-        for key, values in self.Variables.iteritems():
+        for key, values in self.iteritems():
             values.append( dic[ key ] )
-        self.Nentries += 1
 
     def Print( self, variables = [], cuts = '', mathmod = math, evts = -1, prec = 3 ):
         '''
@@ -431,7 +341,7 @@ class DataManager:
         number of decimal points it sets to this value.
         '''
         
-        if not self.Variables:
+        if not self:
             print 'ERROR:', self.Name, '=> No variables booked in this manager'
             return
         
@@ -441,7 +351,7 @@ class DataManager:
         
         ''' If no variables are specified all are printed '''
         if variables == []:
-            variables = self.Variables.keys()
+            variables = self.keys()
             variables.sort()
         
         ''' Prints the name of the manager '''
@@ -449,17 +359,10 @@ class DataManager:
             lname = 3*len( self.Name )
             print '\n' + lname*'*' + '\n' + self.Name.center( lname ) + '\n' + lname*'*'
         
-        ''' Prints the targets '''
-        if self.Targets:
-            print '\nFiles attached:'
-            for ifile, tlist in self.Targets.iteritems():
-                out = ' - ' + ifile.GetName() + ': '
-                for tree in tlist:
-                    out += tree.GetName() + ', '
-                print out[ :-2 ]
-
-        ''' Prints the variables. The variable < maxsize > is the maximum size of the
-        numbers in the print '''
+        '''
+        Prints the variables. The variable < maxsize > is the maximum size of the
+        numbers in the print
+        '''
         maxsize   = 7 + prec
         vout      = ' '
         shortvars = []
@@ -480,7 +383,7 @@ class DataManager:
         if cuts != '':
             evtlst = self.GetCutList( cuts, mathmod )
         else:
-            evtlst = xrange( self.Nentries )
+            evtlst = xrange( len( self ) )
 
         if evts != -1:
             i = 0
@@ -505,70 +408,61 @@ class DataManager:
             if ievt + 1 == len( evtlst ):
                 print deco + '\n'
 
-    def RemoveVariable( self, var ):
+    def Save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
         '''
-        Removes a booked variable
-        '''
-        del self.Variables[ var ]
-
-    def Save( self, name, tree_name = False, ftype = 'root', variables = [], close = True ):
-        '''
-        Saves the given class values in a TTree. If only < name > is defined, it is
-        considered as the tree name, so it is written in the external directory ( to
-        be constructed and accesible in the main program ), if two names are provided
-        the first one is considered as the file name and the second the tree name. If
-        < close > is provided, and if its value is false, this method will return
-        the output file. If < ftype > is set to 'txt', then the output will be
-        considered as a txt where the columns correspond to each variable in alphabetical
-        order. In any case the variables to be stored can be specified using the keyword
-        < variables >, providing a list with them.
+        Saves the given class values in a TTree. If < name > is not provided, the
+        tree will be written in the external directory (to be constructed and
+        accesible in the main program). If < close > is provided, and if its value
+        is false, this method will return the output file. If < ftype > is set to
+        'txt', then the output will be considered as a txt where the columns
+        correspond to each variable in alphabetical order. In any case the
+        variables to be stored can be specified using the keyword < variables >,
+        providing a list with them.
         '''
         if variables == []:
-            variables = self.Variables.keys()
+            variables = self.keys()
         if ftype in ( 'root', 'Root', 'ROOT' ):
-            if tree_name:
+            if name != '':
                 ofile = TFile.Open( name, 'RECREATE' )
-                print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
-                TreeFromDict( tree_name, self.Variables )
             else:
-                print self.Name, '=> Saving tree with name <', name, '> in <', gDirectory.GetName(), '>'
-                TreeFromDict( name, self.Variables )
-            print self.Name, '=> Written', self.Nentries, 'entries'
-            if close: ofile.Close()
-            else: return ofile
+                ofile = False
+                name  = gDirectory.GetName()
+            print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
+            TreeFromDict( self, name = tree_name, variables = variables )
+            print self.Name, '=> Written', len( self ), 'entries'
+            if ofile and close:
+                ofile.Close()
+            else:
+                return ofile
         elif ftype in ( 'txt', 'TXT' ):
             ofile = open( name, 'wt' )
             print self.Name, '=> Saving txt data in file <', name, '>'
-            varvalues = [ self.Variables[ var ] for var in variables ]
+            varvalues = [ self[ var ] for var in variables ]
             out = ''
             for var in variables:
                 out += var + '\t'
             ofile.write( out[ :-1 ] + '\n' )
-            for ievt in xrange( self.Nentries ):
+            for ievt in xrange( len( self ) ):
                 out = ''
                 for var in varvalues:
                     out += str( var[ ievt ] ) + '\t'
                 ofile.write( out[ :-1 ] + '\n' )
-            if close: ofile.close()
-            else: return ofile
+            if close:
+                ofile.close()
+            else:
+                return ofile
     
-    def SetName( self, name ):
-        '''
-        Sets the name of the current manager
-        '''
-        self.Name = name
-
     def SubSample( self, name = '', cuts = '', mathmod = math, evts = -1, varset = '*' ):
         '''
-        Returns a copy of this class satisfying the given requirements. A set of cuts can
-        be specified. The range of the events to be copied can be specified (as a slice
-        object), as well as the variables to be copied. By default the entire class is
-        copied.
+        Returns a copy of this class satisfying the given requirements. A set
+        of cuts can be specified. The range of the events to be copied can be
+        specified, as well as the variables to be copied. By default the
+        entire class is copied.
         '''
         if evts == -1:
-            evts = xrange( 0, self.Nentries )
+            evts = xrange( 0, len( self ) )
         if varset == '*':
-            varset = self.Variables.keys()
+            varset = self.keys()
         if name == '':
             name = self.Name + '_SubSample'
         if 'cuts' != '':
@@ -578,7 +472,7 @@ class DataManager:
             
         cmgr = DataManager( name )
         for kw in varset:
-            vlist = self.Variables[ kw ]
+            vlist = self[ kw ]
             cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]
         cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
         
@@ -598,7 +492,7 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
     if colid == []:
         colid = range( len( line ) )
     if all( isinstance( line[ i ], str ) for i in colid ):
-        if tnames:
+        if tnames and tnames != [ '*' ]:
             colid = [ colid[ i ] for i in colid if line[ i ] in tnames ]
         else:
             tnames = [ line[ i ] for i in colid ]
@@ -633,20 +527,6 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
             varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
     ifile.close()
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
-
-#_______________________________________________________________________________
-# Creates a manager from the root file in < file_path > and the tree in
-# < tree_path >. By default it books all the variables.
-def ManagerFromTree( name, file_path, tree_path, cuts = '', mathmod = math, variables = '*' ):
-    mgr = DataManager( name )
-    mgr.AddDataFromTree( file_path, [ tree_path ] )
-    if variables == '*':
-        variables = [ '*' ]
-    mgr.BookVariables( *variables )
-    if cuts:
-        return mgr.SubSample( cuts = cuts, mathmod = mathmod )
-    else:
-        return mgr
 
 #_______________________________________________________________________________
 # Return variables in a tree. If < regexps > are provided, only variables

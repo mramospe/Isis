@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 28/12/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -63,7 +63,7 @@ namespace IBoost {
   std::vector<type> PyListToStdVec( boost::python::list &lst ) {
 
     size_t lgth = boost::python::len( lst );
-    std::vector<double> res( lgth );
+    std::vector<type> res( lgth );
 
     size_t i = 0;
     for (auto it = res.begin(); it != res.end(); ++it, ++i)

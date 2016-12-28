@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 28/12/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -35,6 +35,8 @@
 
 #include "BufferVariable.h"
 #include "TreeBuffer.h"
+#include "TreeManagement.h"
+#include "Utils.h"
 
 #include "TBranch.h"
 #include "TDirectory.h"
@@ -57,9 +59,11 @@ namespace py = boost::python;
 // to a list
 
 // Constructor
-IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var ) : Var( var ) { }
+IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var ) :
+  Var( var ) { }
 // Constructor given the variable and a list
-IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var, py::list lst ) : Var( var ), List( lst ) { }
+IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var, py::list lst ) :
+  Var( var ), List( lst ) { }
 // Destructor
 IBoost::BuffVarWriter::~BuffVarWriter() {  }
 // Appends the current value stored in the BufferVariable object to the python list
@@ -91,12 +95,17 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 
     auto var = IBoost::ExtractFromIndex<const char*>(vars, i);
 
+    // Get the variables from the given expressions
+    std::vector<std::string> brnames;
+    Analysis::GetBranchNames(brnames, itree, var);
+
     // Do not swap these two lines, since the path must be set after the
     // variable is enabled
-    itree->SetBranchStatus(var, 1);
-    General::BufferVariable *bvar = buffer.LoadVariable( var );
-
-    outmap[ var ] = new IBoost::BuffVarWriter( bvar );
+    for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
+      itree->SetBranchStatus(it->c_str(), 1);
+      General::BufferVariable *bvar = buffer.LoadVariable( *it );
+      outmap[ it->c_str() ] = new IBoost::BuffVarWriter( bvar );
+    }
   }
 
   // Calling to < append > is faster than assigning by index
@@ -130,9 +139,10 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
 
   IBoost::CheckArgs(args, 1);
-  IBoost::CheckKwargs(kwargs, {"name", "tree"});
+  IBoost::CheckKwargs(kwargs, {"name", "tree", "variables"});
   
   py::dict vardict = IBoost::ExtractFromIndex<py::dict>(args, 0);
+  py::list varkeys = vardict.keys();
 
   // Get the tree name or the given tree
   TTree *tree = 0;
@@ -144,7 +154,15 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   const char *tname = 0;
   if ( kwargs.has_key("name") )
     tname = py::extract<const char*>( kwargs["name"] );
-
+  py::list variables;
+  if ( kwargs.has_key("variables") ) {
+    variables = py::extract<py::list>( kwargs["variables"] );
+    if ( !py::len( variables ) )
+      variables = varkeys;
+  }
+  else
+    variables = varkeys;
+  
   // Warning message if both the tree and tree name are provided
   if ( !tree ) {
     tree = new TTree(tname, tname, 0);
@@ -157,18 +175,26 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   // track of the types for each variable.
   Analysis::TreeBuffer buffer( tree );
 
-  py::list vars = vardict.keys();
-  py::ssize_t nvars = py::len( vars );
+  auto vars = IBoost::PyListToStdVec<std::string>( varkeys );
 
   std::map<const char*, IBoost::BuffVarWriter*> varmap;
+  
+  py::ssize_t nexps = py::len( variables );
+  for ( py::ssize_t i = 0; i < nexps; ++i ) {
 
-  for ( py::ssize_t i = 0; i < nvars; ++i ) {
-    const char *var   = IBoost::ExtractFromIndex<const char*>(vars, i);
-    char type         = IBoost::PyTypeFromObject( vardict[ var ][ 0 ] );
-    
-    General::BufferVariable *buffvar = buffer.CreateVariable( var, type );
-    varmap[ var ] =
-      new IBoost::BuffVarWriter( buffvar, py::extract<py::list>( vardict[ var ] ) );
+    // Get the variables from the given expressions
+    const char *exp = IBoost::ExtractFromIndex<const char*>(variables, i);
+    std::vector<std::string> brnames;
+    General::StringVectorFilter(brnames, vars, exp);
+
+    for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
+      const char *var = it->c_str();
+      char type = IBoost::PyTypeFromObject( vardict[ var ][ 0 ] );
+      General::BufferVariable *buffvar = buffer.CreateVariable( var, type );
+      varmap[ var ] =
+	new IBoost::BuffVarWriter( buffvar,
+				   py::extract<py::list>( vardict[ var ] ) );
+    }
   }
   
   // Loop over all the events in the dictionary
