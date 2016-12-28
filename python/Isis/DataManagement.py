@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 26/12/2016
+#//  Last update: 28/12/2016
 #//
 #// ----------------------------------------------------------
 #//
@@ -269,14 +269,14 @@ class DataManager:
         '''
         return len( self.Variables )
 
-    def GetVarEvents( self, variables, cuts = '', mathmod = math ):
+    def GetVarEvents( self, variables, cuts = False, mathmod = math ):
         '''
         Return a list of lists with the values associated with < variables >. If
         an element in < variables > is a variable, it gets the list of values for
         it. If it is an expression, it returns a list with the corresponding values.
         '''
         
-        if cuts != '':
+        if cuts:
             entries = self.GetCutList( cuts, mathmod )
         else:
             entries = xrange( self.Nentries )
@@ -330,9 +330,9 @@ class DataManager:
             mathmod = math
         
         if wvar:
-            vals, wvar = self.GetVarEvents( var, wvar, cuts = cuts, mathmod = mathmod )
+            vals, wvar = self.GetVarEvents( [ var, wvar ], cuts = cuts, mathmod = mathmod )
         else:
-            vals = self.GetVarEvents( var, cuts = cuts, mathmod = mathmod )
+            vals = self.GetVarEvents( [ var ], cuts = cuts, mathmod = mathmod )
 
         kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
@@ -355,9 +355,9 @@ class DataManager:
             mathmod = math
         
         if wvar:
-            xvar, yvar, wvar = self.GetVarEvents( xvar, yvar, wvar, cuts = cuts, mathmod = mathmod )
+            xvar, yvar, wvar = self.GetVarEvents( [ xvar, yvar, wvar ], cuts = cuts, mathmod = mathmod )
         else:
-            xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
+            xvar, yvar = self.GetVarEvents( [ xvar, yvar ], cuts = cuts, mathmod = mathmod )
 
         kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
@@ -375,13 +375,13 @@ class DataManager:
         mathmod = kwargs.get( 'mathmod', math )
 
         if not xerr and not yerr:
-            xvar, yvar = self.GetVarEvents( xvar, yvar, cuts = cuts, mathmod = mathmod )
+            xvar, yvar = self.GetVarEvents( [ xvar, yvar ], cuts = cuts, mathmod = mathmod )
         elif xerr and yerr:
-            xvar, yvar, xerr, yerr = self.GetVarEvents( xvar, yvar, xerr, yerr, cuts = cuts, mathmod = mathmod )
+            xvar, yvar, xerr, yerr = self.GetVarEvents( [ xvar, yvar, xerr, yerr ], cuts = cuts, mathmod = mathmod )
         elif xerr:
-            xvar, yvar, xerr = self.GetVarEvents( xvar, yvar, xerr, cuts = cuts, mathmod = mathmod )
+            xvar, yvar, xerr = self.GetVarEvents( [ xvar, yvar, xerr ], cuts = cuts, mathmod = mathmod )
         else:
-            xvar, yvar, yerr = self.GetVarEvents( xvar, yvar, yerr, cuts = cuts, mathmod = mathmod )
+            xvar, yvar, yerr = self.GetVarEvents( [ xvar, yvar, yerr ], cuts = cuts, mathmod = mathmod )
 
         kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
         kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
@@ -638,7 +638,8 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
 # Creates a manager from the root file in < file_path > and the tree in
 # < tree_path >. By default it books all the variables.
 def ManagerFromTree( name, file_path, tree_path, cuts = '', mathmod = math, variables = '*' ):
-    mgr = DataManager( name, file_path, [ tree_path ] )
+    mgr = DataManager( name )
+    mgr.AddDataFromTree( file_path, [ tree_path ] )
     if variables == '*':
         variables = [ '*' ]
     mgr.BookVariables( *variables )
