@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/12/2016
+#//  Last update: 02/01/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -27,9 +27,10 @@ from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
                    kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
 from array import array
 from math import sqrt
+import itertools
 import sys
 from Isis.MathExt import NearestSquare
-from Isis.Utils import CalcMinDist
+from Isis.Utils import CalcMinDist, FormatEvalExpr
 
 
 #_______________________________________________________________________________
@@ -340,8 +341,8 @@ def MakeHistogram( var,
                    vmin   = None,
                    vmax   = None,
                    wvar   = False,
-                   xtitle = None,
-                   ytitle = 'Entries' ):
+                   xtitle = '',
+                   ytitle = '' ):
     
     if title == None:
         title = name
@@ -445,7 +446,7 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
 # This function plots in the same canvas the distributions of the given
 # variables from different DataManager classes. Different options can
 # also been provided to modify the canvas and the information displayed.
-def MultiPlot( mngrs, variables,
+def MultiPlot( mgrs, variables,
                cuts   = False,
                errors = False,
                flist  = FormatList(),
@@ -458,9 +459,14 @@ def MultiPlot( mngrs, variables,
     if title == None:
         title = name
     
-    nvars   = len( variables ) + 1
-    results = {}
-    if all( var in mngr.Variables for mngr in mngrs for var in variables ):
+    nvars    = len( variables ) + 1
+    results  = {}
+
+    ''' Get the true variables associated with the given expressions '''
+    truevars = [ FormatEvalExpr( var )[ 1 ] for var in variables ]
+    truevars = list( itertools.chain.from_iterable( truevars ) )
+    
+    if all( var in mgr for mgr in mgrs for var in truevars ):
         ''' Checks if the number of variables is a square number '''
         nstsq = NearestSquare( nvars )
         nstrt = int( sqrt( nstsq ) )
@@ -475,23 +481,23 @@ def MultiPlot( mngrs, variables,
         canvas = TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
         
-        nmngrs = len( mngrs )
+        nmgrs = len( mgrs )
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
-            for i in xrange( nmngrs ):
-                mngrs[ i ], mngrs[ i ].Name = mngrs[ i ].SubSample( cuts = cuts ), mngrs[ i ].Name
+            for i, mgr in enumerate( mgrs ):
+                mgr, mgr.Name = mgr.SubSample( cuts = cuts ), mgr.Name
         
         ''' Disables the stat box of the histograms '''
         gStyle.SetOptStat( 0 )
         
         ''' Constructs the legend and the information panel if specified '''
         if legend:
-            rlegend = TLegend( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
+            rlegend = TLegend( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
             rlegend.SetHeader( '#bf{-- Legend --}' )
             rlegend.SetTextAlign( 22 )
             rlegend.SetTextSize( 0.075 )
             rlegend.SetFillColor( 15 )
-            rtxtinf = TPaveText( 0.1, 0.8 - nmngrs*0.05, 0.9, 0.9 )
+            rtxtinf = TPaveText( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
             rtxtinf.AddText( '-- Number of entries --' )
             rtxtinf.SetTextSize( 0.075 )
             rtxtinf.SetFillColor( 42 )
@@ -500,17 +506,21 @@ def MultiPlot( mngrs, variables,
         ''' Generates and draws the histograms '''
         for iv, var in enumerate( variables ):
             canvas.cd( iv + 1 )
-            totlst = [ el for mngr in mngrs for el in mngr[ var ]  ]
-            vmin, vmax, hists = min( totlst ), max( totlst ), []
-            for im, mngr in enumerate( mngrs ):
-                hname = mngr.Name + '_' + var
-                hists.append( mngr.MakeHistogram( var,
-                                                  name  = hname,
-                                                  title = var,
-                                                  nbins = nbins,
-                                                  vmin  = vmin,
-                                                  vmax  = vmax, 
-                                                  cuts  = cuts ) )
+
+            ''' This is done to reduce disk usage '''
+            totlst = [ mgr.VarEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
+            vmax   = max( el for lst in totlst for el in lst )
+            vmin   = min( el for lst in totlst for el in lst )
+            hists  = []
+            
+            for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
+                hname = mgr.Name + '_' + var
+                hists.append( MakeHistogram( vals,
+                                             name  = hname,
+                                             title = var,
+                                             nbins = nbins,
+                                             vmin  = vmin,
+                                             vmax  = vmax ) )
                 h = hists[ -1 ]
                 if norm:
                     h.Scale( float( norm )/h.GetEntries() )
@@ -519,8 +529,8 @@ def MultiPlot( mngrs, variables,
                     
                 if legend and iv == 0:
                     ''' In the first iteration adds the entries to the legend '''
-                    rlegend.AddEntry( h, '#bf{' + mngr.Name + '}', 'L' )
-                    rtxtinf.AddText( mngr.Name + ': %i' % h.GetEntries() )
+                    rlegend.AddEntry( h, '#bf{' + mgr.Name + '}', 'L' )
+                    rtxtinf.AddText( mgr.Name + ': %i' % h.GetEntries() )
                 results[ hname ] = h
             ''' The maximum of the y-axis in the pad is set to the 110% of the maximum
             value for all the histograms to be drawn '''

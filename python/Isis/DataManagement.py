@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 28/12/2016
+#//  Last update: 02/01/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -25,7 +25,6 @@ from array import array
 import math
 from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
 from Isis.Algebra import LongVector, Matrix
-from Isis.PlotTools import MakeHistogram, MakeHistogram2D, MakeScatterPlot
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 
 
@@ -34,7 +33,7 @@ from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 # and trees
 class DataManager( dict ):
 
-    def __init__( self, name = '', path = '', tree = 'DecayTree', variables = [ '*' ], colid = [], ftype = 'root' ):
+    def __init__( self, name = '', path = {}, tree = 'DecayTree', variables = [ '*' ], colid = [], ftype = 'root' ):
         '''
         The constructor provides the possibility of loading data from root or
         txt files, or from dictionary-like classes:
@@ -50,9 +49,6 @@ class DataManager( dict ):
         All the constructors finally call the constructor given a
         dictionary-like class.
         '''
-
-        self.Iterator = 0
-        self.Name     = name
         
         if isinstance( path, str ):
             if ftype:
@@ -61,16 +57,20 @@ class DataManager( dict ):
                 elif ftype == 'txt':
                     self.__init__( name, DictFromTxt( path, variables, colid ) )
                 else:
-                    print 'ERROR:', self.Name, '=> Unknown input file type <', ftype, '>'
+                    print 'ERROR:', name, '=> Unknown input file type <', ftype, '>'
             else:
-                print 'ERROR:', self.Name, '=> The input file type must be specified'
+                print 'ERROR:', name, '=> The input file type must be specified'
         else:
             for kw, lst in path.iteritems():
                 self[ kw ] = list( lst )
+
+            self.Iterator = 0
+            self.Name     = name
         
-        wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) != 1 )
-        if wrong:
-            print 'ERROR:', self.Name, '=> The lists stored in the manager have different lengths'
+            wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
+            if wrong:
+                print ( 'ERROR:', self.Name,
+                        '=> The lists stored in the manager have different lengths' )
 
     def __add__( self, other ):
         '''
@@ -186,7 +186,7 @@ class DataManager( dict ):
         '''
         return len( self.keys() )
 
-    def GetVarEvents( self, variables, cuts = False, mathmod = math ):
+    def VarEvents( self, variables, cuts = False, mathmod = math ):
         '''
         Return a list of lists with the values associated with < variables >. If
         an element in < variables > is a variable, it gets the list of values for
@@ -214,92 +214,15 @@ class DataManager( dict ):
         fvars.reverse()
         
         values = [ self[ var ] for var in fvars ]
-        nvars  = len( fvars )
         output = []
-        for iv, arg in enumerate( truevars ):
-            for ivar in xrange( nvars ):
-                arg = arg.replace( fvars[ ivar ], 'values[ %i ][ ievt ]' %ivar )
+        for arg in truevars:
+            for jv, var in enumerate( fvars ):
+                arg = arg.replace( var, 'values[ %i ][ ievt ]' %jv )
             output.append( eval( '[ %s for ievt in entries ]' %arg ) )
         cmd = 'output[ 0 ]'
         for i in xrange( 1, len( output ) ):
             cmd += ', output[ %i ]' %i
         return eval( cmd )
-
-    def MakeHistogram( self, var, wvar = False, **kwargs ):
-        '''
-        Makes the histogram of the given variable. A selection can be applied
-        introducing < cuts >, as well as the name and the title can be defined in a
-        similar way too.
-        '''
-        if 'cuts' in kwargs:
-            cuts = kwargs.pop( 'cuts' )
-        else:
-            cuts = False
-        if 'mathmod' in kwargs:
-            mathmod = kwargs.pop( 'mathmod' )
-        else:
-            mathmod = math
-        
-        if wvar:
-            vals, wvar = self.GetVarEvents( [ var, wvar ], cuts = cuts, mathmod = mathmod )
-        else:
-            vals = self.GetVarEvents( [ var ], cuts = cuts, mathmod = mathmod )
-
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + var )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', var )
-        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
-        
-        return MakeHistogram( vals, **kwargs )
-
-    def MakeHistogram2D( self, xvar, yvar, wvar = False, **kwargs ):
-        '''
-        Makes the 2-dimensional histogram of the given variables
-        '''
-        if 'cuts' in kwargs:
-            cuts = kwargs.pop( 'cuts' )
-        else:
-            cuts = False
-        if 'mathmod' in kwargs:
-            mathmod = kwargs.pop( 'mathmod' )
-        else:
-            mathmod = math
-        
-        if wvar:
-            xvar, yvar, wvar = self.GetVarEvents( [ xvar, yvar, wvar ], cuts = cuts, mathmod = mathmod )
-        else:
-            xvar, yvar = self.GetVarEvents( [ xvar, yvar ], cuts = cuts, mathmod = mathmod )
-
-        kwargs[ 'name' ]   = kwargs.get( 'name', self.Name + '_' + yvar + '_vs_' + xvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
-        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
-        kwargs[ 'wvar' ]   = kwargs.get( 'wvar', wvar )
-            
-        return MakeHistogram2D( xvar, yvar, **kwargs )
-
-    def MakeScatterPlot( self, xvar, yvar, xerr = False, yerr = False, **kwargs ):
-        '''
-        Creates a graph object with the points corresponding to two variables
-        '''
-        cuts    = kwargs.get( 'cuts', False )
-        mathmod = kwargs.get( 'mathmod', math )
-
-        if not xerr and not yerr:
-            xvar, yvar = self.GetVarEvents( [ xvar, yvar ], cuts = cuts, mathmod = mathmod )
-        elif xerr and yerr:
-            xvar, yvar, xerr, yerr = self.GetVarEvents( [ xvar, yvar, xerr, yerr ], cuts = cuts, mathmod = mathmod )
-        elif xerr:
-            xvar, yvar, xerr = self.GetVarEvents( [ xvar, yvar, xerr ], cuts = cuts, mathmod = mathmod )
-        else:
-            xvar, yvar, yerr = self.GetVarEvents( [ xvar, yvar, yerr ], cuts = cuts, mathmod = mathmod )
-
-        kwargs[ 'name' ]   = kwargs.get( 'name', yvar + 'vs' + xvar )
-        kwargs[ 'title' ]  = kwargs.get( 'title', kwargs[ 'name' ] )
-        kwargs[ 'xtitle' ] = kwargs.get( 'xtitle', xvar )
-        kwargs[ 'ytitle' ] = kwargs.get( 'ytitle', yvar )
-        
-        return MakeScatterPlot( xvar, yvar, xerr, yerr, **kwargs )
 
     def MakeVariable( self, varname, arg, function = False ):
         '''
@@ -322,7 +245,7 @@ class DataManager( dict ):
                 new_variable[ ievt ] = function( *values )
             self[ varname ] = new_variable
         else:
-            self[ varname ] = self.GetVarEvents( arg )
+            self[ varname ] = self.VarEvents( arg )
 
     def NewEvent( self, dic ):
         '''
@@ -473,8 +396,8 @@ class DataManager( dict ):
         cmgr = DataManager( name )
         for kw in varset:
             vlist = self[ kw ]
-            cmgr.Variables[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]
-        cmgr.Nentries = len( next( cmgr.Variables.itervalues() ) )
+            cmgr[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]
+        cmgr.Nentries = len( next( cmgr.itervalues() ) )
         
         return cmgr
 
