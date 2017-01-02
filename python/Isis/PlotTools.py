@@ -330,7 +330,7 @@ def MakeCumulative( hist, name = '', norm = True, title = None ):
     return chist
 
 #_______________________________________________________________________________
-# Function to generate a Root histogram given a list. By default no ytitle is
+# Function to generate a Root histogram given a list. By default no y-title is
 # drawn, but it can be set with the < ytitle > option. For values of type int,
 # the histogram will be of type double.
 def MakeHistogram( var,
@@ -348,10 +348,10 @@ def MakeHistogram( var,
         title = name
     histcall = HistFromType( htype, 1 )
 
-    idxs = ExtractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
-    var  = [ var[ i ] for i in idxs ]
-    vmin = min( v for v in var + [ vmin ] if v != None )
-    vmax = max( v for v in var + [ vmin ] if v != None )
+    idxs  = ExtractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
+    varin = [ var[ i ] for i in idxs ]
+    vmin  = min( v for v in varin + [ vmin ] if v != None )
+    vmax  = max( v for v in varin + [ vmax ] if v != None )
     
     hist = histcall( name, title, nbins, vmin, vmax )
     
@@ -389,13 +389,13 @@ def MakeHistogram2D( xvar, yvar,
     ''' The values used are the intersection between the two lists '''
     idxs = set( xidxs ) & set( yidxs )
 
-    xvar = [ xvar[ i ] for i in idxs ]
-    xmin = min( v for v in xvar + [ vmin ] if v != None )
-    xmax = max( v for v in xvar + [ vmin ] if v != None  )
+    xvarin = [ xvar[ i ] for i in idxs ]
+    xmin   = min( v for v in xvarin + [ xmin ] if v != None )
+    xmax   = max( v for v in xvarin + [ xmax ] if v != None )
 
-    yvar = [ yvar[ i ] for i in idxs ]
-    ymin = min( v for v in yvar + [ vmin ] if v != None )
-    ymax = max( v for v in yvar + [ vmin ] if v != None )
+    yvarin = [ yvar[ i ] for i in idxs ]
+    ymin   = min( v for v in yvarin + [ ymin ] if v != None )
+    ymax   = max( v for v in yvarin + [ ymax ] if v != None )
     
     hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
 
@@ -515,15 +515,15 @@ def MultiPlot( mgrs, variables,
             
             for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
                 hname = mgr.Name + '_' + var
-                hists.append( MakeHistogram( vals,
-                                             name  = hname,
-                                             title = var,
-                                             nbins = nbins,
-                                             vmin  = vmin,
-                                             vmax  = vmax ) )
-                h = hists[ -1 ]
+                h = MakeHistogram( vals,
+                                   name  = hname,
+                                   title = var,
+                                   nbins = nbins,
+                                   vmin  = vmin,
+                                   vmax  = vmax )
+                hists.append( h )
                 if norm:
-                    h.Scale( float( norm )/h.GetEntries() )
+                    h.Scale( float( norm )/h.GetSumOfWeights() )
 
                 flist[ im ].ApplyFormat( h )
                     
