@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/01/2017
+#//  Last update: 03/01/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -223,8 +223,8 @@ def HistFromType( tp, dim = 1 ):
         print 'ERROR: Histogram dimension', dim, 'not allowed'
 
 #_______________________________________________________________________________
-# This function imports different plot modules from Root
-def ImportPlotModules():
+# This function imports different plotting classes from Root
+def ImportRootPlotClasses():
     glob = sys._getframe( 1 ).f_globals
     loc  = sys._getframe( 1 ).f_locals
     modlist = [ 'gROOT', 'TBrowser', 
@@ -375,8 +375,12 @@ def MakeHistogram2D( xvar, yvar,
                      title  = None,
                      wvar   = False,
                      xbins  = 100,
+                     xmax   = None,
+                     xmin   = None,
                      xtitle = 'X',
                      ybins  = 100,
+                     ymax   = None,
+                     ymin   = None,
                      ytitle = 'Y' ):
 
     if title == None:

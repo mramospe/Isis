@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/01/2017
+#//  Last update: 03/01/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -82,7 +82,8 @@ class DataManager( dict ):
             mgr[ var ] = self[ var ] + other[ var ]
         no_booked = set( self.keys() + other.keys() ).difference( true_vars )
         if no_booked:
-            print 'WARNING:', mgr.Name, '=> The following variables are not booked:', no_booked
+            print ( 'WARNING:', mgr.Name,
+                    '=> The following variables are not booked:', no_booked )
         return mgr
 
     def __iadd__( self, other ):
