@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 03/01/2017
+#//  Last update: 09/01/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -28,6 +28,7 @@ from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
 from array import array
 from math import sqrt
 import itertools
+import numpy
 import sys
 from Isis.MathExt import NearestSquare
 from Isis.Utils import CalcMinDist, FormatEvalExpr
@@ -309,6 +310,41 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     hist.GetXaxis().SetTitle( xtitle )
     hist.GetYaxis().SetTitle( ytitle )
 
+    return hist
+
+#_______________________________________________________________________________
+# Creates a correlation histogram given a list of lists. By default it is drawn
+# in color, without palette, and with the contents written inside each bin. No
+# statistical box is displayed neither.
+def MakeCorrelationHist(matrix, name = '', title = None, vartitles = []):
+
+    if title == None:
+        title = name
+    
+    lm = len( matrix )
+    lv = len( vartitles )
+    if vartitles != []:
+        if lm != lv:
+            print 'WARNING: Number of titles is not the same as that of the matrix. '\
+                'New variables will have names < Variables_# >'
+            for i in xrange( lv + 1, lm ):
+                vartitles.append( 'Variable_' + str( i ) )
+    else:
+        vartitles = [ 'Variable_' + str( i ) for i in xrange( lm ) ]
+
+    corr_matrix = 100*numpy.corrcoef( matrix )
+    
+    hist = TH2D( name, title, lm, 0, lm, lm, 0, lm )
+    for i, row in enumerate( corr_matrix ):
+        for j, el in enumerate( row ):
+            hist.SetBinContent( i + 1, j + 1, int( el ) )
+    for i, tit in enumerate( vartitles ):
+        hist.GetXaxis().SetBinLabel( i + 1, tit )
+        hist.GetYaxis().SetBinLabel( i + 1, tit )
+
+    hist.SetOption( 'COLTEXT' )
+    hist.SetStats( False )
+            
     return hist
 
 #_______________________________________________________________________________
