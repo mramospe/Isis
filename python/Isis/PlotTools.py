@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 09/01/2017
+#//  Last update: 13/01/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -316,7 +316,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
 # Creates a correlation histogram given a list of lists. By default it is drawn
 # in color, without palette, and with the contents written inside each bin. No
 # statistical box is displayed neither.
-def MakeCorrelationHist(matrix, name = '', title = None, vartitles = []):
+def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
 
     if title == None:
         title = name
@@ -342,9 +342,11 @@ def MakeCorrelationHist(matrix, name = '', title = None, vartitles = []):
         hist.GetXaxis().SetBinLabel( i + 1, tit )
         hist.GetYaxis().SetBinLabel( i + 1, tit )
 
+    hist.GetXaxis().SetTickLength( 0 )
+    hist.GetYaxis().SetTickLength( 0 )
     hist.SetOption( 'COLTEXT' )
     hist.SetStats( False )
-            
+    
     return hist
 
 #_______________________________________________________________________________
