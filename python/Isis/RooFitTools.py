@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 09/09/2016
+#//  Last update: 16/01/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -20,9 +20,10 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import gRandom, RooArgList, RooArgSet, RooConstVar, RooFormulaVar, RooRealVar, TRandom3, Double
-from ROOT.RooFit import Binning, Name, NormRange, Range, Save
+from ROOT import gRandom, RooArgList, RooArgSet, RooDataSet, RooConstVar, RooFormulaVar, RooGaussian, RooRealVar, TRandom3, Double
+from ROOT.RooFit import Binning, Name, NormRange, Range, Save, Verbose
 from Isis.PlotTools import MakeHistogram
+from Isis.Utils import CheckDeviation
 
 
 #_______________________________________________________________________________
@@ -102,17 +103,39 @@ class BlindVar:
         print 'Unblinded result: %s = %.4g +/- %.4g (%.4g) (+%.4g)' % outstr
 
 #_______________________________________________________________________________
-# This function extracts the values of a pull to a list, useful to check if
-# the result matches a gaussian centered at zero and sigma equal to one
-def ExtractPullValues( pullplot ):
-    xbin = Double( 0. )
-    ybin = Double( 0. )
-    np   = pullplot.GetN()
-    lst  = np*[ 0. ]
-    for ib in xrange( pullplot.GetN() ):
-        pullplot.GetPoint( ib, xbin, ybin )
-        lst[ ib ] += ybin
-    return lst
+# Does a check to see if the given pull values have anomalies. It performs
+# a fit to a gaussian. If any parameter (the mean or the std. dev.) is
+# more far than < sens > from its expected value, a warning message will
+# be displayed. By default the status of the check is returned. If
+# < ret > is set to True, it returns the classes used to do the fit.
+def CheckFitPull( vals, sens = 1, ret = False ):
+
+    pull    = RooRealVar( 'pull', 'pull', -5, 5 )
+    argset  = RooArgSet( pull )
+    dataset = RooDataSet( 'data', 'data', argset )
+    mean    = RooRealVar( 'mean', 'mean', 0, -1, 1 )
+    sigma   = RooRealVar( 'sigma', 'sigma', 1, 0, 5 )
+    model   = RooGaussian( 'gauss', 'gauss', pull, mean, sigma )
+
+    for v in vals:
+        pull.setVal( v )
+        dataset.add( argset )
+
+    result = model.fitTo( dataset, Verbose( False ), Save( True ) )
+    status = result.status()
+
+    CheckDeviation( mean.getVal(), mean.getError(), 0, 'mean', sens = sens )
+    CheckDeviation( sigma.getVal(), sigma.getError(), 1, 'sigma', sens = sens )
+
+    if ret:
+        return { 'pull'  : pull,
+                 'dataset' : dataset,
+                 'mean'    : mean,
+                 'sigma'   : sigma,
+                 'model'   : model,
+                 'status'  : status }
+    else:
+        return { 'status': status }
 
 #_______________________________________________________________________________
 # Class to book the results for a set of variables in a fit. A link to the Root

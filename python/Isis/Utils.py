@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 11/10/2016
+#//  Last update: 16/01/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -21,6 +21,7 @@
 
 import os, fcntl, math, struct, termios, sys
 import __builtin__
+from ROOT import Double
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -37,6 +38,26 @@ def CalcMinDist( lst, allow_zero = True ):
     return min( lst )
 
 #_______________________________________________________________________________
+# Check if the given value is more far from its expectation than the given
+# number of allowed std. dev. (set by < sens >).
+def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
+
+    nsigma = abs( value - exp )/float( sigma )
+
+    status = True
+    if nsigma > 1:
+        status = False
+
+        if verbose:
+            part = 'is away from its expectation by %.2f std. dev.' % nsigma
+            if name:
+                print 'WARNING: Parameter < %s > ' % name + part
+            else:
+                print 'WARNING: Parameter ' + part
+
+    return status
+
+#_______________________________________________________________________________
 # Returns the minimum and maximum values for the combined range for all the
 # given lists
 def CombinedRange( *args ):
@@ -51,6 +72,20 @@ def DLtoLD( dic ):
     length  = len( dic[ firstkw ] )
     return [ { kw: vals[ i ] for kw, vals in dic.iteritems() }
              for i in xrange( length ) ]
+
+#_______________________________________________________________________________
+# This function extracts the values from a TGraph object into two lists
+def ExtractGraphValues( graph ):
+    xbin = Double( 0. )
+    ybin = Double( 0. )
+    np   = graph.GetN()
+    xlst = np*[ 0. ]
+    ylst = np*[ 0. ]
+    for ib in xrange( graph.GetN() ):
+        graph.GetPoint( ib, xbin, ybin )
+        xlst[ ib ] += xbin
+        ylst[ ib ] += ybin
+    return xlst, ylst
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
