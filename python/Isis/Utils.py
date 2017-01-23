@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 16/01/2017
+#//  Last update: 23/01/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -21,7 +21,6 @@
 
 import os, fcntl, math, struct, termios, sys
 import __builtin__
-from ROOT import Double
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -72,20 +71,6 @@ def DLtoLD( dic ):
     length  = len( dic[ firstkw ] )
     return [ { kw: vals[ i ] for kw, vals in dic.iteritems() }
              for i in xrange( length ) ]
-
-#_______________________________________________________________________________
-# This function extracts the values from a TGraph object into two lists
-def ExtractGraphValues( graph ):
-    xbin = Double( 0. )
-    ybin = Double( 0. )
-    np   = graph.GetN()
-    xlst = np*[ 0. ]
-    ylst = np*[ 0. ]
-    for ib in xrange( graph.GetN() ):
-        graph.GetPoint( ib, xbin, ybin )
-        xlst[ ib ] += xbin
-        ylst[ ib ] += ybin
-    return xlst, ylst
 
 #_______________________________________________________________________________
 # Displays the given time in the format [ w, d, h, min, s ]. If one of the
