@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/01/2017
+#//  Last update: 30/01/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -509,17 +509,9 @@ def MultiPlot( mgrs, variables,
     truevars = list( itertools.chain.from_iterable( truevars ) )
     
     if all( var in mgr for mgr in mgrs for var in truevars ):
-        ''' Checks if the number of variables is a square number '''
-        nstsq = NearestSquare( nvars )
-        nstrt = int( sqrt( nstsq ) )
-        if nstsq >= nvars:
-            nxvars = nstrt
-            nyvars = nxvars
-        else:
-            nxvars = nstrt
-            nyvars = nstrt + 1
         
         ''' Generates and divides the canvas '''
+        nyvars, nxvars = OptCanvasDivision( nvars )
         canvas = TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
         
@@ -593,3 +585,19 @@ def MultiPlot( mgrs, variables,
     else:
         print 'ERROR: Any of the managers does not have access to some of the variables'
         return
+
+#_______________________________________________________________________________
+# Create the optimal canvas division for a given number of pads
+def OptCanvasDivision( nvars ):
+    
+    nstsq = NearestSquare( nvars )
+    nstrt = int( sqrt( nvars ) )
+    
+    if nstsq >= nvars:
+        nxvars = nstrt
+        nyvars = nxvars
+    else:
+        nxvars = nstrt
+        nyvars = nstrt + 1
+        
+    return nyvars, nxvars
