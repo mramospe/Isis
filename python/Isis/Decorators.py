@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/03/2016
+#//  Last update: 07/02/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -23,6 +23,57 @@
 import time
 from Isis.Utils import FormatTime, TerminalSize
 
+
+#_______________________________________________________________________________
+# Base decorator to call a function modifying its arguments
+class DecoArgBase:
+
+    def __init__( self, func ):
+        '''
+        The function to be called is parsed
+        '''
+        self.Func = func
+
+    def __call__( self, *args, **kwargs ):
+        '''
+        Call the function
+        '''
+        return self.Func(*args, **kwargs)
+
+#_______________________________________________________________________________
+# Base decorator to convert the first < n > arguments into floats
+class _DecoFloatArgs( DecoArgBase ):
+    
+    def __init__( self, func, n ):
+        '''
+        Call base class and set the number of arguments to convert
+        '''
+        DecoArgBase.__init__(self, func)
+        self.N = n
+        
+    def __call__( self, *args, **kwargs ):
+        '''
+        Convert the < n > arguments and call function
+        '''
+        if self.N < 0:
+            self.N = len(args)
+        
+        args = [float(el) for el in args[:self.N]] + list(args[self.N:])
+        
+        return self.Func(*args, **kwargs)
+
+#_______________________________________________________________________________
+# Decorator to convert the first < n > arguments into floats. If no number is
+# provided, all the arguments will be converted.
+def DecoFloatArgs( func = None, n = -1 ):
+
+    if func:
+        return _DecoFloatArgs( func, n )
+    else:
+        def wrapper( wfunc ):
+            return _DecoFloatArgs( wfunc, n )
+        
+        return wrapper
 
 #_______________________________________________________________________________
 # This decorator displays the time information about a particular job, together
