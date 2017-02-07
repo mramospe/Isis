@@ -4,7 +4,7 @@ This set of c++ and python code constitute a tool to perform analysis in High En
 
 The different tools have been tested under C++11, Python v2.7.8, ROOT v6.02 and Boost v1.61.
 
-Part of this project depends on the Boost libraries http://www.boost.org/. In special code for c++ implementations to be used in python. It also depends on some python packages like numpy.
+Part of this project depends on the Boost libraries http://www.boost.org/. In special code for c++ implementations to be used in python. It also depends on some python packages like numpy or scipy.
 
 To install the package, first source the configuration file "configure.sh" typing ". configure.sh" or "source configure.sh". Then type "make" and the installation will start. In order to set the Isis environment create an alias to execute $ISIS/bin/loadenv.sh, for example "source $ISIS/bin/loadenv.sh".
 
