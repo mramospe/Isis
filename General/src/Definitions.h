@@ -19,8 +19,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#ifndef __DEFINITIONS__
+#define __DEFINITIONS__
+
+
 //_______________________________________________________________________________
 // Define the no-operation statement
-#ifndef NOOP
 #define NOOP
+
 #endif

@@ -20,6 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#ifndef VALUE_TYPE_DEF
+#define VALUE_TYPE_DEF
+
+
 //_______________________________________________________________________________
 // Performa an action in case < tp > is satisfied
 #define I_ACTION_IN_CASE( tp, action ) case tp: action; break;
@@ -68,3 +72,5 @@
 // Convert the value to a string. The function std::to_string must be available for
 // the given type.
 #define I_TO_STRING_PTR( type, ptr ) return std::to_string( *I_CAST_PTR(type, ptr) )
+
+#endif
