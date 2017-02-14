@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/10/2016
+//  Last update: 14/02/2016
 //
 // ---------------------------------------------------------
 //
@@ -56,35 +56,38 @@ std::string General::FormatMsg( const std::string &msg,
 }
 
 //_______________________________________________________________________________
+// Send a message using the given input information
+void General::SendMsg( std::ostream &os,
+		       const std::string &pre,
+		       const std::string &msg,
+		       const bool &color_enabled,
+		       const int &color ) {
+  
+  std::string frmsg = pre + msg;
+  if ( color_enabled )
+    frmsg = FormatMsg( frmsg, color );
+
+  os << frmsg << std::endl;
+}
+
+//_______________________________________________________________________________
 // Function to send an error message
 void General::SendErrorMsg( const std::string &msg ) {
 
-  std::string frmsg = "ERROR: " + msg;
-  if ( ColoredStdErr )
-    frmsg = General::FormatMsg( frmsg, ErrorColor );
-
-  std::cout << frmsg << std::endl;
+  SendMsg( std::cerr, "ERROR: ", msg, ColoredStdErr, ErrorColor );
 }
 
 //_______________________________________________________________________________
 // Function to send an information message
 void General::SendInfoMsg( const std::string &msg ) {
 
-  std::string frmsg = "INFO: " + msg;
-  if ( ColoredStdOut )
-    frmsg = General::FormatMsg( frmsg, InfoColor );
-  
-  std::cout << frmsg << std::endl;
+  SendMsg( std::cout, "INFO: ", msg, ColoredStdOut, InfoColor );
 }
 
 //_______________________________________________________________________________
 // Function to send a warning message
 void General::SendWarningMsg( const std::string &msg ) {
 
-  std::string frmsg = "WARNING: " + msg;
-  if ( ColoredStdOut )
-    frmsg = General::FormatMsg( frmsg, WarningColor );
-
-  std::cout << frmsg << std::endl;
+  SendMsg( std::cout, "WARNING: ", msg, ColoredStdOut, WarningColor );
 }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/10/2016
+//  Last update: 14/02/2016
 //
 // ---------------------------------------------------------
 //
@@ -50,6 +50,11 @@ namespace General {
 			 const int &fgcol,
 			 const int &bgcol = -1,
 			 const int &sty   = -1 );
+  void SendMsg( std::ostream &os,
+		const std::string &pre,
+		const std::string &msg,
+		const bool &color_enabled,
+		const int &color );
   void SendErrorMsg( const std::string &msg );
   void SendInfoMsg( const std::string &msg );
   void SendWarningMsg( const std::string &msg );
