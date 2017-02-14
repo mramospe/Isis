@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 26/08/2016
+//  Last update: 14/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -50,9 +50,13 @@ General::BufferVariable::~BufferVariable() { this -> Delete(); }
 //_______________________________________________________________________________
 // Converts this class to a string
 std::string General::BufferVariable::ToString() const {
+  
   I_SWITCH_BY_DATA_TYPE(fType, fPath, I_TO_STRING_PTR,
-			std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl;
-			return std::string());
+			
+			std::cerr << "ERROR: The type of the buffer "
+			"variable has not been specified yet" << std::endl;
+			return std::string();
+			);
 }
 
 //_______________________________________________________________________________
@@ -63,14 +67,19 @@ std::string General::BufferVariable::ToString() const {
 //_______________________________________________________________________________
 // Method to construct this class, given the type
 void General::BufferVariable::Construct() {
-  I_SWITCH_BY_DATA_TYPE(fType, fPath, I_NEW_INSTANCE,
-			std::cerr << "ERROR: Unknown type for buffer variable < "
-			<< fType << " >" << std::endl);
+
+  if ( fType != '\0' )
+    I_SWITCH_BY_DATA_TYPE(fType, fPath, I_NEW_INSTANCE,
+			  
+			  std::cerr << "ERROR: Unknown type for buffer variable < "
+			  << fType << " >" << std::endl;
+			  );
 }
 
 //_______________________________________________________________________________
 // Method to delete the value stored
 void General::BufferVariable::Delete() {
+  
   I_SWITCH_BY_DATA_TYPE(fType, fPath, I_DELETE_PTR, NOOP);
 }
 
@@ -82,7 +91,8 @@ void General::BufferVariable::Delete() {
 
 //_______________________________________________________________________________
 // Definition of the stream operator
-std::ostream& General::operator << ( std::ostream &os, const General::BufferVariable &var ) {
+std::ostream& General::operator << ( std::ostream &os,
+				     const General::BufferVariable &var ) {
   os << var.ToString();
   return os;
 }

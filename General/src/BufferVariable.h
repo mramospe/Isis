@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 26/08/2016
+//  Last update: 14/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -73,24 +73,37 @@ namespace General {
   // Sets the given variable as the value stored in the class
   template<typename type>
   void BufferVariable::ExtractValue( type &value ) const {
+    
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_GET_PTR_VALUE,
-			  std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl)
+			  
+			  std::cerr << "ERROR: The type of the buffer variable "
+			  "has not been specified yet" << std::endl;
+			  );
   }
+  
   // Returns the type of the class
   inline const char& BufferVariable::GetType() const { return fType; }
+
   // Returns the void pointer to the value stored by this class
   inline void* BufferVariable::PathToValue() { return fPath; }
+
   // Sets the type of this variable. The information stored in it is lost.
   inline void BufferVariable::SetType( const char &type ) {
+    
     this -> Delete();
     fType = type;
     this -> Construct();
   }
+
   // Sets the value stored in the class as that of the given variable
   template<typename type>
   void BufferVariable::SetValue( const type &value ) {
+    
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_SET_PTR_VALUE,
-			  std::cerr << "ERROR: The type of the buffer variable has not been specified yet" << std::endl)
+			  
+			  std::cerr << "ERROR: The type of the buffer variable "
+			  "has not been specified yet" << std::endl;
+			  );
   }
   
   // ____________________
