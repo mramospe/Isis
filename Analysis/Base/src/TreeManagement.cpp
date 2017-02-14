@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/11/2016
+//  Last update: 14/02/2017
 //
 // -------------------------------------------------------
 //
@@ -105,7 +105,10 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 // Gets the type of a variable in a tree
 char Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
-  std::string type = brList -> FindObject( var.c_str() ) -> GetTitle();
+  TObject *obj = brList -> FindObject( var.c_str() );
+  if ( !obj )
+    std::cerr << "ERROR: Unable to get branch with name < " << var << " >" << std::endl;
+  std::string type = obj -> GetTitle();
   type.replace( 0, var.length(), "" );
   return type[ 1 ];
 }
