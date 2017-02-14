@@ -79,8 +79,9 @@ void General::BufferVariable::Construct() {
 //_______________________________________________________________________________
 // Method to delete the value stored
 void General::BufferVariable::Delete() {
-  
-  I_SWITCH_BY_DATA_TYPE(fType, fPath, I_DELETE_PTR, NOOP);
+
+  if ( fType != '\0' )
+    I_SWITCH_BY_DATA_TYPE(fType, fPath, I_DELETE_PTR, NOOP);
 }
 
 
