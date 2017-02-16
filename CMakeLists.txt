@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 21/12/2016
+#  Last update: 16/02/2017
 #
 #  Description:
 #
@@ -106,8 +106,8 @@ endfunction()
 if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
   self_make_directory(${PROJECT_BINARY_DIR}/python)
   self_make_directory(${PROJECT_BINARY_DIR}/python/Isis)
-  self_copy_directory(${PROJECT_SOURCE_DIR}/Tools ${PROJECT_BINARY_DIR}/Tools)
-  self_copy_directory(${PROJECT_SOURCE_DIR}/Examples ${PROJECT_BINARY_DIR}/Examples)
+  self_copy_directory(${PROJECT_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+  self_copy_directory(${PROJECT_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
   self_copy_directory(${PROJECT_SOURCE_DIR}/bin ${PROJECT_BINARY_DIR}/bin)
 endif()
 
@@ -136,9 +136,9 @@ add_subdirectory(python)
 #----------------------------------------------------------------------------
 # Specifies the scripts of the tools to be compiled, and copies the .C and
 # .py files to the folder
-set(TOOLS_DIR ${PROJECT_SOURCE_DIR}/Tools)
+set(TOOLS_DIR ${PROJECT_SOURCE_DIR}/tools)
 file(GLOB srctools ${TOOLS_DIR}/*.cpp)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Tools)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tools)
 foreach(tool ${srctools})
   string(REPLACE ".cpp" ".out" comptool ${tool})
   string(REPLACE ${TOOLS_DIR}/ "" comptool ${comptool})
@@ -153,7 +153,7 @@ endforeach()
 if(BUILD_EXAMPLES)
   if(${BUILD_EXAMPLES} STREQUAL "ON")
     message("-- The examples will be built")
-    set(EXAMPLES_DIR ${PROJECT_BINARY_DIR}/Examples)
+    set(EXAMPLES_DIR ${PROJECT_BINARY_DIR}/examples)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_DIR})
     file(GLOB examples ${EXAMPLES_DIR}/*.cpp)
     foreach(file ${examples})
