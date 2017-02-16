@@ -35,16 +35,26 @@
 namespace General {
   
   namespace ANSIFormat {
-    
+
+    // Colors to format the output
     enum Colors { aBlack, aRed, aGreen, aYellow, aBlue, aMagenta, aCyan, aWhite, aNoColor };
+
+    // Styles to format the output
     enum Styles { aNormal, aBold, aFaint, aItalic, aUnderline, aNoStyle };
 
+    // GLOBAL variable storing whether the error output can be printed in color
     const bool ColoredStdErr = isatty( STDERR_FILENO );
+
+    // GLOBAL variable storing whether the usual output can be printed in color
     const bool ColoredStdOut = isatty( STDOUT_FILENO );
 
-    // Default GLOBAL values for the colors in the output messages
+    // GLOBAL color for the error messages
     extern int ErrorColor;
+
+    // GLOBAL color for the information messages
     extern int InfoColor;
+
+    // GLOBAL color for the warning messages
     extern int WarningColor;
   }
 

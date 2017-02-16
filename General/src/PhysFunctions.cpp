@@ -7,14 +7,7 @@
 //  AUTHOR : Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last Update: 09/03/2016
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements different functions to perform calculations of physical and
-//  algebraic variables.
+//  Last Update: 16/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +19,7 @@
 
 
 //______________________________________________________________________________
-// CTAU function
+//
 double General::CTAU( General::LorentzVector vec,
 		      General::Vector        OwnPV,
 		      General::Vector        EndV ) {
@@ -39,7 +32,7 @@ double General::CTAU( General::LorentzVector vec,
 }
 
 //______________________________________________________________________________
-// Calculates the determinant of three Vector
+//
 double General::Det( General::Vector vec1,
 		     General::Vector vec2,
 		     General::Vector vec3 ) {
@@ -51,7 +44,7 @@ double General::Det( General::Vector vec1,
 }
 
 //______________________________________________________________________________
-// Calculates the determinant of three LorentzVector 
+//
 double General::Det( General::LorentzVector vec1,
 		     General::LorentzVector vec2,
 		     General::LorentzVector vec3 ) {
@@ -63,7 +56,7 @@ double General::Det( General::LorentzVector vec1,
 }
 
 //______________________________________________________________________________
-// Calculates the IP given the momentum and the primary and secondary vertex
+//
 double General::IP( General::Vector vec,
 		    General::Vector pv,
 		    General::Vector sv ) {
@@ -76,7 +69,7 @@ double General::IP( General::Vector vec,
 }
 
 //______________________________________________________________________________
-// DOCA function (distance of closest approach)
+//
 double General::DOCA( General::LorentzVector vec1,
 		      General::Vector        EndV1,
 		      General::LorentzVector vec2,

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/07/2015
+//  Last update: 16/02/2017
 //
 // ----------------------------------------------------------------
 //
@@ -68,30 +68,51 @@ namespace General {
     // Destructor
     ~ProgressBar();
 
-    // Methods
+    // Ends the display of the progress
     void End();
+
+    // If the required percentage of the loop is achieved, it prints the progress
     void Print( const size_t &entry );
+
+    // Sets the colors of the different display options
     void SetColor( const char *opts );
+
+    // Starts the progress display
     void Start( size_t nentries );
 
   protected:
 
-    // Attributes
-    unsigned short int           fBarWidth;
-    std::map
-    < const char*, std::string > fColors;
-    size_t                       fNentries;
-    unsigned short int           fPercentage;
-    std::string                  fStartDate;
-    clock_t                      fStart;
-    std::map
-    < const char*, bool >        fUse;
+    // Width of the progress bar
+    unsigned short int fBarWidth;
+
+    // Colors for each 
+    std::map<const char*, std::string> fColors;
+
+    // Number of entries to perform the iteration
+    size_t fNentries;
+
+    // Percentage needed to draw each mark
+    unsigned short int fPercentage;
+
+    // String to store the starting date
+    std::string fStartDate;
+
+    // Variable to store the starting time
+    clock_t fStart;
+
+    // Map storing which information must be shown
+    std::map<const char*, bool> fUse;
 
   private:
 
-    // Methods
+    // Gets the date depending on the configuration option specified
     inline std::string GetDate();
+
+    // Gets the option for one of the possible selections
     inline std::string GetOption( std::string &str, const char *opt );
+
+    // Gets the time elapsed in format ( days, hours, minutes, seconds ). There are
+    // only displayed those magnitudes wich have reached a value greater than 0.
     inline std::string GetTime();
   };
 

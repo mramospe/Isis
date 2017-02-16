@@ -7,39 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/07/2015
-//
-// ----------------------------------------------------------------
-//
-//  Description:
-//
-//  Includes the ProgressBar class to display the
-//  progress of a certain loop. Configuration options
-//  are:
-//
-//  Bar        => Generates a progress bar with size 50
-//  Percentage => Shows the percentage of the loop each time it
-//                completes the specified percentage
-//  Time       => Displays the time elapsed in the loop
-//  Date       => Allows the display of the date. There are two
-//                options:
-//                 - Start: shows the starting date
-//                 - End:   shows the ending date
-//                By default local time is displayed. If option
-//                UTC is specified the dates will correspond to
-//                the UTC date and time.
-//
-//  Options have to be separated by the < : > character. All
-//  modifications have to be done through the < = > operator in
-//  the way < Bar=50 >. This sets the ProgressBar class to
-//  generate a bar of size 50 points. For Date the options can
-//  be separated by any symbol by < = > or < : >.
-//
-//  For the colors, they have to be expresed as ANSI color
-//  codes. With the same options as above but substituing
-//  < Date > by < StartDate > and < EndDate >. An example could
-//  be < Bar=32;41;1 >, meaning the display of the bar with
-//  green bold lines, and with a red background.
+//  Last update: 16/02/2017
 //
 // ----------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////
@@ -52,12 +20,7 @@
 #include <iomanip>
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Constructor
+//
 General::ProgressBar::ProgressBar( const char *opts ) :
   fBarWidth( 50 ), fPercentage( 1 ) {
 
@@ -96,16 +59,11 @@ General::ProgressBar::ProgressBar( const char *opts ) :
 }
 
 //______________________________________________________________________________
-// Destructor
+//
 General::ProgressBar::~ProgressBar() { }
 
 //______________________________________________________________________________
-
-
-// --- PUBLIC METHODS
-
-//______________________________________________________________________________
-// Ends the display of the progress
+//
 void General::ProgressBar::End() {
 
   if ( fBarWidth ) {
@@ -137,7 +95,7 @@ void General::ProgressBar::End() {
 }
 
 //______________________________________________________________________________
-// If the required percentage of the loop is achieved, it prints the progress
+//
 void General::ProgressBar::Print( const size_t &entry ) {
 
   if ( entry % ( fNentries*fPercentage/100 ) == 0 ) {
@@ -172,7 +130,7 @@ void General::ProgressBar::Print( const size_t &entry ) {
 }
 
 //______________________________________________________________________________
-// Sets the colors of the different display options
+//
 void General::ProgressBar::SetColor( const char *opts ) {
 
   std::string str( opts );
@@ -191,7 +149,7 @@ void General::ProgressBar::SetColor( const char *opts ) {
 }
 
 //______________________________________________________________________________
-// Starts the progress display
+//
 void General::ProgressBar::Start( size_t nentries ) {
   
   fNentries = nentries;
@@ -203,12 +161,7 @@ void General::ProgressBar::Start( size_t nentries ) {
 }
 
 //______________________________________________________________________________
-
-
-// --- PRIVATE METHODS
-
-//______________________________________________________________________________
-// Gets the date depending on the configuration option specified
+//
 inline std::string General::ProgressBar::GetDate() {
 
   time_t  actual_time = time( 0 );
@@ -227,7 +180,7 @@ inline std::string General::ProgressBar::GetDate() {
 }
 
 //______________________________________________________________________________
-// Gets the option for one of the possible selections
+//
 inline std::string General::ProgressBar::GetOption( std::string &str, const char *opt ) {
 
   std::string res;
@@ -243,8 +196,7 @@ inline std::string General::ProgressBar::GetOption( std::string &str, const char
 }
 
 //______________________________________________________________________________
-// Gets the time elapsed in format ( days, hours, minutes, seconds ). There are
-// only displayed those magnitudes wich have reached a value greater than 0.
+//
 inline std::string General::ProgressBar::GetTime() {
 
   float total_sec( ( ( float ) clock() - fStart ) / CLOCKS_PER_SEC );
@@ -279,5 +231,3 @@ inline std::string General::ProgressBar::GetTime() {
 
   return ss.str();
 }
-
-//______________________________________________________________________________

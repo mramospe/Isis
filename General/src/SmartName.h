@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 07/06/2016
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -37,73 +37,139 @@ namespace General {
 
   public:
 
-    // Constructor and destructor
+    // Constructor
     SmartName( const std::string &str = std::string(), const char &sep = '_' );
+
+    // Destructor
     ~SmartName();
 
-    // Method
+    // Looks in the name for the given pattern, and returns the result of the search
     bool Find( const std::string &other ) const;
 
-    // Inline methods
-    inline std::string        BuildFilePath( const std::string &ext );
+    // Builds the complete path to a file, given the type of the file (without the dot)
+    inline std::string BuildFilePath( const std::string &ext );
+    
+    // Returns the current name of the class
     inline const std::string& GetName() const;
 
-    // Operators
+    // Add a string
     inline SmartName operator +  ( const std::string &str ) const;
+
+    // Add another SmartName
     inline SmartName operator +  ( const SmartName &str ) const;
-    inline void      operator += ( const std::string &str );
-    inline void      operator += ( const SmartName &str );
-    inline void      operator =  ( const SmartName &str );
-    inline void      operator =  ( const std::string &str );
-    inline bool      operator == ( const SmartName &other ) const;
-    inline bool      operator == ( const std::string &other ) const;
-    inline bool      operator != ( const SmartName &other ) const;
-    inline bool      operator != ( const std::string &other ) const;
+
+    // Add string to this class
+    inline void operator += ( const std::string &str );
+
+    // Add another SmartName to this class
+    inline void operator += ( const SmartName &str );
+
+    // Set this class from a SmartName
+    inline void operator =  ( const SmartName &str );
+
+    // Set this class from a string
+    inline void operator =  ( const std::string &str );
+
+    // Compare this name to another SmartName
+    inline bool operator == ( const SmartName &other ) const;
+
+    // Compare this name to a string
+    inline bool operator == ( const std::string &other ) const;
+
+    // Negative comparison respect to another SmartName
+    inline bool operator != ( const SmartName &other ) const;
+
+    // Negative comparison respect to a string
+    inline bool operator != ( const std::string &other ) const;
+
+    // Send the name to a stream
+    inline std::ostream& operator << ( std::ostream &os ) const;
     
   protected:
     
-    // Attributes
+    // Name being stored
     std::string fName;
-    char        fSep;
+
+    // Character separating each part of the name
+    char fSep;
     
   };
   
-  // _________________
-  // -- INLINE METHODS
-
-  // Builds the complete path to a file, given the type of the file (without the dot)
+  //_______________________________________________________________________________
+  //
   inline std::string SmartName::BuildFilePath( const std::string &ext ) { return fName + "." + ext; }
-  // Returns the current name of the class
+
+  //_______________________________________________________________________________
+  //
   inline const std::string& SmartName::GetName() const { return fName; }
   
-  // _________________
-  // -- OPERATORS
-  
+  //_______________________________________________________________________________
+  //
   inline SmartName SmartName::operator + ( const std::string &str ) const {
     return SmartName( fName + fSep + str, fSep );
   }
+  
+  //_______________________________________________________________________________
+  //
   inline SmartName SmartName::operator + ( const SmartName &str ) const {
     return SmartName( fName + fSep + str.fName, str.fSep );
   }
+
+  //_______________________________________________________________________________
+  //
   inline void SmartName::operator += ( const std::string &str ) { fName += fSep + str; }
+
+  //_______________________________________________________________________________
+  //
   inline void SmartName::operator += ( const SmartName &str ) {
     fName += fSep + str.fName;
     fSep   = str.fSep;
   }
+
+  //_______________________________________________________________________________
+  //
   inline void SmartName::operator =  ( const std::string &str ) {
     fName = str;
     fSep  = '_';
   }
+
+  //_______________________________________________________________________________
+  //
   inline void SmartName::operator =  ( const SmartName &str ) {
     fName = str.fName;
     fSep  = str.fSep;
   }
-  inline bool SmartName::operator == ( const std::string &other ) const { return fName == other; }
-  inline bool SmartName::operator == ( const SmartName &other ) const { return fName == other.fName; }
-  inline bool SmartName::operator != ( const std::string &other ) const { return fName != other; }
-  inline bool SmartName::operator != ( const SmartName &other ) const { return fName != other.fName; }
-  std::ostream& operator << ( std::ostream &os, const SmartName &name );
 
+  //_______________________________________________________________________________
+  //
+  inline bool SmartName::operator == ( const std::string &other ) const {
+    return fName == other;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline bool SmartName::operator == ( const SmartName &other ) const {
+    return fName == other.fName;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline bool SmartName::operator != ( const std::string &other ) const {
+    return fName != other;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline bool SmartName::operator != ( const SmartName &other ) const {
+    return fName != other.fName;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline std::ostream& SmartName::operator << ( std::ostream &os ) const {
+    os << fName;
+    return os;
+  }
 }
 
 #endif

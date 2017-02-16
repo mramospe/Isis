@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 16/02/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -45,80 +45,133 @@ namespace General {
 
   public:
 
-    // Constructor and destructor
+    // Main constructor
     OutputTable();
+
+    // Constructor given the precision number and string length
     OutputTable( const unsigned short int &prec, const unsigned short int len = 0 );
+
+    // Destructor
     ~OutputTable();
 
-    // Methods
+    // Returns a new line from the buffer
     std::string GetLine();
-    void        Print( const char &chdeco = '*' );
-    void        SetFormat( const char *format, const std::vector<std::string> &titles );
-    void        SetFormat( const char *format ... );
+
+    // Displays the whole table, including the title and the elements. If this method
+    // is used no < Start > has to be called before.
+    void Print( const char &chdeco = '*' );
+
+    // Sets the format for the current table. To know which imput parameters are
+    // allowed to be introduced see the < SetFormat( const char *format ... ) > method.
+    void SetFormat( const char *format, const std::vector<std::string> &titles );
+
+    // Sets the format of the elements displayed in the table. There can be displayed
+    // values of any kind: boolean (b), short integers (i), integers (I), floats (f),
+    // doubles (d) and strings (s). As second, third, ... arguments the title of the
+    // variables have to be specified.
+    void SetFormat( const char *format ... );
+
+    // Prints the title and initializes the table. If the pointer of the buffer is
+    // not located at the start it is moved to it. Returns the string used to
+    // separate the title from the elements.
     std::string Start( const char &chdeco = '*' );
 
-    // Inline methods
-    inline void   End();
-    inline size_t GetNlines();
-    inline void   PrintLine();
-    inline void   Rewind();
-    inline void   SetPrecision( const unsigned short int &prec );
-    inline void   SetStrLength( const unsigned short int &len );
+    // Finishes the display of the table showing the separator
+    inline void End();
 
-    // Template method
+    // Returns the number of lines in the table
+    inline size_t GetNlines();
+
+    // Displays another line from the buffer
+    inline void PrintLine();
+
+    // Rewinds the buffer
+    inline void Rewind();
+
+    // Sets the number of numbers that will be displayed for float and double types
+    inline void SetPrecision( const unsigned short int &prec );
+
+    // Sets the length of the strings displayed in the table
+    inline void SetStrLength( const unsigned short int &len );
+
+    // Appends a new element to the current buffer, separating it by a tabulation
+    // when it corresponds to the same row and by a newline symbol when moving to
+    // another column
     template<class type>
     inline void AppendStream( type &str );
 
-    // Operators
+    // Returns an element from the buffer
     template<class type>
     friend inline OutputTable& operator << ( const type &str, OutputTable &table );
+
+    // Appends to the current table a new value of any kind. This operator is
+    // useful when using it concatenated: "table << 1 << 2 << ..."
     template<class type>
     friend inline OutputTable& operator >> ( OutputTable &table, type &str );
 
   protected:
 
-    // Attributes
-    std::stringstream        fBuffer;
-    char                     fDecoChar;
-    unsigned short int       fIvar;
-    size_t                   fNlines;
-    std::vector<size_t>      fPrecisions;
-    std::string              fSeparator;
-    std::vector<size_t>      fSizes;
-    unsigned short int       fStrLength;
+    // Buffer to store the information
+    std::stringstream fBuffer;
+
+    // Character to decorate the table
+    char fDecoChar;
+
+    // Iterator used when reading from streams
+    unsigned short int fIvar;
+
+    // Number of lines in the table
+    size_t fNlines;
+
+    // Vector to store the number of variables to be printed and the precision for each
+    std::vector<size_t> fPrecisions;
+
+    // Internal variable to separate blocks
+    std::string fSeparator;
+
+    // Vector storing the size of the elements to be printed in each column
+    std::vector<size_t> fSizes;
+
+    // Length of the variables which are strings
+    unsigned short int fStrLength;
+
+    // Title for each of the variables
     std::vector<std::string> fTitles;
 
   };
   
-  //_______________
-  // INLINE METHODS
-
-  // Finishes the display of the table showing the separator
+  //_______________________________________________________________________________
+  //
   inline void OutputTable::End() {
     std::cout << fSeparator << std::endl;
   }
-  // Returns the number of lines in the table
+
+  //_______________________________________________________________________________
+  //
   inline size_t OutputTable::GetNlines() { return fNlines; }
-  // Displays another line from the buffer
-  void General::OutputTable::PrintLine() {
-    std::cout << this -> GetLine() << std::endl;
-  }
-  // Rewinds the buffer
-  inline void OutputTable::Rewind() {
-    fBuffer.seekg( 0 );
-  }
-  // Sets the number of numbers that will be displayed for float and double types
+
+  //_______________________________________________________________________________
+  //
+  void General::OutputTable::PrintLine() { std::cout << this->GetLine() << std::endl; }
+
+  //_______________________________________________________________________________
+  //
+  inline void OutputTable::Rewind() { fBuffer.seekg( 0 ); }
+
+  //_______________________________________________________________________________
+  //
   inline void OutputTable::SetPrecision( const unsigned short int &prec ) {
     fBuffer.precision( prec );
   }
-  // Sets the length of the strings displayed in the table
-  inline void OutputTable::SetStrLength( const unsigned short int &len ) { fStrLength = len; }
 
-  //___________________
-  // TEMPLATE FUNCTIONS
+  //_______________________________________________________________________________
+  //
+  inline void OutputTable::SetStrLength( const unsigned short int &len ) {
+    fStrLength = len;
+  }
 
-  // Appends a new element to the current buffer, separating it by a tabulation when it corresponds
-  // to the same row and by a newline symbol when moving to another column
+  //_______________________________________________________________________________
+  //
   template<class type>
   inline void OutputTable::AppendStream( type &str ) {
     if ( fPrecisions[ fIvar ] )
@@ -132,14 +185,17 @@ namespace General {
       fBuffer << '\n';
     }
   }
-  // Returns an element from the buffer
+
+  //_______________________________________________________________________________
+  //
   template<class type>
   inline OutputTable& operator >> ( OutputTable &table, type &str ) {
     table.fBuffer >> str;
     return table;
   }
-  // Appends to the current table a new value of any kind. This operator is useful when using it
-  // concatenated: "table << 1 << 2 << ..."
+
+  //_______________________________________________________________________________
+  //
   template<class type>
   inline OutputTable& operator << ( OutputTable &table, const type &str ) {
     table.AppendStream( str );

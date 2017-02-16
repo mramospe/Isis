@@ -49,13 +49,13 @@ namespace General {
     // Destructor
     ~Messenger();
 
-    // Stream operator
+    // Send object to the output stream
     template<class type>
     Messenger& operator << ( const type& obj );
     
   protected:
 
-    // Attribute
+    // Output stream
     std::ostream *fOStream;
 
   };
