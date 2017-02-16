@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/11/2016
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -43,7 +43,11 @@ namespace General {
 
     // Nested struct class
     struct LoopArrayIndex {
+
+      // Constructor
       LoopArrayIndex( const size_t &min, const size_t &max );
+
+      // Destructor
       ~LoopArrayIndex();
 
       size_t Index;
@@ -51,79 +55,123 @@ namespace General {
       size_t Max;
     };
 
-    // Constructors
+    // Main constructor. The number of loops must be one since as new entries are
+    // added, this number is multiplied by their range.
     LoopArray();
+
+    // Copy constructor
     LoopArray( const LoopArray &other );
+
+    // Constructor given the sice of the array and the maximum loop value
     LoopArray( const size_t &size, const size_t &min, const size_t &max );
 
     // Destructor
     ~LoopArray();
 
-    // Methods
+    // Adds a new index variable to the array
     inline void         AddIndex( const size_t &min, const size_t &max );
-    inline const size_t GetNindices() const;
-    inline const size_t GetNloops() const;
-    inline const size_t GetPos() const;
-    inline void         Next();
-    inline void         Start();
-    inline bool         Status() const;
 
-    // Iterative methods
+    // Gets the number of indices stored in the array
+    inline const size_t GetNindices() const;
+
+    // Gets the number of loops that would be made using this array
+    inline const size_t GetNloops() const;
+
+    // Returns the current position of the array
+    inline const size_t GetPos() const;
+
+    // This method is set to enable the pythonization of the class
+    inline void Next();
+
+    // Resets the values of the array to their minimums to start a new iteration
+    inline void Start();
+
+    // Return the status of the iteration
+    inline bool Status() const;
+
+    // Returns the position to the first element of the vector of indices
     inline std::vector<LoopArrayIndex>::const_iterator cBegin();
+
+    // Returns the position to the next-to-last element of the vector of indices
     inline std::vector<LoopArrayIndex>::const_iterator cEnd();
 
-    // Operators
+    //  Moves one element forward in the array. This implies to add one unit to the
+    // last index stored. If it reaches the associated maximum value it is reset,
+    // and a unit is added to the next index ( doing this recursively ).
     LoopArray&  operator ++ ();
+
+    // Creates a copy of this class and adds a new unit to the current one. The old
+    // class is returned.
     LoopArray   operator ++ ( int );
+
+    // Returns the value of the index at position < index >
     const size_t operator [] ( size_t index ) const;
 
   protected:
 
-    // Attributes
-    size_t                      fNloops;
-    size_t                      fPos;
+    // Number of loops to be performed
+    size_t fNloops;
+
+    // Current position
+    size_t fPos;
+
+    // Vector storing each of the indices
     std::vector<LoopArrayIndex> fVector;
   };
 
-  //______________________________
-  // INLINE METHODS
-
-  // Adds a new index variable to the array
+  //_______________________________________________________________________________
+  //
   inline void LoopArray::AddIndex( const size_t &min, const size_t &max ) {
     fVector.push_back( LoopArrayIndex( min, max ) );
     fNloops *= ( max - min );
   }
-  // Gets the number of indices stored in the array
+
+  //_______________________________________________________________________________
+  //
   inline const size_t LoopArray::GetNindices() const {
     return fVector.size();
   }
-  // Returns the current position of the array
+
+  //_______________________________________________________________________________
+  //
   inline const size_t LoopArray::GetPos() const {
     return fPos;
   }
-  // This method is set to enable the pythonization of the class
+
+  //_______________________________________________________________________________
+  //
   inline void LoopArray::Next() {
-    this -> operator ++ ();
+    this->operator ++ ();
   }
-  // Gets the number of loops that would be made using this array
+
+  //_______________________________________________________________________________
+  //
   inline const size_t LoopArray::GetNloops() const {
     return fNloops;
   }
-  // Resets the values of the array to their minimums to start a new iteration
+
+  //_______________________________________________________________________________
+  //
   inline void LoopArray::Start() {
     fPos = 0;
     for ( auto it = fVector.begin(); it != fVector.end(); ++it )
-      it -> Index = it -> Min;    
+      it->Index = it->Min;    
   }
-  // Return the status of the iteration
+
+  //_______________________________________________________________________________
+  //
   inline bool LoopArray::Status() const {
     return ( fPos < fNloops );
   }
-  // Returns the position to the first element of the vector of indices
+
+  //_______________________________________________________________________________
+  //
   inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cBegin() {
     return fVector.cbegin();
   }
-  // Returns the position to the next-to-last element of the vector of indices
+
+  //_______________________________________________________________________________
+  //
   inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cEnd() {
     return fVector.cend();
   }

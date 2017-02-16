@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/07/2015
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -25,6 +25,7 @@
 
 #include "LorentzVector.h"
 
+
 //______________________________________________________________________________
 
 namespace General {
@@ -33,8 +34,10 @@ namespace General {
 
   public:
 
-    // Constructors
+    // Main constructor
     HelicityAngles();
+
+    // Constructor given the paths to the different Lorentz vectors
     HelicityAngles( LorentzVector &Mother,
 		    LorentzVector &P1, LorentzVector &P2,
 		    LorentzVector &P11, LorentzVector &P12,
@@ -43,71 +46,139 @@ namespace General {
     // Destructor
     ~HelicityAngles();
 
-    // Methods
-    inline double  GetCosTheta1() const;
-    inline double  GetCosTheta2() const;
-    inline double  GetPhi() const;
-    inline void    CalculateAngles();
-    void           CalculateAngles( LorentzVector &Mother,
-				    LorentzVector &P1,  LorentzVector &P2,
-				    LorentzVector &P11, LorentzVector &P12,
-				    LorentzVector &P21, LorentzVector &P22 );
-    void           CalculateAngles( LorentzVector &P11, LorentzVector &P12,
-				    LorentzVector &P21, LorentzVector &P22 );
+    // Return the angle < fCosTheta1 >
+    inline double GetCosTheta1() const;
+
+    // Return the angle < fCosTheta2 >
+    inline double GetCosTheta2() const;
+
+    // Return the phi angle
+    inline double GetPhi() const;
+
+    // Calculates the angles
+    inline void CalculateAngles();
+
+    // Calculates the helicity angles of a four-body decay given all the 4-vectors
+    // of the particles
+    void CalculateAngles( LorentzVector &Mother,
+			  LorentzVector &P1,  LorentzVector &P2,
+			  LorentzVector &P11, LorentzVector &P12,
+			  LorentzVector &P21, LorentzVector &P22 );
+    
+    // Calculates the helicity angles of a four-body decay given the 4-vectors of
+    // the daughters
+    void CalculateAngles( LorentzVector &P11, LorentzVector &P12,
+			  LorentzVector &P21, LorentzVector &P22 );
+
+    // Grants access to the path of < fCosTheta1 >
     inline double* PathToCosTheta1();
+
+    // Grants access to the path of < fCosTheta2 >
     inline double* PathToCosTheta2();
+
+    // Grants access to the path of < fPhi >
     inline double* PathToPhi();
-    inline void    SetParticles( LorentzVector &Mother,
-				 LorentzVector &P1,  LorentzVector &P2,
-				 LorentzVector &P11, LorentzVector &P12,
-				 LorentzVector &P21, LorentzVector &P22 );
-    inline double  TripleProdU();
-    inline double  TripleProdV();
+
+    // Sets the pointers to the 4-vectors of the particles
+    inline void SetParticles( LorentzVector &Mother,
+			      LorentzVector &P1,  LorentzVector &P2,
+			      LorentzVector &P11, LorentzVector &P12,
+			      LorentzVector &P21, LorentzVector &P22 );
+
+    // Calculates the triple product < U > variable
+    inline double TripleProdU();
+
+    // Calculates the triple product < V > variable
+    inline double TripleProdV();
 
   protected:
       
-    // Attributes
+    // Mother particle
     LorentzVector *fMother;
-    LorentzVector *fP1;
-    LorentzVector *fP2;
-    LorentzVector *fP11;
-    LorentzVector *fP12;
-    LorentzVector *fP21;
-    LorentzVector *fP22;
-    double fCosTheta1;
-    double fCosTheta2;
-    double fPhi;
 
+    // First daughter
+    LorentzVector *fP1;
+
+    // Second daughter
+    LorentzVector *fP2;
+
+    // First-first granddaughter
+    LorentzVector *fP11;
+
+    // First-second graddaughter
+    LorentzVector *fP12;
+
+    // Second-first granddaughter
+    LorentzVector *fP21;
+
+    // Second-second granddaughter
+    LorentzVector *fP22;
+
+    // Angle between first daughter particle respect to one of its
+    // own daughter particles in the mother reference frame
+    double fCosTheta1;
+
+    // Angle between second daughter particle respect to one of its
+    // own daughter particles in the mother reference frame
+    double fCosTheta2;
+
+    // Angle between the planes formed by the granddaughters
+    double fPhi;
+    
   };
 
-  // Calculates the angles
-  inline void    HelicityAngles::CalculateAngles() {
-    this -> CalculateAngles( *fMother,
-			     *fP1, *fP2,
-			     *fP11, *fP12,
-			     *fP21, *fP22 );
+  //______________________________________________________________________________
+  //
+  inline void HelicityAngles::CalculateAngles() {
+    this->CalculateAngles( *fMother,
+			   *fP1, *fP2,
+			   *fP11, *fP12,
+			   *fP21, *fP22 );
   }
-  // Gets the different variables
+
+  //______________________________________________________________________________
+  //
   inline double  HelicityAngles::GetCosTheta1() const { return fCosTheta1; }
+
+  //______________________________________________________________________________
+  //
   inline double  HelicityAngles::GetCosTheta2() const { return fCosTheta2; }
+
+  //______________________________________________________________________________
+  //
   inline double  HelicityAngles::GetPhi() const { return fPhi; }
-  // Grants access to the path of the variables
+
+  //______________________________________________________________________________
+  //
   inline double* HelicityAngles::PathToCosTheta1() { return &fCosTheta1; }
+
+  //______________________________________________________________________________
+  //
   inline double* HelicityAngles::PathToCosTheta2() { return &fCosTheta2; }
+
+  //______________________________________________________________________________
+  //
   inline double* HelicityAngles::PathToPhi() { return &fPhi; }
-  // Sets the pointers to the particles 4-vectors
-  inline void    HelicityAngles::SetParticles( LorentzVector &Mother,
-					       LorentzVector &P1,  LorentzVector &P2,
-					       LorentzVector &P11, LorentzVector &P12,
-					       LorentzVector &P21, LorentzVector &P22 ) {
+
+  //______________________________________________________________________________
+  //
+  inline void HelicityAngles::SetParticles( LorentzVector &Mother,
+					    LorentzVector &P1,  LorentzVector &P2,
+					    LorentzVector &P11, LorentzVector &P12,
+					    LorentzVector &P21, LorentzVector &P22 ) {
 
     fMother = &Mother;
     fP1 = &P1; fP2 = &P2;
     fP11 = &P11; fP12 = &P12;
     fP21 = &P21; fP22 = &P22;
   }
-  // Calculates the different helicity variables
+
+  //______________________________________________________________________________
+  //
   inline double  HelicityAngles::TripleProdU() { return std::sin( 2*fPhi ); }
+
+  //______________________________________________________________________________
+  //
   inline double  HelicityAngles::TripleProdV() {
     return fCosTheta1*fCosTheta2 > 0 ? std::sin( fPhi ) : -std::sin( fPhi );
   }

@@ -7,14 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/07/2015
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements the class HelicityAngles, that allows to calculate the helicity
-//  angles of 4-body decays.
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -24,12 +17,7 @@
 
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Main constructor
+//
 General::HelicityAngles::HelicityAngles() :
   fMother( 0 ),
   fP1( 0 ), fP2( 0 ),
@@ -37,7 +25,7 @@ General::HelicityAngles::HelicityAngles() :
   fP21( 0 ), fP22( 0 ) { }
 
 //______________________________________________________________________________
-// Constructor given the paths to the different Lorentz vectors
+//
 General::HelicityAngles::HelicityAngles( LorentzVector &Mother,
 					 LorentzVector &P1, LorentzVector &P2,
 					 LorentzVector &P11, LorentzVector &P12,
@@ -48,17 +36,11 @@ General::HelicityAngles::HelicityAngles( LorentzVector &Mother,
   fP21( &P21 ), fP22( &P22 ) { }
 
 //______________________________________________________________________________
-// Destructor
+//
 General::HelicityAngles::~HelicityAngles() { }
 
 //______________________________________________________________________________
-
-
-// -- METHODS
-
-//______________________________________________________________________________
-// Calculates the helicity angles of a four-body decay given all the 4-vectors
-// of the particles
+//
 void General::HelicityAngles::CalculateAngles( General::LorentzVector &Mother,
 					       General::LorentzVector &P1,
 					       General::LorentzVector &P2,
@@ -87,8 +69,7 @@ void General::HelicityAngles::CalculateAngles( General::LorentzVector &Mother,
 }
 
 //______________________________________________________________________________
-// Calculates the helicity angles of a four-body decay given the 4-vectors of
-// the daughters
+//
 void General::HelicityAngles::CalculateAngles( General::LorentzVector &P11,
 					       General::LorentzVector &P12,
 					       General::LorentzVector &P21,
@@ -99,5 +80,5 @@ void General::HelicityAngles::CalculateAngles( General::LorentzVector &P11,
     P2( P21 + P22 ),
     Mother( P1 + P2 );
 
-  this -> CalculateAngles( Mother, P1, P2, P11, P12, P21, P22 );
+  this->CalculateAngles( Mother, P1, P2, P11, P12, P21, P22 );
 }

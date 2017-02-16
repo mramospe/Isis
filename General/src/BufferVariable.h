@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 14/02/2017
+//  Last update: 16/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -39,38 +39,53 @@ namespace General {
 
   public:
     
-    // Constructor and destructor
+    // Constructor given the type as a character
     BufferVariable( const char &type = '\0' );
+
+    // Destructor
     ~BufferVariable();
 
-    // Methods
+    // Converts this class to a string
     std::string ToString() const;
 
-    // Inline methods
+    // Sets the given variable as the value stored in the class
     template<typename type> inline void ExtractValue( type &value ) const;
-    inline const char&                  GetType() const;
-    inline void*                        PathToValue();
-    inline void                         SetType( const char &type );
+
+    // Returns the type of the class
+    inline const char& GetType() const;
+
+    // Returns the void pointer to the value stored by this class
+    inline void* PathToValue();
+
+    // Sets the type of this variable. The information stored in it is lost.
+    inline void SetType( const char &type );
+
+    // Sets the value stored in the class as that of the given variable
     template<typename type> inline void SetValue( const type &value );
+
+    // Convert to string and add it to the stream
+    std::ostream& operator << ( std::ostream &os );
 
   protected:
 
-    // Attributes
-    char  fType;
+    // Type of the variable stored
+    char fType;
+
+    // Pointer to the variable stored
     void *fPath;
 
   private:
     
-    // Methods
+    // Method to construct this class, given the type
     void Construct();
+
+    // Method to delete the value stored
     void Delete();
 
   };
 
-  // ______________
-  // INLINE METHODS
-  
-  // Sets the given variable as the value stored in the class
+  //_______________________________________________________________________________
+  //
   template<typename type>
   void BufferVariable::ExtractValue( type &value ) const {
     
@@ -80,22 +95,26 @@ namespace General {
 			  "has not been specified yet" << std::endl;
 			  );
   }
-  
-  // Returns the type of the class
+
+  //_______________________________________________________________________________
+  //
   inline const char& BufferVariable::GetType() const { return fType; }
 
-  // Returns the void pointer to the value stored by this class
+  //_______________________________________________________________________________
+  //
   inline void* BufferVariable::PathToValue() { return fPath; }
 
-  // Sets the type of this variable. The information stored in it is lost.
+  //_______________________________________________________________________________
+  //
   inline void BufferVariable::SetType( const char &type ) {
     
-    this -> Delete();
+    this->Delete();
     fType = type;
-    this -> Construct();
+    this->Construct();
   }
 
-  // Sets the value stored in the class as that of the given variable
+  //_______________________________________________________________________________
+  //
   template<typename type>
   void BufferVariable::SetValue( const type &value ) {
     
@@ -106,9 +125,13 @@ namespace General {
 			  );
   }
   
-  // ____________________
-  // NON-MEMBER OPERATOR
-  std::ostream& operator << ( std::ostream &os, const BufferVariable &var );
+  //_______________________________________________________________________________
+  //
+  inline std::ostream& BufferVariable::operator << ( std::ostream &os ) {
+    
+    os << this->ToString();
+    return os;
+  }
 
 }
 

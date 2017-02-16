@@ -7,31 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/04/2016
-//
-// --------------------------------------------------------
-//
-//  Description:
-//
-//  Class to storage cuts present in a cuts-file. This
-//  files have to be written in the way:
-//
-//  cut1 = j > 0 and b > 1
-//
-//  cut2 = $cut1$ or c == 0
-//
-//  The symbol < $ > before and after a word means that
-//  is a cut, so the class is going to get that and
-//  place it instead. This class is going to search
-//  for the given keys, so one can comment anything as
-//  long as no key has the same string value as it,
-//  being situated at the beginning of the line.
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
 
 
 #include "CutManager.h"
+#include "Messenger.h"
 
 #include <algorithm>
 #include <cstring>
@@ -43,12 +26,7 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 General::CutManager::CutManager( const std::string &file_path ) :
   fFile( new std::ifstream ), fOptions( { {"and", "&&"}, {"or", "||"} } ) {
   if ( file_path.size() )
@@ -56,7 +34,7 @@ General::CutManager::CutManager( const std::string &file_path ) :
 }
 
 //_______________________________________________________________________________
-// Copy constructor
+//
 General::CutManager::CutManager( const General::CutManager &other ) {
   fCuts    = other.fCuts;
   fFile    = other.fFile;
@@ -64,35 +42,30 @@ General::CutManager::CutManager( const General::CutManager &other ) {
 }
 
 //_______________________________________________________________________________
-// Destructor
+//
 General::CutManager::~CutManager() {
   if ( fFile.use_count() == 1 && (*fFile).is_open() )
     (*fFile).close();
 }
 
 //_______________________________________________________________________________
-
-
-// -- METHODS
-
-//_______________________________________________________________________________
-// Almacenates a new cut from the cuts-file
+//
 std::string General::CutManager::BookCut( const std::string &key, const bool &print ) {
   if ( fCuts.find( key ) != fCuts.end() ) {
-    std::cout << "Cut with name < " << key << " > already booked" << std::endl;
+    Warning << "Cut with name < " << key << " > already booked" << EndMsg;
     return "";
   }
   std::string cut = this -> GetCut( key );
   if ( cut.size() ) {
     fCuts.insert( std::make_pair( key, cut ) );
     if ( print )
-      std::cout << "Booked new cut < " << key << " >: " << fCuts[ key ] << std::endl;
+      BegMsg << "Booked new cut < " << key << " >: " << fCuts[ key ] << EndMsg;
   }
   return cut;
 }
 
 //_______________________________________________________________________________       
-// Functions that gets a cut from the cuts-file
+//
 std::string General::CutManager::GetCut( const std::string &key ) {
 
   // Each time a cut is obtained the pointer to the file is set to its start
@@ -135,9 +108,9 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	  }
 	  
 	  if ( mismatch ) {
-	    std::cerr <<
-	      "ERROR: Mismatched < $ > symbol when scanning cut < "
-		      << key << " >" << std::endl;
+	    Error <<
+	      "Mismatched < $ > symbol when scanning cut < "
+		  << key << " >" << EndMsg;
 	    return std::string();
 	  }
 
@@ -153,7 +126,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
     }
 
     if ( (*fFile).eof() && cond ) {
-      std::cerr << "ERROR: Cut with name < " << key << " > does not exist." << std::endl;
+      Error << "Cut with name < " << key << " > does not exist." << EndMsg;
       return 0;
     }
   }
@@ -167,8 +140,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 }
 
 //_______________________________________________________________________________
-// Appends all the cuts in the same string using the given statement (< && > by
-// default)
+//
 std::string General::CutManager::MakeMergedCut( std::string joinop ) {
   joinop = ' ' + joinop + ' ';
   auto it = fCuts.begin();
@@ -179,13 +151,13 @@ std::string General::CutManager::MakeMergedCut( std::string joinop ) {
 }
 
 //_______________________________________________________________________________
-// Opens the file in the given path. The old file will be closed first.
+//
 void General::CutManager::Open( const std::string &file_path ) {
   if ( fFile.use_count() == 1 && (*fFile).is_open() )
     (*fFile).close();
   (*fFile).open( file_path.c_str() );
   if ( !(*fFile) ) {
-    std::cerr << "ERROR: File < " << file_path << " > does not exist" << std::endl;
+    Error << "File < " << file_path << " > does not exist" << EndMsg;
     return;
   }
   std::string line, str;
@@ -198,8 +170,8 @@ void General::CutManager::Open( const std::string &file_path ) {
 
 	  // Checks whether does exist any other assignment operator in the same line
 	  if ( line.find( '=', pos + 1 ) != std::string::npos ) {
-	    std::cerr << "ERROR: Found two assignment operators in line < " <<
-	      nl << " >" << std::endl;
+	    Error << "Found two assignment operators in line < " <<
+	      nl << " >" << EndMsg;
 	    return;
 	  }
 
@@ -210,8 +182,8 @@ void General::CutManager::Open( const std::string &file_path ) {
 	  while ( str.back() == ' ' )
 	    str.erase( str.end() - 1 );
 	  if ( str.find( ' ' ) != std::string::npos ) {
-	    std::cerr << "ERROR: The cut defined in line < " << nl <<
-	      " > has whitespaces on its name" << std::endl;
+	    Error << "The cut defined in line < " << nl <<
+	      " > has whitespaces on its name" << EndMsg;
 	    return;
 	  }
 
@@ -220,15 +192,15 @@ void General::CutManager::Open( const std::string &file_path ) {
 	    newpos = line.find( '$', ++pos );
 	    str    = line.substr( pos, newpos - pos );
 	    if ( newpos == std::string::npos || str.find( ' ' ) != std::string::npos ) {
-	      std::cerr << "ERROR: Mismatched < $ > symbol in line < " << nl << " >" << std::endl;
+	      Error << "Mismatched < $ > symbol in line < " << nl << " >" << EndMsg;
 	      return;
 	    }
 	    pos = newpos + 1;
 	  }
 	}
 	else
-	  std::cout << "WARNING: Line number < " << nl <<
-	    " > not a cut line; must be commented (starting by #)" << std::endl;
+	  Warning<< "Line number < " << nl <<
+	    " > not a cut line; must be commented (starting by #)" << EndMsg;
       }
   }
   (*fFile).clear();
@@ -236,7 +208,7 @@ void General::CutManager::Open( const std::string &file_path ) {
 }
 
 //_______________________________________________________________________________       
-// Prints the cuts attached to this class
+//
 void General::CutManager::Print() const {
   size_t maxsize = std::max_element( fCuts.begin(),
 				     fCuts.end(),
@@ -244,6 +216,6 @@ void General::CutManager::Print() const {
 					  const std::pair<std::string, std::string> &p2 ) {
 				       return p1.first.size() < p2.first.size(); } ) -> first.size();
   for ( auto it = fCuts.begin(); it != fCuts.end(); ++it )
-    std::cout << std::left << std::setw( maxsize ) <<
-      it -> first  << " => " << it -> second << std::endl;
+    BegMsg << std::left << std::setw( maxsize ) <<
+      it -> first  << " => " << it -> second << EndMsg;
 }

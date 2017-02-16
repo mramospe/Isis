@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/04/2016
+//  Last update: 16/02/2016
 //
 // --------------------------------------------------------
 //
@@ -50,45 +50,68 @@ namespace General {
 
   public:
 
-    // Contructor
+    // Main constructor
     CutManager( const std::string &file_path = std::string() );
+
+    // Copy constructor
     CutManager( const CutManager &other );
 
     // Destructor
     ~CutManager();
 
-    // Methods
+    // Almacenates a new cut from the cuts-file
     std::string BookCut( const std::string &key, const bool &print = true );
+
+    // Clears the data storaged in the class
     inline void Clear();
+
+    // Closes the file related to this class
     inline void Close();
+
+    // Functions that gets a cut from the cuts-file
     std::string GetCut( const std::string &key );
+
+    // Appends all the cuts in the same string using the given statement (< && > by
+    // default)
     std::string MakeMergedCut( std::string joinop = "&&" );
-    void        Open( const std::string &file_path );
-    void        Print() const;
+
+    // Opens the file in the given path. The old file will be closed first
+    void Open( const std::string &file_path );
+
+    // Prints the cuts attached to this class
+    void Print() const;
+
+    // Removes the cut booked as < key >. If "*" is provided all will be removed.
     inline void Remove( const std::string &key );
 
-    // Iteration methods
+    // Gets the location of the begin of the map of cuts
     inline std::map<std::string, std::string>::iterator begin();
+
+    // Gets the location of the end of the map of cuts
     inline std::map<std::string, std::string>::iterator end();
 
-    // Operator
+    // Operator to get the cut with name < key >
     inline std::string operator [] ( const std::string &key ) const;
 
   protected:
 
-    // Attributes
+    // Map of cuts stored by key
     std::map<std::string, std::string> fCuts;
-    std::shared_ptr<std::ifstream>     fFile;
+
+    // Input file to read from
+    std::shared_ptr<std::ifstream> fFile;
+
+    // Map to store conversions from 'and' => '&&' and 'or' => '||'
     std::map<std::string, std::string> fOptions;
 
   };
 
-  //______________________________
-  // INLINE METHODS DEFINITION
-
-  // Clears the data storaged in the class
+  //_______________________________________________________________________________
+  //
   inline void CutManager::Clear() { fCuts.clear(); }
-  // Closes the file related to this class
+
+  //_______________________________________________________________________________
+  //
   inline void CutManager::Close() {
     if ( fFile.use_count() == 1 )
       (*fFile).close();
@@ -97,24 +120,30 @@ namespace General {
 	"WARNING: Attempt to close a file when more than one manager is accessing it"
 		<< std::endl;
   }
-  // Gets the location of the begin of the map of cuts
+
+  //_______________________________________________________________________________
+  //
   inline std::map<std::string, std::string>::iterator CutManager::begin() {
     return fCuts.begin();
   }
-  // Gets the location of the end of the map of cuts 
+
+  //_______________________________________________________________________________
+  //
   inline std::map<std::string, std::string>::iterator CutManager::end() {
     return fCuts.end();
   }
-  // Removes the cut booked as < key >. If "*" is provided all will be removed.
+
+  //_______________________________________________________________________________
+  //
   inline void CutManager::Remove( const std::string &key ) {
     if ( key == "*" )
       fCuts.erase( key );
     else
       fCuts.clear();
   }
-  
-  //______________________________
-  // OPERATOR
+
+  //_______________________________________________________________________________
+  //
   inline std::string CutManager::operator [] ( const std::string &key ) const {
     return fCuts.at( key );
   }

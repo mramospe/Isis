@@ -7,49 +7,29 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 13/10/2016
-//
-// --------------------------------------------------------------------
-//
-//  Description:
-//
-//  This class facilitates the specification of the input variables
-//  for a c++ executable. The types of the variables are defined
-//  via the < BookConfigOpt > method. They can be doubles (D),
-//  integers (I), or strings (S). Once they are all set, the method
-//  < ParseArgs > must be called, introducing the same variables as
-//  those in the < main > function.
+//  Last update: 16/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 
 #include "ConfigParser.h"
+#include "Messenger.h"
 #include "Utils.h"
 
 #include <algorithm>
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 General::ConfigParser::ConfigParser() : fParsed( false ) { }
 
 //_______________________________________________________________________________
-// Destructor
+//
 General::ConfigParser::~ConfigParser() { }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Books a new variable, storing also its type
+//
 void General::ConfigParser::BookConfigOpt( const std::string &name,
 					   const char &type,
 					   const std::vector<std::string> &poss ) {
@@ -62,9 +42,9 @@ void General::ConfigParser::BookConfigOpt( const std::string &name,
   case 'S':
     break;
   default:
-    std::cerr <<
-      "ERROR: Unknown type for variable < " << name << " > (" << type << ')'
-					    << std::endl;
+    Error <<
+      "Unknown type for variable < " << name << " > (" << type << ')'
+					    << EndMsg;
     return;
   }
 
@@ -73,8 +53,7 @@ void General::ConfigParser::BookConfigOpt( const std::string &name,
 }
 
 //_______________________________________________________________________________
-// Parses the options given to the main function. Both input variables must be
-// those passed to the executable.
+//
 void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
 
   // Allows the class to extract values
@@ -87,9 +66,9 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
   // equal to that in the class
   const size_t &gsize = fArgs.size();
   if ( gsize != truenargs ) {
-    std::cerr <<
-      "ERROR: Incorrect number of input parameters (" << truenargs << '/' << gsize << ')'
-						      << std::endl;
+    Error <<
+      "Incorrect number of input parameters (" << truenargs << '/' << gsize << ')'
+						      << EndMsg;
     return;
   }
 
@@ -114,8 +93,8 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
     
     auto def = fArgs[ name ].second;
     if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
-      std::cerr << "ERROR: Input for < " << name <<
-	" > does not match any of the possibilities: " << General::VectorToString( def ) << std::endl;
+      Error << "Input for < " << name <<
+	" > does not match any of the possibilities: " << General::VectorToString( def ) << EndMsg;
       return;
     }
     else
@@ -123,7 +102,7 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
 
     // An error is displayed when an argument can not be parsed
     if ( !status )
-      std::cerr << "ERROR: Unable to parse argument " << pos << ": < "
-		<< name << " > (" << type << ')' << std::endl;
+      Error << "Unable to parse argument " << pos << ": < "
+		<< name << " > (" << type << ')' << EndMsg;
   }
 }

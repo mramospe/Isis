@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 14/02/2017
+//  Last update: 16/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -24,7 +24,7 @@
 
 
 //_______________________________________________________________________________
-// Define the no-operation statement
+// No-operation statement
 #define NOOP
 
 #endif

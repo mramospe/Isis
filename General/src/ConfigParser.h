@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 13/10/2016
+//  Last update: 16/02/2016
 //
 // --------------------------------------------------------------------
 //
@@ -27,6 +27,8 @@
 #ifndef CONFIG_PARSER
 #define CONFIG_PARSER
 
+#include "Messenger.h"
+
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -40,44 +42,54 @@ namespace General {
 
   class ConfigParser {
 
+    // Definition of types used by this class
     typedef std::pair< std::string, std::vector<std::string> > ConfigOptPair;
     typedef std::map<std::string, ConfigOptPair>               ConfigMap;
     typedef std::vector< std::pair<std::string, const char> >  TypeVec;
 
   public:
 
-    // Constructors and destructor
+    // Main constructor
     ConfigParser();
+
+    // Destructor
     ~ConfigParser();
 
-    // Methods
+    // Books a new variable, storing also its type
     void BookConfigOpt( const std::string &name,
 			const char &type,
 			const std::vector<std::string> &poss = {} );
+
+    // Parses the options given to the main function. Both input variables must be
+    // those passed to the executable.
     void ParseArgs( const int &nargs, const char *argv[] );
 
-    // Template method
+    // Extracts the value for the given variable
     template <typename type>
     void Extract( const std::string &name, type &value );
     
   protected:
     
-    // Attributes
-    ConfigMap         fArgs;
-    bool              fParsed;
+    // Map containing the configuration options
+    ConfigMap fArgs;
+
+    // Boolean to store whether the configuration has been parsed or not
+    bool fParsed;
+
+    // Object to parse the configuration
     std::stringstream fParser;
-    TypeVec           fVariables;
+
+    // Vector to store the variables containing the information about the configuration
+    TypeVec fVariables;
     
   };
 
-  //________________
-  // TEMPLATE METHOD
-  
-  // Extracts the value for the given variable
+  //_______________________________________________________________________________
+  //
   template <typename type>
   void ConfigParser::Extract( const std::string &name, type &value ) {
     if ( !fParsed )
-      std::cerr << "ERROR: No arguments have been parsed yet; unable to extract value" << std::endl;
+      Error << "No arguments have been parsed yet; unable to extract value" << EndMsg;
     fParser << fArgs[ name ].first;
     fParser >> value;
     fParser.clear();

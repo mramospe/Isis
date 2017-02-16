@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 16/02/2017
 //
 // -----------------------------------------------------------------------------
 //
@@ -48,66 +48,94 @@ namespace General {
     typedef bool (*SortFunc)( const std::string &stra, const std::string &strb );
     typedef std::map<std::string, BuffVar*, SortFunc> BuffVarMap;
     
-    // Constructor and destructor
+    // Copy constructor. Memory will be allocated to generate new variables. The
+    // allocated memory is independent for each array.
     BufferArray( const BufferArray &other );
-    BufferArray( SortFunc func = [] ( const std::string &strA,
-				      const std::string &strB ) { return strA < strB; } );
+    
+    // Main constructor, given the ordering function to follow. By default, the
+    // ordering is alphabetic.
+    BufferArray( SortFunc func = []
+		 ( const std::string &strA,
+		   const std::string &strB ) { return strA < strB; } );
+    
+    // Destructor
     virtual ~BufferArray();
 
-    // Methods
+    // Adds a new variable to the buffer, given the name and the type
     BufferVariable* AddVariable( const std::string &name, const char &type );
-    void            ExtractNames( std::vector<std::string> &vector );
-    std::string     ToString() const;
     
-    // Inline methods
-    inline void              Clear();
-    inline bool              Contains( const std::string &name ) const;
-    inline const BuffVar&    Get( const std::string &name ) const;
+    // Appends to the new vector the names of the current array
+    void ExtractNames( std::vector<std::string> &vector );
+
+    // Converts the values stored in this array to a string
+    std::string ToString() const;
+    
+    // Removes the variables booked in this class
+    inline void Clear();
+
+    // Checks whether the given variable is already booked  
+    inline bool Contains( const std::string &name ) const;
+
+    // Returns the variable related to the name given
+    inline const BuffVar& Get( const std::string &name ) const;
+
+    // Returns the map containing all the variables
     inline const BuffVarMap& GetMap() const;
-    inline size_t            GetSize() const;
-    inline void              Sort( SortFunc func );
+
+    // Returns the size of the map
+    inline size_t GetSize() const;
+
+    // Reconstructs the map following the given sort function    
+    inline void Sort( SortFunc func );
     
-    // Operator
+    // Operator to get a variable by index
     inline BuffVar& operator [] ( const std::string &name );
     
   protected:
     
-    // Attribute
+    // Map containing the variables
     BuffVarMap fVarMap;
     
   };
-
-  //__________________
-  // -- INLINE METHODS
   
-  // Removes the variables booked in this class
+  //_______________________________________________________________________________
+  //
   inline void BufferArray::Clear() {
     for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
       delete it -> second;
     fVarMap.clear();
   }
-  // Checks whether the given variable is already booked
+
+  //_______________________________________________________________________________
+  //
   inline bool BufferArray::Contains( const std::string &name ) const {
     return fVarMap.count( name );
   }
-  // Returns the variable related to the name given
+
+  //_______________________________________________________________________________
+  //
   inline const BufferArray::BuffVar& BufferArray::Get( const std::string &name ) const {
     return *(fVarMap.at( name ));
   }
-  // Returns the map containing all the variables
+
+  //_______________________________________________________________________________
+  //
   inline const BufferArray::BuffVarMap& BufferArray::GetMap() const {
     return fVarMap;
   }
-  // Returns the size of the map
+
+  //_______________________________________________________________________________
+  //
   inline size_t BufferArray::GetSize() const { return fVarMap.size(); }
-  // Reconstructs the map following the given sort function
+
+  //_______________________________________________________________________________
+  //
   inline void BufferArray::Sort( SortFunc func ) {
     fVarMap = BufferArray::BuffVarMap( fVarMap.begin(), fVarMap.end(), func );
   }
 
-  //____________
-  // -- OPERATOR
-  
+  //_______________________________________________________________________________
+  //
   inline General::BufferVariable& BufferArray::operator [] ( const std::string &name ) {
     return *(fVarMap.at( name ));
   }
