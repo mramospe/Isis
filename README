@@ -1,4 +1,4 @@
-*** Isis project ***
+*** Isis project v3r0 ***
 
 This set of c++ and python code constitute a tool to perform analysis in High Energy Physics. The environment is built executing the attached script "loadenv.sh".
 
