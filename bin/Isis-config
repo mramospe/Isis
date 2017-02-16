@@ -13,7 +13,7 @@ iinclude=-I$ISIS/include
 rinclude=-I`root-config --incdir`
 
 # C++ libraries (both Root and Isis)
-rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lTMVA -lPyROOT"
+rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lPyROOT"
 ilibs=-L$ISIS/lib" "-lRFExt" "-lAdBin" "-lStats" "-lWgts" "-lCluster" "-lAnalysis" "-lGeneral
 
 out=""
