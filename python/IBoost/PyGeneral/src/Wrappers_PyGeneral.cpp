@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 26/12/2016
+//  Last update: 16/02/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -24,7 +24,8 @@
 #include <boost/python/scope.hpp>
 
 #include "CutManager.h"
-#include "GlobalMessenger.h"
+#include "Messenger.h"
+#include "MessengerConfig.h"
 #include "LoopArray.h"
 #include "ProgressBar.h"
 
@@ -48,9 +49,37 @@ namespace CutMgr {
 					 0, 1);
 }
 
+// Thin functions to send messages using the class Messenger
+namespace Msg {
+
+  // Function to send a formatted message
+  void SendFormattedMsg( const std::string &msg,
+			 const int &fgcol = General::ANSIFormat::aNoColor,
+			 const int &bgcol = General::ANSIFormat::aNoColor,
+			 const int &sty = General::ANSIFormat::aNoStyle ) {
+
+    General::Messenger("", std::cout, fgcol, bgcol, sty) << msg << EndMsg;
+  }
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SendFormattedMsg_Overloads,
+				  SendFormattedMsg,
+				  1, 4);
+
+  // Function to send an usual message
+  void SendMsg( const std::string &msg ) { BegMsg << msg << EndMsg; }
+
+  // Function to send an error message
+  void SendErrorMsg( const std::string &msg ) { Error << msg << EndMsg; }
+
+  // Function to send an information message
+  void SendInfoMsg( const std::string &msg ) { Info << msg << EndMsg; }
+
+  // Function to send a warning message
+  void SendWarningMsg( const std::string &msg ) { Warning << msg << EndMsg; }
+}
+
 BOOST_PYTHON_MODULE( PyGeneral ) {
 
-  // Wrapper from CutManager.h
+  // Wrappers from CutManager.h
   py::class_<gl::CutManager>("CutManager", py::init<const std::string&>())
     .def(py::init<const gl::CutManager&>())
     .def("BookCut"      , &gl::CutManager::BookCut, CutMgr::BookCut_Overloads())
@@ -65,9 +94,11 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
     ;
 
   // Wrappers from GlobalMessenger.h
-  py::def("SendErrorMsg"  , &gl::SendErrorMsg);
-  py::def("SendInfoMsg"   , &gl::SendInfoMsg);
-  py::def("SendWarningMsg", &gl::SendWarningMsg);
+  py::def("SendFormattedMsg", &Msg::SendFormattedMsg, Msg::SendFormattedMsg_Overloads());
+  py::def("SendMsg"         , &Msg::SendMsg);
+  py::def("SendErrorMsg"    , &Msg::SendErrorMsg);
+  py::def("SendInfoMsg"     , &Msg::SendInfoMsg);
+  py::def("SendWarningMsg"  , &Msg::SendWarningMsg);
 
   { // ANSIFormat scope
     class ANSIFormatNSP { };
@@ -86,6 +117,7 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
       .value("aMagenta", gl::ANSIFormat::aMagenta)
       .value("aCyan"   , gl::ANSIFormat::aCyan)
       .value("aWhite"  , gl::ANSIFormat::aWhite)
+      .value("aNoColor", gl::ANSIFormat::aNoColor)
       ;
     py::enum_<gl::ANSIFormat::Styles>("Styles")
       .value("aNormal"   , gl::ANSIFormat::aNormal)
@@ -93,6 +125,7 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
       .value("aFaint"    , gl::ANSIFormat::aFaint)
       .value("aItalic"   , gl::ANSIFormat::aItalic)
       .value("aUnderline", gl::ANSIFormat::aUnderline)
+      .value("aNoStyle"  , gl::ANSIFormat::aNoStyle)
       ;
   }
 
