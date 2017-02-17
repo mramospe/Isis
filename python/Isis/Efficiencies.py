@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 07/02/2017
+#//  Last update: 17/02/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -74,7 +74,7 @@ def CalcEfficiency( N, k, cl = 0.683, method = 'sym' ):
     p = k/N
     d = N - k
     
-    p_unc = min(PoissonEffUncert(N, k), BinomialEffUncert(N, k))
+    p_unc = BinomialEffUncert(N, k)
     a0 = abs(p - p_unc)
     b0 = abs(p + p_unc)
     
@@ -173,7 +173,11 @@ def CalcEfficiency( N, k, cl = 0.683, method = 'sym' ):
     else:
         a, b, r = fsolve(nleq, (a0, b0, l0), fprime = nleq_jac)
 
-    return p, p - a, b - p, r
+    s_sy = beta.std(k + 1, d + 1)
+    s_lw = p - a
+    s_up = b - p
+
+    return p, s_sy, s_lw, s_up, r
 
 #_______________________________________________________________________________
 # Symmetric efficiency. In this case the efficiency is set to the mean of the
@@ -187,7 +191,7 @@ def CalcSymEfficiency( N, k, cl = 0.683 ):
 
     d    = N - k    
     mean = beta.mean(k + 1, d + 1)
-    p0   = min(PoissonEffUncert(N, k), BinomialEffUncert(N, k))
+    p0   = BinomialEffUncert(N, k)
     
     fc = lambda x: betainc(k + 1, d + 1, mean + x) - betainc(k + 1, d + 1, mean - x) - cl
     jc = lambda x: beta.pdf(mean + x, k + 1, d + 1) + beta.pdf(mean - x, k + 1, d + 1)
@@ -195,8 +199,3 @@ def CalcSymEfficiency( N, k, cl = 0.683 ):
     dist = fsolve(fc, p0, fprime = jc)[ 0 ]
 
     return mean, dist
-
-#_______________________________________________________________________________
-# Return the poisson uncertainty associated with having < k > events in < N >
-def PoissonEffUncert( N, k ):
-    return sqrt(k*float(N + k)/N**3)
