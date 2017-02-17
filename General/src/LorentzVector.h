@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -320,7 +320,7 @@ namespace General {
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Pt() const { return fP.Pt(); }
+  inline double LorentzVector::Pt() const { return fP.ModT(); }
 
   //_______________________________________________________________________________
   //

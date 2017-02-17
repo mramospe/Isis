@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/11/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------
 //
@@ -33,22 +33,44 @@
 
 namespace General {
 
-  //_______________________________________________________________________________
-  // These are the definitions of different useful functions
-  size_t      CalcIntLength( long int integer );
-  std::string CenterString( const std::string &str, const size_t &size, const char &ch = ' ' );
-  void        CheckParseOpts( const std::string              &str,
-			      const std::vector<std::string> &lst = {} );
-  void        ReplaceNames( std::vector<std::string> &vector,
-			    std::string               istr,
-			    std::string               ostr );
-  void        SplitString( std::vector<std::string> &output,
-			   const std::string        &str,
-			   const std::string        &expr );
-  void        StringVectorFilter( std::vector<std::string>       &output,
-				  const std::vector<std::string> &input,
-				  const std::string              &expr );
-  void        TrimString( std::string &str, const std::string &trexpr = " " );
+  // Calculates the length ( number of numbers ) for a given interger
+  size_t CalcIntLength( long int integer );
+
+  // This function allows to center a string in a place with width equal to
+  // < size >. In case of working with odd sizes the right hand will always be
+  // greater.
+  std::string CenterString( const std::string &str,
+			    const size_t      &size,
+			    const char        &ch = ' ' );
+
+  // Checks the current expression to see if it can be pased. If a list of strings
+  // is given, a check is made to see if all the names in the current expression
+  // are contained in such list.
+  void CheckParseOpts( const std::string              &str,
+		       const std::vector<std::string> &lst = {} );
+
+  // This function replaces all the substrings of the strings storaged in a vector
+  // with another
+  void ReplaceNames( std::vector<std::string> &vector,
+		     std::string               istr,
+		     std::string               ostr );
+
+  // Splits a given string < str > taking into account the expression < expr > that
+  // appears on it. The output is appended to the given vector.
+  void SplitString( std::vector<std::string> &output,
+		    const std::string        &str,
+		    const std::string        &expr );
+
+  // Filters the entries in the given vector following the rules imposed by the
+  // input variable < expr >. The strings that pass the filter are attached to the
+  // output vector.
+  void StringVectorFilter( std::vector<std::string>       &output,
+			   const std::vector<std::string> &input,
+			   const std::string              &expr );
+
+  // Trims the given string using < trexpr >. All the elements that match this
+  // expression in the front and back of < str > will be removed.
+  void TrimString( std::string &str, const std::string &trexpr = " " );
   
   //_______________________________________________________________________________
   // This function checks if the given string can be converted to a variable of the
@@ -132,7 +154,9 @@ namespace General {
 
   //_______________________________________________________________________________
   // Returns a given vector as a string
-  template<typename type> std::string VectorToString( const std::vector<type> &vector ) {
+  template<typename type>
+  std::string VectorToString( const std::vector<type> &vector ) {
+    
     std::stringstream ss;
     if ( vector.size() ) {
       ss << "[ " << vector[ 0 ];

@@ -7,14 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/08/2016
-//
-// --------------------------------------------------------
-//
-//  Description:
-//
-//  Template file that contains some utils to work with
-//  c++ classes.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -26,7 +19,7 @@
 
 
 //_______________________________________________________________________________
-// Calculates the length ( number of numbers ) for a given interger
+//
 size_t General::CalcIntLength( long int integer ) {
   size_t size = 0;
   if ( integer > 0 )
@@ -43,10 +36,10 @@ size_t General::CalcIntLength( long int integer ) {
 }
 
 //_______________________________________________________________________________
-// This function allows to center a string in a place with width equal to
-// < size >. In case of working with odd sizes the right hand will always be
-// greater.
-std::string General::CenterString( const std::string &str, const size_t &size, const char &ch ) {
+//
+std::string General::CenterString( const std::string &str,
+				   const size_t      &size,
+				   const char        &ch ) {
   unsigned short int
     rst = size - str.size(),
     coc = rst / 2;
@@ -57,9 +50,7 @@ std::string General::CenterString( const std::string &str, const size_t &size, c
 }
 
 //_______________________________________________________________________________
-// Checks the current expression to see if it can be pased. If a list of strings
-// is given, a check is made to see if all the names in the current expression
-// are contained in such list.
+//
 void General::CheckParseOpts( const std::string              &str,
 			      const std::vector<std::string> &lst ) {
 
@@ -102,8 +93,7 @@ void General::CheckParseOpts( const std::string              &str,
 }
 
 //_______________________________________________________________________________
-// This function replaces all the substrings of the strings storaged in a vector
-// with another
+//
 void General::ReplaceNames( std::vector<std::string> &vector, std::string istr, std::string ostr ) {
   size_t pos;
   for ( std::vector<std::string>::iterator it = vector.begin();
@@ -116,8 +106,7 @@ void General::ReplaceNames( std::vector<std::string> &vector, std::string istr, 
 }
 
 //_______________________________________________________________________________
-// Splits a given string < str > taking into account the expression < expr > that
-// appears on it. The output is appended to the given vector.
+//
 void General::SplitString( std::vector<std::string> &output,
 			   const std::string        &str,
 			   const std::string        &expr ) {
@@ -130,9 +119,7 @@ void General::SplitString( std::vector<std::string> &output,
 }
 
 //_______________________________________________________________________________
-// Filters the entries in the given vector following the rules imposed by the
-// input variable < expr >. The strings that pass the filter are attached to the
-// output vector.
+//
 void General::StringVectorFilter( std::vector<std::string>       &output,
 				  const std::vector<std::string> &input,
 				  const std::string              &expr ) {
@@ -155,7 +142,8 @@ void General::StringVectorFilter( std::vector<std::string>       &output,
   // if the < * > symbol is placed in the expression extremes, so they must be removed
   splitVec.assign( splitVec.begin() + !checkstart, splitVec.end() - !checkend );
   
-  // Adds each string to the new vector if they satisfy the requirements imposed by < expr >
+  // Adds each string to the new vector if they satisfy the requirements imposed
+  // by < expr >
   for ( auto it = input.begin(); it != input.end(); ++it ) {
     
     size_t
@@ -164,8 +152,8 @@ void General::StringVectorFilter( std::vector<std::string>       &output,
 
     bool cond1 = true, cond2 = true;
 
-    // If the start or the end does not coincide with the expected, the condition variable
-    // is set to < false >, so it does not enter into the following loop
+    // If the start or the end does not coincide with the expected, the condition
+    // variable is set to < false >, so it does not enter into the following loop
     if ( checkstart )
       if ( it -> find( splitVec.front() ) != 0 )
 	cond1 = false;
@@ -192,8 +180,7 @@ void General::StringVectorFilter( std::vector<std::string>       &output,
 }
 
 //_______________________________________________________________________________
-// Trims the given string using < trexpr >. All the elements that match this
-// expression in the front and back of < str > will be removed.
+//
 void General::TrimString( std::string &str, const std::string &trexpr ) {
   size_t pos = str.find_first_not_of( trexpr );
   str.erase( 0, pos );

@@ -97,7 +97,9 @@ namespace General {
   
   //_______________________________________________________________________________
   //
-  inline std::string SmartName::BuildFilePath( const std::string &ext ) { return fName + "." + ext; }
+  inline std::string SmartName::BuildFilePath( const std::string &ext ) {
+    return fName + "." + ext;
+  }
 
   //_______________________________________________________________________________
   //
