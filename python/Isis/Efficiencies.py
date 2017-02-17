@@ -19,6 +19,7 @@
 #/////////////////////////////////////////////////////////////////
 
 
+from Isis.IBoost.PyGeneral import SendErrorMsg
 from Isis.Decorators import DecoArgBase
 from math import sqrt
 from scipy.optimize import fsolve
@@ -57,8 +58,8 @@ class DecoEffInput( DecoArgBase ):
         Check the input numbers and call the stored function
         '''
         if k > N:
-            print 'ERROR: Calculating efficiency with a final number of '\
-                'events greater than the initial'
+            SendErrorMsg('Calculating efficiency with a final number of '\
+                         'events greater than the initial')
             return
         
         return self.Func(float(N), float(k), *args, **kwargs)

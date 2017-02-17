@@ -114,7 +114,7 @@ class FormatList:
                                           self.MarkSt, self.FillSt )
                   if isinstance( lst, list ) ]
         if len( set( lgths ) ) != 1:
-            print 'ERROR: Lists passed to FormatList instance have different lengths'
+            SendErrorMsg('Lists passed to FormatList instance have different lengths')
 
     def __getitem__( self, idx ):
         ''' Gets the format for the given index '''
@@ -204,7 +204,7 @@ def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
 # Returns the histogram constructor given the type as a string
 def HistFromType( tp, dim = 1 ):
     if tp not in ( 'float', 'double', 'int' ):
-        print 'ERROR: Histogram type', tp, 'not known'
+        SendErrorMsg('Histogram type < %s > not known' %tp)
         return
     if dim == 1:
         if tp == 'float':
@@ -221,7 +221,7 @@ def HistFromType( tp, dim = 1 ):
         else:
             return TH2I
     else:
-        print 'ERROR: Histogram dimension', dim, 'not allowed'
+        SendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
 
 #_______________________________________________________________________________
 # This function imports different plotting classes from Root
@@ -277,9 +277,11 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
-        print 'ERROR: Occupancy requested is too big:', minocc
+        SendErrorMsg('Occupancy requested is too big: %i' %iminocc)
     
-    ''' Creates a list with the values and the weights joint and sorts it by the values '''
+    '''
+    Creates a list with the values and the weights joint and sorts it by the values
+    '''
     values = zip( values, weights )
     values.sort()
     
@@ -583,7 +585,7 @@ def MultiPlot( mgrs, variables,
         results[ name ] = canvas
         return results
     else:
-        print 'ERROR: Any of the managers does not have access to some of the variables'
+        SendErrorMsg('Any of the managers does not have access to some of the variables')
         return
 
 #_______________________________________________________________________________

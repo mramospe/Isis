@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 03/01/2017
+#//  Last update: 17/02/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -23,6 +23,7 @@
 from ROOT import TFile, TTree, gDirectory
 from array import array
 import math
+from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
 from Isis.Algebra import LongVector, Matrix
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
@@ -57,9 +58,9 @@ class DataManager( dict ):
                 elif ftype == 'txt':
                     self.__init__( name, DictFromTxt( path, variables, colid ) )
                 else:
-                    print 'ERROR:', name, '=> Unknown input file type <', ftype, '>'
+                    SendErrorMsg('%s => Unknown input file type < %s >' %(name, ftype))
             else:
-                print 'ERROR:', name, '=> The input file type must be specified'
+                SendErrorMsg('%s => The input file type must be specified' %name)
         else:
             for kw, lst in path.iteritems():
                 self[ kw ] = list( lst )
@@ -69,8 +70,8 @@ class DataManager( dict ):
         
             wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
             if wrong:
-                print ( 'ERROR:', self.Name,
-                        '=> The lists stored in the manager have different lengths' )
+                SendErrorMsg('%s => The lists stored in the manager '\
+                             'have different lengths' %self.Name)
 
     def __add__( self, other ):
         '''
@@ -82,8 +83,8 @@ class DataManager( dict ):
             mgr[ var ] = self[ var ] + other[ var ]
         no_booked = set( self.keys() + other.keys() ).difference( true_vars )
         if no_booked:
-            print ( 'WARNING:', mgr.Name,
-                    '=> The following variables are not booked:', no_booked )
+            SendWarningMsg('%s => The following variables are not '\
+                           'booked: %s' %(mgr.Name, no_booked))
         return mgr
 
     def __iadd__( self, other ):
@@ -134,7 +135,8 @@ class DataManager( dict ):
         cut, variables = FormatEvalExpr( cut, mathmod )
         varstoadd = [ v for v in variables if v not in self ]
         if varstoadd:
-            print 'ERROR: Need to load additional variables to apply the cuts:', varstoadd
+            SendErrorMsg('Need to load additional variables to apply the cuts: %s'
+                         %varstoadd)
             return
         values = [ self[ var ] for var in variables ]
         for ivar in xrange( len( variables ) ):
@@ -266,7 +268,7 @@ class DataManager( dict ):
         '''
         
         if not self:
-            print 'ERROR:', self.Name, '=> No variables booked in this manager'
+            SendErrorMsg('%s => No variables booked in this manager' %self.Name)
             return
         
         form = '%.' + str( prec ) + 'e'
@@ -422,14 +424,14 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
             tnames = [ line[ i ] for i in colid ]
         line = ifile.readline().split()
     elif any( isinstance( line[ i ], str ) for i in colid ):
-        print 'ERROR: The first line of the input file has not the correct format'
+        SendErrorMsg('The first line of the input file has not the correct format')
         return
     else:
         if not tnames:
-            print 'ERROR: The names of the variables in the colid have to be specified'
+            SendErrorMsg('The names of the variables in the colid have to be specified')
             return
         elif len( tnames ) != len( colid ):
-            print 'ERROR: The names of the variables and the column index must match'
+            SendErrorMsg('The names of the variables and the column index must match')
             return
     convfuncs, varvalues = [], []
     for index, icol in enumerate( colid ):
@@ -443,7 +445,7 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
                 float( value )
                 convfuncs.append( float )
             except:
-                print 'ERROR: Format for column <', i, '> not recognised'
+                SendErrorMsg('Format for column < %s > not recognised' %i)
         varvalues.append( [ convfuncs[ -1 ]( value ) ] )
     for line in ifile:
         line = line.split()
@@ -470,7 +472,8 @@ def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
             if addlst != []:
                 truenames += addlst
             else:
-                print 'WARNING: No variables found matching expression <', expr, '>'
+                SendWarningMsg('No variables found matching '\
+                               'expression < %s >' %expr)
         return truenames
     else:
         return brnames

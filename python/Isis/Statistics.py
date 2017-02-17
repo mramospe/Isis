@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 11/07/2016
+#//  Last update: 17/02/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -22,7 +22,9 @@
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
-from Isis.PlotTools import HistFromType, MakeAdaptiveBinnedHist, MakeCumulative, MakeHistogram
+from Isis.IBoost.PyGeneral import SendError, SendWarning
+from Isis.PlotTools import ( HistFromType, MakeAdaptiveBinnedHist,
+                             MakeCumulative, MakeHistogram )
 from Isis.Utils import CalcMinDist
 from array import array
 from bisect import bisect
@@ -219,7 +221,8 @@ class IntegralTransformer:
                 print ( 'INFO: After the transformation, all the values greater than one will be ' +
                         'attached to the last bin' )
             if self.AdaptBin:
-                print 'WARNING: Adaptive binned method not available with a TH1 object as input'
+                SendWarningMsg('Adaptive binned method not available with a '\
+                               'TH1 object as input')
             self.AdaptBin = False
             self.MainHist = arg
             self.Nbins    = nbins
@@ -311,13 +314,13 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
         ''' If the classes are histograms it works using the bins contents '''
         nbins = smpRef.GetNbinsX()
         if nbins != smpObs.GetNbinsX():
-            print 'ERROR: The number of bins is different for both samples'
+            SendErrorMsg('The number of bins is different for both samples')
             return
         elif smpRef.GetXaxis().GetXmin() != smpObs.GetXaxis().GetXmin():
-            print 'ERROR: The minimum values for the axis of the histograms do not match'
+            SendErrorMsg('The minimum values for the axis of the histograms do not match')
             return
         elif smpRef.GetXaxis().GetXmax() != smpObs.GetXaxis().GetXmax():
-            print 'ERROR: The maximum values for the axis of the histograms do not match'
+            SendErrorMsg('The maximum values for the axis of the histograms do not match')
             return
     else:
         if binned:
@@ -412,7 +415,7 @@ def Mode( lst ):
         if vdict[ el ] == oldmax:
             nmodes += 1
     if nmodes > 1:
-        print 'WARNING: A number of', nmodes, 'exist in the input list'
+        SendWarningMsg('A number of < %i > modes exist in the input list' %nmodes)
     return oldmax
 
 #_______________________________________________________________________________

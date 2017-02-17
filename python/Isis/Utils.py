@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/01/2017
+#//  Last update: 17/02/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -21,6 +21,7 @@
 
 import os, fcntl, math, struct, termios, sys
 import __builtin__
+from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.Algebra import Matrix, SolveLU
 
 
@@ -50,9 +51,9 @@ def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
         if verbose:
             part = 'is away from its expectation by %.2f std. dev.' % nsigma
             if name:
-                print 'WARNING: Parameter < %s > ' % name + part
+                SendWarningMsg('Parameter < %s > %s' %(name, part))
             else:
-                print 'WARNING: Parameter ' + part
+                SendWarningMsg('Input parameter ' + part)
 
     return status
 
@@ -147,14 +148,17 @@ def FormatEvalExpr( expr, mathmod = math ):
                 try:
                     float( left )
                     if right:
-                        print 'ERROR: Unable to parse expression <', el, '>'
+                        SendErrorMsg('Unable to parse expression < %s >' %el)
                         return
                     else:
                         try:
-                            ''' The < 0 > is added since it could find a string like < 1e > '''
+                            '''
+                            The < 0 > is added since it could find a string like < 1e >
+                            '''
                             float( variables[ idx + 1 ] + '0' )
                         except:
-                            print 'ERROR: Unable to parse expression; error in floating constant'
+                            SendErrorMsg('Unable to parse expression; error in '\
+                                         'floating constant')
                             return
                     isfloat = True
                 except:
@@ -167,7 +171,7 @@ def FormatEvalExpr( expr, mathmod = math ):
             except:
                 it = el[ 0 ]
                 if it.isdigit() or it == '.':
-                    print 'ERROR: Unable to parse expression <', el, '>'
+                    SendErrorMsg('Unable to parse expression < %s >' %el)
                     return
                 else:
                     isfloat = False
@@ -213,7 +217,8 @@ def InferValue( x, y, x0, nord = False ):
             nord += 1
         else:
             nord = lp
-            print 'WARNING: Order greater than the number of points. Value set to', lp
+            SendWarningMsg('Order greater than the number of points. '\
+                           'Value set to < %i >' %lp)
     else:
         nord = lp
 
@@ -257,7 +262,7 @@ def JoinDicts( *args ):
         for key in dic:
             if key in rdict:
                 del rdict[ key ]
-                print 'WARNING: Key <', key, '> already in dictionary. Not considered.'
+                SendWarningMsg('Key < %s > already in dictionary. Not considered.' %key)
             else:
                 rdict[ key ] = dic[ key ]
     return rdict
@@ -332,7 +337,8 @@ def MergeDicts( *args ):
         keys = dic.keys()
         for key in kvars:
             if key not in keys:
-                print 'WARNING: Key <', key, '> does not appear in all dictionaries; not merged'
+                SendWarningMsg('Key < %s > does not appear in all dictionaries; '\
+                               'not merged' %key)
                 kvars.remove( key )
     rdic = {}
     for key in kvars:
@@ -422,13 +428,13 @@ class PythonEnvMgr:
         clname = 'class ' + name + ':\n'
 
         if any( line.startswith( name ) for line in lines ):
-            print 'WARNING: Overwriting in <', ofile.name, \
-                '>; a variable called <', name, '> already exists'
+            SendWarningMsg('Overwriting in < %s >; a variable called < %s > '\
+                           'already exists' %(ofile.name, name))
 
         if clname in lines:
 
-            print 'WARNING: Replacing existing environment <', name,\
-                '> in file <', ofile.name, '>'
+            SendWarningMsg('Replacing existing environment < %s > in '\
+                           'file < %s >' %(name, ofile.name))
         
             ofile.truncate()
             start = lines.index( clname )
@@ -507,9 +513,9 @@ class StrNumGenerator:
         if not end:
             start, end = 0, start
         elif end < start:
-            print 'ERROR: The starting number has to be greater than the ending'
+            SendErrorMsg('The starting number has to be greater than the ending')
         if end < 0 or start < 0:
-            print 'ERROR: Input parameters have to be both positive'
+            SendErrorMsg('Input parameters have to be both positive')
         self.CurrIter  = start
         self.MaxIter   = end
         self.MaxStrLen = len( str( end ) )
