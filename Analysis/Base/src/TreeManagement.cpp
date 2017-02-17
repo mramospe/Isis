@@ -29,37 +29,48 @@
 
 //_______________________________________________________________________________
 //
-void Analysis::GetBranchNames( std::vector<std::string> &vector,
-			       TTree *inputTree,
-			       const std::string &expr ) {
+size_t Analysis::GetBranchNames( std::vector<std::string> &vector,
+				 TTree *inputTree,
+				 const std::string &expr ) {
+  
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::vector<std::string> brVector( brList -> GetEntries() );
   for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
     brVector[ ibr ] = brList -> At( ibr ) -> GetName();
+  
+  size_t n = vector.size();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
   else
     vector.insert( vector.end(), brVector.begin(), brVector.end() );
+  
+  return vector.size() - n;
 }
 
 //_______________________________________________________________________________
 //
-void Analysis::GetBranchTitles( std::vector<std::string> &vector,
-				TTree *inputTree,
-				const std::string &expr ) {
+size_t Analysis::GetBranchTitles( std::vector<std::string> &vector,
+				  TTree *inputTree,
+				  const std::string &expr ) {
+  
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::vector<std::string> brVector( brList -> GetEntries() );
   for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
     brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
+
+  size_t n = vector.size();
   if ( expr.size() )
     General::StringVectorFilter( vector, brVector, expr );
   else
     vector.insert( vector.end(), brVector.begin(), brVector.end() );
+
+  return vector.size() - n;
 }
 
 //_______________________________________________________________________________
 //
 size_t Analysis::GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
+  
   std::vector<std::string> vector;
   Analysis::GetBranchNames( vector, inputTree, expr );
   return vector.size();
@@ -68,6 +79,7 @@ size_t Analysis::GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
 //_______________________________________________________________________________
 //
 size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
+  
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
@@ -84,6 +96,7 @@ size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
 size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 				     const char &type,
 				     const std::vector<std::string> &vector ) {
+  
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
   size_t      counter( 0 );
@@ -98,6 +111,7 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 //_______________________________________________________________________________
 //
 char Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
+  
   TObjArray *brList = inputTree -> GetListOfBranches();
   TObject *obj = brList -> FindObject( var.c_str() );
   if ( !obj )
@@ -120,8 +134,10 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
     exit( 0 );
   }
 
-  IBegMsg << " Changing variables in tree: < "   << inputTree  -> GetName() << " >" << IEndMsg;
-  IBegMsg << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << IEndMsg;
+  IBegMsg << " Changing variables in tree: < "   << inputTree  -> GetName()
+	  << " >" << IEndMsg;
+  IBegMsg << " Output tree will be saved in: < " << gDirectory -> GetName()
+	  << " >" << IEndMsg;
 
   // Deactivates the branches of the input variables
   for ( auto it = ivars.begin(); it != ivars.end(); ++it )

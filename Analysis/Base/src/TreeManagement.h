@@ -33,15 +33,17 @@
 
 namespace Analysis {
 
-  // Appends to the given vector all the names of the branches in a tree
-  void GetBranchNames( std::vector<std::string> &vector,
-		       TTree *inputTree,
-		       const std::string &expr = "" );
+  // Appends to the given vector all the names of the branches in a tree. Returns
+  // the number of branches appended.
+  size_t GetBranchNames( std::vector<std::string> &vector,
+			 TTree *inputTree,
+			 const std::string &expr = "" );
 
-  // Appends to the given vector all the titles of the branches in a tree
-  void GetBranchTitles( std::vector<std::string> &vector,
-			TTree *inputTree,
-			const std::string &expr = "" );
+  // Appends to the given vector all the titles of the branches in a tree. Returns
+  // the number of branches appended.
+  size_t GetBranchTitles( std::vector<std::string> &vector,
+			  TTree *inputTree,
+			  const std::string &expr = "" );
 
   // Gets the number of variables in a tree whose name contains a given keyword
   size_t GetNvarsWithExpr( TTree *inputTree, const std::string &expr );

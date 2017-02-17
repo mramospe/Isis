@@ -98,7 +98,10 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 
     // Get the variables from the given expressions
     std::vector<std::string> brnames;
-    Analysis::GetBranchNames(brnames, itree, var);
+    size_t nadded = Analysis::GetBranchNames(brnames, itree, var);
+    if ( !nadded )
+      IWarning << "No variables have been found following expression < "
+	       << var << " >" << IEndMsg;
 
     // Do not swap these two lines, since the path must be set after the
     // variable is enabled
