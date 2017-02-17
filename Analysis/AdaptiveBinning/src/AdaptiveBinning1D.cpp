@@ -7,21 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/12/2016
-//
-// --------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements the class to make one-dimensional adaptive binning
-//  histograms. The construction can be made given a set of vectors
-//  or a TTree object and the name of the leaves.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 
 #include "AdaptiveBinning1D.h"
+#include "Messenger.h"
 
 #include "TLeaf.h"
 
@@ -31,16 +24,11 @@
 
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Main constructor
+//
 Analysis::AdaptiveBinning1D::AdaptiveBinning1D() : AdaptiveBinning() { }
 
 //______________________________________________________________________________
-// Constructor given vectors of values
+//
 Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
 						double  vmin,
 						double  vmax,
@@ -55,9 +43,9 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
   auto itv = values.begin();
   if ( weights.size() ) {
     if ( values.size() != weights.size() )
-      std::cerr <<
-	"ERROR: The lengths of the vectors containing the values and the weights do no match"
-		<< std::endl;
+      IError <<
+	"The lengths of the vectors containing the values and the weights do no match"
+	     << IEndMsg;
     auto itw = weights.begin();
     while( itv != values.end() ) {
       if ( *itv >= vmin && *itv < vmax )
@@ -84,7 +72,7 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
   
   // If the number of bins is zero an error is displayed
   if ( nbins == 0 )
-    std::cerr << "ERROR: Occupancy requested is too big: " << occ << std::endl;
+    IError << "Occupancy requested is too big: " << occ << IEndMsg;
   
   // Creates the vector of bins
   fBinList = std::vector<Bin*>( nbins );
@@ -120,16 +108,11 @@ Analysis::AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
 }
 
 //______________________________________________________________________________
-// Destructor
+//
 Analysis::AdaptiveBinning1D::~AdaptiveBinning1D() { }
 
 //______________________________________________________________________________
-
-
-// -- PUBLIC METHOD
-
-//______________________________________________________________________________
-// Returns an empty histogram with the adaptive binning structure
+//
 TH1D* Analysis::AdaptiveBinning1D::GetStruct( const char *name, const char *title ) const {
  double *bins = new double[ fBinList.size() + 1 ];
   for ( size_t i = 0; i < fBinList.size(); ++i )

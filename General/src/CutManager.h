@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 17/02/2016
 //
 // --------------------------------------------------------
 //
@@ -33,6 +33,8 @@
 
 #ifndef CUT_MANAGER
 #define CUT_MANAGER
+
+#include "Messenger.h"
 
 #include <iostream>
 #include <fstream>
@@ -116,9 +118,9 @@ namespace General {
     if ( fFile.use_count() == 1 )
       (*fFile).close();
     else
-      std::cout <<
-	"WARNING: Attempt to close a file when more than one manager is accessing it"
-		<< std::endl;
+      IWarning<<
+	"Attempt to close a file when more than one manager is accessing it"
+		<< IEndMsg;
   }
 
   //_______________________________________________________________________________

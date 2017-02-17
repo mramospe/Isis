@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 17/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 
+#include "Messenger.h"
 #include "ValueTypeDef.h"
 
 
@@ -91,8 +92,8 @@ namespace General {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_GET_PTR_VALUE,
 			  
-			  std::cerr << "ERROR: The type of the buffer variable "
-			  "has not been specified yet" << std::endl;
+			  IError << "The type of the buffer variable "
+			  "has not been specified yet" << IEndMsg;
 			  );
   }
 
@@ -120,8 +121,8 @@ namespace General {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_SET_PTR_VALUE,
 			  
-			  std::cerr << "ERROR: The type of the buffer variable "
-			  "has not been specified yet" << std::endl;
+			  IError << "The type of the buffer variable "
+			  "has not been specified yet" << IEndMsg;
 			  );
   }
   

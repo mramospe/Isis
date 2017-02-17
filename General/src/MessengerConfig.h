@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 17/02/2016
 //
 // ---------------------------------------------------------
 //
@@ -67,10 +67,10 @@ namespace General {
 
 //_______________________________________________________________________________
 // Definition of the objects to display the basic types of messages
-#define BegMsg  General::Messenger("--- "     , std::cout, General::ANSIFormat::aNoColor)
-#define Error   General::Messenger("ERROR: "  , std::cerr, General::ANSIFormat::ErrorColor)
-#define Info    General::Messenger("INFO: "   , std::cout, General::ANSIFormat::InfoColor)
-#define Warning General::Messenger("WARNING: ", std::cout, General::ANSIFormat::WarningColor)
-#define EndMsg  General::EndMsgLine
+#define IBegMsg  General::Messenger("--- "     , std::cout, General::ANSIFormat::aNoColor)
+#define IError   General::Messenger("ERROR: "  , std::cerr, General::ANSIFormat::ErrorColor)
+#define IInfo    General::Messenger("INFO: "   , std::cout, General::ANSIFormat::InfoColor)
+#define IWarning General::Messenger("WARNING: ", std::cout, General::ANSIFormat::WarningColor)
+#define IEndMsg  General::EndMsgLine
 
 #endif

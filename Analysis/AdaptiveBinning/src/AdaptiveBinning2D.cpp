@@ -7,21 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/12/2016
-//
-// --------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements the class to make two-dimensional adaptive binning
-//  histograms. The construction can be made given a set of vectors
-//  or a TTree object and the name of the leaves.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
 
 
 #include "AdaptiveBinning2D.h"
+#include "Messenger.h"
 
 #include "TLeaf.h"
 
@@ -30,16 +23,11 @@
 
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Main constructor
+//
 Analysis::AdaptiveBinning2D::AdaptiveBinning2D() : AdaptiveBinning() { }
 
 //______________________________________________________________________________
-// Constructor given vectors of values
+//
 Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 						double      xmin,
 						double      xmax,
@@ -102,7 +90,7 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
     nbins    = 1;
   
   if ( max_iter == 0 )
-    std::cerr << " ERROR: minimum occupancy is so big, decrease it." << std::endl;
+    IError << "Minimum occupancy is so big, decrease it." << IEndMsg;
 
   double
     xrange( *std::max_element( xvalues.begin(), xvalues.end() ) -
@@ -149,7 +137,7 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 }
 
 //______________________________________________________________________________
-// Destructor
+//
 Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() {
 
   for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end(); ++it )
@@ -157,12 +145,7 @@ Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() {
 }
 
 //______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//______________________________________________________________________________
-// Makes an adjusted adaptive binned histogram
+//
 TH2Poly* Analysis::AdaptiveBinning2D::GetAdjStruct( const char *name,
 						    const char *title ) const {
   TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );
@@ -174,7 +157,7 @@ TH2Poly* Analysis::AdaptiveBinning2D::GetAdjStruct( const char *name,
 }
 
 //______________________________________________________________________________
-// Makes an adaptive binned histogram
+//
 TH2Poly* Analysis::AdaptiveBinning2D::GetStruct( const char *name,
 						 const char *title ) const {
   TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );

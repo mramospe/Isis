@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/07/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -36,44 +36,66 @@ namespace Analysis {
 
   public:
 
-    // Constructor and destructor
+    // Main constructor
     ClusterPoint( const size_t &nvars = 0, const double &wgt = 1 );
+
+    // Constructor given a vector of values
     ClusterPoint( const std::vector<double> &values, const double &wgt = 1 );
+
+    // Destructor
     virtual ~ClusterPoint();
     
-    // Inline methods
-    inline const double               GetValue( const size_t &index ) const;
+    // Returns the value for the variable at position < index >
+    inline const double GetValue( const size_t &index ) const;
+
+    // Returns the vector with the values and the weights
     inline const std::vector<double>& GetValues() const;
-    inline const double               GetWeight() const;
-    inline void                       Normalize( const std::vector<double> &norm );
-    inline void                       SetValues( const std::vector<double> &values,
-						 const double              &wgt = 1 );
+
+    // Returns the global weight of the point
+    inline const double GetWeight() const;
+
+    // Normalizes the point given the normalization factors for each variable
+    inline void Normalize( const std::vector<double> &norm );
+
+    // Sets the values for this point
+    inline void SetValues( const std::vector<double> &values,
+			   const double              &wgt = 1 );
 
   protected:
   
-    // Attributes
+    // Vector with the values for each dimension
     std::vector<double> fValues;
-    double              fWeight;
+
+    // Weight of the point
+    double fWeight;
     
   };
 
-  //__________________
-  // -- INLINE METHODS
+  //_______________________________________________________________________________
+  //
+  const double ClusterPoint::GetValue( const size_t &index ) const {
+    return fValues[ index ];
+  }
 
-  // Returns the value for the variable at position < index >
-  const double ClusterPoint::GetValue( const size_t &index ) const { return fValues[ index ]; }
-  // Returns the vector with the values and the weights
+  //_______________________________________________________________________________
+  //
   const std::vector<double>& ClusterPoint::GetValues() const { return fValues; }
-  // Returns the global weight of the point
+
+  //_______________________________________________________________________________
+  //
   const double ClusterPoint::GetWeight() const { return fWeight; }
-  // Normalizes the point given the normalization factors for each variable
+
+  //_______________________________________________________________________________
+  //
   void ClusterPoint::Normalize( const std::vector<double> &norm ) {
     auto itv = fValues.begin();
     auto itm = norm.begin();
     while ( itv != fValues.end() )
       *itv++ /= *itm++;
   }
-  // Sets the values for this point
+
+  //_______________________________________________________________________________
+  //
   void ClusterPoint::SetValues( const std::vector<double> &values, const double &wgt ) {
     fValues = values;
     fWeight = wgt;

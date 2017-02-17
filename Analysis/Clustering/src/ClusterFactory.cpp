@@ -7,25 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 05/10/2016
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  Main class to perform cluster analysis. It can work by two different ways:
-//  the first of them implies that the number of clusters has to be defined
-//  previously, while in the second is the proper class which defines the
-//  number of clusters that fit the given data. The different options are set
-//  using the constructor or the method < Configure >. All methods work better
-//  with gaussian distributions. One must specify after the construction, the
-//  variables to work with, in order to avoid dimensional errors.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 
 #include "ClusterFactory.h"
+#include "Messenger.h"
 #include "Utils.h"
 
 #include <algorithm>
@@ -36,14 +25,7 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor. The options for the factory must be given in a string,
-// following the convention of the < Parse > functions defined in Utils.h. The
-// configuration options can be seen in the method < Configure >.
+//
 Analysis::ClusterFactory::ClusterFactory( const std::string &opts ) :
   Cluster(),
   fClusteringMethod( &ClusterFactory::ConvergenceMethod ),
@@ -56,20 +38,72 @@ Analysis::ClusterFactory::ClusterFactory( const std::string &opts ) :
   fNiter( 10 ),
   fVerbose( true ) {
   
-  this -> Configure( opts );
-  }
+  this->Configure( opts );
+}
 
 //_______________________________________________________________________________
-// Destructor
+//
 Analysis::ClusterFactory::~ClusterFactory() { }
 
 //_______________________________________________________________________________
+//
+void Analysis::ClusterFactory::BuildCentersOfMass() {
+  
+  // Removes the points stored in the clusters
+  std::cout << "Removing points in clusters" << std::endl;
+  this->Reset();
 
+  std::cout << "Building centers of mass" << std::endl;
+  
+  // Loops over the clusters to set the initial points
+  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
+    
+    std::vector< std::pair<PointArray::iterator, double> >
+      distances( fPoints.size() - fPointsToAvoid.size() );
 
-// -- PUBLIC METHODS
+    auto itd = distances.begin();
+    auto itp = fPoints.begin();
+    
+    // The distance is taken according to the variance of the main cluster
+    while ( itd != distances.end() ) {
+      
+      if ( std::find( fPointsToAvoid.begin(), fPointsToAvoid.end(), itp ) ==
+	   fPointsToAvoid.end() ) {
+	itd->first  = itp;
+	itd->second = this->DistanceBetweenPoints( itc->GetCenterOfMass(), *itp );
+	++itd;
+      }
+      
+      ++itp;
+    }
+    
+    // The points are sorted according to the distance to the cluster, but using the main standard
+    // deviation (from the main cluster)
+    std::sort( distances.begin(),
+	       distances.end(),
+	       [] ( const std::pair<PointArray::iterator, double> &itl,
+		    const std::pair<PointArray::iterator, double> &itr ) {
+		 return itl.second < itr.second; } );
+
+    // Points are added till no null variances are found
+    itd = distances.begin();
+    do {
+      itc->AddPoint( *(itd->first) );
+      fPointsToAvoid.push_back( itd->first );
+      ++itd;
+    } while ( itc->GetCenterOfMass().AnyNullSigma() );
+
+    size_t icluster = itc - fClusters.begin();
+    std::cout <<
+      "Cluster < " << icluster << " > built with < " << itc->GetPoints().size() << " > points"
+		   << std::endl;
+  }
+
+  std::cout << "Defined initial centers of mass" << std::endl;
+}
 
 //_______________________________________________________________________________
-// Main function that calculates the clusters
+//
 void Analysis::ClusterFactory::CalculateClusters() {
 
   // Displays the initial message and the configuration values
@@ -99,14 +133,14 @@ void Analysis::ClusterFactory::CalculateClusters() {
       mean2 = 0;
     
     for ( auto itp = fPoints.cbegin(); itp != fPoints.cend(); ++itp ) {
-      double val = itp -> GetValue( inr );
+      double val = itp->GetValue( inr );
       mean  += val;
       mean2 += val*val;
     }
     fVarNorm[ inr ] = std::sqrt( mean2/npoints - mean/( npoints*npoints ) );
   }
   for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
-    it -> Normalize( fVarNorm );
+    it->Normalize( fVarNorm );
   fCenterOfMass.Normalize( fVarNorm );
   
   // Defines the initial centers of mass. If this function manages the number of clusters, all of
@@ -135,9 +169,9 @@ void Analysis::ClusterFactory::CalculateClusters() {
 	  fClusters.push_back( Analysis::Cluster( fClusterWeights.at( i ) ) );
     }
   }
-  (this ->* fComDefMethod)();
+  (this->*fComDefMethod)();
   if ( fVerbose )
-    this -> Display( &ClusterFactory::PrintCentersOfMass, "Initial centers of mass" );
+    this->Display( &ClusterFactory::PrintCentersOfMass, "Initial centers of mass" );
   
   
   // Calls the center of mass definition algorithm as well as the clustering algorithm. If the
@@ -148,12 +182,12 @@ void Analysis::ClusterFactory::CalculateClusters() {
     std::cout << "*** Looking for the best cluster configuration ***" << std::endl;
 
     // Calls the clustering method for the first time
-    (this ->* fClusteringMethod)();
+    (this->*fClusteringMethod)();
     
     // Defines the clusters for the first time to determine the satus
     bool
       dec       = true,
-      oldstatus = this -> ManageClusters();
+      oldstatus = this->ManageClusters();
     
     // The convergence process adding and substracting clusters starts here
     size_t counter = 0;
@@ -168,33 +202,33 @@ void Analysis::ClusterFactory::CalculateClusters() {
 	fClusters.pop_back();
 
       // Calls again the two clustering methods to get the new status
-      (this ->* fComDefMethod)();
-      (this ->* fClusteringMethod)();
-      bool newstatus = this -> ManageClusters();
+      (this->*fComDefMethod)();
+      (this->*fClusteringMethod)();
+      bool newstatus = this->ManageClusters();
       
       // If the status changes it exits the loop
       if ( newstatus != oldstatus ) {
 	dec = false;
 	if ( oldstatus ) {
 	  fClusters.pop_back();
-	  (this ->* fComDefMethod)();
-	  (this ->* fClusteringMethod)();
+	  (this->*fComDefMethod)();
+	  (this->*fClusteringMethod)();
 	}
       }
     }
   }
   else {
     // Here the class just calls the clustering method and checks if it has converged
-    if ( (this ->* fClusteringMethod)() )
+    if ( (this->*fClusteringMethod)() )
       std::cout << "Clustering process successful" << std::endl;
     else
-      std::cerr << "WARNING: The method has not converged yet" << std::endl;
+      IWarning << "The method has not converged yet" << IEndMsg;
   }
   std::cout << "Number of clusters: " << fClusters.size() << std::endl;
     
   // Displays the final results
   if ( fVerbose )
-    this -> Display( &ClusterFactory::PrintCentersOfMass, "Final centers of mass" );
+    this->Display( &ClusterFactory::PrintCentersOfMass, "Final centers of mass" );
 
   
   // Renormalizes the values in the different clusters, so the points now will have the true
@@ -203,9 +237,9 @@ void Analysis::ClusterFactory::CalculateClusters() {
   for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
     *it = 1/(*it);
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
-    it -> Normalize( invnorm );
+    it->Normalize( invnorm );
   }
-  this -> Normalize( invnorm );
+  this->Normalize( invnorm );
 
   std::cout << "***************************************" << std::endl;
   std::cout << "*** Generation of clusters finished ***" << std::endl;
@@ -213,29 +247,6 @@ void Analysis::ClusterFactory::CalculateClusters() {
 }
 
 //_______________________________________________________________________________
-// Configures the current factory with the options given. The different options
-// are the following:
-//  - ComDefMethod     => Method to define the initial position of the centers of
-//                        mass of the clusters (Distance/Random).
-//  - ClusteringMethod => Method to perform the clustering process (Iterative/
-//                        Convergence).
-//  - ManageClusters   => Enables or disables the capability of this class to add
-//                        or substract clusters.
-//  - MaxComVar        => Maximum variation of the centers of mass allowed for
-//                        the < Convergence > method. In the < Iterative > method
-//                        only a warning will be displayed.
-//  - nComStdDev       => Number of standard deviations between clusters. If two
-//                        clusters are separated by an amount smaller than the
-//                        sum of both standard deviations multiplied by this
-//                        quantity, one of them will be removed.
-//  - MinNpoints       => Minimum number of points needed to consider a cluster.
-//  - nClusters        => Initial number of clusters.
-//  - nIter            => Number of iterations. For the < Iterative > method, it
-//                        will be considered as the maximum number of iterations
-//                        to be performed. In the < Convergence > method, it is
-//                        set to the maximum number of iterations that can be
-//                        performed to look for convergence.
-//  - Verbose          => Controls the display of the messages of the class.
 //
 void Analysis::ClusterFactory::Configure( const std::string &opts ) {
 
@@ -261,7 +272,7 @@ void Analysis::ClusterFactory::Configure( const std::string &opts ) {
     else if ( method == "Distance" )
       fComDefMethod = &ClusterFactory::DistanceCentersOfMass;
     else {
-      std::cerr << "WARNING: Input method < " << method << " > not known; set to default" << std::endl;
+      IWarning << "Input method < " << method << " > not known; set to default" << IEndMsg;
       fComDefMethod = &ClusterFactory::RandomCentersOfMass;
     }
   }
@@ -275,7 +286,7 @@ void Analysis::ClusterFactory::Configure( const std::string &opts ) {
     else if ( method == "Convergence" )
       fClusteringMethod = &ClusterFactory::ConvergenceMethod;
     else {
-      std::cerr << "WARNING: Input method < " << method << " > not known; set to default" << std::endl;
+      IWarning << "Input method < " << method << " > not known; set to default" << IEndMsg;
       fClusteringMethod = &ClusterFactory::IterativeMethod;
     }
   }
@@ -310,7 +321,7 @@ void Analysis::ClusterFactory::Configure( const std::string &opts ) {
 }
 
 //_______________________________________________________________________________
-// Displays the current centers of mass of the clusters
+//
 void Analysis::ClusterFactory::PrintCentersOfMass( std::string title ) {
   
   // If the number of clusters or the maximum size of the names of the variables is smaller than
@@ -319,7 +330,7 @@ void Analysis::ClusterFactory::PrintCentersOfMass( std::string title ) {
     maxvarsize = std::max_element( fVarOrder.begin(), fVarOrder.end(),
 				   [] ( const std::string &str1,
 					const std::string &str2 ) {
-				     return str1.size() < str2.size(); } ) -> size() + 2,
+				     return str1.size() < str2.size(); } )->size() + 2,
     nclsize = std::to_string( fClusters.size() ).size() + 2;
   if ( nclsize < 8 )
     nclsize = 8;
@@ -359,8 +370,8 @@ void Analysis::ClusterFactory::PrintCentersOfMass( std::string title ) {
   size_t icluster = 0;
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++icluster ) {
     std::cout << '|' << std::setw( nclsize ) << icluster << ' ';
-    for ( auto itv = it -> GetCenterOfMass().GetValues().begin();
-	  itv != it -> GetCenterOfMass().GetValues().end(); ++itv ) {
+    for ( auto itv = it->GetCenterOfMass().GetValues().begin();
+	  itv != it->GetCenterOfMass().GetValues().end(); ++itv ) {
       std::cout << '|' << std::setw( maxvarsize ) << *itv << ' ';
     }
     std::cout << '|' << std::endl;
@@ -377,7 +388,7 @@ void Analysis::ClusterFactory::PrintCentersOfMass( std::string title ) {
 }
 
 //_______________________________________________________________________________
-// Displays the distances among the different clusters
+//
 void Analysis::ClusterFactory::PrintDistances( std::string title ) {
   
   // If the size given the number of clusters is small, the size for the numbers is set to
@@ -417,7 +428,7 @@ void Analysis::ClusterFactory::PrintDistances( std::string title ) {
       if ( itcr == itcc )
 	std::cout << std::setw( numsize ) << 0;
       else
-	std::cout << std::setw( numsize ) <<  itcr -> DistanceToCluster( itcc -> GetCenterOfMass() );
+	std::cout << std::setw( numsize ) <<  itcr->DistanceToCluster( itcc->GetCenterOfMass() );
     }
     std::cout << " |" << std::endl;
   }
@@ -425,43 +436,35 @@ void Analysis::ClusterFactory::PrintDistances( std::string title ) {
 }
 
 //_______________________________________________________________________________
-// Sets the weights for a given cluster. This weights are only taken into account
-// if the class does not manage the number of clusters. If < index > is negative,
-// the weights will be applied to all clusters (included the factory).
-void Analysis::ClusterFactory::SetClusterWeights( const int &index, const std::vector<double> &wgts ) {
+//
+void Analysis::ClusterFactory::SetClusterWeights( const int &index,
+						  const std::vector<double> &wgts ) {
   if ( wgts.size() != fVarNorm.size() ) {
-    std::cerr << "ERROR: The length of the weights must match the number of variables" << std::endl;
+    IError << "The length of the weights must match the number of variables" << IEndMsg;
     return;
   }
   if ( index > 0 )
     fClusterWeights[ index ] = wgts;
   else {
-    this -> SetWeights( wgts );
+    this->SetWeights( wgts );
     for ( size_t i = 0; i < fClusters.size(); ++i )
       fClusterWeights[ i ] = wgts;
   }
 }
 
 //_______________________________________________________________________________
-
-
-// -- PRIVATE METHODS
-
-//_______________________________________________________________________________
-// This method resets the all the clusters stored in the factory. The infomation
-// about the center of mass and the points to avoid is also lost.
+//
 inline void Analysis::ClusterFactory::Reset() {
 
   for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
-    itc -> ResetCenterOfMassWeight();
-    itc -> RemovePoints();}
+    itc->ResetCenterOfMassWeight();
+    itc->RemovePoints();}
 
   fPointsToAvoid.clear();
 }
 
 //_______________________________________________________________________________
-// Funcion used to display the information inside the different methods. Here the
-// clusters are normalized if required.
+//
 inline void Analysis::ClusterFactory::Display( void (ClusterFactory::*funcptr)( std::string ),
 					       const std::string &title ) {
   
@@ -473,24 +476,23 @@ inline void Analysis::ClusterFactory::Display( void (ClusterFactory::*funcptr)( 
     for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
       *it = 1./(*it);
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it )
-      it -> NormalizeCenterOfMass( invnorm );
+      it->NormalizeCenterOfMass( invnorm );
     fCenterOfMass.Normalize( invnorm );
   }
 
   // Calls the function
-  (this ->* funcptr)( title );
+  (this->*funcptr)( title );
 
   if ( dec ) {
     // Renormalizes the clusters back to the previous status
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it )
-      it -> NormalizeCenterOfMass( fVarNorm );
+      it->NormalizeCenterOfMass( fVarNorm );
     fCenterOfMass.Normalize( fVarNorm );
   }
 }
 
 //_______________________________________________________________________________
-// Method to calculate the initial centers of mass of the clusters taking into
-// account the minimum position allowed between clusters.
+//
 void Analysis::ClusterFactory::DistanceCentersOfMass() {
   
   // First calculates the distances from the points to the center of mass of the main cluster
@@ -498,8 +500,8 @@ void Analysis::ClusterFactory::DistanceCentersOfMass() {
   std::vector< std::pair<PointArray::iterator, double> > distances( fPoints.size() );
   auto itd = distances.begin();
   for ( auto itp = fPoints.begin(); itp != fPoints.end(); ++itp, ++itd ) {
-    itd -> first  = itp;
-    itd -> second = this -> DistanceToCluster( *itp );
+    itd->first  = itp;
+    itd->second = this->DistanceToCluster( *itp );
   }
   
   // Sorts the points to select the maximums
@@ -516,21 +518,21 @@ void Analysis::ClusterFactory::DistanceCentersOfMass() {
   itd = distances.begin();
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
     
-    it -> InitCenterOfMass( *(itd++ -> first) );
+    it->InitCenterOfMass( *(itd++->first) );
     
     for ( auto itc = fClusters.begin(); itc != it; ++itc ) {
       
-      const Analysis::ClusterCenterOfMass &currctr = itc -> GetCenterOfMass();
+      const Analysis::ClusterCenterOfMass &currctr = itc->GetCenterOfMass();
       
-      while ( this -> DistanceBetweenPoints( it -> GetCenterOfMass(), currctr ) < mindist &&
+      while ( this->DistanceBetweenPoints( it->GetCenterOfMass(), currctr ) < mindist &&
 	      itd != distances.end() )
-	it -> InitCenterOfMass( *(itd++ -> first) );
+	it->InitCenterOfMass( *(itd++->first) );
     }
     
     if ( itd == distances.end() ) {
-      std::cerr <<
-	"WARNING: The number of clusters could be too high; using a smaller limit distance"
-		<< std::endl;
+      IWarning <<
+	"The number of clusters could be too high; using a smaller limit distance"
+	       << IEndMsg;
       mindist /= 2;
       
       it  = fClusters.begin();
@@ -539,11 +541,11 @@ void Analysis::ClusterFactory::DistanceCentersOfMass() {
   }
 
   // Adds as many points as needed in such a way that the dispersion is different from zero
-  this -> BuildCentersOfMass();
+  this->BuildCentersOfMass();
 }
 
 //_______________________________________________________________________________
-// Method to calculate the initial centers of mass in a random way
+//
 void Analysis::ClusterFactory::RandomCentersOfMass() {
   
   // Generates a random vector with the position associated with each center of mass
@@ -560,16 +562,14 @@ void Analysis::ClusterFactory::RandomCentersOfMass() {
   std::vector<Cluster>::iterator it;
   std::vector<size_t>::iterator itp;
   for ( it = fClusters.begin(), itp = positions.begin(); it != fClusters.end(); ++it, ++itp )
-    it -> InitCenterOfMass( fPoints[ *itp ] );
+    it->InitCenterOfMass( fPoints[ *itp ] );
 
   // Adds as many points as needed in such a way that the dispersion is different from zero
-  this -> BuildCentersOfMass();
+  this->BuildCentersOfMass();
 }
 
 //_______________________________________________________________________________
-// Clustering method that constantly reconstructs the clusters till the variation
-// of the centers of mass is negligible, or the maximum number of iterations is
-// reached
+//
 bool Analysis::ClusterFactory::ConvergenceMethod() {
     
   // Loops till the maximum variation on the center of mass is smaller than that required
@@ -584,17 +584,17 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
     // Gets the position of the centers of mass to calculate the variation of their position
     auto itc = fClusters.begin();
     for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-      *nitc = itc -> GetCenterOfMass();
+      *nitc = itc->GetCenterOfMass();
 
     // Call to the main method to define the clusters
-    this -> DistanceMerging();
+    this->DistanceMerging();
     
     auto itd = comdists.begin();
     auto itp = centersOfMass.begin();
     itc = fClusters.begin();
     
     while ( itc != fClusters.end() )
-      *itd++ = itc++ -> DistanceToCluster( *itp++ );
+      *itd++ = itc++->DistanceToCluster( *itp++ );
         
   } while ( *std::max_element( comdists.begin(), comdists.end() ) > maxdst && ++iiter < fNiter );
 
@@ -606,72 +606,12 @@ bool Analysis::ClusterFactory::ConvergenceMethod() {
 }
 
 //_______________________________________________________________________________
-// Function to be called after the position of the center of mass is set for
-// each cluster. Since for the calculation of the variance more than one point
-// is needed, it collects the minimal number of closest points that are necessary
-// to avoid this quantity from being zero.
-void Analysis::ClusterFactory::BuildCentersOfMass() {
-  
-  // Removes the points stored in the clusters
-  std::cout << "Removing points in clusters" << std::endl;
-  this -> Reset();
-
-  std::cout << "Building centers of mass" << std::endl;
-  
-  // Loops over the clusters to set the initial points
-  for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
-    
-    std::vector< std::pair<PointArray::iterator, double> >
-      distances( fPoints.size() - fPointsToAvoid.size() );
-
-    auto itd = distances.begin();
-    auto itp = fPoints.begin();
-    
-    // The distance is taken according to the variance of the main cluster
-    while ( itd != distances.end() ) {
-      
-      if ( std::find( fPointsToAvoid.begin(), fPointsToAvoid.end(), itp ) == fPointsToAvoid.end() ) {
-	itd -> first  = itp;
-	itd -> second = this -> DistanceBetweenPoints( itc -> GetCenterOfMass(), *itp );
-	++itd;
-      }
-      
-      ++itp;
-    }
-    
-    // The points are sorted according to the distance to the cluster, but using the main standard
-    // deviation (from the main cluster)
-    std::sort( distances.begin(),
-	       distances.end(),
-	       [] ( const std::pair<PointArray::iterator, double> &itl,
-		    const std::pair<PointArray::iterator, double> &itr ) {
-		 return itl.second < itr.second; } );
-
-    // Points are added till no null variances are found
-    itd = distances.begin();
-    do {
-      itc -> AddPoint( *(itd -> first) );
-      fPointsToAvoid.push_back( itd -> first );
-      ++itd;
-    } while ( itc -> GetCenterOfMass().AnyNullSigma() );
-
-    size_t icluster = itc - fClusters.begin();
-    std::cout <<
-      "Cluster < " << icluster << " > built with < " << itc -> GetPoints().size() << " > points"
-			 << std::endl;
-  }
-
-  std::cout << "Defined initial centers of mass" << std::endl;
-}
-
-//_______________________________________________________________________________
-// Main clustering method that calculates the distances between the different
-// points and the clusters and attaches them using this quantity
+//
 inline void Analysis::ClusterFactory::DistanceMerging() {
 
   // Removes the points stored in the clusters
   std::cout << "Removing points in clusters" << std::endl;
-  this -> Reset();
+  this->Reset();
   
   // Generates the clusters taking into account the distances from the points to them
   std::cout << "Merging process started" << std::endl;
@@ -684,7 +624,7 @@ inline void Analysis::ClusterFactory::DistanceMerging() {
       auto itc = fClusters.begin();
       
       while ( itc != fClusters.end() )
-	*itd++ = itc++ -> DistanceToCluster( *itp );
+	*itd++ = itc++->DistanceToCluster( *itp );
     
       itd = std::min_element( distances.begin(), distances.end() );
       fClusters[ itd - distances.begin() ].AddPoint( *itp );
@@ -693,12 +633,11 @@ inline void Analysis::ClusterFactory::DistanceMerging() {
   std::cout << "Generated new set of clusters" << std::endl;
   
   if ( fVerbose )
-    this -> Display( &ClusterFactory::PrintDistances, "Normalized distances" );
+    this->Display( &ClusterFactory::PrintDistances, "Normalized distances" );
 }
 
 //_______________________________________________________________________________
-// Clustering method that reconstructs the clusters till the maximum number of
-// iterations is reached
+//
 bool Analysis::ClusterFactory::IterativeMethod() {
   
   // Process flag
@@ -712,7 +651,7 @@ bool Analysis::ClusterFactory::IterativeMethod() {
   PointArray centersOfMass( fClusters.size() );
   auto itc = fClusters.begin();
   for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-    *nitc = itc -> GetCenterOfMass();
+    *nitc = itc->GetCenterOfMass();
   
   // Loops < fNiter > times to generate the clusters
   for ( size_t iiter = 0; iiter < fNiter; ++iiter ) {
@@ -721,14 +660,14 @@ bool Analysis::ClusterFactory::IterativeMethod() {
     std::cout << "-- Iteration number " << iiter + 1 << " -- " << std::endl;
     
     // Call to the main method to define the clusters
-    this -> DistanceMerging();
+    this->DistanceMerging();
 
     auto itd = comdists.begin();
     auto itp = centersOfMass.begin();
     auto itc = fClusters.begin();
     
     while ( itc != fClusters.end() )
-      *itd++ = itc++ -> DistanceToCluster( *itp++ );
+      *itd++ = itc++->DistanceToCluster( *itp++ );
 
     if ( *std::max_element( comdists.begin(), comdists.end() ) > maxdst ) {
       std::cout << "The method has not converged yet" << std::endl;
@@ -739,15 +678,14 @@ bool Analysis::ClusterFactory::IterativeMethod() {
     
     itc = fClusters.begin();
     for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-      *nitc = itc -> GetCenterOfMass();
+      *nitc = itc->GetCenterOfMass();
   }
   
   return converged;
 }
 
 //_______________________________________________________________________________
-// Function used when the class is able to add or substract clusters. It returns
-// the decision of whether a cluster must be removed or not.
+//
 bool Analysis::ClusterFactory::ManageClusters() {
   
   // Calculates the dispersions of the clusters to get the selection decision
@@ -755,7 +693,7 @@ bool Analysis::ClusterFactory::ManageClusters() {
   std::vector<double> dispersions( fClusters.size() );
   auto itdr = dispersions.begin();
   for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++itdr )
-    *itdr = it -> Dispersion();
+    *itdr = it->Dispersion();
   
   // Iterates over the clusters to apply the decision
   double nstddev2 = fNcomStdDev*fNcomStdDev;
@@ -766,12 +704,12 @@ bool Analysis::ClusterFactory::ManageClusters() {
     auto itdc = itdr + 1;
     
     while ( itcc != fClusters.end() ) {
-      double dist = itcr -> DistanceToCluster( itcc -> GetCenterOfMass() );
+      double dist = itcr->DistanceToCluster( itcc->GetCenterOfMass() );
       if ( dist < nstddev2*( (*itdr) + (*itdc) ) ) {
 	std::cout << "Removing cluster: two clusters are too close" << std::endl;
 	return false;
       }
-      else if ( itcr -> GetPoints().size() < fMinNpoints ) {
+      else if ( itcr->GetPoints().size() < fMinNpoints ) {
 	std::cout << "Removing cluster: number of points in cluster too small" << std::endl;
 	return false;
       }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 17/02/2016
 //
 // --------------------------------------------------------------------
 //
@@ -89,7 +89,7 @@ namespace General {
   template <typename type>
   void ConfigParser::Extract( const std::string &name, type &value ) {
     if ( !fParsed )
-      Error << "No arguments have been parsed yet; unable to extract value" << EndMsg;
+      IError << "No arguments have been parsed yet; unable to extract value" << IEndMsg;
     fParser << fArgs[ name ].first;
     fParser >> value;
     fParser.clear();

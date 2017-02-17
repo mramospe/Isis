@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 12/01/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 //
@@ -35,28 +35,34 @@ namespace Analysis {
 
   public:
 
-    // Constructor and destructor
+    // Constructor
     Bin();
+
+    // Destructor
     virtual ~Bin();
     
-    // Inline methods
+    // Return the number of entries stored in the bin
     inline const size_t GetEntries() const;
+
+    // Return the sum of the weights of the entries in the bin
     inline const size_t GetSumOfWeights() const;
 
   protected:
 
-    // Attributes
+    // Entries in the bin
     size_t fEntries;
+
+    // Sum of weights in the bin
     double fSumOfWeights;
 
   };
 
-  //_______________
-  // INLINE METHODS
-
-  // Returns the number of entries stored in the bin
+  //______________________________________________________________________________
+  //
   inline const size_t Bin::GetEntries() const { return fEntries; }
-  // Returns the sum of the weights of the entries in the bin
+
+  //______________________________________________________________________________
+  //
   inline const size_t Bin::GetSumOfWeights() const { return fSumOfWeights; }
 
 }

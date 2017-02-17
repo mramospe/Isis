@@ -7,14 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 27/07/2016
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  Class defining a center of mass of a cluster, storing its position and the
-//  mean of squares.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -24,16 +17,11 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 Analysis::ClusterCenterOfMass::ClusterCenterOfMass() : ClusterPoint() { fWeight = 0; }
 
 //_______________________________________________________________________________
-// Constructor given a position
+//
 Analysis::ClusterCenterOfMass::ClusterCenterOfMass( const ClusterPoint &point ) :
   ClusterPoint( point ), fMeanOfSquares( fValues ) {
   for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
@@ -41,16 +29,11 @@ Analysis::ClusterCenterOfMass::ClusterCenterOfMass( const ClusterPoint &point ) 
 }
 
 //_______________________________________________________________________________
-// Destructor
+//
 Analysis::ClusterCenterOfMass::~ClusterCenterOfMass() { }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Looks if does exist any variance which could lead to infinites
+//
 bool Analysis::ClusterCenterOfMass::AnyNullSigma() const {
 
   auto
@@ -70,7 +53,7 @@ bool Analysis::ClusterCenterOfMass::AnyNullSigma() const {
 }
 
 //_______________________________________________________________________________
-// Recalculates the center of mass when adding a new point
+//
 void Analysis::ClusterCenterOfMass::AttachPoint( const ClusterPoint &point ) {
   
   double
@@ -103,7 +86,7 @@ void Analysis::ClusterCenterOfMass::AttachPoint( const ClusterPoint &point ) {
 }
 
 //_______________________________________________________________________________
-// Normalizes the position of this center of mass
+//
 void Analysis::ClusterCenterOfMass::Normalize( const std::vector<double> &norm ) {
 
   ClusterPoint::Normalize( norm );
@@ -120,7 +103,7 @@ void Analysis::ClusterCenterOfMass::Normalize( const std::vector<double> &norm )
 }
 
 //_______________________________________________________________________________
-// Sets the position of the center of mass
+//
 void Analysis::ClusterCenterOfMass::SetValues( const std::vector<double> &values ) {
     
   ClusterPoint::SetValues( values );

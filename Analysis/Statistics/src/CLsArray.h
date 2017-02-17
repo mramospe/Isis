@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 02/12/2016
+//  Last update: 17/02/2017
 //
 // -----------------------------------------------------------
 //
@@ -39,51 +39,90 @@ namespace Analysis {
   
   public:
   
-    // Constructor
+    // Main constructor
     CLsArray();
+
+    // Copy constructor
     CLsArray( const CLsArray &other );
+
+    // Constructor for single-values ( Poisson )
     CLsArray( const double &value );
+
+    // Constructor for single-values ( Gaussian )
     CLsArray( const double &value, const double &sigma );
+
+    //  Constructor given two lists
     CLsArray( const DVector &values, const DVector &sigmas = {} );
 
     // Destructor
     ~CLsArray();
 
-    // Inline methods
+    // Return the length of the array
     inline size_t GetSize() const;
 
-    // Methods
-    CLsArray&        operator =  ( const CLsArray &other );
-    double           operator [] ( const int &index );
-    CLsArray         operator +  ( const CLsArray &other );
-    CLsArray         operator -  ( const CLsArray &other );
-    friend CLsArray  operator *  ( const double &value, const CLsArray &other );
-    friend CLsArray  operator *  ( const CLsArray &other, const double &value );
-    CLsArray         operator /  ( const double &value );
+    // Assignment from a given array
+    CLsArray& operator =  ( const CLsArray &other );
+
+    // Return the value at < index >
+    double operator [] ( const int &index );
+
+    // Add two arrays
+    CLsArray operator +  ( const CLsArray &other );
+
+    // Substract two arrays
+    CLsArray operator -  ( const CLsArray &other );
+
+    // Multiply scalar*array
+    friend CLsArray operator *  ( const double &value, const CLsArray &other );
+
+    // Multiply array*scalar
+    friend CLsArray operator *  ( const CLsArray &other, const double &value );
+
+    // Division by a scalar
+    CLsArray operator /  ( const double &value );
 
   protected:
     
-    // Attributes
+    // Random number generator
     TRandom3 fGenerator;
-    DVector  fMeans;
-    DVector  fSigmas;
-    char     fType;
 
-    // Methods
-    CLsArray  GenerateGaussian();
-    CLsArray  GeneratePoisson();
-    double    GetGaussianProb( const CLsArray &values );
-    double    GetPoissonProb( const CLsArray &values );
+    // Vector storing the means for each bin
+    DVector fMeans;
+
+    // Vector storing the standard deviations for each bin
+    DVector fSigmas;
+
+    // Type of array (Gaussian or Poissonian)
+    char fType;
+
+  protected:
+    
+    // Generates an array filled with random gaussian numbers following the
+    // distribution given by the means and sigmas owned by this class.
+    CLsArray GenerateGaussian();
+
+    // Generates an array filled with random poissonian numbers following the
+    // distribution given by the means and sigmas owned by this class.
+    CLsArray GeneratePoisson();
+
+    // Gets the gaussian probability of having the given value(s)
+    double GetGaussianProb( const CLsArray &values );
+
+    // Gets the poissonian probability of having the given value(s)
+    double GetPoissonProb( const CLsArray &values );
 
   };
 
-  //_______________
-  // INLINE METHODS
-  inline size_t CLsArray::GetSize() const { return fMeans.size(); }
+  // Gets the gaussian probability associated to this value
+  inline double GetGaussian( const double &mean, const double &sigma,
+			     const double &value );
   
-  // Other functions
-  inline double GetGaussian( const double &mean, const double &sigma, const double &value );
+  // Gets the poissonian probability associated to this value
   inline double GetPoisson( const double &mean, const double &value );
+  
+  //_______________________________________________________________________________
+  //
+  inline size_t CLsArray::GetSize() const { return fMeans.size(); }
 
 }
 

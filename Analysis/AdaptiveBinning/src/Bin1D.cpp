@@ -7,14 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/04/2016
-//
-// --------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements the one-dimensional bin class to work together with
-//  AdaptiveBinning1D to create adaptive binned histograms.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -24,25 +17,15 @@
 
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Constructor
+//
 Analysis::Bin1D::Bin1D( const double &vmin ) : Bin(), fMin( vmin ) { }
 
 //______________________________________________________________________________
-// Destructor
+//
 Analysis::Bin1D::~Bin1D() { }
 
 //______________________________________________________________________________
-
-
-// -- METHOD
-
-//______________________________________________________________________________
-// Fills the bin if the point given is inside the considered range
+//
 void Analysis::Bin1D::Fill( const double &pos, const double &weight ) {
   if ( pos < fMin )
     fMin = pos;

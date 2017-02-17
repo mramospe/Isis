@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/08/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -37,80 +37,134 @@ namespace Analysis {
 
   public:
 
-    // Internal definition
+    // Internal definition of a vector of cluster points
     typedef std::vector<ClusterPoint> PointArray;
     
-    // Constructor and destructor
+    // Main constructor
     Cluster();
+
+    // Copy constructor
     Cluster( const Cluster &other );
+
+    // Constructor given the array of weights
     Cluster( const std::vector<double> &weights );
+
+    // Destructor
     virtual ~Cluster();
 
-    // Methods
+    // Calculates the dispersion (squared standard deviation) of the points in the
+    // cluster. The same could be achieved summing all the distances of the points
+    // to the cluster, dividing by the number of points.
     double Dispersion() const;
-    double DistanceBetweenPoints( const ClusterPoint &pointA, const ClusterPoint &pointB ) const;
-    void   Normalize( const std::vector<double> &values );
-  
-    // Inline methods
-    inline void                       AddPoint( const ClusterPoint &point );
-    inline double                     DistanceToCluster( const ClusterPoint &point ) const;
-    inline const ClusterCenterOfMass& GetCenterOfMass() const;
-    inline const PointArray&          GetPoints() const;
-    inline const double               GetSumOfWeights() const;
-    inline const double               GetWeight() const;
-    inline void                       InitCenterOfMass( const ClusterPoint &com );
-    inline void                       NormalizeCenterOfMass( const std::vector<double> &values );
-    inline void                       RemovePoints();
-    inline void                       ResetCenterOfMassWeight();
-    inline void                       SetCenterOfMass( const ClusterPoint &com );
-    inline void                       SetWeights( const std::vector<double> &weights );
 
-    // Static method
+    // Returns the weighted distance between two points. The weight is dividing since
+    // as its value grows, the distance must turn smaller.
+    double DistanceBetweenPoints( const ClusterPoint &pointA,
+				  const ClusterPoint &pointB ) const;
+
+    // Normalizes the values in the points of the cluster
+    void Normalize( const std::vector<double> &values );
+  
+    // Adds a new point given a cluster point
+    inline void AddPoint( const ClusterPoint &point );
+
+    // Returns the distance to the center of mass
+    inline double DistanceToCluster( const ClusterPoint &point ) const;
+
+    // Returns the current center of mass
+    inline const ClusterCenterOfMass& GetCenterOfMass() const;
+
+    // Returns the vector of points in the cluster
+    inline const PointArray& GetPoints() const;
+
+    // Returns the sum of weights of the cluster
+    inline const double GetSumOfWeights() const;
+
+    // Initializes the center of mass for the cluster
+    inline void InitCenterOfMass( const ClusterPoint &com );
+
+    // Normalizes the center of mass of this cluster
+    inline void NormalizeCenterOfMass( const std::vector<double> &values );
+
+    // Removes the points of the current cluster
+    inline void RemovePoints();
+
+    // Reset the center of mass weight
+    inline void ResetCenterOfMassWeight();
+
+    // Sets a new point as the center of mass
+    inline void SetCenterOfMass( const ClusterPoint &com );
+
+    // Sets the weights for each variable in the points for this cluster
+    inline void SetWeights( const std::vector<double> &weights );
+
+    // Merges two clusters into one, owning all the points
     static Cluster MergeClusters( const Cluster &clusterA, const Cluster &clusterB );
     
   protected:
   
-    // Attributes
+    // Center of mass of the cluster
     ClusterCenterOfMass fCenterOfMass;
-    PointArray          fPoints;
+
+    // Vector of points attached to the cluster
+    PointArray fPoints;
+
+    // Vector of weights for each point
     std::vector<double> fWeights;
     
   };
-  
-  //_______________
-  // INLINE METHODS
 
-  // Adds a new point given a cluster point
+  //_______________________________________________________________________________
+  //
   inline void Cluster::AddPoint( const ClusterPoint &point ) {
     fCenterOfMass.AttachPoint( point );
     fPoints.push_back( point );
   }
-  // Returns the distance to the center of mass
+
+  //_______________________________________________________________________________
+  //
   double Cluster::DistanceToCluster( const Analysis::ClusterPoint &point ) const {
     return this -> DistanceBetweenPoints( fCenterOfMass, point );
   }
-  // Returns the current center of mass
+
+  //_______________________________________________________________________________
+  //
   const ClusterCenterOfMass& Cluster::GetCenterOfMass() const { return fCenterOfMass; }
-  // Returns the vector of points in the cluster
+
+  //_______________________________________________________________________________
+  //
   const std::vector<ClusterPoint>& Cluster::GetPoints() const { return fPoints; }
-  // Returns the sum of weights of the cluster
+
+  //_______________________________________________________________________________
+  //
   const double Cluster::GetSumOfWeights() const { return fCenterOfMass.GetWeight(); }
-  // Initializes the center of mass for the cluster
+
+  //_______________________________________________________________________________
+  //
   void Cluster::InitCenterOfMass( const ClusterPoint &com ) {
     fCenterOfMass.InitPosition( com );
   }
-  // Normalizes the center of mass of this cluster
+
+  //_______________________________________________________________________________
+  //
   void Cluster::NormalizeCenterOfMass( const std::vector<double> &values ) {
     fCenterOfMass.Normalize( values );
   }
-  // Removes the points of the current cluster
+
+  //_______________________________________________________________________________
+  //
   void Cluster::RemovePoints() { fPoints.clear(); }
 
+  //_______________________________________________________________________________
+  //
   void Cluster::ResetCenterOfMassWeight() { fCenterOfMass.ResetWeight(); }
 
-  // Sets a new point as the center of mass
+  //_______________________________________________________________________________
+  //
   void Cluster::SetCenterOfMass( const ClusterPoint &com ) { fCenterOfMass = com; }
-  // Sets the weights for each variable in the points for this cluster
+
+  //_______________________________________________________________________________
+  //
   void Cluster::SetWeights( const std::vector<double> &weights ) { fWeights = weights; }
 
 }

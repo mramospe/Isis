@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 17/02/2016
 //
 // -------------------------------------------------------------------------------
 //
@@ -58,23 +58,23 @@ namespace Msg {
 			 const int &bgcol = General::ANSIFormat::aNoColor,
 			 const int &sty = General::ANSIFormat::aNoStyle ) {
 
-    General::Messenger("", std::cout, fgcol, bgcol, sty) << msg << EndMsg;
+    General::Messenger("", std::cout, fgcol, bgcol, sty) << msg << IEndMsg;
   }
   BOOST_PYTHON_FUNCTION_OVERLOADS(SendFormattedMsg_Overloads,
 				  SendFormattedMsg,
 				  1, 4);
 
   // Function to send an usual message
-  void SendMsg( const std::string &msg ) { BegMsg << msg << EndMsg; }
+  void SendMsg( const std::string &msg ) { IBegMsg << msg << IEndMsg; }
 
   // Function to send an error message
-  void SendErrorMsg( const std::string &msg ) { Error << msg << EndMsg; }
+  void SendErrorMsg( const std::string &msg ) { IError << msg << IEndMsg; }
 
   // Function to send an information message
-  void SendInfoMsg( const std::string &msg ) { Info << msg << EndMsg; }
+  void SendInfoMsg( const std::string &msg ) { IInfo << msg << IEndMsg; }
 
   // Function to send a warning message
-  void SendWarningMsg( const std::string &msg ) { Warning << msg << EndMsg; }
+  void SendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
 }
 
 BOOST_PYTHON_MODULE( PyGeneral ) {

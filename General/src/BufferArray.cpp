@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 17/02/2017
 //
 // -----------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,11 +18,6 @@
 #include "BufferArray.h"
 #include "Messenger.h"
 
-
-//_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
 
 //_______________________________________________________________________________
 //
@@ -48,16 +43,12 @@ General::BufferArray::~BufferArray() {
 }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
 //
-General::BufferVariable* General::BufferArray::AddVariable( const std::string &name, const char &type ) {
+General::BufferVariable* General::BufferArray::AddVariable( const std::string &name,
+							    const char &type ) {
 
   if ( fVarMap.count( name ) )
-    Error << "ERROR: Variable with name < " << name << " > already booked" << EndMsg;
+    IError << "Variable with name < " << name << " > already booked" << IEndMsg;
   else {
     General::BufferVariable *var = new BuffVar( type );
     fVarMap[ name ] = var;

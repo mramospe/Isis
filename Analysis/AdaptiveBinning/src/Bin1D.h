@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/04/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 //
@@ -38,11 +38,13 @@ namespace Analysis {
 
   public:
     
-    // Constructor and destructor
+    // Constructor
     Bin1D( const double &vmin );
+
+    // Destructor
     ~Bin1D();
 
-    // Method
+    // Fill the bin if the point given is inside the considered range
     void Fill( const double &pos, const double &weight = 1 );
 
     // Inline methods
@@ -50,20 +52,20 @@ namespace Analysis {
 
   protected:
 
-    // Attributes
+    // Minimum value required for an entry to be inside the bin
     double fMin;
 
-    // Method
+    // Set the minimum value of the bin
     inline void SetMin( const double &vmin );
 
   };
 
-  //_______________
-  // INLINE METHODS
-
-  // Method to return the limit of the bin
+  //______________________________________________________________________________
+  //
   inline const double Bin1D::GetMin() const { return fMin; }
-  // Sets the limits of the bin to the input values
+  
+  //______________________________________________________________________________
+  //
   inline void Bin1D::SetMin( const double &vmin ) { fMin = vmin; }
 
 }

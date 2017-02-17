@@ -7,15 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/08/2016
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  This class defines a set of cluster points. It has attached the weights for
-//  each variable, the points and a center of mass, which is automatically
-//  recalculated each time another point is attached.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -25,16 +17,11 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 Analysis::Cluster::Cluster() { }
 
 //_______________________________________________________________________________
-// Copy constructor
+//
 Analysis::Cluster::Cluster( const Cluster &other ) {
   
   fCenterOfMass = other.fCenterOfMass;
@@ -43,22 +30,16 @@ Analysis::Cluster::Cluster( const Cluster &other ) {
 }
 
 //_______________________________________________________________________________
-// Constructor given the array of weights
-Analysis::Cluster::Cluster( const std::vector<double> &weights ) : fWeights( weights ) { }
+//
+Analysis::Cluster::Cluster( const std::vector<double> &weights ) :
+  fWeights( weights ) { }
 
 //_______________________________________________________________________________
-// Destructor
+//
 Analysis::Cluster::~Cluster() { }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Calculates the dispersion (squared standard deviation) of the points in the
-// cluster. The same could be achieved summing all the distances of the points
-// to the cluster, dividing by the number of points.
+//
 double Analysis::Cluster::Dispersion() const {
   
   auto
@@ -81,8 +62,7 @@ double Analysis::Cluster::Dispersion() const {
 }
 
 //_______________________________________________________________________________
-// Returns the weighted distance between two points. The weight is dividing since
-// as its value grows, the distance must turn smaller.
+//
 double Analysis::Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
 						 const ClusterPoint &pointB ) const {
   auto
@@ -105,7 +85,7 @@ double Analysis::Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
 }
 
 //_______________________________________________________________________________
-// Merges two clusters into one, owning all the points
+//
 Analysis::Cluster Analysis::Cluster::MergeClusters( const Cluster &clusterA,
 						    const Cluster &clusterB ) {
 
@@ -130,7 +110,7 @@ Analysis::Cluster Analysis::Cluster::MergeClusters( const Cluster &clusterA,
 }
 
 //_______________________________________________________________________________
-// Normalizes the values in the points of the cluster
+//
 void Analysis::Cluster::Normalize( const std::vector<double> &values ) {
   for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
     it -> Normalize( values );

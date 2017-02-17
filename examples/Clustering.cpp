@@ -127,7 +127,7 @@ int main() {
   factory.CalculateClusters();
 
   // Generates the scatter plots and histograms for each cluster and writes them
-  for ( size_t i = 0; i < factory.GetNclusters(); ++i ) {
+  for ( size_t i = 0; i < factory.GetNClusters(); ++i ) {
     of -> cd();
     WriteForCluster( factory, i );
   }

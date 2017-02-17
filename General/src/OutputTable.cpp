@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Messenger.h"
 #include "OutputTable.h"
 #include "Utils.h"
 
@@ -94,7 +95,7 @@ void General::OutputTable::SetFormat( const char *format, const std::vector<std:
       if ( *format == 'b' ) {
 	size = 1;
 	fPrecisions.back() = 0;
-	std::cout << "WARNING: Precision specification not allowed for boolean numbers" << std::endl;
+	IWarning << "Precision specification not allowed for boolean numbers" << IEndMsg;
       }
       else if ( *format == 'i' )
 	fPrecisions.back() = 0;
@@ -109,7 +110,7 @@ void General::OutputTable::SetFormat( const char *format, const std::vector<std:
       else if ( *format == 's' )
 	fPrecisions.back() = 0;
       else
-	std::cerr << "ERROR: Unknown variable type < " << *format << " > in table" << std::endl;
+	IError << "Unknown variable type < " << *format << " > in table" << IEndMsg;
       format += 2;
     }
     else {
@@ -133,7 +134,7 @@ void General::OutputTable::SetFormat( const char *format, const std::vector<std:
       else if ( *format == 's' )
 	size = fStrLength;
       else
-	std::cerr << "ERROR: Unknown variable type < " << *format << " > in table" << std::endl;
+	IError << "Unknown variable type < " << *format << " > in table" << IEndMsg;
       format++;
     }
     if ( size > fSizes.back() )

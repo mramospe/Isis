@@ -7,15 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
-//
-// --------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  Defines the class to help when performing input/output operations from Root
-//  TTree objects. It is meant to be used to allow the user to work with the
-//  variables that are present in the tree without knowing its type.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -27,32 +19,20 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 Analysis::TreeBuffer::TreeBuffer() : General::BufferArray() { }
 
 //_______________________________________________________________________________
-// Constructor given the tree to be attached and the function to sort the booked
-// variables.
+//
 Analysis::TreeBuffer::TreeBuffer( TTree *tree, SortFunc func ) :
   BufferArray( func ), fTree( tree ) { }
 
 //_______________________________________________________________________________
-// Destructor
+//
 Analysis::TreeBuffer::~TreeBuffer() { }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Attaches a tree to this class. All the variables stored in this class are
-// removed.
+//
 void Analysis::TreeBuffer::AttachTree( TTree *tree ) {
 
   for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
@@ -64,7 +44,7 @@ void Analysis::TreeBuffer::AttachTree( TTree *tree ) {
 }
 
 //_______________________________________________________________________________
-// Creates a new variable in the attached tree given the name and its type
+//
 General::BufferVariable* Analysis::TreeBuffer::CreateVariable( const std::string &name, const char &type ) {
 
   General::BufferVariable *var = this -> AddVariable( name, type );
@@ -75,7 +55,7 @@ General::BufferVariable* Analysis::TreeBuffer::CreateVariable( const std::string
 }
 
 //_______________________________________________________________________________
-// Loads the variables satisfying the requirements in the given expression
+//
 void Analysis::TreeBuffer::Load( const std::string &expr ) {
   
   std::vector<std::string> variables;
@@ -86,9 +66,7 @@ void Analysis::TreeBuffer::Load( const std::string &expr ) {
 }
 
 //_______________________________________________________________________________
-// Loads a variable from the attached tree. Automatically determines the type of
-// the variable and constructs a General::BufferVariable class to set the branch
-// address to.
+//
 General::BufferVariable* Analysis::TreeBuffer::LoadVariable( const std::string &name ) {
 
   General::BufferVariable *var = this ->
@@ -99,8 +77,7 @@ General::BufferVariable* Analysis::TreeBuffer::LoadVariable( const std::string &
 }
 
 //_______________________________________________________________________________
-// Changes the status of the branches in the attached tree to that given to the
-// function
+//
 void Analysis::TreeBuffer::SetBranchStatus( const bool &dec ) {
   if ( dec )
     fTree -> SetBranchStatus( "*", dec );

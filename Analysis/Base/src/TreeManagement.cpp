@@ -7,19 +7,13 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 14/02/2017
-//
-// -------------------------------------------------------
-//
-//  Description:
-//
-//  Here are defined different tools to manage TTree
-//  objects.
+//  Last update: 17/02/2017
 //
 // ------------------------------------------------------
 /////////////////////////////////////////////////////////
 
 
+#include "Messenger.h"
 #include "TreeManagement.h"
 #include "Utils.h"
 
@@ -34,7 +28,7 @@
 
 
 //_______________________________________________________________________________
-// Appends to the given vector all the names of the branches in a tree
+//
 void Analysis::GetBranchNames( std::vector<std::string> &vector,
 			       TTree *inputTree,
 			       const std::string &expr ) {
@@ -49,7 +43,7 @@ void Analysis::GetBranchNames( std::vector<std::string> &vector,
 }
 
 //_______________________________________________________________________________
-// Appends to the given vector all the titles of the branches in a tree
+//
 void Analysis::GetBranchTitles( std::vector<std::string> &vector,
 				TTree *inputTree,
 				const std::string &expr ) {
@@ -64,7 +58,7 @@ void Analysis::GetBranchTitles( std::vector<std::string> &vector,
 }
 
 //_______________________________________________________________________________
-// Gets the number of variables in a tree whose name contains a given keyword
+//
 size_t Analysis::GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
   std::vector<std::string> vector;
   Analysis::GetBranchNames( vector, inputTree, expr );
@@ -72,7 +66,7 @@ size_t Analysis::GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
 }
 
 //_______________________________________________________________________________
-// Returns the number of variables of a given type
+//
 size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   std::string title;
@@ -86,7 +80,7 @@ size_t Analysis::GetNvarsWithType( TTree *inputTree, const char &type ) {
 }
 
 //_______________________________________________________________________________
-// Returns the number of variables of a certain type in a given vector and tree
+//
 size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 				     const char &type,
 				     const std::vector<std::string> &vector ) {
@@ -102,21 +96,19 @@ size_t Analysis::GetNvarsWithTypeIn( TTree *inputTree,
 }
 
 //_______________________________________________________________________________
-// Gets the type of a variable in a tree
+//
 char Analysis::GetVarType( TTree *inputTree, const std::string &var ) {
   TObjArray *brList = inputTree -> GetListOfBranches();
   TObject *obj = brList -> FindObject( var.c_str() );
   if ( !obj )
-    std::cerr << "ERROR: Unable to get branch with name < " << var << " >" << std::endl;
+    IError << "Unable to get branch with name < " << var << " >" << IEndMsg;
   std::string type = obj -> GetTitle();
   type.replace( 0, var.length(), "" );
   return type[ 1 ];
 }
 
 //_______________________________________________________________________________
-// Makes and saves a new tree with a given set of names changed by anothers. The
-// output tree is going to be saved in the current directory, so an output file
-// must be opened first.
+//
 void Analysis::MakeTreeChangingNames( TTree *inputTree,
 				      const std::vector<std::string> &ivars,
 				      const std::vector<std::string> &ovars ) {
@@ -124,12 +116,12 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   // Sends a warning message if the number of input variables is different to
   // the number of output variables
   if ( ivars.size() != ovars.size() ) {
-    std::cout << " -- Number of input and output variables doesn't match --" << std::endl;
+    IBegMsg << " -- Number of input and output variables doesn't match --" << IEndMsg;
     exit( 0 );
   }
 
-  std::cout << " Changing variables in tree: < "   << inputTree  -> GetName() << " >" << std::endl;
-  std::cout << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << std::endl;
+  IBegMsg << " Changing variables in tree: < "   << inputTree  -> GetName() << " >" << IEndMsg;
+  IBegMsg << " Output tree will be saved in: < " << gDirectory -> GetName() << " >" << IEndMsg;
 
   // Deactivates the branches of the input variables
   for ( auto it = ivars.begin(); it != ivars.end(); ++it )
@@ -155,11 +147,11 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
   std::vector< std::pair<bool  , TLeaf*> >
     bvector( Analysis::GetNvarsWithTypeIn( inputTree, 'O', ivars ) );
 
-  std::cout << " Variables to change:" << std::endl;
-  std::cout << " - Float:  \t" << fvector.size() << std::endl;
-  std::cout << " - Double: \t" << dvector.size() << std::endl;
-  std::cout << " - Integer:\t" << ivector.size() << std::endl;
-  std::cout << " - Boolean:\t" << bvector.size() << std::endl;
+  IBegMsg << " Variables to change:" << IEndMsg;
+  IBegMsg << " * Float:  \t" << fvector.size() << IEndMsg;
+  IBegMsg << " * Double: \t" << dvector.size() << IEndMsg;
+  IBegMsg << " * Integer:\t" << ivector.size() << IEndMsg;
+  IBegMsg << " * Boolean:\t" << bvector.size() << IEndMsg;
 
   // Loops over all the variables generating the corresponding branches
   std::vector<TBranch*> brList( ovars.size() );
@@ -227,13 +219,11 @@ void Analysis::MakeTreeChangingNames( TTree *inputTree,
 
   // Writes the output tree in the current directory
   outputTree -> AutoSave();
-  std::cout << " Output tree < " << outputTree -> GetName() << " > saved" << std::endl;
+  IBegMsg << " Output tree < " << outputTree -> GetName() << " > saved" << IEndMsg;
 }
 
 //_______________________________________________________________________________
-// Creates and saves a clone of the input tree where all the input variables of
-// the given type, specified by 'F' ( float ) or 'D' ( double ), are changed to
-// the other one
+//
 TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 
   TObjArray *brList = inputTree -> GetListOfBranches();
@@ -244,14 +234,14 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 
   // Checks the type of conversion that is going to be made
   if ( itype == 'F' ) {
-    std::cout << "Converting variables from float to double in tree < " <<
-      inputTree -> GetName() << " >" << std::endl;
+    IBegMsg << "Converting variables from float to double in tree < " <<
+      inputTree -> GetName() << " >" << IEndMsg;
     tail = "/F";
     vtype = "float";
   }
   else {
-    std::cout << "Converting variables from double to float in tree < " <<
-      inputTree -> GetName() << " >" << std::endl;
+    IBegMsg << "Converting variables from double to float in tree < " <<
+      inputTree -> GetName() << " >" << IEndMsg;
     tail = "/D";
     vtype = "double";
   }
@@ -266,14 +256,14 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
       ++nvars;
     }
   }
-  std::cout << "Found " << nvars << " " << vtype << " variables" << std::endl;
+  IBegMsg << "Found " << nvars << " " << vtype << " variables" << IEndMsg;
 
-  std::cout << "Cloning input tree" << std::endl;
+  IBegMsg << "Cloning input tree" << IEndMsg;
   TTree *outputTree = inputTree -> CloneTree( 0 );
   
   if ( !nvars )
-    std::cout << "WARNING: Number of " << vtype <<
-      " variables is zero. It will be saved a clone of the input tree." << std::endl;
+    IWarning << "Number of " << vtype <<
+      " variables is zero. It will be saved a clone of the input tree." << IEndMsg;
 
   inputTree -> SetBranchStatus( "*", true );
   
@@ -297,11 +287,11 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
 	Branch( brname.c_str(), &( it -> second ).first, brtitle.c_str() );
     }
 
-  std::cout << "Constructing the double variables" << std::endl;
+  IBegMsg << "Constructing the double variables" << IEndMsg;
   std::pair<float, double> *pair;
 
-  // Performs the loop over the input tree to fill the output variables depending on the input
-  // variable type
+  // Performs the loop over the input tree to fill the output variables depending
+  // on the input variable type
   if ( itype == 'F' )
     for ( size_t ievt = 0; ievt < ( size_t ) inputTree -> GetEntries(); ++ievt ) {
       inputTree -> GetEntry( ievt );
@@ -326,8 +316,8 @@ TTree* Analysis::MakeTreeConvertingVars( TTree *inputTree, const char &itype ) {
     }
 
   outputTree -> AutoSave();
-  std::cout << "Saved output tree < " << outputTree -> GetName() << " > in directory < "
-	    << gDirectory -> GetName() << " >" << std::endl;
+  IBegMsg << "Saved output tree < " << outputTree -> GetName() << " > in directory < "
+	  << gDirectory -> GetName() << " >" << IEndMsg;
 
   return outputTree;
 }

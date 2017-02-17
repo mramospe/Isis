@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -52,14 +52,14 @@ General::CutManager::~CutManager() {
 //
 std::string General::CutManager::BookCut( const std::string &key, const bool &print ) {
   if ( fCuts.find( key ) != fCuts.end() ) {
-    Warning << "Cut with name < " << key << " > already booked" << EndMsg;
+    IWarning << "Cut with name < " << key << " > already booked" << IEndMsg;
     return "";
   }
   std::string cut = this -> GetCut( key );
   if ( cut.size() ) {
     fCuts.insert( std::make_pair( key, cut ) );
     if ( print )
-      BegMsg << "Booked new cut < " << key << " >: " << fCuts[ key ] << EndMsg;
+      IBegMsg << "Booked new cut < " << key << " >: " << fCuts[ key ] << IEndMsg;
   }
   return cut;
 }
@@ -108,9 +108,9 @@ std::string General::CutManager::GetCut( const std::string &key ) {
 	  }
 	  
 	  if ( mismatch ) {
-	    Error <<
+	    IError <<
 	      "Mismatched < $ > symbol when scanning cut < "
-		  << key << " >" << EndMsg;
+		  << key << " >" << IEndMsg;
 	    return std::string();
 	  }
 
@@ -126,7 +126,7 @@ std::string General::CutManager::GetCut( const std::string &key ) {
     }
 
     if ( (*fFile).eof() && cond ) {
-      Error << "Cut with name < " << key << " > does not exist." << EndMsg;
+      IError << "Cut with name < " << key << " > does not exist." << IEndMsg;
       return 0;
     }
   }
@@ -157,7 +157,7 @@ void General::CutManager::Open( const std::string &file_path ) {
     (*fFile).close();
   (*fFile).open( file_path.c_str() );
   if ( !(*fFile) ) {
-    Error << "File < " << file_path << " > does not exist" << EndMsg;
+    IError << "File < " << file_path << " > does not exist" << IEndMsg;
     return;
   }
   std::string line, str;
@@ -170,8 +170,8 @@ void General::CutManager::Open( const std::string &file_path ) {
 
 	  // Checks whether does exist any other assignment operator in the same line
 	  if ( line.find( '=', pos + 1 ) != std::string::npos ) {
-	    Error << "Found two assignment operators in line < " <<
-	      nl << " >" << EndMsg;
+	    IError << "Found two assignment operators in line < " <<
+	      nl << " >" << IEndMsg;
 	    return;
 	  }
 
@@ -182,8 +182,8 @@ void General::CutManager::Open( const std::string &file_path ) {
 	  while ( str.back() == ' ' )
 	    str.erase( str.end() - 1 );
 	  if ( str.find( ' ' ) != std::string::npos ) {
-	    Error << "The cut defined in line < " << nl <<
-	      " > has whitespaces on its name" << EndMsg;
+	    IError << "The cut defined in line < " << nl <<
+	      " > has whitespaces on its name" << IEndMsg;
 	    return;
 	  }
 
@@ -192,15 +192,15 @@ void General::CutManager::Open( const std::string &file_path ) {
 	    newpos = line.find( '$', ++pos );
 	    str    = line.substr( pos, newpos - pos );
 	    if ( newpos == std::string::npos || str.find( ' ' ) != std::string::npos ) {
-	      Error << "Mismatched < $ > symbol in line < " << nl << " >" << EndMsg;
+	      IError << "Mismatched < $ > symbol in line < " << nl << " >" << IEndMsg;
 	      return;
 	    }
 	    pos = newpos + 1;
 	  }
 	}
 	else
-	  Warning<< "Line number < " << nl <<
-	    " > not a cut line; must be commented (starting by #)" << EndMsg;
+	  IWarning<< "Line number < " << nl <<
+	    " > not a cut line; must be commented (starting by #)" << IEndMsg;
       }
   }
   (*fFile).clear();
@@ -216,6 +216,6 @@ void General::CutManager::Print() const {
 					  const std::pair<std::string, std::string> &p2 ) {
 				       return p1.first.size() < p2.first.size(); } ) -> first.size();
   for ( auto it = fCuts.begin(); it != fCuts.end(); ++it )
-    BegMsg << std::left << std::setw( maxsize ) <<
-      it -> first  << " => " << it -> second << EndMsg;
+    IBegMsg << std::left << std::setw( maxsize ) <<
+      it -> first  << " => " << it -> second << IEndMsg;
 }

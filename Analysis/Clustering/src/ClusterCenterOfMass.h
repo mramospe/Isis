@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 27/07/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -34,47 +34,68 @@ namespace Analysis {
 
   public:
 
-    // Constructor and destructor
+    // Main constructor
     ClusterCenterOfMass();
+
+    // Constructor given a position
     ClusterCenterOfMass( const ClusterPoint &point );
+
+    // Destructor
     ~ClusterCenterOfMass();
 
-    // Methods
+    // Looks if does exist any variance which could lead to infinites
     bool AnyNullSigma() const;
+
+    // Recalculates the center of mass when adding a new point
     void AttachPoint( const ClusterPoint &point );
+
+    // Normalizes the position of this center of mass
     void Normalize( const std::vector<double> &norm );
+
+    // Sets the position of the center of mass
     void SetValues( const std::vector<double> &values );
 
-    // Inline method
-    inline void                       AddDimension();
-    inline const std::vector<double>& GetMeanOfSquares() const;
-    inline void                       InitPosition( const ClusterPoint &com );
-    inline void                       ResetWeight();
+    // Adds one dimension to the center of mass
+    inline void AddDimension();
 
-    // Operators
+    // Returns the vector to the mean of squares
+    inline const std::vector<double>& GetMeanOfSquares() const;
+
+    // Initializes the class setting the internal weight to zero and defining
+    // the position
+    inline void InitPosition( const ClusterPoint &com );
+
+    // Reset the weight for this center of mass
+    inline void ResetWeight();
+
+    // Set this class from another center of pass
     inline void operator = ( const ClusterCenterOfMass &point );
+
+    // Set this class from a cluster point
     inline void operator = ( const ClusterPoint &point );
 
   protected:
 
-    // Attribute
+    // Vector storing the mean of squares for each point
     std::vector<double> fMeanOfSquares;
     
   };
   
-  //__________________
-  // -- INLINE METHODS
-
-  // Adds one dimension to the center of mass
+  //_______________________________________________________________________________
+  //
   inline void ClusterCenterOfMass::AddDimension() {
     fValues.push_back( 0. );
     fMeanOfSquares.push_back( 0. );
   }
-  // Returns the vector to the mean of squares
+
+  //_______________________________________________________________________________
+  //
   inline const std::vector<double>& ClusterCenterOfMass::GetMeanOfSquares() const {
     return fMeanOfSquares;
   }
-  // Initializes the class setting the internal weight to zero and defining the position
+
+  //_______________________________________________________________________________
+  //
   inline void ClusterCenterOfMass::InitPosition( const ClusterPoint &point ) {
     fValues        = point.GetValues();
     fMeanOfSquares = fValues;
@@ -82,18 +103,21 @@ namespace Analysis {
     for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
       *it *= (*it); 
   }
+
+  //_______________________________________________________________________________
+  //
   inline void ClusterCenterOfMass::ResetWeight() { fWeight = 0; }
 
-  //_____________
-  // -- OPERATORS
-
-  // Asign operator
+  //_______________________________________________________________________________
+  //
   inline void ClusterCenterOfMass::operator = ( const ClusterCenterOfMass &point ) {
     fValues        = point.fValues;
     fMeanOfSquares = point.fMeanOfSquares;
     fWeight        = point.fWeight;
   }
-  // If the class to be asigned to is a ClusterPoint, the mean of squares is set to its values
+
+  //_______________________________________________________________________________
+  //
   inline void ClusterCenterOfMass::operator = ( const ClusterPoint &point ) {
     this -> InitPosition( point );
     fWeight = point.GetWeight();

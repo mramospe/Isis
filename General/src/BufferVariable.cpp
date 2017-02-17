@@ -35,8 +35,8 @@ std::string General::BufferVariable::ToString() const {
   
   I_SWITCH_BY_DATA_TYPE(fType, fPath, I_TO_STRING_PTR,
 			
-			Error << "ERROR: The type of the buffer "
-			"variable has not been specified yet" << EndMsg;
+			IError << "The type of the buffer "
+			"variable has not been specified yet" << IEndMsg;
 			return std::string();
 			);
 }
@@ -48,8 +48,8 @@ void General::BufferVariable::Construct() {
   if ( fType != '\0' )
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_NEW_INSTANCE,
 			  
-			  Error << "ERROR: Unknown type for buffer variable < "
-			  << fType << " >" << EndMsg;
+			  IError << "Unknown type for buffer variable < "
+			  << fType << " >" << IEndMsg;
 			  );
 }
 

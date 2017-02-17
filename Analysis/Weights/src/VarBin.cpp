@@ -7,15 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
-//
-// ---------------------------------------------------------------------------------
-//
-//  Description:
-//
-//  This class defines a multivariable bin. The bin has information about the
-//  variables, the number of entries and an associated weight. This is a friend
-//  class of < VarWeighter >.
+//  Last update: 17/02/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
@@ -29,26 +21,15 @@
 
 
 //_______________________________________________________________________________
-
-
-// -- CONSTRUCTOR AND DESTRUCTOR
-
-//_______________________________________________________________________________
-// Main constructor
+//
 Analysis::VarBin::VarBin() : fError( 0 ), fNentries( 0 ), fWeight( 0 ) { }
 
 //_______________________________________________________________________________
-// Destructor
+//
 Analysis::VarBin::~VarBin() { }
 
 //_______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//_______________________________________________________________________________
-// Increases the number of entries in one unit for this bin if the values given
-// are inside its limits
+//
 void Analysis::VarBin::IfInsideAdd( const std::map<std::string, double> &values ) {
   for ( auto it = values.begin(); it != values.end(); it++ )
     if ( this -> IsOutside( it -> first, it -> second ) )
@@ -57,7 +38,7 @@ void Analysis::VarBin::IfInsideAdd( const std::map<std::string, double> &values 
 }
 
 //_______________________________________________________________________________
-// Checks if the value for the variable given is inside this bin
+//
 bool Analysis::VarBin::IsOutside( const std::string &vname, const double &value ) {
   std::pair<double, double> *range = &fVarRanges[ vname ];
   if ( value < range -> first || value >= range -> second )
@@ -66,7 +47,7 @@ bool Analysis::VarBin::IsOutside( const std::string &vname, const double &value 
 }
 
 //_______________________________________________________________________________
-// Checks if the values given are inside this bin
+//
 bool Analysis::VarBin::IsOutside( const std::map<std::string, double> &values ) {
   for ( auto it = values.begin(); it != values.end(); it++ )
     if ( this -> IsOutside( it -> first, it -> second ) )
@@ -75,8 +56,7 @@ bool Analysis::VarBin::IsOutside( const std::map<std::string, double> &values ) 
 }
 
 //_______________________________________________________________________________
-// Displays the information of this bin, where the width of the columns is
-// specified as an input
+//
 void Analysis::VarBin::Print( const size_t &width ) {
   std::pair<double, double> *pair;
   for ( auto itm = fVarRanges.begin(); itm != fVarRanges.end(); itm++ ) {
@@ -88,9 +68,7 @@ void Analysis::VarBin::Print( const size_t &width ) {
 }
 
 //_______________________________________________________________________________
-// Sets the weight for this bin. The input parameters are the number of entries
-// for the reference bin, the ratio between the entries for each tree and its
-// error. Both the weight and the error are computed in this method.
+//
 void Analysis::VarBin::SetWeight( const size_t &rentries,
 				  const double &ratio,
 				  const double &sratio,
@@ -114,12 +92,7 @@ void Analysis::VarBin::SetWeight( const size_t &rentries,
 }
 
 //_______________________________________________________________________________
-
-
-// -- PROTECTED METHOD
-
-//_______________________________________________________________________________
-// Divides this bin using the information given
+//
 std::vector<Analysis::VarBin> Analysis::VarBin::Split( const std::string &name,
 						       const size_t      &nbins,
 						       const double      &min,

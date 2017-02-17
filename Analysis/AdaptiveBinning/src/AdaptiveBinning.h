@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 13/06/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 //
@@ -39,35 +39,38 @@ namespace Analysis {
 
   public:
 
-    // Constructors and destructor
+    // Constructor
     AdaptiveBinning();
+
+    // Destructor
     virtual ~AdaptiveBinning();
     
-    // Method
+    // Method to get the a histogram with the adaptive binned structure
     virtual TObject* GetStruct( const char *name = "",
 				const char *title = "" ) const;
 
-    // Inline methods
+    // Return the list of bins
     inline const std::vector<Bin*>& GetBinList() const;
-    inline size_t                   GetNbins() const;
+
+    // Return the number of bins
+    inline size_t GetNbins() const;
 
   protected:
     
-    // Attribute
+    // List of bins
     std::vector<Bin*> fBinList;
         
   };
 
-  //_______________
-  // INLINE METHODS
-
+//______________________________________________________________________________
+//
   const std::vector<Bin*>& AdaptiveBinning::GetBinList() const {
     return fBinList;
   }
-  // Returns the number of bins
-  inline size_t AdaptiveBinning::GetNbins() const {
-    return fBinList.size();
-  }
+
+  //______________________________________________________________________________
+  //
+  inline size_t AdaptiveBinning::GetNbins() const { return fBinList.size(); }
 }
 
 #endif

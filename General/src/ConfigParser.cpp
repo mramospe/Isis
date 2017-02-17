@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -42,9 +42,9 @@ void General::ConfigParser::BookConfigOpt( const std::string &name,
   case 'S':
     break;
   default:
-    Error <<
+    IError <<
       "Unknown type for variable < " << name << " > (" << type << ')'
-					    << EndMsg;
+					    << IEndMsg;
     return;
   }
 
@@ -66,9 +66,9 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
   // equal to that in the class
   const size_t &gsize = fArgs.size();
   if ( gsize != truenargs ) {
-    Error <<
+    IError <<
       "Incorrect number of input parameters (" << truenargs << '/' << gsize << ')'
-						      << EndMsg;
+						      << IEndMsg;
     return;
   }
 
@@ -93,8 +93,8 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
     
     auto def = fArgs[ name ].second;
     if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
-      Error << "Input for < " << name <<
-	" > does not match any of the possibilities: " << General::VectorToString( def ) << EndMsg;
+      IError << "Input for < " << name <<
+	" > does not match any of the possibilities: " << General::VectorToString( def ) << IEndMsg;
       return;
     }
     else
@@ -102,7 +102,7 @@ void General::ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
 
     // An error is displayed when an argument can not be parsed
     if ( !status )
-      Error << "Unable to parse argument " << pos << ": < "
-		<< name << " > (" << type << ')' << EndMsg;
+      IError << "Unable to parse argument " << pos << ": < "
+		<< name << " > (" << type << ')' << IEndMsg;
   }
 }

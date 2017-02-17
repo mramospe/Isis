@@ -23,6 +23,8 @@
 #ifndef __UTILS__
 #define __UTILS__
 
+#include "Messenger.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -108,8 +110,8 @@ namespace General {
 
     // If the variable is not found an error is displayed
     if ( varpos == std::string::npos ) {
-      std::cerr << "ERROR: Could not parse option < " << var <<
-	" >. Key not found." << std::endl;
+      IError << "Could not parse option < " << var <<
+	" >. Key not found." << IEndMsg;
       return;
     }
   
@@ -141,8 +143,8 @@ namespace General {
 
     // If the string to be parsed has whitespaces, an error is sent
     if ( opts.find( ' ' ) != std::string::npos ) {
-      std::cerr << "ERROR: The value to assign to < " << var <<
-	" > has whitespaces; remove them." << std::endl;
+      IError << "The value to assign to < " << var <<
+	" > has whitespaces; remove them." << IEndMsg;
       return;
     }
   

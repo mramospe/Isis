@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/12/2016
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 //
@@ -41,36 +41,44 @@ namespace Analysis {
 
   public:
 
-    // Constructors and destructor
+    // Main constructor
     AdaptiveBinning1D();
+
+    // Constructor given vectors of values
     AdaptiveBinning1D( size_t  occ,
 		       double  vmin,
 		       double  vmax,
 		       const std::vector<double> &values,
 		       const std::vector<double> &weights = std::vector<double>() );
+
+    // Destructor
     ~AdaptiveBinning1D();
 
-    // Method
+    // Return an empty histogram with the adaptive binning structure
     TH1D* GetStruct( const char *name = "", const char *title = "" ) const;
 
-    // Inline Methods
-    inline const double              GetMax() const;
-    inline const double              GetMin() const;
+    // Returns the maximum value for the histogram range
+    inline const double GetMax() const;
+
+    // Returns the minimum value for the histogram range
+    inline const double GetMin() const;
 
   protected:
 
-    // Attributes
+    // Maximum of the histogram
     double fMax;
+
+    // Minimum of the histogram
     double fMin;
 
   };
 
-  //_______________
-  // INLINE METHODS
-
-  // Returns the maximum value for the variable of this class
+  //______________________________________________________________________________
+  //  
   inline const double AdaptiveBinning1D::GetMax() const { return fMax; }
-  // Returns the minimum value for the variable of this class
+  
+  //______________________________________________________________________________
+  //
   inline const double AdaptiveBinning1D::GetMin() const { return fMin; }
 }
 

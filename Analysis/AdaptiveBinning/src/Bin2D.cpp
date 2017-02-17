@@ -7,14 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 19/04/2016
-//
-// --------------------------------------------------------------------
-//
-//  Description:
-//
-//  Implements the two-dimensional bin class to work together with
-//  AdaptiveBinning2D to create adaptive binned histograms.
+//  Last update: 17/02/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -26,12 +19,7 @@
 
 
 //______________________________________________________________________________
-
-
-// -- CONSTRUCTORS AND DESTRUCTOR
-
-//______________________________________________________________________________
-// Constructor
+//
 Analysis::Bin2D::Bin2D( const double &xmin,
 			const double &xmax,
 			const double &ymin,
@@ -39,16 +27,11 @@ Analysis::Bin2D::Bin2D( const double &xmin,
   Bin(), fXmax( xmax ), fXmin( xmin ), fYmax( ymax ), fYmin( ymin ) { }
 
 //______________________________________________________________________________
-// Destructor
+//
 Analysis::Bin2D::~Bin2D() { }
 
 //______________________________________________________________________________
-
-
-// -- PUBLIC METHODS
-
-//______________________________________________________________________________
-// If the bin is in a border of the histogram, adjusts it to the data
+//
 void Analysis::Bin2D::AdjustBin( const double &xmin,
 				 const double &xmax,
 				 const double &ymin,
@@ -65,7 +48,7 @@ void Analysis::Bin2D::AdjustBin( const double &xmin,
 }
 
 //______________________________________________________________________________
-// Fills the bin if the point is inside it
+//
 void Analysis::Bin2D::Fill( const double &x, const double &y, const double &w ) {
 
   if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
@@ -94,43 +77,33 @@ void Analysis::Bin2D::Fill( const double &x, const double &y, const double &w ) 
 }
 
 //______________________________________________________________________________
-
-
-// -- PROTECTED METHODS
-
-//______________________________________________________________________________
-// Divides the bin in two, given the range of the < x > and < y > axis
+//
 Analysis::Bin2D* Analysis::Bin2D::Divide( const double &xrange, const double &yrange ) {
   double tmp;
-  this -> CalcMedians();
+  this->CalcMedians();
   if ( std::min( fXmedian - fXmin, fXmax - fXmedian )/xrange > 
        std::min( fYmedian - fYmin, fYmax - fYmedian )/yrange ) {
     tmp   = fXmax;
     fXmax = fXmedian;
-    this -> Clear();
+    this->Clear();
     return new Bin2D( fXmedian, tmp, fYmin, fYmax );
   }
   else {
     tmp   = fYmax;
     fYmax = fYmedian;
-    this -> Clear();
+    this->Clear();
     return new Bin2D( fXmin, fXmax, fYmedian, tmp );
   }
 }
 
 //______________________________________________________________________________
-
-
-// -- PRIVATE METHODS
-
-//______________________________________________________________________________
-// If the bin is in a border of the histogram, adjusts it to the data
+//
 void Analysis::Bin2D::CalcMedians() {
   
   // Sorts the data ( with the weights )
   std::vector<double>
-    xw_sorted( this -> Sort( fXpoints, fWpoints ) ),
-    yw_sorted( this -> Sort( fYpoints, fWpoints ) );
+    xw_sorted( this->Sort( fXpoints, fWpoints ) ),
+    yw_sorted( this->Sort( fYpoints, fWpoints ) );
 
   // Calculates the median
   double sw_max, sw;
@@ -155,7 +128,7 @@ void Analysis::Bin2D::CalcMedians() {
 }
 
 //______________________________________________________________________________
-// Clears the content of the bin but the limits
+//
 void Analysis::Bin2D::Clear() {
   fXpoints.clear();
   fYpoints.clear();
@@ -164,8 +137,7 @@ void Analysis::Bin2D::Clear() {
 }
 
 //______________________________________________________________________________
-// Sorts the data and the weights and returns the sorted vector of weights for
-// that data sample
+//
 std::vector<double> Analysis::Bin2D::Sort( std::vector<double> &dvector,
 					   std::vector<double> &wvector ) {
   std::vector< std::pair<double, double> > order( dvector.size() );

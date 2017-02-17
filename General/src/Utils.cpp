@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////
 
 
+#include "Messenger.h"
 #include "Utils.h"
 
 #include <algorithm>
@@ -80,13 +81,13 @@ void General::CheckParseOpts( const std::string              &str,
     
     // Checks if the name of the option is in the given list
     if ( lst.size() && std::find( lst.begin(), lst.end(), name ) == lst.end() )
-      std::cerr << "WARNING: Option for < " << name <<
-	" > not known; check the input options." << std::endl;
+      IWarning << "Option for < " << name <<
+	" > not known; check the input options." << IEndMsg;
     
     // Checks if the option given has whitespaces or not
     if ( opt.find( ' ' ) != std::string::npos ) {
-      std::cerr << "ERROR: Option < " << name << 
-	" > has whitespaces on its value" << std::endl;
+      IError << "Option < " << name << 
+	" > has whitespaces on its value" << IEndMsg;
       return;
     }
   }
