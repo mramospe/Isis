@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/12/2016
+//  Last update: 17/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -34,6 +34,7 @@
 #include <boost/python/tuple.hpp>
 
 #include "BufferVariable.h"
+#include "RootUtils.h"
 #include "TreeBuffer.h"
 #include "TreeManagement.h"
 #include "Utils.h"
@@ -80,7 +81,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 				    const char *cuts ) {
   
   TFile *ifile = TFile::Open( fpath );
-  TTree *itree = IBoost::GetRootTree( ifile, tpath );
+  TTree *itree = static_cast<TTree*>(Analysis::GetSafeObject( ifile, tpath ));
 
   // Extracts the list of events to be used
   itree->Draw(">>evtlist", cuts);
@@ -262,21 +263,6 @@ py::object IBoost::BoostListToTree( py::tuple args, py::dict kwargs ) {
   dict[ var ] = values;
   
   return IBoost::BoostDictToTree( py::make_tuple( dict ), kwargs );
-}
-
-//_______________________________________________________________________________
-// Function to get a Root tree and send an error if no tree is found with the
-// given path
-TTree* IBoost::GetRootTree( TFile *ifile, const char *tpath ) {
-
-  TTree *itree = (TTree*) ifile->Get( tpath );
-
-  if ( !itree )
-    std::cerr << "ERROR: No tree named < " << tpath
-	      << " > in file < " << ifile->GetTitle()
-	      << " >" << std::endl;
-  
-  return itree;
 }
 
 //_______________________________________________________________________________

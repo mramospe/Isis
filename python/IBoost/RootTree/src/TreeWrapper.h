@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 17/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -67,7 +67,6 @@ namespace IBoost {
 					 const char *cuts = 0 );
   boost::python::object BoostListToTree( boost::python::tuple args,
 					 boost::python::dict kwargs );
-  TTree* GetRootTree( TFile *ifile, const char *tpath );
   char PyTypeFromObject( boost::python::object object );
 
 }

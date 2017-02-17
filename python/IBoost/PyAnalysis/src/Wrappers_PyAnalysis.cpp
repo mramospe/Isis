@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/12/2016
+//  Last update: 17/02/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -30,6 +30,7 @@
 #include "AdaptiveBinning1D.h"
 #include "AdaptiveBinning2D.h"
 #include "Bin.h"
+#include "RootUtils.h"
 
 #include "TPython.h"
 
@@ -147,6 +148,19 @@ namespace AdBin2D {
   BOOST_PYTHON_FUNCTION_OVERLOADS(GetStruct_Overloads, GetStruct, 1, 3);
 }
 
+// Wrappers for functions and classes in RootUtils.h
+namespace RootUtils {
+
+  PyObject* GetSafeObject( PyObject *ifile_obj, const std::string &path ) {
+
+    TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
+    
+    return TPython::ObjectProxy_FromVoidPtr( an::GetSafeObject(ifile, path),
+					     "TObject",
+					     false );
+  }
+}
+
 
 BOOST_PYTHON_MODULE( PyAnalysis ) {
 
@@ -199,4 +213,6 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     .def_readonly("Ymin", &an::Bin2D::GetYmin)
     ;
 
+  // Wrappers from RootUtils
+  py::def("GetSafeObject", &RootUtils::GetSafeObject);
 }
