@@ -180,7 +180,7 @@ def CalcEfficiency( N, k, cl = 0.683 ):
     Depending on the value for the efficiency a different set
     of non-linear equations is solved
     '''
-    if a0 < 1. - b0:
+    if 1. - b0 < 0:
         l0 = 1./beta.pdf(a0, k + 1, d + 1)
     else:
         l0 = 1./beta.pdf(b0, k + 1, d + 1)
