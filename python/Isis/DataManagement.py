@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/02/2017
+#//  Last update: 20/02/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -29,11 +29,11 @@ from Isis.Algebra import LongVector, Matrix
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 
 
-#_______________________________________________________________________________
-# Class to manage data, specially designed to work together with Root files
-# and trees
 class DataManager( dict ):
-
+    '''
+    Class to manage data, specially designed to work together with Root files
+    and trees
+    '''
     def __init__( self, name = '', path = {}, tree = 'DecayTree', variables = [ '*' ], colid = [], ftype = 'root' ):
         '''
         The constructor provides the possibility of loading data from root or
@@ -404,15 +404,17 @@ class DataManager( dict ):
         
         return cmgr
 
-#_______________________________________________________________________________
-# Creates a new dictionary containing the values of the variables stored on
-# a txt file. The file path is specified in < fname >, while the names of the
-# variables are given as a list in < tnames >. As a keyword argument, the column
-# index to be read has to be given as colid = [ 1, 3, 4, ... ]. If < tnames >
-# is provided, and the first row has the names of the variables, it has
-# preference over the < colid > variable. In the case where the first row
-# does not have the names, < tnames > and < colid > must match.
+
 def DictFromTxt( fname, tnames = [], colid = [] ):
+    '''
+    Creates a new dictionary containing the values of the variables stored on
+    a txt file. The file path is specified in < fname >, while the names of the
+    variables are given as a list in < tnames >. As a keyword argument, the column
+    index to be read has to be given as colid = [ 1, 3, 4, ... ]. If < tnames >
+    is provided, and the first row has the names of the variables, it has
+    preference over the < colid > variable. In the case where the first row
+    does not have the names, < tnames > and < colid > must match.
+    '''
     ifile   = open( fname, 'rt' )
     line    = ifile.readline().split()
     if colid == []:
@@ -454,10 +456,12 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
     ifile.close()
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
 
-#_______________________________________________________________________________
-# Return variables in a tree. If < regexps > are provided, only variables
-# matching it will be returned.
+
 def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
+    '''
+    Return variables in a tree. If < regexps > are provided, only variables
+    matching it will be returned.
+    '''
     if not tree:
         rfile = TFile.Open( fname )
         tree  = rfile.Get( tpath )

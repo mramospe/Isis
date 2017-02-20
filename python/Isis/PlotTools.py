@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/01/2017
+#//  Last update: 20/02/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -34,12 +34,12 @@ from Isis.MathExt import NearestSquare
 from Isis.Utils import CalcMinDist, FormatEvalExpr
 
 
-#_______________________________________________________________________________
-# Output class for an iteration over a < FormatList > instance. This class
-# stores the information of the color, line style and fill style. It also has
-# features to apply it to Root objects.
 class FormatListIter:
-
+    '''
+    Output class for an iteration over a < FormatList > instance. This class
+    stores the information of the color, line style and fill style. It also has
+    features to apply it to Root objects.
+    '''
     def __init__( self, color, linest, markst, fillst ):
         '''
         The color and the line, marker and fill styles are passed to the class
@@ -72,15 +72,16 @@ class FormatListIter:
             obj.SetFillColor( self.Color )
             obj.SetFillStyle( self.FillSt )
 
-#_______________________________________________________________________________
-# This class allows to generate a list storing colors and line, marker and fill
-# styles, so one can iterate over it. The formats are extracted using
-# < __getitem__ > or on an iteration process. If the index is greater than the
-# number of colors in the list, the color will correspond to the loop number,
-# added to the remainder araising from the division. For the other features
-# the quantity is directly extracted from the remainder.
-class FormatList:
 
+class FormatList:
+    '''
+    This class allows to generate a list storing colors and line, marker and fill
+    styles, so one can iterate over it. The formats are extracted using
+    < __getitem__ > or on an iteration process. If the index is greater than the
+    number of colors in the list, the color will correspond to the loop number,
+    added to the remainder araising from the division. For the other features
+    the quantity is directly extracted from the remainder.
+    '''
     def __init__( self, colors = None, linest = None, markst = None, fillst = False ):
         '''
         Any of the input arguments can be passed explicitily to the class. However,
@@ -163,14 +164,16 @@ class FormatList:
                 return lst
         else:
             return
-        
-#_______________________________________________________________________________
-# Draws the given list of histograms. If the variable < norm > is set to True,
-# then the histograms will be normalized and the function will return
-# the list with the clone histograms. It always returns a list with at least an
-# histogram used to give format to the plot. The draw options are set using the
-# < drawopt > keyword.
+
+
 def DrawHistograms( hlst, drawopt = '', norm = True ):
+    '''
+    Draws the given list of histograms. If the variable < norm > is set to True,
+    then the histograms will be normalized and the function will return
+    the list with the clone histograms. It always returns a list with at least an
+    histogram used to give format to the plot. The draw options are set using the
+    < drawopt > keyword.
+    '''
     if norm:
         imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
         imin = min( h.GetMinimum()*1./h.GetSumOfWeights() for h in hlst )
@@ -189,10 +192,12 @@ def DrawHistograms( hlst, drawopt = '', norm = True ):
     drawopt += 'SAME'
     return [ hformat ] + [ meth( h, drawopt ) for h in hlst ]
 
-#_______________________________________________________________________________
-# This function extracts the points of the given array of data which are
-# supposed to be used to make a histogram
+
 def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
+    '''
+    This function extracts the points of the given array of data which are
+    supposed to be used to make a histogram
+    '''
     if vmin == None:
         vmin = min( varlst )
     if vmax == None:
@@ -200,9 +205,11 @@ def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
         vmax += ( vmax - vmin )/( 2.*nbins )
     return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
 
-#_______________________________________________________________________________
-# Returns the histogram constructor given the type as a string
+
 def HistFromType( tp, dim = 1 ):
+    '''
+    Returns the histogram constructor given the type as a string
+    '''
     if tp not in ( 'float', 'double', 'int' ):
         SendErrorMsg('Histogram type < %s > not known' %tp)
         return
@@ -223,9 +230,11 @@ def HistFromType( tp, dim = 1 ):
     else:
         SendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
 
-#_______________________________________________________________________________
-# This function imports different plotting classes from Root
+
 def ImportRootPlotClasses():
+    '''
+    This function imports different plotting classes from Root
+    '''
     glob = sys._getframe( 1 ).f_globals
     loc  = sys._getframe( 1 ).f_locals
     modlist = [ 'gROOT', 'TBrowser', 
@@ -245,16 +254,17 @@ def ImportRootPlotClasses():
     for el in modlist:
         glob[ el ] = __import__( 'ROOT.' + el, glob, loc, [ '*' ] )
 
-#_______________________________________________________________________________
-# This function creates a 1-D adaptive binning histogram given a name, the
-# minimum occupancy value and a list. Adding a list of weights is also possible.
+
 def MakeAdaptiveBinnedHist( name, minocc, values,
                             htype   = 'double',
                             title   = None,
                             weights = False,
                             xtitle  = None,
                             ytitle  = 'Entries' ):
-
+    '''
+    This function creates a 1-D adaptive binning histogram given a name, the
+    minimum occupancy value and a list. Adding a list of weights is also possible.
+    '''
     if title == None:
         title = name
     if not xtitle:
@@ -314,12 +324,13 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
 
     return hist
 
-#_______________________________________________________________________________
-# Creates a correlation histogram given a list of lists. By default it is drawn
-# in color, without palette, and with the contents written inside each bin. No
-# statistical box is displayed neither.
-def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
 
+def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
+    '''
+    Creates a correlation histogram given a list of lists. By default it is drawn
+    in color, without palette, and with the contents written inside each bin. No
+    statistical box is displayed neither.
+    '''
     if title == None:
         title = name
     
@@ -351,11 +362,13 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     
     return hist
 
-#_______________________________________________________________________________
-# Returns a histogram containing the cumulative distribution of that given. If
-# the option < norm > is given, the histogram will be scaled in such a way that
-# the maximum value will be one.
+
 def MakeCumulative( hist, name = '', norm = True, title = None ):
+    '''
+    Returns a histogram containing the cumulative distribution of that given. If
+    the option < norm > is given, the histogram will be scaled in such a way that
+    the maximum value will be one.
+    '''
     if title == None:
         title = name
     chist = hist.Clone()
@@ -369,10 +382,7 @@ def MakeCumulative( hist, name = '', norm = True, title = None ):
         chist.Scale( 1./chist.GetMaximum() )
     return chist
 
-#_______________________________________________________________________________
-# Function to generate a Root histogram given a list. By default no y-title is
-# drawn, but it can be set with the < ytitle > option. For values of type int,
-# the histogram will be of type double.
+
 def MakeHistogram( var,
                    name   = '',
                    nbins  = 100,
@@ -383,7 +393,11 @@ def MakeHistogram( var,
                    wvar   = False,
                    xtitle = '',
                    ytitle = '' ):
-    
+    '''
+    Function to generate a Root histogram given a list. By default no y-title is
+    drawn, but it can be set with the < ytitle > option. For values of type int,
+    the histogram will be of type double.
+    '''
     if title == None:
         title = name
     histcall = HistFromType( htype, 1 )
@@ -407,8 +421,7 @@ def MakeHistogram( var,
     
     return hist
 
-#_______________________________________________________________________________
-# Creates a 2-dimensional histogram given two lists
+
 def MakeHistogram2D( xvar, yvar,
                      name   = '',
                      htype  = 'double',
@@ -422,7 +435,9 @@ def MakeHistogram2D( xvar, yvar,
                      ymax   = None,
                      ymin   = None,
                      ytitle = 'Y' ):
-
+    '''
+    Creates a 2-dimensional histogram given two lists
+    '''
     if title == None:
         title = name
     histcall = HistFromType( htype, 2 )
@@ -453,14 +468,15 @@ def MakeHistogram2D( xvar, yvar,
     hist.GetYaxis().SetTitle( ytitle )
     return hist
 
-#_______________________________________________________________________________
-# Generates a scatter plot given two lists of data
+
 def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
                      name   = '',
                      title  = None,
                      xtitle = 'X',
                      ytitle = 'Y' ):
-
+    '''
+    Generates a scatter plot given two lists of data
+    '''
     if title == None:
         title = name
     npoints = len( xvar )
@@ -486,10 +502,7 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
     
     return graph
 
-#_______________________________________________________________________________
-# This function plots in the same canvas the distributions of the given
-# variables from different DataManager classes. Different options can
-# also been provided to modify the canvas and the information displayed.
+
 def MultiPlot( mgrs, variables,
                cuts   = False,
                errors = False,
@@ -499,7 +512,11 @@ def MultiPlot( mgrs, variables,
                nbins  = 100,
                norm   = True,
                title  = None ):
-
+    '''
+    This function plots in the same canvas the distributions of the given
+    variables from different DataManager classes. Different options can
+    also been provided to modify the canvas and the information displayed.
+    '''
     if title == None:
         title = name
     
@@ -568,8 +585,10 @@ def MultiPlot( mgrs, variables,
                     rlegend.AddEntry( h, '#bf{' + mgr.Name + '}', 'L' )
                     rtxtinf.AddText( mgr.Name + ': %i' % h.GetEntries() )
                 results[ hname ] = h
-            ''' The maximum of the y-axis in the pad is set to the 110% of the maximum
-            value for all the histograms to be drawn '''
+            '''
+            The maximum of the y-axis in the pad is set to the 110% of the maximum
+            value for all the histograms to be drawn
+            '''
             hists[ 0 ].SetMaximum( 1.1*max( h.GetMaximum() for h in hists ) )
             for h in hists:
                 if errors: h.Draw( 'SAMEE' )
@@ -588,10 +607,11 @@ def MultiPlot( mgrs, variables,
         SendErrorMsg('Any of the managers does not have access to some of the variables')
         return
 
-#_______________________________________________________________________________
-# Create the optimal canvas division for a given number of pads
+
 def OptCanvasDivision( nvars ):
-    
+    '''
+    Create the optimal canvas division for a given number of pads
+    '''
     nstsq = NearestSquare( nvars )
     nstrt = int( sqrt( nvars ) )
     

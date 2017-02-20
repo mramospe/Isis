@@ -25,11 +25,12 @@ from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.Algebra import Matrix, SolveLU
 
 
-#_______________________________________________________________________________
-# Calculates the minimum distance between values in an iterable object. With the
-# input parameter < allow_zero > one can prevent the function to take into
-# account elements in the list with the same value.
 def CalcMinDist( lst, allow_zero = True ):
+    '''
+    Calculates the minimum distance between values in an iterable object. With the
+    input parameter < allow_zero > one can prevent the function to take into
+    account elements in the list with the same value.
+    '''
     if allow_zero:
         lst = sorted( lst )
     else:
@@ -37,11 +38,12 @@ def CalcMinDist( lst, allow_zero = True ):
     lst = [ abs( lst[ i - 1 ] - lst[ i ] ) for i in xrange( 1, len( lst ) ) ]
     return min( lst )
 
-#_______________________________________________________________________________
-# Check if the given value is more far from its expectation than the given
-# number of allowed std. dev. (set by < sens >).
-def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
 
+def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
+    '''
+    Check if the given value is more far from its expectation than the given
+    number of allowed std. dev. (set by < sens >).
+    '''
     nsigma = abs( value - exp )/float( sigma )
 
     status = True
@@ -57,18 +59,21 @@ def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
 
     return status
 
-#_______________________________________________________________________________
-# Returns the minimum and maximum values for the combined range for all the
-# given lists
+
 def CombinedRange( *args ):
+    '''
+    Returns the minimum and maximum values for the combined range for all the
+    given lists
+    '''
     minlst = min( min( lst ) for lst in args )
     maxlst = max( max( lst ) for lst in args )
     return minlst, maxlst
 
-#_______________________________________________________________________________
-# Return a new list with the arguments at position < slc > converted to floats
+
 def ConvertArgs( conv, args, slc = slice(0, None) ):
-    
+    '''
+    Return a new list with the arguments at position < slc > converted to floats
+    '''
     new_args = list(args)
     if isinstance(slc, slice):
         islc = range(*slc.indices(len(args)))
@@ -81,18 +86,22 @@ def ConvertArgs( conv, args, slc = slice(0, None) ):
 
     return new_args
 
-#_______________________________________________________________________________
-# Given a dictionary of lists, it returns a list of dictionaries
+
 def DLtoLD( dic ):
+    '''
+    Given a dictionary of lists, it returns a list of dictionaries
+    '''
     firstkw = dic.keys()[ 0 ]
     length  = len( dic[ firstkw ] )
     return [ { kw: vals[ i ] for kw, vals in dic.iteritems() }
              for i in xrange( length ) ]
 
-#_______________________________________________________________________________
-# Displays the given time in the format [ w, d, h, min, s ]. If one of the
-# quantities is zero, it is not displayed.
+
 def FormatTime( itime ):
+    '''
+    Displays the given time in the format [ w, d, h, min, s ]. If one of the
+    quantities is zero, it is not displayed.
+    '''
     conv  = [ 60, 60, 24, 7 ]
     vlist = [ 's', 'min', 'h', 'd', 'w' ]
     vals  = { 's': itime, 'min': 0, 'h': 0, 'd': 0, 'w': 0 }
@@ -109,11 +118,13 @@ def FormatTime( itime ):
     else:
         return '0s'
 
-#_______________________________________________________________________________
-# This function allows to format a given expression in such a way that takes
-# into account the mathematical functions and the logical operators. The module
-# containing the mathematical functions can be specified.
+
 def FormatEvalExpr( expr, mathmod = math ):
+    '''
+    This function allows to format a given expression in such a way that takes
+    into account the mathematical functions and the logical operators. The module
+    containing the mathematical functions can be specified.
+    '''
     expr = TranslateCExpr( expr )
     variables = expr
     for el in ( '==', '!=', '<=', '>=', '>', '<',
@@ -128,9 +139,11 @@ def FormatEvalExpr( expr, mathmod = math ):
     while '' in variables:
         variables.remove( '' )
 
-    ''' Iterates over the expression to find the variables and the constants in it. The use
+    '''
+    Iterates over the expression to find the variables and the constants in it. The use
     of a < while > loop becomes necessary to avoid replacing multiple times the same function
-    by < module.function >. '''
+    by < module.function >.
+    '''
     
     truevars = []
     fmlist   = dir( mathmod )
@@ -192,8 +205,10 @@ def FormatEvalExpr( expr, mathmod = math ):
                 else:
                     isfloat = False
 
-        ''' If it is a float it continues the loop. If it is an expression, tries to find it
-        in the builtin and math modules. '''
+        '''
+        If it is a float it continues the loop. If it is an expression, tries to find it
+        in the builtin and math modules.
+        '''
         if isfloat:
             idx += 1
         else:
@@ -209,24 +224,29 @@ def FormatEvalExpr( expr, mathmod = math ):
                 if el not in fblist:
                     truevars.append( el )
     
-    ''' Sorting the list on a reversed way is necessary to prevent missreplacement of
-    the variables '''
+    '''
+    Sorting the list on a reversed way is necessary to prevent missreplacement of
+    the variables
+    '''
     truevars.sort()
     truevars.reverse()
     return expr, truevars
 
-#_______________________________________________________________________________
-# Given two lists < x > and < y >, performs the inter(extra)polation of the
-# < y > value in the given point < x0 > using a polynomial of order < nord >.
-# If no order is providen it will use all the points to perform the calculation.
-def InferValue( x, y, x0, nord = False ):
 
+def InferValue( x, y, x0, nord = False ):
+    '''
+    Given two lists < x > and < y >, performs the inter(extra)polation of the
+    < y > value in the given point < x0 > using a polynomial of order < nord >.
+    If no order is providen it will use all the points to perform the calculation.
+    '''
     srtlst = sorted( zip( x, y ) )
     x = [ el[ 0 ] for el in srtlst ]
     y = [ el[ 1 ] for el in srtlst ]
 
-    ''' If no order is specified, it will be taken as the number of points. If it is greater
-    than the number of points it is set to this number, and a warning message is sent. '''
+    '''
+    If no order is specified, it will be taken as the number of points. If it is greater
+    than the number of points it is set to this number, and a warning message is sent.
+    '''
     lp = len( x )
     if nord:
         if nord < lp:
@@ -253,8 +273,10 @@ def InferValue( x, y, x0, nord = False ):
     xsol = Matrix( [ x[ imin : imax ] ] )
     ysol = Matrix( [ y[ imin : imax ] ] )
 
-    ''' Because of the degrees of freedom, the polinomial order is one unit smaller than the
-    number of points '''
+    '''
+    Because of the degrees of freedom, the polinomial order is one unit smaller than the
+    number of points
+    '''
     nord -= 1
 
     ''' Generates the matrix of equations '''
@@ -269,10 +291,12 @@ def InferValue( x, y, x0, nord = False ):
         y0 += el * x0**n
     return y0
 
-#_______________________________________________________________________________
-# Joins dictionaries with different keys into one. If some of them have the
-# same key, this one is not considered and not added to the final dictionary.
+
 def JoinDicts( *args ):
+    '''
+    Joins dictionaries with different keys into one. If some of them have the
+    same key, this one is not considered and not added to the final dictionary.
+    '''
     rdict = {}
     for dic in args:
         for key in dic:
@@ -283,11 +307,13 @@ def JoinDicts( *args ):
                 rdict[ key ] = dic[ key ]
     return rdict
 
-#_______________________________________________________________________________
-# If the input is a list, it gets the length of the maximum string located
-# inside it. If it is a dictionary, it gets the maximum value of the strings
-# associated to the keys of it ( it has to be a dictionary of strings ).
+
 def LargestString( lstdic ):
+    '''
+    If the input is a list, it gets the length of the maximum string located
+    inside it. If it is a dictionary, it gets the maximum value of the strings
+    associated to the keys of it ( it has to be a dictionary of strings ).
+    '''
     maxlen = 0
     if isinstance( lstdic, list ):
         for el in lstdic:
@@ -301,19 +327,23 @@ def LargestString( lstdic ):
         print 'The input parameter is not a list nor a dictionary, returned 0'
     return maxlen
 
-#_______________________________________________________________________________
-# Given a list of dictionaries, it returns a dictionary of lists
+
 def LDtoDL( lst ):
+    '''
+    Given a list of dictionaries, it returns a dictionary of lists
+    '''
     keys = lst[ 0 ].keys()
     return { kw: [ el[ kw ] for el in lst ] for kw in keys }
 
-#_______________________________________________________________________________
-# This function generates a sublist from that given, with its values between
-# < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
-# than that of < vmax > will be considered. If set to False, the values that are
-# equal to it will also be considered. By default the output list is given
-# sorted, and this behaviour is managed trough the < sort > variable.
+
 def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
+    '''
+    This function generates a sublist from that given, with its values between
+    < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
+    than that of < vmax > will be considered. If set to False, the values that are
+    equal to it will also be considered. By default the output list is given
+    sorted, and this behaviour is managed trough the < sort > variable.
+    '''
     if 'sort' in kwargs: sort = kwargs[ 'sort' ]
     else: sort = True
     if 'nbr' in kwargs: nbr = kwargs[ 'nbr' ]
@@ -344,10 +374,12 @@ def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
         order.sort()
         return cplst.__class__( lst[ el ] for el in order )
 
-#_______________________________________________________________________________
-# This function merges the values from various dictionaries into one. Only the
-# variables that appear in all the dictionaries are considered.
+
 def MergeDicts( *args ):
+    '''
+    This function merges the values from various dictionaries into one. Only the
+    variables that appear in all the dictionaries are considered.
+    '''
     kvars = args[ 0 ].keys()
     for dic in args[ 1: ]:
         keys = dic.keys()
@@ -363,13 +395,14 @@ def MergeDicts( *args ):
             rdic[ key ] += dic[ key ]
     return rdic
 
-#_______________________________________________________________________________
-# This class allows to save/read environments to/from a file, which are
-# saved as classes. This is very useful when peforming an analysis with many
-# results from different categories that can not be easily written into any
-# other kind of file.
-class PythonEnvMgr:
 
+class PythonEnvMgr:
+    '''
+    This class allows to save/read environments to/from a file, which are
+    saved as classes. This is very useful when peforming an analysis with many
+    results from different categories that can not be easily written into any
+    other kind of file.
+    '''
     def __init__( self, filename, **kwargs ):
         '''
         The name of the input/output file must be provided. The option < addbot >
@@ -474,10 +507,12 @@ class PythonEnvMgr:
 
         ofile.close()
 
-#_______________________________________________________________________________
-# Returns the minimum and maximum values for the shared range among lists. If
-# there is no shared range < False > is returned.
+
 def SharedRange( *args ):
+    '''
+    Returns the minimum and maximum values for the shared range among lists. If
+    there is no shared range < False > is returned.
+    '''
     minlst = max( min( lst ) for lst in args )
     maxlst = min( max( lst ) for lst in args )
     if maxlst > minlst:
@@ -485,10 +520,12 @@ def SharedRange( *args ):
     else:
         return False
 
-#_______________________________________________________________________________
-# Given a list and a pattern ( with elements separated by '*' symbols ) it
-# returns another list with those that satisfy it.
+
 def StringListFilter( lst, pattern ):
+    '''
+    Given a list and a pattern ( with elements separated by '*' symbols ) it
+    returns another list with those that satisfy it.
+    '''
     pattern = pattern.split( '*' )
     checkstart = not pattern[  0 ] == ''
     checkend   = not pattern[ -1 ] == ''
@@ -515,16 +552,19 @@ def StringListFilter( lst, pattern ):
                 output.append( el )
     return output
 
-#_______________________________________________________________________________
-# This is a generator of numbers represented as strings. It allows to perform
-# iterations over numbers from < start > to < end >, filling the left side of
-# them with as much zeros as necessary to make all the numbers in the row have
-# the same size.
-class StrNumGenerator:
 
+class StrNumGenerator:
+    '''
+    This is a generator of numbers represented as strings. It allows to perform
+    iterations over numbers from < start > to < end >, filling the left side of
+    them with as much zeros as necessary to make all the numbers in the row have
+    the same size.
+    '''
     def __init__( self, start, end = False ):
-        ''' If only one number is specified the start will be taken as zero. Only positive
-        values are allowed. '''
+        '''
+        If only one number is specified the start will be taken as zero. Only positive
+        values are allowed.
+        '''
 
         if not end:
             start, end = 0, start
@@ -550,9 +590,11 @@ class StrNumGenerator:
             self.CurrIter += 1
             return ( self.MaxStrLen - lciter )*'0' + citer
 
-#_______________________________________________________________________________
-# Returns the values of the height and width of the terminal
+
 def TerminalSize():
+    '''
+    Returns the values of the height and width of the terminal
+    '''
     def gwinsz( fd ):
         try:
             cr = struct.unpack( 'hh', fcntl.ioctl( fd, termios.TIOCGWINSZ, '1234' ) )
@@ -571,9 +613,11 @@ def TerminalSize():
         cr = ( os.environ.get( 'LINES', 25 ), os.environ.get( 'COLUMNS', 80 ) )
     return int( cr[ 0 ] ), int( cr[ 1 ] )
 
-#_______________________________________________________________________________
-# Translates a C expression into a python expression
+
 def TranslateCExpr( expr ):
+    '''
+    Translates a C expression into a python expression
+    '''
     expr = expr.replace( '&&' , ' and ' )
     expr = expr.replace( '||' , ' or '  )
     expr = expr.replace( 'abs', 'fabs'  )

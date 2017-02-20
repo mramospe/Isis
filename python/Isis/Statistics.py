@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/02/2017
+#//  Last update: 20/02/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -31,18 +31,21 @@ from bisect import bisect
 from math import sqrt
 
 
-#_______________________________________________________________________________
-# Calculates the covariance between two lists ( with the same size )
 def Covariance( lst1, lst2 ):
+    '''
+    Calculates the covariance between two lists ( with the same size )
+    '''
     m1 = Mean( lst1 )
     m2 = Mean( lst2 )
     ex = [ ( v1 - m1 )*( v2 - m2 ) for v1, v2 in zip( lst1, lst2 ) ]
     return Mean( ex )
 
-#_______________________________________________________________________________
-# Calculates the covariance matrix for a given set of data. The indexes of the
-# data set have to correspond to the values of one of the variables.
+
 def CovMatrix( data ):
+    '''
+    Calculates the covariance matrix for a given set of data. The indexes of the
+    data set have to correspond to the values of one of the variables.
+    '''
     nvars     = len( data )
     covmatrix = Matrix( [ nvars*[ 0. ] for i in xrange( nvars ) ] )
     for i in xrange( nvars ):
@@ -50,15 +53,18 @@ def CovMatrix( data ):
             covmatrix[ i ][ j ] = Covariance( data[ i ], data[ j ] )
     return covmatrix
 
-#_______________________________________________________________________________
-# This class allows to generate the linear Fisher discriminant variable given
-# a signal and a background samples.
-class FisherDiscriminant:
 
+class FisherDiscriminant:
+    '''
+    This class allows to generate the linear Fisher discriminant variable given
+    a signal and a background samples.
+    '''
     def __init__( self, SigSample, BkgSample, EvtsInRows = True ):
-        ''' This class works with a signal and a background sample given as a
+        '''
+        This class works with a signal and a background sample given as a
         list of lists. They can be provided with the events disposed as rows
-        < EvtsInRows = True > or in columns ( more common ) < EvtsInRows = False > '''
+        < EvtsInRows = True > or in columns ( more common ) < EvtsInRows = False >
+        '''
         if EvtsInRows:
             self.SigSample = Matrix( SigSample ).Transpose()
             self.BkgSample = Matrix( BkgSample ).Transpose()
@@ -82,7 +88,9 @@ class FisherDiscriminant:
         return fisherVar
 
     def GetTrainFisherValues( self ):
-        ''' Returns the values for the fisher discriminant of the two training samples '''
+        '''
+        Returns the values for the fisher discriminant of the two training samples
+        '''
         SigSample  = self.SigSample.Transpose()
         BkgSample  = self.BkgSample.Transpose()
         fisherSig  = self.Apply( SigSample )
@@ -90,8 +98,10 @@ class FisherDiscriminant:
         return fisherSig, fisherBkg
 
     def PlotFisherQuality( self, **kwargs ):
-        ''' Plots the histograms of the fisher discriminant values for the two training
-        samples '''
+        '''
+        Plots the histograms of the fisher discriminant values for the two training
+        samples
+        '''
         nbins   = kwargs.get( 'nbins', 100 )
         npoints = kwargs.get( 'npoints', 100 )
         nsig    = kwargs.get( 'nsig', 1000 )
@@ -193,25 +203,28 @@ class FisherDiscriminant:
                  'roc'    : roc,
                  'sig'    : sig }
 
-#_______________________________________________________________________________
-# This class allows to generate an integral transformation from a given set of
-# values. This method is the opposite to that which is used to generate a set
-# of values with following some distribution given an uniform random 
-# distributed set of values (so the input values would be transformed to an 
-# uniform distribution). It can proceed by two different ways. One is using an
-# adaptive binning technique to take the best use of the statistics, while in
-# the other usual bins are used. This last method has the disadvantage that the
-# final shape is bin dependent (this means that even the transformation of the
-# input values could not start at 0).
+
 class IntegralTransformer:
-    
+    '''
+    This class allows to generate an integral transformation from a given set of
+    values. This method is the opposite to that which is used to generate a set
+    of values with following some distribution given an uniform random 
+    distributed set of values (so the input values would be transformed to an 
+    uniform distribution). It can proceed by two different ways. One is using an
+    adaptive binning technique to take the best use of the statistics, while in
+    the other usual bins are used. This last method has the disadvantage that the
+    final shape is bin dependent (this means that even the transformation of the
+    input values could not start at 0).
+    '''
     def __init__( self, nbins, arg, **kwargs ):
-        ''' To initialize the class one has to provide the number of bins that will be used
+        '''
+        To initialize the class one has to provide the number of bins that will be used
         in the transformed distribution < nbins > and an argument, that can be a set of
         values or a histogram. If it is a set of values, the option to use the adaptive
         binning technique is set by the < adaptbin > parameter. If no such technique is used,
         one can control the number of bin for the input sample with the input parameter
-        < ntrbins >. '''
+        < ntrbins >.
+        '''
         
         verbose = kwargs.get( 'verbose', True )
 
@@ -245,11 +258,12 @@ class IntegralTransformer:
         self.CumulativeHist = MakeCumulative( self.MainHist )
     
     def Transform( self, name, arg, **kwargs ):
-        ''' Transforms the distribution from the given set of values using the class
+        '''
+        Transforms the distribution from the given set of values using the class
         distribution. One must provide the name of the output histogram and an argument.
         This argument can be a histogram or an iterable. The title and the type of histogram
-        are set using the < title > and < htype > parameters. '''
-
+        are set using the < title > and < htype > parameters.
+        '''
         title    = kwargs.get( 'title', name )
         histcall = HistFromType( kwargs.get( 'htype', 'double' ) )
         
@@ -302,13 +316,15 @@ class IntegralTransformer:
         else:
             return hist.GetBinCenter( pos )
 
-#_______________________________________________________________________________
-# Returns the two Kolmogorov-Smirnov factors. The input parameters can be
-# iterable objects or TH1 histograms. The < smpRef > variable will be taken
-# as the 'reference' and < smpObs > as the distribution to check if matches. If
-# a list or similar class is provided, by default the analysis will be unbinned,
-# controlling it with the < binned > option.
+
 def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
+    '''
+    Returns the two Kolmogorov-Smirnov factors. The input parameters can be
+    iterable objects or TH1 histograms. The < smpRef > variable will be taken
+    as the 'reference' and < smpObs > as the distribution to check if matches. If
+    a list or similar class is provided, by default the analysis will be unbinned,
+    controlling it with the < binned > option.
+    '''
     binned = kwargs.get( 'binned', False )
     if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
         ''' If the classes are histograms it works using the bins contents '''
@@ -361,44 +377,64 @@ def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
                 Dp[ ip ] = abs( nObs - nRef )
                 Dm[ ip ] = abs( nRef - nObs )
             return max( Dp ), max( Dm )
-    ''' Calculates the sum of weights and creates a list with the content of all the bins '''
+        
+    '''
+    Calculates the sum of weights and creates a list with the content of all the bins
+    '''
     nRef, nObs = [ smp.GetSumOfWeights() for smp in ( smpRef, smpObs ) ]
     cRef = [ smpRef.GetBinContent( i )/nRef for i in xrange( 1, nbins + 1 ) ]
     cObs = [ smpObs.GetBinContent( i )/nObs for i in xrange( 1, nbins + 1 ) ]
-    ''' Calculates the cumulated values '''
+    
+    '''
+    Calculates the cumulated values
+    '''
     for i in xrange( 1, nbins ):
         cRef[ i ] += cRef[ i - 1 ]
         cObs[ i ] += cObs[ i - 1 ]
-    ''' Calculates the Kolmogorov-Smirnov parameters '''
+        
+    '''
+    Calculates the Kolmogorov-Smirnov parameters
+    '''
     Dp, Dm = nbins*[ 0. ], nbins*[ 0. ]
     for ib in xrange( nbins ):
         Dp[ ib ] = abs( cObs[ ib ] - cRef[ ib ] )
         Dm[ ib ] = abs( cRef[ ib ] - cObs[ ib ] )
+        
     return max( Dp ), max( Dm )
 
-#_______________________________________________________________________________
-# Calculates the linear correlation coefficient between two lists of values
+
 def LinearCorrCoeff( lst1, lst2 ):
+    '''
+    Calculates the linear correlation coefficient between two lists of values
+    '''
     return Covariance( lst1, lst2 )*1./sqrt( StdDev2( lst1 )*StdDev2( lst2 ) )
 
-#_______________________________________________________________________________
-# Calculates the mean of the values in a list of values
+
 def Mean( lst ):
+    '''
+    Calculates the mean of the values in a list of values
+    '''
     return sum( lst )*1./len( lst )
 
-#_______________________________________________________________________________
-# Calculates the squared standard deviation of the mean of a list of values
+
 def MeanStdDev2( lst ):
+    '''
+    Calculates the squared standard deviation of the mean of a list of values
+    '''
     return StdDev2( lst )*1./len( lst )
 
-#_______________________________________________________________________________
-# Calculates the standard deviation of the mean of a list of values
+
 def MeanStdDev( lst ):
+    '''
+    Calculates the standard deviation of the mean of a list of values
+    '''
     return sqrt( MeanStdDev2( lst ) )
 
-#_______________________________________________________________________________
-# Calculates the mode of a list of values
+
 def Mode( lst ):
+    '''
+    Calculates the mode of a list of values
+    '''
     vdict = {}
     for el in lst:
         if el not in vdict:
@@ -418,25 +454,31 @@ def Mode( lst ):
         SendWarningMsg('A number of < %i > modes exist in the input list' %nmodes)
     return oldmax
 
-#_______________________________________________________________________________
-# Gets the nth momentum of the distribution of the list
+
 def StatMomentum( lst, n ):
+    '''
+    Gets the nth momentum of the distribution of the list
+    '''
     mean = Mean( lst )
     res  = 0
     for el in lst:
         res += ( el - mean )**n
     return res*1./len( lst )
     
-#_______________________________________________________________________________
-# Calculates the squared standard deviation of a list of values
+
 def StdDev2( lst ):
+    '''
+    Calculates the squared standard deviation of a list of values
+    '''
     mean = Mean( lst )
     res  = 0
     for el in lst:
         res += ( el - mean )**2
     return res*1./len( lst )
 
-#_______________________________________________________________________________
-# Calculates the standard deviation of a list of values
+
 def StdDev( lst ):
+    '''
+    Calculates the standard deviation of a list of values
+    '''
     return sqrt( StdDev2( lst ) )

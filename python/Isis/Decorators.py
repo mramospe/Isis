@@ -24,10 +24,10 @@ import time
 from Isis.Utils import ConvertArgs, FormatTime, TerminalSize
 
 
-#_______________________________________________________________________________
-# Base decorator to call a function modifying its arguments
 class DecoArgBase:
-
+    '''
+    Base decorator to call a function modifying its arguments
+    '''
     def __init__( self, func ):
         '''
         The function to be called is parsed
@@ -40,20 +40,22 @@ class DecoArgBase:
         '''
         return self.Func(*args, **kwargs)
 
-#_______________________________________________________________________________
-# Thin second-order decorator designed to be used with class methods
+
 def DecoClassMethod( func ):
-    
+    '''
+    Thin second-order decorator designed to be used with class methods
+    '''
     def wrapper( self, *args, **kwargs ):
         return func( self, *args, **kwargs )
     
     return wrapper
 
-#_______________________________________________________________________________
-# Base decorator to apply a function < conv > to each argument based on the
-# slice < slc >. The keyword arguments can also be parsed as a list in < kvars >
+
 class _DecoInputArgs( DecoArgBase ):
-    
+    '''
+    Base decorator to apply a function < conv > to each argument based on the
+    slice < slc >. The keyword arguments can also be parsed as a list in < kvars >
+    '''
     def __init__( self, conv, func, slc, kvars ):
         '''
         Call base class and set the number of arguments to convert
@@ -78,21 +80,23 @@ class _DecoInputArgs( DecoArgBase ):
 
         return self.Func(*func_args, **kwargs)
 
-#_______________________________________________________________________________
-# Function to extend the functionality of the class < _DecoInputArgs > as a
-# decorator
-def DecoInputArgs( conv, slc = slice(0, None), kvars = [] ):
 
+def DecoInputArgs( conv, slc = slice(0, None), kvars = [] ):
+    '''
+    Function to extend the functionality of the class < _DecoInputArgs > as a
+    decorator
+    '''
     def wrapper( func ):
         return _DecoInputArgs(conv, func, slc, kvars)
         
     return wrapper
 
-#_______________________________________________________________________________
-# This decorator displays the time information about a particular job, together
-# with some separators
-def TrackTime( function ):
 
+def TrackTime( function ):
+    '''
+    This decorator displays the time information about a particular job, together
+    with some separators
+    '''
     def wrapper( *args, **kwargs ):
         '''
         This is the wrapper function to be returned

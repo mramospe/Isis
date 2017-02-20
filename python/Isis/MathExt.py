@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 12/04/2016
+#//  Last update: 20/02/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -22,11 +22,12 @@
 from math import sqrt, floor
 
 
-#_______________________________________________________________________________
-# Decomposes the given number in the smallest multiples. The result is given in
-# a list, which is automatically ordered from the minimum multiple to the
-# maximum.
 def Decompose( number ):
+    '''
+    Decomposes the given number in the smallest multiples. The result is given in
+    a list, which is automatically ordered from the minimum multiple to the
+    maximum.
+    '''
     cnt, result = 1, []
     while number != 1:
         cnt += 1
@@ -36,17 +37,21 @@ def Decompose( number ):
             cnt = 1
     return result
 
-#_______________________________________________________________________________
-# Calculates the greater common divisor of a set of numbers
+
 def GreaterComDiv( *args ):
+    '''
+    Calculates the greater common divisor of a set of numbers
+    '''
     cnt = min( args )
     while any( el % cnt for el in args ):
         cnt -= 1
     return cnt
 
-#_______________________________________________________________________________
-# Checks if the given number is a prime number
+
 def IsPrime( number ):
+    '''
+    Checks if the given number is a prime number
+    '''
     cnt = 2
     while number % cnt and cnt < number:
         cnt += 1
@@ -55,9 +60,11 @@ def IsPrime( number ):
     else:
         return False
 
-#_______________________________________________________________________________
-# Checks if the given number is a pure square number
+
 def IsSquare( number ):
+    '''
+    Checks if the given number is a pure square number
+    '''
     cnt, number = 0, int( number )
     while cnt*cnt < number:
         cnt += 1
@@ -66,17 +73,21 @@ def IsSquare( number ):
     else:
         return False
 
-#_______________________________________________________________________________
-# Calculates the least common multiple of a set of numbers
+
 def LeastComMult( *args ):
+    '''
+    Calculates the least common multiple of a set of numbers
+    '''
     cnt = max( args )
     while any( cnt % el for el in args ):
         cnt += 1
     return cnt
 
-#_______________________________________________________________________________
-# Calculates the nearest perfect square number to the one given
+
 def NearestSquare( number ):
+    '''
+    Calculates the nearest perfect square number to the one given
+    '''
     nfloor  = floor( sqrt( number ) )
     lowsqrt = nfloor**2
     upsqrt  = ( nfloor + 1 )**2
