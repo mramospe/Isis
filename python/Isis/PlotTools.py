@@ -21,15 +21,16 @@
 
 
 from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
-                   TGraph, TGraphErrors, TH1,
+                   TGraph, TGraphErrors, TGraphAsymmErrors, TH1,
                    TH1F, TH1D,
                    TH2F, TH2D,
                    kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
-from array import array
+from numpy import array
 from math import sqrt
 import itertools
 import numpy
 import sys
+from Isis.Efficiencies import CalcEfficiency
 from Isis.MathExt import NearestSquare
 from Isis.Utils import CalcMinDist, FormatEvalExpr
 
@@ -164,6 +165,55 @@ class FormatList:
                 return lst
         else:
             return
+
+
+def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
+    '''
+    Divide two histograms < hK/hN >. By default, asymmetric errors are
+    considered. Returns a TGraphAsymmErrors instance.
+    '''
+    if title == None:
+        title = name
+
+    nbins   = hN.GetNbinsX()
+    tprg    = (1, nbins + 1)
+    centers = array([hN.GetBinCenter(i) for i in xrange(*tprg)])
+    swidth  = array([hN.GetBinWidth(i) for i in xrange(*tprg)])/2.
+    
+    nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
+    nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
+
+    eff     = []
+    seff    = []
+    seff_lw = []
+    seff_up = []
+
+    for nn, nk in zip(nN, nK):
+        p, s_sy, s_lw, s_up, r = CalcEfficiency(nn, nk)
+        eff.append(p)
+        seff.append(s_sy)
+        seff_lw.append(s_lw)
+        seff_up.append(s_up)
+
+    if not asym:
+        ''' If specified, the symmetric error is used '''
+        seff_lw = seff_up = seff
+
+    '''
+    Build the graph
+    '''
+    eff     = array(eff)
+    seff_lw = array(seff_lw)
+    seff_up = array(seff_up)
+
+    graph = TGraphAsymmErrors(nbins,
+                              centers, eff,
+                              swidth, swidth,
+                              seff_lw, seff_up)
+    
+    graph.SetNameTitle(name, title)
+    
+    return graph
 
 
 def DrawHistograms( hlst, drawopt = '', norm = True ):
@@ -311,9 +361,11 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
         binlist[ -1 ][ 0 ], binlist[ -1 ][ 1 ] = values[ idat ]
         idat += 1
 
-    ''' To create the Root histogram, an array of doubles has to be created, with the minimum
-    value for the bins '''
-    bins = array( 'd', ( nbins + 1 )*[ 0. ] )
+    '''
+    To create the Root histogram, an array of doubles has to be created, with the
+    minimum value for the bins
+    '''
+    bins = array(( nbins + 1 )*[ 0. ])
     for i, ib in enumerate( binlist ):
         bins[ i ] = ib[ 0 ]
     bins[ -1 ] = vmax
@@ -480,18 +532,18 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
     if title == None:
         title = name
     npoints = len( xvar )
-    xvar    = array( 'd', xvar )
-    yvar    = array( 'd', yvar )
+    xvar    = array(xvar)
+    yvar    = array(yvar)
     if xerr or yerr:
         if   not xerr:
-            xerr = array( 'd', npoints*[ 0 ] )
-            yerr = array( 'd', yerr )
+            xerr = array(npoints*[ 0 ])
+            yerr = array(yerr)
         elif not yerr:
-            xerr = array( 'd', yerr )
-            yerr = array( 'd', npoints*[ 0 ] )
+            xerr = array(yerr)
+            yerr = array(npoints*[ 0 ])
         else:
-            xerr = array( 'd', xerr )
-            yerr = array( 'd', yerr )
+            xerr = array(xerr)
+            yerr = array(yerr)
         graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
     else:
         graph = TGraph( npoints, xvar, yvar )
