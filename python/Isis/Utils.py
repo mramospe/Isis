@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/02/2017
+#//  Last update: 20/02/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -64,6 +64,22 @@ def CombinedRange( *args ):
     minlst = min( min( lst ) for lst in args )
     maxlst = max( max( lst ) for lst in args )
     return minlst, maxlst
+
+#_______________________________________________________________________________
+# Return a new list with the arguments at position < slc > converted to floats
+def ConvertArgs( conv, args, slc = slice(0, None) ):
+    
+    new_args = list(args)
+    if isinstance(slc, slice):
+        islc = range(*slc.indices(len(args)))
+    else:
+        islc = slc
+        
+    for i, el in enumerate(new_args):
+        if i in islc:
+            new_args[i] = conv(el)
+
+    return new_args
 
 #_______________________________________________________________________________
 # Given a dictionary of lists, it returns a list of dictionaries

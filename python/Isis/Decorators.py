@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 07/02/2017
+#//  Last update: 20/02/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -21,7 +21,7 @@
 
 
 import time
-from Isis.Utils import FormatTime, TerminalSize
+from Isis.Utils import ConvertArgs, FormatTime, TerminalSize
 
 
 #_______________________________________________________________________________
@@ -41,39 +41,52 @@ class DecoArgBase:
         return self.Func(*args, **kwargs)
 
 #_______________________________________________________________________________
-# Base decorator to convert the first < n > arguments into floats
-class _DecoFloatArgs( DecoArgBase ):
+# Thin second-order decorator designed to be used with class methods
+def DecoClassMethod( func ):
     
-    def __init__( self, func, n ):
+    def wrapper( self, *args, **kwargs ):
+        return func( self, *args, **kwargs )
+    
+    return wrapper
+
+#_______________________________________________________________________________
+# Base decorator to apply a function < conv > to each argument based on the
+# slice < slc >. The keyword arguments can also be parsed as a list in < kvars >
+class _DecoInputArgs( DecoArgBase ):
+    
+    def __init__( self, conv, func, slc, kvars ):
         '''
         Call base class and set the number of arguments to convert
         '''
         DecoArgBase.__init__(self, func)
-        self.N = n
+        self.Conv  = conv
+        self.Kvars = kvars
+        self.Slice = slc
         
     def __call__( self, *args, **kwargs ):
         '''
-        Convert the < n > arguments and call function
+        Convert arguments with indices < self.Slice > and call function
         '''
-        if self.N < 0:
-            self.N = len(args)
-        
-        args = [float(el) for el in args[:self.N]] + list(args[self.N:])
-        
-        return self.Func(*args, **kwargs)
+        func_args = ConvertArgs(self.Conv, args, self.Slice)
+
+        if self.Kvars:
+            common = set(self.Kvars).intersection(kwargs.keys())
+            values = [kwargs[kw] for kw in common]
+            values = ConvertArgs(self.Conv, values)
+            for kw, v in zip(self.Kvars, values):
+                kwargs[kw] = v
+
+        return self.Func(*func_args, **kwargs)
 
 #_______________________________________________________________________________
-# Decorator to convert the first < n > arguments into floats. If no number is
-# provided, all the arguments will be converted.
-def DecoFloatArgs( func = None, n = -1 ):
+# Function to extend the functionality of the class < _DecoInputArgs > as a
+# decorator
+def DecoInputArgs( conv, slc = slice(0, None), kvars = [] ):
 
-    if func:
-        return _DecoFloatArgs( func, n )
-    else:
-        def wrapper( wfunc ):
-            return _DecoFloatArgs( wfunc, n )
+    def wrapper( func ):
+        return _DecoInputArgs(conv, func, slc, kvars)
         
-        return wrapper
+    return wrapper
 
 #_______________________________________________________________________________
 # This decorator displays the time information about a particular job, together

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/02/2017
+#//  Last update: 20/02/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -20,7 +20,7 @@
 
 
 from Isis.IBoost.PyGeneral import SendErrorMsg
-from Isis.Decorators import DecoArgBase
+from Isis.Decorators import DecoArgBase, DecoClassMethod, DecoInputArgs
 from math import sqrt
 from scipy.optimize import fsolve
 from scipy.special import betainc, binom
@@ -30,6 +30,7 @@ from scipy.stats import beta
 #_______________________________________________________________________________
 # Return the binomial bayesian probability of having < k > events in < N >
 # with a probability < p >.
+@DecoInputArgs(float)
 def BinomialBayesianProb( N, k, p ):
     
     d   = N - k
@@ -40,8 +41,9 @@ def BinomialBayesianProb( N, k, p ):
 
 #_______________________________________________________________________________
 # Return the binomial efficiency uncertainty of having < k > events in < N >
+@DecoInputArgs(float)
 def BinomialEffUncert( N, k ):
-    return sqrt(k*(1. - float(k)/N))/N
+    return sqrt(k*(1. - k/N))/N
 
 #_______________________________________________________________________________
 # Decorator to check the input parameters to calculate the efficiency
@@ -53,6 +55,8 @@ class DecoEffInput( DecoArgBase ):
         '''
         DecoArgBase.__init__(self, func)
 
+    @DecoClassMethod
+    @DecoInputArgs(float, slc = slice(1, 3), kvars = ['cl'])
     def __call__( self, N, k, *args, **kwargs ):
         '''
         Check the input numbers and call the stored function
@@ -62,7 +66,7 @@ class DecoEffInput( DecoArgBase ):
                          'events greater than the initial')
             return
         
-        return self.Func(float(N), float(k), *args, **kwargs)
+        return self.Func(N, k, *args, **kwargs)
             
 #_______________________________________________________________________________
 # Calculate the efficiency and its associated asymmetric uncertainties
@@ -75,7 +79,7 @@ def CalcEfficiency( N, k, cl = 0.683, method = 'sym' ):
     p = k/N
     d = N - k
     
-    p_unc = BinomialEffUncert(N, k)
+    p_unc = beta.std(k + 1, d + 1)
     a0 = abs(p - p_unc)
     b0 = abs(p + p_unc)
     
@@ -174,7 +178,7 @@ def CalcEfficiency( N, k, cl = 0.683, method = 'sym' ):
     else:
         a, b, r = fsolve(nleq, (a0, b0, l0), fprime = nleq_jac)
 
-    s_sy = beta.std(k + 1, d + 1)
+    s_sy = p_unc
     s_lw = p - a
     s_up = b - p
 
@@ -190,7 +194,7 @@ def CalcEfficiency( N, k, cl = 0.683, method = 'sym' ):
 @DecoEffInput
 def CalcSymEfficiency( N, k, cl = 0.683 ):
 
-    d    = N - k    
+    d    = N - k
     mean = beta.mean(k + 1, d + 1)
     p0   = BinomialEffUncert(N, k)
     
