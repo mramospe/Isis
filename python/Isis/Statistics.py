@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 21/02/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -22,11 +22,12 @@
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
 from Isis.Algebra import Matrix, Inv
-from Isis.IBoost.PyGeneral import SendError, SendWarning
+from Isis.IBoost.PyGeneral import SendErrorMsg, SendInfoMsg, SendWarningMsg
 from Isis.PlotTools import ( HistFromType, MakeAdaptiveBinnedHist,
                              MakeCumulative, MakeHistogram )
+from Isis.RootUtils import ExtractHistValues
 from Isis.Utils import CalcMinDist
-from array import array
+import numpy as np
 from bisect import bisect
 from math import sqrt
 
@@ -206,115 +207,44 @@ class FisherDiscriminant:
 
 class IntegralTransformer:
     '''
-    This class allows to generate an integral transformation from a given set of
-    values. This method is the opposite to that which is used to generate a set
-    of values with following some distribution given an uniform random 
-    distributed set of values (so the input values would be transformed to an 
-    uniform distribution). It can proceed by two different ways. One is using an
-    adaptive binning technique to take the best use of the statistics, while in
-    the other usual bins are used. This last method has the disadvantage that the
-    final shape is bin dependent (this means that even the transformation of the
-    input values could not start at 0).
+    Class to do integral transformations. The transformation is performed so the
+    distribution of the given argument is flat in [0, 1]. The de-transformation
+    process is also possible.
     '''
-    def __init__( self, nbins, arg, **kwargs ):
+    def __init__( self, arg, weights = None ):
         '''
-        To initialize the class one has to provide the number of bins that will be used
-        in the transformed distribution < nbins > and an argument, that can be a set of
-        values or a histogram. If it is a set of values, the option to use the adaptive
-        binning technique is set by the < adaptbin > parameter. If no such technique is used,
-        one can control the number of bin for the input sample with the input parameter
-        < ntrbins >.
+        The argument must be an array-like or a TH1 object. The weights may only be
+        provided for the first case.
         '''
-        
-        verbose = kwargs.get( 'verbose', True )
-
-        self.AdaptBin = kwargs.get( 'adaptbin', False )
         if isinstance( arg, TH1 ):
-            if verbose:
-                print ( 'INFO: After the transformation, all the values greater than one will be ' +
-                        'attached to the last bin' )
-            if self.AdaptBin:
-                SendWarningMsg('Adaptive binned method not available with a '\
-                               'TH1 object as input')
-            self.AdaptBin = False
-            self.MainHist = arg
-            self.Nbins    = nbins
-        else:
-            if self.AdaptBin:
-                if verbose:
-                    print ( 'INFO: The output histogram comes from an adaptive binned transformation. ' +
-                            'Is constructed as: x in bin if x > min and x <= max.' )
-                
-                length = len( arg )
-                self.MainHist = MakeAdaptiveBinnedHist( '', length/nbins, arg )
-                self.Nbins    = nbins
+
+            if weights:
+                SendWarning('Using a TH1 object; input weights ignored')
             
-                for val in arg:
-                    self.MainHist.Fill( val )
-            else:
-                ntrbins = kwargs.get( 'ntrbins', 100 )
-                self.__init__( nbins, MakeHistogram( arg, nbins = ntrbins ) )
-                
-        self.CumulativeHist = MakeCumulative( self.MainHist )
+            centers, values, widths = ExtractHistValues(arg)
+
+            self.__init__(centers, values)
+            
+        else:
+            if weights == None:
+                weights = len(arg)*[1.]
+
+            values, weights = zip(*sorted(zip(arg, weights)))
+
+            self.Values = np.array(values)
+            self.Cltve  = np.cumsum(weights)*1./sum(weights)
     
-    def Transform( self, name, arg, **kwargs ):
+    def Transform( self, arg ):
         '''
-        Transforms the distribution from the given set of values using the class
-        distribution. One must provide the name of the output histogram and an argument.
-        This argument can be a histogram or an iterable. The title and the type of histogram
-        are set using the < title > and < htype > parameters.
+        Return the integral transformated value(s)
         '''
-        title    = kwargs.get( 'title', name )
-        histcall = HistFromType( kwargs.get( 'htype', 'double' ) )
-        
-        transf = histcall( name, title, self.Nbins, 0, 1 )
-        
-        '''
-        If the argument is an histogram, it creates the list with the values and
-        associated weights.
-        '''
-        if isinstance( arg, TH1 ):
-            values = [ ( arg.GetBinCenter( ib ), arg.GetBinContent( ib ) )
-                       for ib in xrange( 1, arg.GetNbinsX() + 1 ) ]
-        else:
-            values = zip( arg, len( arg )*[ 1. ] )
+        return np.interp(arg, self.Values, self.Cltve)
 
-        if self.AdaptBin:
-            nbins  = self.MainHist.GetNbinsX()
-            blist  = [ self.MainHist.GetBinLowEdge( ib ) for ib in xrange( 1, nbins + 2 ) ]
-            bins   = array( 'd', blist )
-            abhist = self.MainHist.__class__( '', '', nbins, bins )
-            for val, wgt in values:
-                abhist.Fill( val, wgt )
-            sw = abhist.GetSumOfWeights()
-            for ib in xrange( 1, self.MainHist.GetNbinsX() + 1 ):
-                cont = abhist.GetBinContent( ib )
-                transf.SetBinContent( ib, cont/sw )
-                transf.SetBinError( ib, sqrt( cont/sw**2 + sw*cont**2/sw**4 ) )
-        else:
-            addifone = 1 - transf.GetBinWidth( 1 )/2.
-            for val, wgt in values:
-                fval = self.CumulativeHist.Interpolate( val )
-                if fval != 1:
-                    transf.Fill( fval, wgt )
-                else:
-                    transf.Fill( addifone, wgt )
-        
-        return transf
-
-    def DeTransfValue( self, value, retallinfo = False ):
+    def DeTransform( self, arg ):
         '''
-        Returns the de-transformated value associated to that given. If the option
-        < retallinfo > is set to True, it will return the bin center and the bin width
-        associated with that value.
+        Return the de-transformated value(s)
         '''
-        hist    = self.CumulativeHist
-        binvals = [ hist.GetBinContent( ib ) for ib in xrange( 1, hist.GetNbinsX() + 1 ) ]
-        pos     = bisect( binvals, value ) - 1
-        if retallinfo:
-            return hist.GetBinCenter( pos ), hist.GetBinWidth( pos )
-        else:
-            return hist.GetBinCenter( pos )
+        return np.interp(arg, self.Cltve, self.Values)
 
 
 def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
