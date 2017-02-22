@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/02/2017
+#//  Last update: 22/02/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -21,15 +21,51 @@
 
 
 from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
+from ROOT import Math as rmath
+
 from Isis.Algebra import Matrix, Inv
+from Isis.Decorators import DecoInputArgs
 from Isis.IBoost.PyGeneral import SendErrorMsg, SendInfoMsg, SendWarningMsg
-from Isis.PlotTools import ( HistFromType, MakeAdaptiveBinnedHist,
-                             MakeCumulative, MakeHistogram )
 from Isis.RootUtils import ExtractHistValues
 from Isis.Utils import CalcMinDist
-import numpy as np
-from bisect import bisect
+
 from math import sqrt
+import numpy as np
+import numbers
+from scipy.special import betainc
+from scipy.stats import beta
+
+
+@DecoInputArgs(float, kvars = ['cl', 'prec'])
+def BinomialUncert( N, k, cl = 0.683, prec = 0.01 ):
+    '''
+    Calculate the frequentist uncertainties associated with an observation of < k >
+    events in < N >. The confidence level and precision for the results may be
+    provided.
+    '''
+    p = k/N
+
+    d = N - k
+    
+    s_sy = beta.std(k + 1, d + 1)
+
+    nsteps = int(2*s_sy/prec)
+
+    lw_lst = np.linspace(p - 2*s_sy, p, nsteps)
+    up_lst = np.linspace(p + 2*s_sy, p, nsteps)
+
+    lw_probs = map(lambda x: betainc(k + 1, d + 1, x), lw_lst)
+    up_probs = map(lambda x: 1. - betainc(k + 1, d + 1, x), up_lst)
+    
+    pb = (1. - cl)/2.
+
+    p_lw = np.interp(pb, lw_probs, lw_lst)
+    p_up = np.interp(pb, up_probs, up_lst)
+
+    s_lw = p - p_lw
+    s_up = p_up - p
+
+    return s_sy, s_lw, s_up
 
 
 def Covariance( lst1, lst2 ):
@@ -144,7 +180,8 @@ class FisherDiscriminant:
             bkgrej = 1 - bkgeff
             roc.SetPoint( i, sigeff, bkgrej )
             if ( sigeff + bkgeff ) != 0:
-                sig.SetPoint( sig.GetN(), cut, sigeff*nsig*1./sqrt( sigeff*nsig + bkgeff*nbkg ) )
+                sig.SetPoint( sig.GetN(), cut,
+                              sigeff*nsig*1./sqrt( sigeff*nsig + bkgeff*nbkg ) )
             eff.SetPoint( i, cut, sigeff )
             rej.SetPoint( i, cut, bkgrej )
 
@@ -219,7 +256,7 @@ class IntegralTransformer:
         if isinstance( arg, TH1 ):
 
             if weights:
-                SendWarning('Using a TH1 object; input weights ignored')
+                SendWarningMsg('Using a TH1 object; input weights ignored')
             
             centers, values, widths = ExtractHistValues(arg)
 
@@ -245,92 +282,6 @@ class IntegralTransformer:
         Return the de-transformated value(s)
         '''
         return np.interp(arg, self.Cltve, self.Values)
-
-
-def KolmogorovSmirnovTest( smpRef, smpObs, **kwargs ):
-    '''
-    Returns the two Kolmogorov-Smirnov factors. The input parameters can be
-    iterable objects or TH1 histograms. The < smpRef > variable will be taken
-    as the 'reference' and < smpObs > as the distribution to check if matches. If
-    a list or similar class is provided, by default the analysis will be unbinned,
-    controlling it with the < binned > option.
-    '''
-    binned = kwargs.get( 'binned', False )
-    if all( issubclass( smp.__class__, TH1 ) for smp in ( smpRef, smpObs ) ):
-        ''' If the classes are histograms it works using the bins contents '''
-        nbins = smpRef.GetNbinsX()
-        if nbins != smpObs.GetNbinsX():
-            SendErrorMsg('The number of bins is different for both samples')
-            return
-        elif smpRef.GetXaxis().GetXmin() != smpObs.GetXaxis().GetXmin():
-            SendErrorMsg('The minimum values for the axis of the histograms do not match')
-            return
-        elif smpRef.GetXaxis().GetXmax() != smpObs.GetXaxis().GetXmax():
-            SendErrorMsg('The maximum values for the axis of the histograms do not match')
-            return
-    else:
-        if binned:
-            ''' This is the task performed when one wants to consider binned lists '''
-            nbins = kwargs.get( 'nbins', 100 )
-            vmin  = kwargs.get( 'vmin', min( smpRef + smpObs ) )
-            vmax  = kwargs.get( 'vmax', max( smpRef + smpObs ) +
-                                CalcMinDist( smpRef + smpObs, False )*1./2 )
-            smpRef = MakeHistogram( smpRef, name = 'ref', nbins = nbins, vmin = vmin, vmax = vmax )
-            smpObs = MakeHistogram( smpObs, name = 'obs', nbins = nbins, vmin = vmin, vmax = vmax )
-        else:
-            ''' This is what is performed when one works with unbinned distributions '''
-            npoints = kwargs.get( 'npoints', 100 )
-            smpRef  = list( smpRef )
-            smpObs  = list( smpObs )
-            mainlst = smpRef + smpObs
-            vmax    = max( mainlst )
-            vmin    = min( mainlst )
-            step    = float( vmax - min( mainlst ) )/npoints
-            points  = [ vmin + i*step for i in xrange( 1, npoints + 1 ) ]
-            points[ -1 ] += step
-            cRef, cObs = 1./len( smpRef ), 1./len( smpObs )
-            smpRef.sort()
-            smpObs.sort()
-            Dp, Dm = npoints*[ 0. ], npoints*[ 0. ]
-            for ip, p in enumerate( points ):
-                nRef, nObs = 0, 0
-                i = 0
-                while smpRef[ i ] < p:
-                    i += 1
-                    nRef += cRef
-                smpRef = smpRef[ i: ]
-                i = 0
-                while smpObs[ i ] < p:
-                    i += 1
-                    nObs += cObs
-                smpObs = smpObs[ i: ]
-                Dp[ ip ] = abs( nObs - nRef )
-                Dm[ ip ] = abs( nRef - nObs )
-            return max( Dp ), max( Dm )
-        
-    '''
-    Calculates the sum of weights and creates a list with the content of all the bins
-    '''
-    nRef, nObs = [ smp.GetSumOfWeights() for smp in ( smpRef, smpObs ) ]
-    cRef = [ smpRef.GetBinContent( i )/nRef for i in xrange( 1, nbins + 1 ) ]
-    cObs = [ smpObs.GetBinContent( i )/nObs for i in xrange( 1, nbins + 1 ) ]
-    
-    '''
-    Calculates the cumulated values
-    '''
-    for i in xrange( 1, nbins ):
-        cRef[ i ] += cRef[ i - 1 ]
-        cObs[ i ] += cObs[ i - 1 ]
-        
-    '''
-    Calculates the Kolmogorov-Smirnov parameters
-    '''
-    Dp, Dm = nbins*[ 0. ], nbins*[ 0. ]
-    for ib in xrange( nbins ):
-        Dp[ ib ] = abs( cObs[ ib ] - cRef[ ib ] )
-        Dm[ ib ] = abs( cRef[ ib ] - cObs[ ib ] )
-        
-    return max( Dp ), max( Dm )
 
 
 def LinearCorrCoeff( lst1, lst2 ):
@@ -383,6 +334,40 @@ def Mode( lst ):
     if nmodes > 1:
         SendWarningMsg('A number of < %i > modes exist in the input list' %nmodes)
     return oldmax
+
+
+@DecoInputArgs(float, slc = [], kvars = ['cl', 'prec'])
+def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
+    '''
+    Calculate the frequentist poisson uncertainties for a given integer value. The
+    confidence level may be provided. Also the precision required in the outcoming
+    uncertainties.
+    '''
+    if not isinstance(mean, numbers.Integral):
+        mean = int(round(mean))
+        SendWarningMsg('Calculating poisson uncertainty of a non-integer value; '\
+                       'returning values for closest integer < %i >' %mean)
+    
+    s_sy = sqrt(mean)
+
+    nsteps = int(2*s_sy/prec)
+    lw_mean_lst = np.linspace(mean - 2*s_sy, mean, nsteps)
+    up_mean_lst = np.linspace(mean + 2*s_sy, mean, nsteps)
+
+    ''' Adding the value at < mean > is necessary '''
+    lw_probs = map(lambda x: rmath.poisson_cdf_c(mean, x) + rmath.poisson_pdf(mean, x),
+                   lw_mean_lst)
+    up_probs = map(lambda x: rmath.poisson_cdf(mean, x), up_mean_lst)
+
+    pb = (1. - cl)/2.
+
+    mean_lw = np.interp(pb, lw_probs, lw_mean_lst)
+    mean_up = np.interp(pb, up_probs, up_mean_lst)
+
+    s_lw = mean - mean_lw
+    s_up = mean_up - mean
+
+    return s_sy, s_lw, s_up
 
 
 def StatMomentum( lst, n ):

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 22/02/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -189,7 +189,7 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
     seff_up = []
 
     for nn, nk in zip(nN, nK):
-        p, s_sy, s_lw, s_up, r = CalcEfficiency(nn, nk)
+        p, s_sy, s_lw, s_up = CalcEfficiency(nn, nk)
         eff.append(p)
         seff.append(s_sy)
         seff_lw.append(s_lw)

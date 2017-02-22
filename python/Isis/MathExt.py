@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 22/02/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -95,3 +95,10 @@ def NearestSquare( number ):
         return round( lowsqrt )
     else:
         return round( upsqrt )
+
+
+def SumQuad( *values ):
+    '''
+    Sum the input values in quadrature
+    '''
+    return sum(v**2 for v in values)
