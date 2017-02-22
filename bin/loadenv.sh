@@ -14,7 +14,7 @@ currpath=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 # Exports the different folders of the project
 export ISIS=${currpath:0:(${#currpath}-4)}
 export ISIS_PYTHON=$ISIS/python
-export ISIS_TOOLS=$ISIS/Tools
+export ISIS_SCRIPTS=$ISIS/scripts
 
 # Displays the path to the Isis folder
 echo "Loading source from: $ISIS"
@@ -37,12 +37,6 @@ if [[ $PYTHONPATH != *$ISIS_PYTHON* ]]; then
 fi
 echo "Extended python path from: $ISIS_PYTHON"
 
-# Defines the alias to the tools
-alias BDTBrowser='root -l $ISIS_TOOLS/BDTBrowser.C'
-alias changeWords='python $ISIS_TOOLS/changeWords.py'
-alias convertVars='$ISIS_TOOLS/./convertVars.out'
-alias getLuminosity='$ISIS_TOOLS/./getLuminosity.out'
-alias mergeFilesByEvents='$ISIS_TOOLS/./mergeFilesByEvents.out'
-alias readCuts='$ISIS_TOOLS/./readCuts.out'
-alias reorderTreeByEvents='$ISIS_TOOLS/./reorderTreeByEvents.out'
-echo "Defined alias for tools at: $ISIS_TOOLS"
+# Defines the alias to the scripts
+alias readCuts='python $ISIS_SCRIPTS/readCuts.py'
+echo "Defined alias for scripts at: $ISIS_SCRIPTS"
