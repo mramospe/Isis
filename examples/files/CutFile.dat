@@ -1,7 +1,7 @@
-////////////////////////////////////////////////
-//  Example of cut file to be used together   //
-//  with CutManager class		      //
-////////////////////////////////////////////////
+# -----------------------------------------------
+# Example of cut file to be used together with
+# the class CutManager
+# -----------------------------------------------
 
 # This is a comment
 Cut1 = a > 0 or b == 1

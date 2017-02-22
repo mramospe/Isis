@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 22/02/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -167,13 +167,6 @@ void General::CutManager::Open( const std::string &file_path ) {
     if ( line.size() )
       if ( line.front() != '#' ) {
 	if ( ( pos = line.find( '=' ) ) != std::string::npos ) {
-
-	  // Checks whether does exist any other assignment operator in the same line
-	  if ( line.find( '=', pos + 1 ) != std::string::npos ) {
-	    IError << "Found two assignment operators in line < " <<
-	      nl << " >" << IEndMsg;
-	    return;
-	  }
 
 	  // Checks whether the cut name is free of whitespaces
 	  str = line.substr( 0, pos );

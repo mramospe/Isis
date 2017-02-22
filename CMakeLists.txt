@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 16/02/2017
+#  Last update: 22/02/2017
 #
 #  Description:
 #
@@ -106,7 +106,7 @@ endfunction()
 if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
   self_make_directory(${PROJECT_BINARY_DIR}/python)
   self_make_directory(${PROJECT_BINARY_DIR}/python/Isis)
-  self_copy_directory(${PROJECT_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+  self_copy_directory(${PROJECT_SOURCE_DIR}/scripts ${PROJECT_BINARY_DIR}/scripts)
   self_copy_directory(${PROJECT_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
   self_copy_directory(${PROJECT_SOURCE_DIR}/bin ${PROJECT_BINARY_DIR}/bin)
 endif()
@@ -132,20 +132,6 @@ add_subdirectory(General)
 add_subdirectory(Analysis)
 list(REVERSE PROJECT_LIBRARIES)
 add_subdirectory(python)
-
-#----------------------------------------------------------------------------
-# Specifies the scripts of the tools to be compiled, and copies the .C and
-# .py files to the folder
-set(TOOLS_DIR ${PROJECT_SOURCE_DIR}/tools)
-file(GLOB srctools ${TOOLS_DIR}/*.cpp)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/tools)
-foreach(tool ${srctools})
-  string(REPLACE ".cpp" ".out" comptool ${tool})
-  string(REPLACE ${TOOLS_DIR}/ "" comptool ${comptool})
-  add_executable(${comptool} ${tool})
-  add_dependencies(${comptool} ${PROJECT_LIBRARIES})
-  target_link_libraries(${comptool} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
-endforeach()
 
 #----------------------------------------------------------------------------
 # Copies the example files. If the option BUILD_EXAMPLES is ON, the scripts

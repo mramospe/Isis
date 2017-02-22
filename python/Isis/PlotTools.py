@@ -20,19 +20,21 @@
 #////////////////////////////////////////////////////////////////
 
 
+from Isis.Efficiencies import CalcEfficiency
+from Isis.IBoost.PyGeneral import SendErrorMsg
+from Isis.MathExt import NearestSquare
+from Isis.Utils import CalcMinDist, FormatEvalExpr
+
 from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
                    TGraph, TGraphErrors, TGraphAsymmErrors, TH1,
                    TH1F, TH1D,
                    TH2F, TH2D,
                    kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
-from numpy import array
-from math import sqrt
+
 import itertools
-import numpy
+from math import sqrt
+import numpy as np
 import sys
-from Isis.Efficiencies import CalcEfficiency
-from Isis.MathExt import NearestSquare
-from Isis.Utils import CalcMinDist, FormatEvalExpr
 
 
 class FormatListIter:
@@ -177,8 +179,8 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
 
     nbins   = hN.GetNbinsX()
     tprg    = (1, nbins + 1)
-    centers = array([hN.GetBinCenter(i) for i in xrange(*tprg)])
-    swidth  = array([hN.GetBinWidth(i) for i in xrange(*tprg)])/2.
+    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)])
+    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)])/2.
     
     nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
     nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
@@ -202,9 +204,9 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
     '''
     Build the graph
     '''
-    eff     = array(eff)
-    seff_lw = array(seff_lw)
-    seff_up = array(seff_up)
+    eff     = np.array(eff)
+    seff_lw = np.array(seff_lw)
+    seff_up = np.array(seff_up)
 
     graph = TGraphAsymmErrors(nbins,
                               centers, eff,
@@ -365,7 +367,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     To create the Root histogram, an array of doubles has to be created, with the
     minimum value for the bins
     '''
-    bins = array(( nbins + 1 )*[ 0. ])
+    bins = np.array(( nbins + 1 )*[ 0. ])
     for i, ib in enumerate( binlist ):
         bins[ i ] = ib[ 0 ]
     bins[ -1 ] = vmax
@@ -397,7 +399,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     else:
         vartitles = [ 'Variable_' + str( i ) for i in xrange( lm ) ]
 
-    corr_matrix = 100*numpy.corrcoef( matrix )
+    corr_matrix = 100*np.corrcoef( matrix )
     
     hist = TH2D( name, title, lm, 0, lm, lm, 0, lm )
     for i, row in enumerate( corr_matrix ):
@@ -532,18 +534,18 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
     if title == None:
         title = name
     npoints = len( xvar )
-    xvar    = array(xvar)
-    yvar    = array(yvar)
+    xvar    = np.array(xvar)
+    yvar    = np.array(yvar)
     if xerr or yerr:
         if   not xerr:
-            xerr = array(npoints*[ 0 ])
-            yerr = array(yerr)
+            xerr = np.array(npoints*[ 0 ])
+            yerr = np.array(yerr)
         elif not yerr:
-            xerr = array(yerr)
-            yerr = array(npoints*[ 0 ])
+            xerr = np.array(yerr)
+            yerr = np.array(npoints*[ 0 ])
         else:
-            xerr = array(xerr)
-            yerr = array(yerr)
+            xerr = np.array(xerr)
+            yerr = np.array(yerr)
         graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
     else:
         graph = TGraph( npoints, xvar, yvar )
@@ -563,17 +565,20 @@ def MultiPlot( mgrs, variables,
                name   = 'canvas',
                nbins  = 100,
                norm   = True,
+               ranges = {},
                title  = None ):
     '''
     This function plots in the same canvas the distributions of the given
     variables from different DataManager classes. Different options can
     also been provided to modify the canvas and the information displayed.
+    If < ranges > is provided, it must contain the same name of the
+    variables passed in < variables > (this applies also to formulas).
     '''
     if title == None:
         title = name
     
-    nvars    = len( variables ) + 1
-    results  = {}
+    nvars   = len( variables ) + 1
+    results = {}
 
     ''' Get the true variables associated with the given expressions '''
     truevars = [ FormatEvalExpr( var )[ 1 ] for var in variables ]
@@ -614,10 +619,16 @@ def MultiPlot( mgrs, variables,
 
             ''' This is done to reduce disk usage '''
             totlst = [ mgr.VarEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
-            vmax   = max( el for lst in totlst for el in lst )
-            vmin   = min( el for lst in totlst for el in lst )
-            hists  = []
+
+
+            ''' Extract the ranges for each variable (if any) '''
+            if var in ranges.keys():
+                vmin, vmax = ranges[var]
+            else:
+                vmax = max( el for lst in totlst for el in lst )
+                vmin = min( el for lst in totlst for el in lst )
             
+            hists  = []
             for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
                 hname = mgr.Name + '_' + var
                 h = MakeHistogram( vals,
