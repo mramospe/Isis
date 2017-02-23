@@ -179,8 +179,8 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
 
     nbins   = hN.GetNbinsX()
     tprg    = (1, nbins + 1)
-    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)], dtype = float)
-    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)], dtype = float)/2.
+    centers = [hN.GetBinCenter(i) for i in xrange(*tprg)]
+    swidth  = [hN.GetBinWidth(i) for i in xrange(*tprg)]
     
     nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
     nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
@@ -204,10 +204,12 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
     '''
     Build the graph
     '''
-    eff     = np.array(eff, dtype = float)
+    centers = np.array(centers, dtype = float)
+    eff     = np.array(eff    , dtype = float)
+    swidth  = np.array(swidth , dtype = float)
     seff_lw = np.array(seff_lw, dtype = float)
     seff_up = np.array(seff_up, dtype = float)
-
+    
     graph = TGraphAsymmErrors(nbins,
                               centers, eff,
                               swidth, swidth,
@@ -533,19 +535,18 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
     '''
     if title == None:
         title = name
-    npoints = len( xvar )
+    npoints = len(xvar)
     xvar    = np.array(xvar, dtype = float)
     yvar    = np.array(yvar, dtype = float)
     if xerr or yerr:
         if   not xerr:
             xerr = np.array(npoints*[ 0 ], dtype = float)
-            yerr = np.array(yerr, dtype = float)
         elif not yerr:
-            xerr = np.array(yerr, dtype = float)
-            yerr = np.array(npoints*[ 0 ], dtype = float)
-        else:
-            xerr = np.array(xerr, dtype = float)
-            yerr = np.array(yerr, dtype = float)
+            yerr = npoints*[ 0 ]
+            
+        xerr = np.array(xerr, dtype = float)
+        yerr = np.array(yerr, dtype = float)
+        
         graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
     else:
         graph = TGraph( npoints, xvar, yvar )
