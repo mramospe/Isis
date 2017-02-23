@@ -20,9 +20,12 @@
 #/////////////////////////////////////////////////////////////
 
 
+import math
+import numpy as np
+
 from ROOT import TFile, TTree, gDirectory
 from array import array
-import math
+
 from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
 from Isis.Algebra import LongVector, Matrix
@@ -338,6 +341,38 @@ class DataManager( dict ):
             if ievt + 1 == len( evtlst ):
                 print deco + '\n'
 
+    def RunCutEntries( self, var,
+                       sense    = '>',
+                       npoints  = 100,
+                       vmin     = None,
+                       vmax     = None,
+                       endpoint = True ):
+        '''
+        Return a list with the numbers of elements satisfying a given cut, running
+        from < vmin > to < vmax > in < npoints >.
+        '''
+        if sense not in ('>', '>=', '<', '<='):
+            SendErrorMsg('Unable to parse < %s > as a sense-like symbol')
+            return
+
+        values = self[var]
+        
+        if vmin == None:
+            vmin = min(values)
+        if vmax == None:
+            vmax = max(values)
+
+        cuts = np.linspace(vmin, vmax, npoints, endpoint = endpoint)
+        
+        var += sense
+
+        points = []
+        for ic in cuts:
+            ct = var + str(ic)
+            points.append(self.GetEntries(ct))
+
+        return points
+                
     def Save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
         '''
         Saves the given class values in a TTree. If < name > is not provided, the

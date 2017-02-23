@@ -26,6 +26,7 @@ from math import sqrt
 from scipy.optimize import fsolve
 from scipy.special import betainc, binom
 from scipy.stats import beta
+import numpy as np
 
 
 @DecoInputArgs(float)
@@ -233,3 +234,27 @@ def CalcRejection( N, k, cl = 0.683 ):
     p, s_sy, s_up, s_lw = CalcEfficiency(N, k, cl)
 
     return 1. - p, s_sy, s_lw, s_up
+
+
+def ROCvalues( var, sig, bkg,
+               sense    = '>',
+               npoints  = 100,
+               vmin     = None,
+               vmax     = None,
+               endpoint = True ):
+    '''
+    Calculate the ROC values for two samples of signal and background events over
+    the variable < var >. Two lists are returned containing the output of the
+    < CalcEfficiency > and < CalcRejection > methods.
+    '''
+
+    nS = sig.RunCutEntries(var, sense, npoints, vmin, vmax, endpoint)
+    nB = bkg.RunCutEntries(var, sense, npoints, vmin, vmax, endpoint)
+    
+    nS_glob = sig.GetEntries()
+    nB_glob = bkg.GetEntries()
+    
+    eff = map(lambda x: CalcEfficiency(nS_glob, x), nS)
+    rej = map(lambda x: CalcRejection(nB_glob, x), nB)
+
+    return eff, rej
