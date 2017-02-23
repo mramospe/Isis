@@ -148,10 +148,13 @@ class DataManager( dict ):
         Gets the number of entries of the class. If a cut selection is given, it is
         calculated the number of events that satisfy those cuts.
         '''
-        if selection:
-            return len( self.GetCutList( selection ), mathmod )
+        if self.keys():
+            if selection:
+                return len(self.GetCutList(selection, mathmod))
+            else:
+                return len(next(self.itervalues()))
         else:
-            return len( self )
+            SendErrorMsg('Attempting to get entries from an empty data manager')
 
     def GetEventDict( self, ievt ):
         '''
@@ -172,7 +175,8 @@ class DataManager( dict ):
     def GetMatrix( self, variables = '*', trans = True ):
         '''
         Returns a list with the values from < variables > for each event. If < trans >
-        is set to true, then it returns a list of lists with the values for each variable.
+        is set to true, then it returns a list of lists with the values for each
+        variable.
         '''
         if variables == '*':
             variables = self.keys()
@@ -187,7 +191,7 @@ class DataManager( dict ):
         '''
         Gets the number of variables in the class
         '''
-        return len( self.keys() )
+        return len(self.keys())
 
     def VarEvents( self, variables, cuts = False, mathmod = math ):
         '''

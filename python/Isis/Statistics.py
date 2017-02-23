@@ -48,11 +48,17 @@ def BinomialUncert( N, k, cl = 0.683, prec = 0.01 ):
     d = N - k
     
     s_sy = beta.std(k + 1, d + 1)
+    
+    nsteps = int(1./prec)
 
-    nsteps = int(2*s_sy/prec)
+    vmin = p - 2*s_sy
+    vmax = p + 2*s_sy
 
-    lw_lst = np.linspace(p - 2*s_sy, p, nsteps)
-    up_lst = np.linspace(p + 2*s_sy, p, nsteps)
+    if vmin < 0:
+        vmin = 0
+
+    lw_lst = np.linspace(vmin, p, nsteps)
+    up_lst = np.linspace(vmax, p, nsteps)
 
     lw_probs = map(lambda x: betainc(k + 1, d + 1, x), lw_lst)
     up_probs = map(lambda x: 1. - betainc(k + 1, d + 1, x), up_lst)

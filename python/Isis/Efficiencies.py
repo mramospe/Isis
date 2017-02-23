@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/02/2017
+#//  Last update: 23/02/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -68,7 +68,7 @@ def CalcEfficiency( N, k, cl = 0.683 ):
     can be specified. Returns the efficiency, the symmetric efficiency
     and the lower and upper intervals associated to the given CL.
     '''
-    p = N/k
+    p = k/N
     s_sy, s_lw, s_up = BinomialUncert(N, k, cl)
     
     return p, s_sy, s_lw, s_up
@@ -223,3 +223,13 @@ def CalcBayesSymEfficiency( N, k, cl = 0.683 ):
     dist = fsolve(fc, p0, fprime = jc)[ 0 ]
 
     return mean, dist
+
+
+def CalcRejection( N, k, cl = 0.683 ):
+    '''
+    Calculate rejection for havin < k > elements in < N >. For more details
+    see < CalcEfficiency >. Asymmetric uncertainties are swapped.
+    '''
+    p, s_sy, s_up, s_lw = CalcEfficiency(N, k, cl)
+
+    return 1. - p, s_sy, s_lw, s_up

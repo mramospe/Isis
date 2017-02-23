@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/02/2017
+#//  Last update: 23/02/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -179,8 +179,8 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
 
     nbins   = hN.GetNbinsX()
     tprg    = (1, nbins + 1)
-    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)])
-    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)])/2.
+    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)], dtype = float)
+    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)], dtype = float)/2.
     
     nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
     nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
@@ -204,9 +204,9 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
     '''
     Build the graph
     '''
-    eff     = np.array(eff)
-    seff_lw = np.array(seff_lw)
-    seff_up = np.array(seff_up)
+    eff     = np.array(eff, dtype = float)
+    seff_lw = np.array(seff_lw, dtype = float)
+    seff_up = np.array(seff_up, dtype = float)
 
     graph = TGraphAsymmErrors(nbins,
                               centers, eff,
@@ -367,7 +367,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     To create the Root histogram, an array of doubles has to be created, with the
     minimum value for the bins
     '''
-    bins = np.array(( nbins + 1 )*[ 0. ])
+    bins = np.array(( nbins + 1 )*[ 0. ], dtype = float)
     for i, ib in enumerate( binlist ):
         bins[ i ] = ib[ 0 ]
     bins[ -1 ] = vmax
@@ -392,8 +392,8 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     lv = len( vartitles )
     if vartitles != []:
         if lm != lv:
-            print 'WARNING: Number of titles is not the same as that of the matrix. '\
-                'New variables will have names < Variables_# >'
+            SendWarningMsg('Number of titles is not the same as that of the matrix; '\
+                           'new variables will have names < Variables_# >')
             for i in xrange( lv + 1, lm ):
                 vartitles.append( 'Variable_' + str( i ) )
     else:
@@ -534,18 +534,18 @@ def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
     if title == None:
         title = name
     npoints = len( xvar )
-    xvar    = np.array(xvar)
-    yvar    = np.array(yvar)
+    xvar    = np.array(xvar, dtype = float)
+    yvar    = np.array(yvar, dtype = float)
     if xerr or yerr:
         if   not xerr:
-            xerr = np.array(npoints*[ 0 ])
-            yerr = np.array(yerr)
+            xerr = np.array(npoints*[ 0 ], dtype = float)
+            yerr = np.array(yerr, dtype = float)
         elif not yerr:
-            xerr = np.array(yerr)
-            yerr = np.array(npoints*[ 0 ])
+            xerr = np.array(yerr, dtype = float)
+            yerr = np.array(npoints*[ 0 ], dtype = float)
         else:
-            xerr = np.array(xerr)
-            yerr = np.array(yerr)
+            xerr = np.array(xerr, dtype = float)
+            yerr = np.array(yerr, dtype = float)
         graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
     else:
         graph = TGraph( npoints, xvar, yvar )
