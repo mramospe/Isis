@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 23/02/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -78,7 +78,7 @@ class DataManager( dict ):
         Allows merging two objects of this class
         '''
         mgr = DataManager( self.Name + '__' + other.Name )
-        true_vars = [ var for var in self if var in other ]
+        true_vars = [ var for var in self.keys() if var in other ]
         for var in true_vars:
             mgr[ var ] = self[ var ] + other[ var ]
         no_booked = set( self.keys() + other.keys() ).difference( true_vars )
