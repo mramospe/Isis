@@ -309,7 +309,7 @@ def ImportRootPlotClasses():
                 'TCanvas', 'TPave', 'TPaveText', 'TLegend',
                 'TH1D', 'TH1F', 'TH1I',
                 'TH2D', 'TH2F', 'TH2I',
-                'TGraph', 'TGraphErrors',
+                'TGraph', 'TGraphErrors', 'TGraphAsymmErrors',
                 'TF1', 'TF2', 'TLine',
                 'TColor',
                 'kBlue', 'kViolet', 'kMagenta', 'kPink',

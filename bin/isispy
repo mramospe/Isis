@@ -1,3 +1,4 @@
+#!/bin/bash
 #==============================================================#
 # Function to load the python environment for the Isis package #
 #--------------------------------------------------------------#
@@ -5,22 +6,80 @@
 # e-mail: miguel.ramos.pernas@cern.ch	                       #
 #==============================================================#
 
-# If no arguments are provided opens the python interpreter
-if [ $# -eq 0 ]; then
-     args=-i
+usage="
+$(basename "$0") [-h] [-i] [-e execfile] [-l loadfiles] [-p pyflags]
+
+Initialize a ipython session with the provided options and the Isis project loaded. If
+ipython is not available, python will be used instead.
+
+ -h  show this help text
+ -e  executable file
+ -i  run in interactive mode (by default if no executable file is specified)
+ -l  files to load
+ -p  python flags
+"
+
+pyflags=""
+while getopts 'ha:e:il:p:' option; do
+    case "$option" in
+	h) echo "$usage"
+	   exit
+	   ;;
+	a) args=$OPTARG
+	   ;;
+	e) execfile=$OPTARG
+	   ;;
+	i) pyflags="$pyflags -i"
+	   ;;
+	l) loadfiles=$OPTARG
+	   ;;
+	p) pyflags=$pyflags" $OPTARG"
+	   ;;
+	:) printf "\nError: missing argument for < -%s >\n" "$OPTARG" >&2
+	   echo "$usage" >&2
+	   exit 1
+	   ;;
+	\?) printf "\nError: illegal option: < -%s >\n" "$OPTARG" >&2
+	    echo "$usage" >&2
+	    exit 1
+	    ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+
+# Define the command to be executed
+
+postsc=""
+
+if [ "$execfile" != "" ]; then
+    postsc=$postsc" -e $execfile"
 else
-     args=$@
+    pyflags=" -i $pyflags"
 fi
 
-# Checks if any of ipython or python exists and initializes it with the Isis
-# and Root modules. It will prioritize initializing ipython first. If none of
-# them are accesible the process is aborted. When calling ipython, since it
-# does not support the < import * > for the ROOT modules one has to pass
-# one argument to the < __init__.py > script.
+if [ "$loadfiles" != "" ]; then
+    postsc=$postsc" -l $loadfiles"
+fi
+
+if [ "$args" != "" ]; then
+    postsc="$postsc -a $args"
+fi
+
+
+# The script < isispy.py > is located at $ISIS_BIN
+
+cmd="$ISIS_BIN/isispy.py $postsc"
+
+
+# Checks whether any of ipython or python exists and initializes it with the
+# Isis and Root modules. It will prioritize initializing ipython first. If none
+# of them are accesible the process is aborted.
+
 if   hash ipython 2>/dev/null; then
-     ipython $args $ISIS_PYTHON/Isis/__init__.py NoRootAll
+    ipython $pyflags -c "%run $cmd"
 elif hash python  2>/dev/null; then
-     python  $args $ISIS_PYTHON/Isis/__init__.py
+    python  $pyflags $cmd
 else
-     echo "No ipython nor python exist. Aborted."
+    echo "Error: No ipython nor python exist. Aborted."
 fi
