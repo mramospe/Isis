@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/02/2017
+#//  Last update: 01/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -21,7 +21,7 @@
 
 
 from Isis.Efficiencies import CalcEfficiency
-from Isis.IBoost.PyGeneral import SendErrorMsg
+from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.MathExt import NearestSquare
 from Isis.Utils import CalcMinDist, FormatEvalExpr
 
@@ -169,14 +169,11 @@ class FormatList:
             return
 
 
-def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
+def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '', ytitle = '' ):
     '''
     Divide two histograms < hK/hN >. By default, asymmetric errors are
     considered. Returns a TGraphAsymmErrors instance.
     '''
-    if title == None:
-        title = name
-
     nbins   = hN.GetNbinsX()
     tprg    = (1, nbins + 1)
     centers = [hN.GetBinCenter(i) for i in xrange(*tprg)]
@@ -215,7 +212,7 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None ):
                               swidth, swidth,
                               seff_lw, seff_up)
     
-    graph.SetNameTitle(name, title)
+    FormatPlottable2D(graph, name, title, xtitle, ytitle)
     
     return graph
 
@@ -258,6 +255,21 @@ def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
         vmax  = max( varlst )
         vmax += ( vmax - vmin )/( 2.*nbins )
     return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
+
+
+def FormatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
+    '''
+    Set name, main title and titles for each axis of a 2D object
+    '''
+    if title == None:
+        title = name
+
+    obj.SetNameTitle(name, title)
+
+    if xtitle:
+        obj.GetXaxis().SetTitle(xtitle)
+    if ytitle:
+        obj.GetYaxis().SetTitle(ytitle)
 
 
 def HistFromType( tp, dim = 1 ):
@@ -313,16 +325,12 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
                             htype   = 'double',
                             title   = None,
                             weights = False,
-                            xtitle  = None,
-                            ytitle  = 'Entries' ):
+                            xtitle  = '',
+                            ytitle  = '' ):
     '''
     This function creates a 1-D adaptive binning histogram given a name, the
     minimum occupancy value and a list. Adding a list of weights is also possible.
     '''
-    if title == None:
-        title = name
-    if not xtitle:
-        xtitle = name
     histcall = HistFromType( htype, 1 )
     
     ''' Calculates the array of weights '''
@@ -374,10 +382,10 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
         bins[ i ] = ib[ 0 ]
     bins[ -1 ] = vmax
     
-    hist = histcall( name, title, nbins, bins )
-    hist.GetXaxis().SetTitle( xtitle )
-    hist.GetYaxis().SetTitle( ytitle )
+    hist = histcall('', '', nbins, bins)
 
+    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+    
     return hist
 
 
@@ -387,9 +395,6 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     in color, without palette, and with the contents written inside each bin. No
     statistical box is displayed neither.
     '''
-    if title == None:
-        title = name
-    
     lm = len( matrix )
     lv = len( vartitles )
     if vartitles != []:
@@ -403,7 +408,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
 
     corr_matrix = 100*np.corrcoef( matrix )
     
-    hist = TH2D( name, title, lm, 0, lm, lm, 0, lm )
+    hist = TH2D('', '', lm, 0, lm, lm, 0, lm)
     for i, row in enumerate( corr_matrix ):
         for j, el in enumerate( row ):
             hist.SetBinContent( i + 1, j + 1, int( el ) )
@@ -411,6 +416,8 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
         hist.GetXaxis().SetBinLabel( i + 1, tit )
         hist.GetYaxis().SetBinLabel( i + 1, tit )
 
+    FormatPlottable2D(hist, name, title, '', '')
+    
     hist.GetXaxis().SetTickLength( 0 )
     hist.GetYaxis().SetTickLength( 0 )
     hist.SetOption( 'COLTEXT' )
@@ -419,16 +426,13 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     return hist
 
 
-def MakeCumulative( hist, name = '', norm = True, title = None ):
+def MakeCumulative( hist, name = '', norm = False, title = None ):
     '''
     Returns a histogram containing the cumulative distribution of that given. If
     the option < norm > is given, the histogram will be scaled in such a way that
     the maximum value will be one.
     '''
-    if title == None:
-        title = name
     chist = hist.Clone()
-    chist.SetNameTitle( name, title )
     cumulative = chist.GetBinContent( 1 )
     for i in xrange( 2, hist.GetNbinsX() + 1 ):
         cumulative += hist.GetBinContent( i )
@@ -436,6 +440,7 @@ def MakeCumulative( hist, name = '', norm = True, title = None ):
         chist.SetBinError( i, sqrt( cumulative ) )
     if norm:
         chist.Scale( 1./chist.GetMaximum() )
+    FormatPlottable2D(hist, name, title)
     return chist
 
 
@@ -454,8 +459,6 @@ def MakeHistogram( var,
     drawn, but it can be set with the < ytitle > option. For values of type int,
     the histogram will be of type double.
     '''
-    if title == None:
-        title = name
     histcall = HistFromType( htype, 1 )
 
     idxs  = ExtractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
@@ -463,7 +466,7 @@ def MakeHistogram( var,
     vmin  = min( v for v in varin + [ vmin ] if v != None )
     vmax  = max( v for v in varin + [ vmax ] if v != None )
     
-    hist = histcall( name, title, nbins, vmin, vmax )
+    hist = histcall('', '', nbins, vmin, vmax)
     
     if wvar:
         for el, w in zip( var, wvar ):
@@ -472,9 +475,8 @@ def MakeHistogram( var,
         for el in var:
             hist.Fill( el )
     
-    hist.GetXaxis().SetTitle( xtitle )
-    hist.GetYaxis().SetTitle( ytitle )
-    
+    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+            
     return hist
 
 
@@ -486,16 +488,14 @@ def MakeHistogram2D( xvar, yvar,
                      xbins  = 100,
                      xmax   = None,
                      xmin   = None,
-                     xtitle = 'X',
+                     xtitle = '',
                      ybins  = 100,
                      ymax   = None,
                      ymin   = None,
-                     ytitle = 'Y' ):
+                     ytitle = '' ):
     '''
     Creates a 2-dimensional histogram given two lists
     '''
-    if title == None:
-        title = name
     histcall = HistFromType( htype, 2 )
     
     xidxs = ExtractHistPoints( xvar, xbins, vmin = xmin, vmax = xmax )
@@ -512,7 +512,7 @@ def MakeHistogram2D( xvar, yvar,
     ymin   = min( v for v in yvarin + [ ymin ] if v != None )
     ymax   = max( v for v in yvarin + [ ymax ] if v != None )
     
-    hist = histcall( name, title, xbins, xmin, xmax, ybins, ymin, ymax )
+    hist = histcall('', '', xbins, xmin, xmax, ybins, ymin, ymax)
 
     if wvar:
         for x, y, w in zip( xvar, yvar, wvar ):
@@ -520,40 +520,111 @@ def MakeHistogram2D( xvar, yvar,
     else:
         for x, y in zip( xvar, yvar ):
             hist.Fill( x, y )
-    hist.GetXaxis().SetTitle( xtitle )
-    hist.GetYaxis().SetTitle( ytitle )
+
+    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+
     return hist
 
 
-def MakeScatterPlot( xvar, yvar, xerr = False, yerr = False,
+class _GraphInConfig:
+    '''
+    Auxiliar class to build a TGraph, TGraphErrors or TGraphAsymmErrors objects
+    depending on the input arguments
+    '''
+    def __init__( self, values, err, errlo, errup ):
+        '''
+        Values, symmetric and asymmetric errors must be provided
+        '''
+        self.Values = np.array(values, dtype = float)
+
+        self.Err = False
+        self.Sym = None
+        
+        if any((el is not False) for el in (err, errlo, errup)):
+
+            self.Err = True
+            
+            if err:
+
+                self.Sym = True
+                
+                if errlo or errup:
+                    SendWarningMsg('Specified both sym. and asym. errors; only sym. '\
+                                   'will be considered')
+                
+                self.Errors = np.array(err, dtype = float)
+
+            else:
+
+                self.Sym = False
+
+                if errlo:
+                    self.ErrLo = np.array(errlo, dtype = float)
+                else:
+                    self.ErrLo = np.zeros(len(errup), dtype = float)
+
+                if errup:
+                    self.ErrUp = np.array(errup, dtype = float)
+                else:
+                    self.ErrUp = np.zeros(len(errlo), dtype = float)
+
+                self.Errors = np.zeros(len(self.ErrLo), dtype = float)
+                    
+
+    def BuildAsym( self ):
+        '''
+        If this class has symmetric errors attached, generates a duplicate
+        '''
+        if self.Sym:
+            self.ErrLo = self.ErrUp = self.Errors
+
+
+def MakeScatterPlot( xvar, yvar,
+                     xerr   = False,
+                     xerrlo = False,
+                     xerrup = False,
+                     yerr   = False,
+                     yerrlo = False,
+                     yerrup = False,
                      name   = '',
                      title  = None,
-                     xtitle = 'X',
-                     ytitle = 'Y' ):
+                     xtitle = '',
+                     ytitle = '' ):
     '''
     Generates a scatter plot given two lists of data
     '''
-    if title == None:
-        title = name
-    npoints = len(xvar)
-    xvar    = np.array(xvar, dtype = float)
-    yvar    = np.array(yvar, dtype = float)
-    if xerr or yerr:
-        if   not xerr:
-            xerr = np.array(npoints*[ 0 ], dtype = float)
-        elif not yerr:
-            yerr = npoints*[ 0 ]
-            
-        xerr = np.array(xerr, dtype = float)
-        yerr = np.array(yerr, dtype = float)
-        
-        graph = TGraphErrors( npoints, xvar, yvar, xerr, yerr )
-    else:
-        graph = TGraph( npoints, xvar, yvar )
+
+    xconfig = _GraphInConfig(xvar, xerr, xerrlo, xerrup)
+    yconfig = _GraphInConfig(yvar, yerr, yerrlo, yerrup)
+
+    npoints = len(xconfig.Values)
+    xvar    = xconfig.Values
+    yvar    = yconfig.Values
     
-    graph.SetNameTitle( name, title )
-    graph.GetXaxis().SetTitle( xtitle )
-    graph.GetYaxis().SetTitle( ytitle )
+    if not xconfig.Err and not yconfig.Err:
+        
+        graph = TGraph(npoints, xvar, yvar)
+        
+    else:
+        
+        if xconfig.Sym and yconfig.Sym:
+
+            xerr = xconfig.Errors
+            yerr = yconfig.Errors
+            
+            graph = TGraphErrors(npoints, xvar, yvar, xerr, yerr)
+
+        else:
+            
+            for cfg in (xconfig, yconfig):
+                cfg.BuildAsym()
+
+            xerrlo, xerrup = xconfig.ErrLo, xconfig.ErrUp
+            yerrlo, yerrup = yconfig.ErrLo, yconfig.ErrUp
+
+            graph = TGraphAsymmErrors(npoints, xvar, yvar, xerrlo, xerrup, yerrlo, yerrup)
+            
+    FormatPlottable2D(graph, name, title, xtitle, ytitle)
     
     return graph
 
