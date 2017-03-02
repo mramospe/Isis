@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/02/2017
+#//  Last update: 02/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -23,8 +23,7 @@
 import math
 import numpy as np
 
-from ROOT import TFile, TTree, gDirectory
-from array import array
+import ROOT as rt
 
 from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
@@ -388,10 +387,10 @@ class DataManager( dict ):
             variables = self.keys()
         if ftype in ( 'root', 'Root', 'ROOT' ):
             if name != '':
-                ofile = TFile.Open( name, 'RECREATE' )
+                ofile = rt.TFile.Open( name, 'RECREATE' )
             else:
                 ofile = False
-                name  = gDirectory.GetName()
+                name  = rt.gDirectory.GetName()
             print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
             TreeFromDict( self, name = tree_name, variables = variables )
             print self.Name, '=> Written', len( self ), 'entries'
@@ -502,7 +501,7 @@ def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
     matching it will be returned.
     '''
     if not tree:
-        rfile = TFile.Open( fname )
+        rfile = rt.TFile.Open( fname )
         tree  = rfile.Get( tpath )
     brnames = [ el.GetName()
                 for el in tree.GetListOfBranches() ]

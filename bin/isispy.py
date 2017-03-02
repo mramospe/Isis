@@ -72,10 +72,20 @@ def load_files( files ):
 
 
 if __name__ == '__main__':
+
+    print '\n*** Imports to the python shell ***\n'
     
     from Isis import *
+    print '- All packages and modules from the Isis project'
     
     import ROOT as rt
+    print '- Set ROOT as < rt >'
+
+    import numpy as np
+    print '- Set numpy as < np >'
+
+    import scipy as sc
+    print '- Set scipy as < sc >'
 
     print '\n**********************************'
     print '** Initialized Isis environment **'

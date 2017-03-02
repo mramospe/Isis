@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/02/2017
+#//  Last update: 02/03/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -20,7 +20,7 @@
 #//////////////////////////////////////////////////////////
 
 
-from ROOT import gStyle, TCanvas, TH1, TH1D, TGraph
+import ROOT as rt
 from ROOT import Math as rmath
 
 from Isis.Algebra import Matrix, Inv
@@ -157,8 +157,8 @@ class FisherDiscriminant:
         minv, maxv = min( fisherTot ) - offset, max( fisherTot ) + offset
 
         ''' Makes the histograms with the aforementioned variables '''
-        histA = TH1D( 'Signal', '', nbins, minv, maxv )
-        histB = TH1D( 'Background', '', nbins, minv, maxv )
+        histA = rt.TH1D( 'Signal', '', nbins, minv, maxv )
+        histB = rt.TH1D( 'Background', '', nbins, minv, maxv )
         for el in fisherSig: histA.Fill( el )
         for el in fisherBkg: histB.Fill( el )
         histA.Scale( nsig*1./histA.GetEntries() )
@@ -171,7 +171,7 @@ class FisherDiscriminant:
         fisherSig.sort()
         fisherBkg.sort()
         la , lb  = len( fisherSig ), len( fisherBkg )
-        roc, sig, eff, rej = TGraph(), TGraph(), TGraph(), TGraph()
+        roc, sig, eff, rej = rt.TGraph(), rt.TGraph(), rt.TGraph(), rt.TGraph()
         for i in xrange( npoints ):
             cut    = minv + i*step
             nA, nB = 0, 0
@@ -208,9 +208,9 @@ class FisherDiscriminant:
         rej.SetLineColor( 2 ); rej.SetMarkerStyle( 8 )
 
         ''' Draws all the plots in a canvas and returns them '''
-        canvas = TCanvas()
+        canvas = rt.TCanvas()
         canvas.Divide( 2, 2 )
-        gStyle.SetOptStat( 0 )
+        rt.gStyle.SetOptStat( 0 )
         canvas.cd( 1 )
         if histA.GetMaximum() > histB.GetMaximum():
             histA.GetXaxis().SetTitle( 'Fisher linear discriminant' )
@@ -259,7 +259,7 @@ class IntegralTransformer:
         The argument must be an array-like or a TH1 object. The weights may only be
         provided for the first case.
         '''
-        if isinstance( arg, TH1 ):
+        if isinstance( arg, rt.TH1 ):
 
             if weights:
                 SendWarningMsg('Using a TH1 object; input weights ignored')

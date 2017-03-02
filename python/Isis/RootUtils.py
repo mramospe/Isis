@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/01/2017
+#//  Last update: 02/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -19,15 +19,15 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import Double, TH1, TH2
+import ROOT as rt
 
 
 #_______________________________________________________________________________
 # This function extracts the values from a TGraph object into two lists
 def ExtractGraphValues( graph ):
     
-    xbin = Double( 0. )
-    ybin = Double( 0. )
+    xbin = rt.Double( 0. )
+    ybin = rt.Double( 0. )
     np   = graph.GetN()
     xlst = np*[ 0. ]
     ylst = np*[ 0. ]
@@ -45,7 +45,7 @@ def ExtractGraphValues( graph ):
 # The result is given completely splitted.
 def ExtractHistValues( hist ):
 
-    if isinstance( hist, TH2 ):
+    if isinstance( hist, rt.TH2 ):
         axis = [ hist.GetXaxis(), hist.GetYaxis() ]
     else:
         axis = [ hist.GetXaxis() ]

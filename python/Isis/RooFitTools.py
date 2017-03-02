@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 02/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -20,11 +20,8 @@
 #/////////////////////////////////////////////////////////////
 
 
-from ROOT import ( gRandom,
-                   RooArgList, RooArgSet,
-                   RooDataSet, RooConstVar, RooFormulaVar,
-                   RooGaussian, RooRealVar, TRandom3, Double )
-from ROOT.RooFit import Binning, Name, NormRange, Range, Save, Verbose
+import ROOT as rt
+
 from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.PlotTools import MakeHistogram
 from Isis.Utils import CheckDeviation
@@ -53,14 +50,14 @@ class BlindVar:
         The seed is different for each call, which guarantees the blinding procedure
         '''
         print 'Generating new set of random bounds'
-        rndm = TRandom3( 0 )
+        rndm = rt.TRandom3( 0 )
         vmin = roovar.getMin()
         boundlo = rndm.Uniform( vmin, vmin*scale )
         vmax = roovar.getMax()
         boundhi = rndm.Uniform( vmax, vmax*scale )
 
         clonename = name + '_BLIND'
-        blindVar = RooRealVar( clonename, clonename, roovar.getVal(), boundlo, boundhi )
+        blindVar = rt.RooRealVar( clonename, clonename, roovar.getVal(), boundlo, boundhi )
         print 'Created clone variable named <', clonename, '>'
         
         alpha = ( vmax - vmin )/( boundhi - boundlo )
@@ -68,12 +65,12 @@ class BlindVar:
 
         blindVar.setVal( alpha*( roovar.getVal() - beta ) )
 
-        alpha = RooConstVar( 'alpha', 'alpha', alpha )
-        beta  = RooConstVar( 'beta', 'beta', beta )
+        alpha = rt.RooConstVar( 'alpha', 'alpha', alpha )
+        beta  = rt.RooConstVar( 'beta', 'beta', beta )
         
         formula = 'alpha*( %s - beta)' % clonename
-        varlist = RooArgList( blindVar, alpha, beta )
-        blindEq = RooFormulaVar( eqname, eqname, formula, varlist )
+        varlist = rt.RooArgList( blindVar, alpha, beta )
+        blindEq = rt.RooFormulaVar( eqname, eqname, formula, varlist )
         print 'The blinding formula is:', formula
         
         self.Alpha    = alpha
@@ -116,18 +113,18 @@ def CheckFitPull( vals, sens = 1, ret = False ):
     be displayed. By default the status of the check is returned. If
     < ret > is set to True, it returns the classes used to do the fit.
     '''
-    pull    = RooRealVar( 'pull', 'pull', -5, 5 )
-    argset  = RooArgSet( pull )
-    dataset = RooDataSet( 'data', 'data', argset )
-    mean    = RooRealVar( 'mean', 'mean', 0, -1, 1 )
-    sigma   = RooRealVar( 'sigma', 'sigma', 1, 0, 5 )
-    model   = RooGaussian( 'gauss', 'gauss', pull, mean, sigma )
+    pull    = rt.RooRealVar( 'pull', 'pull', -5, 5 )
+    argset  = rt.RooArgSet( pull )
+    dataset = rt.RooDataSet( 'data', 'data', argset )
+    mean    = rt.RooRealVar( 'mean', 'mean', 0, -1, 1 )
+    sigma   = rt.RooRealVar( 'sigma', 'sigma', 1, 0, 5 )
+    model   = rt.RooGaussian( 'gauss', 'gauss', pull, mean, sigma )
 
     for v in vals:
         pull.setVal( v )
         dataset.add( argset )
 
-    result = model.fitTo( dataset, Verbose( False ), Save( True ) )
+    result = model.fitTo( dataset, rt.RooFit.Verbose( False ), rt.RooFit.Save( True ) )
     status = result.status()
 
     CheckDeviation( mean.getVal(), mean.getError(), 0, 'mean', sens = sens )
@@ -228,7 +225,7 @@ class FitPerformance:
         yields. The fit options can be provided in **kwargs as < fitopts >.
         '''
         self.FitOpts = kwargs.get( 'fitopts', [] )
-        opt = Save( True )
+        opt = rt.RooFit.Save( True )
         if opt not in self.FitOpts:
             self.FitOpts.append( opt )
         
@@ -271,7 +268,7 @@ class FitPerformance:
             print 'Generating new data set with number of events <', nevts, '>'
             print deco
             
-            dataSet = mainPdf.generate( RooArgSet( *self.IndepVars ), nevts )
+            dataSet = mainPdf.generate( rt.RooArgSet( *self.IndepVars ), nevts )
             
             results = mainPdf.fitTo( dataSet, *self.FitOpts )
 
@@ -297,7 +294,7 @@ class FitPerformance:
         print '-- Number of events:', nevts
         print '-- Random shape:    ', shape
 
-        rndm = TRandom3()
+        rndm = rt.TRandom3()
 
         output = []
 
@@ -336,7 +333,7 @@ class FitPerformance:
             print ' Set new configuration of yields '
             FitContainer( *self.Yields.ListOfVariables() ).Print()
                 
-            dataSet = self.MainPdf.generate( RooArgSet( *self.IndepVars ), nevts )
+            dataSet = self.MainPdf.generate( rt.RooArgSet( *self.IndepVars ), nevts )
             
             for name, dic in self.Yields.iteritems():
                 dic['var'].setVal( cvals[ name ] )
@@ -371,7 +368,7 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
     frame = roovar.frame()
     
     ''' This is the graph that afterwards will be returned '''
-    dataset.plotOn( frame, Binning( nbins ), Name( 'hist' ) )
+    dataset.plotOn( frame, rt.RooFit.Binning( nbins ), rt.RooFit.Name( 'hist' ) )
     graphDst = frame.getHist( 'hist' )
 
     '''
@@ -381,14 +378,14 @@ def MakePullPlot( nbins, dataset, roovar, pdf, pull = True, **kwargs ):
     if limits:
         for kw, el in limdic.iteritems():
             name = 'pdf_' + kw
-            pdf.plotOn( frame, Name( name ), Range( kw ) )
+            pdf.plotOn( frame, rt.RooFit.Name( name ), rt.RooFit.Range( kw ) )
             el[ 'pdf' ] = frame.getCurve( name )
     else:
-        pdf.plotOn( frame, Name( 'pdf0' ) )
+        pdf.plotOn( frame, rt.RooFit.Name( 'pdf0' ) )
         graphPdf = frame.getCurve( 'pdf0' )
     
-    xbin = Double( 0. )
-    ybin = Double( 0. )
+    xbin = rt.Double( 0. )
+    ybin = rt.Double( 0. )
     
     ''' Makes a loop over all the points in the graph to correct them '''
     maxerr = 0

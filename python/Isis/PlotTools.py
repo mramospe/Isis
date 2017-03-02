@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 01/03/2017
+#//  Last update: 02/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -25,11 +25,7 @@ from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
 from Isis.MathExt import NearestSquare
 from Isis.Utils import CalcMinDist, FormatEvalExpr
 
-from ROOT import ( TCanvas, TLegend, TPaveText, gStyle,
-                   TGraph, TGraphErrors, TGraphAsymmErrors, TH1,
-                   TH1F, TH1D,
-                   TH2F, TH2D,
-                   kBlue, kRed, kOrange, kGreen, kMagenta, kCyan )
+import ROOT as rt
 
 import itertools
 from math import sqrt
@@ -99,7 +95,8 @@ class FormatList:
         if colors != None:
             self.Colors = colors
         else:
-            self.Colors = [ kBlue, kRed, kOrange, kGreen, kMagenta, kCyan ]
+            self.Colors = [ rt.kBlue, rt.kRed, rt.kOrange,
+                            rt.kGreen, rt.kMagenta, rt.kCyan ]
         if linest != None:
             self.LineSt = linest
         else:
@@ -207,10 +204,10 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '',
     seff_lw = np.array(seff_lw, dtype = float)
     seff_up = np.array(seff_up, dtype = float)
     
-    graph = TGraphAsymmErrors(nbins,
-                              centers, eff,
-                              swidth, swidth,
-                              seff_lw, seff_up)
+    graph = rt.TGraphAsymmErrors(nbins,
+                                 centers, eff,
+                                 swidth, swidth,
+                                 seff_lw, seff_up)
     
     FormatPlottable2D(graph, name, title, xtitle, ytitle)
     
@@ -228,11 +225,11 @@ def DrawHistograms( hlst, drawopt = '', norm = True ):
     if norm:
         imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
         imin = min( h.GetMinimum()*1./h.GetSumOfWeights() for h in hlst )
-        meth = TH1.DrawNormalized
+        meth = rt.TH1.DrawNormalized
     else:
         imax = max( h.GetMaximum() for h in hlst )
         imin = min( h.GetMinimum() for h in hlst )
-        meth = TH1.Draw
+        meth = rt.TH1.Draw
     offset = ( imax + imin )/10.
     vmin   = min( h.GetXaxis().GetXmin() for h in hlst )
     vmax   = max( h.GetXaxis().GetXmax() for h in hlst )
@@ -281,18 +278,18 @@ def HistFromType( tp, dim = 1 ):
         return
     if dim == 1:
         if tp == 'float':
-            return TH1F
+            return rt.TH1F
         elif tp == 'double':
-            return TH1D
+            return rt.TH1D
         else:
-            return TH1I
+            return rt.TH1I
     elif dim == 2:
         if tp == 'float':
-            return TH2F
+            return rt.TH2F
         elif tp == 'double':
-            return TH2D
+            return rt.TH2D
         else:
-            return TH2I
+            return rt.TH2I
     else:
         SendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
 
@@ -408,7 +405,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
 
     corr_matrix = 100*np.corrcoef( matrix )
     
-    hist = TH2D('', '', lm, 0, lm, lm, 0, lm)
+    hist = rt.TH2D('', '', lm, 0, lm, lm, 0, lm)
     for i, row in enumerate( corr_matrix ):
         for j, el in enumerate( row ):
             hist.SetBinContent( i + 1, j + 1, int( el ) )
@@ -603,7 +600,7 @@ def MakeScatterPlot( xvar, yvar,
     
     if not xconfig.Err and not yconfig.Err:
         
-        graph = TGraph(npoints, xvar, yvar)
+        graph = rt.TGraph(npoints, xvar, yvar)
         
     else:
         
@@ -612,7 +609,7 @@ def MakeScatterPlot( xvar, yvar,
             xerr = xconfig.Errors
             yerr = yconfig.Errors
             
-            graph = TGraphErrors(npoints, xvar, yvar, xerr, yerr)
+            graph = rt.TGraphErrors(npoints, xvar, yvar, xerr, yerr)
 
         else:
             
@@ -622,7 +619,7 @@ def MakeScatterPlot( xvar, yvar,
             xerrlo, xerrup = xconfig.ErrLo, xconfig.ErrUp
             yerrlo, yerrup = yconfig.ErrLo, yconfig.ErrUp
 
-            graph = TGraphAsymmErrors(npoints, xvar, yvar, xerrlo, xerrup, yerrlo, yerrup)
+            graph = rt.TGraphAsymmErrors(npoints, xvar, yvar, xerrlo, xerrup, yerrlo, yerrup)
             
     FormatPlottable2D(graph, name, title, xtitle, ytitle)
     
@@ -660,7 +657,7 @@ def MultiPlot( mgrs, variables,
         
         ''' Generates and divides the canvas '''
         nyvars, nxvars = OptCanvasDivision( nvars )
-        canvas = TCanvas( name, title, 300*nyvars, 300*nxvars )
+        canvas = rt.TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
         
         nmgrs = len( mgrs )
@@ -670,16 +667,16 @@ def MultiPlot( mgrs, variables,
                 mgr, mgr.Name = mgr.SubSample( cuts = cuts ), mgr.Name
         
         ''' Disables the stat box of the histograms '''
-        gStyle.SetOptStat( 0 )
+        rt.gStyle.SetOptStat( 0 )
         
         ''' Constructs the legend and the information panel if specified '''
         if legend:
-            rlegend = TLegend( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
+            rlegend = rt.TLegend( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
             rlegend.SetHeader( '#bf{-- Legend --}' )
             rlegend.SetTextAlign( 22 )
             rlegend.SetTextSize( 0.075 )
             rlegend.SetFillColor( 15 )
-            rtxtinf = TPaveText( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
+            rtxtinf = rt.TPaveText( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
             rtxtinf.AddText( '-- Number of entries --' )
             rtxtinf.SetTextSize( 0.075 )
             rtxtinf.SetFillColor( 42 )
