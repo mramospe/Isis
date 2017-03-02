@@ -49,6 +49,7 @@ def load_files( files ):
     from Isis.IBoost.PyGeneral import SendInfoMsg
     for f in pyfiles:
         SendInfoMsg('Adding new python file: %s' %f)
+        execfile(f)
 
     glb = globals()
 
