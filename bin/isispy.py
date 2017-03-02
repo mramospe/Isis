@@ -1,14 +1,10 @@
 #!/usr/bin/python
 #==============================================================
-#
-# AUTHOR: Miguel Ramos Pernas
-# e-mail: miguel.ramos.pernas@cern.ch
-#
-# Description:
-#
 # Script to load the Isis environment together with Root on a
 # python shell
-#
+#--------------------------------------------------------------
+# AUTHOR: Miguel Ramos Pernas
+# e-mail: miguel.ramos.pernas@cern.ch
 #==============================================================
 
 
@@ -76,12 +72,13 @@ def load_files( files ):
 
 
 if __name__ == '__main__':
+    
+    from Isis import *
+    
+    import ROOT as rt
 
     print '\n**********************************'
     print '** Initialized Isis environment **'
     print '**********************************\n'
-    
-    from Isis import *
-    import ROOT as rt
     
     parse_arguments()

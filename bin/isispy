@@ -1,10 +1,10 @@
 #!/bin/bash
-#==============================================================#
-# Function to load the python environment for the Isis package #
-#--------------------------------------------------------------#
-# AUTHOR: Miguel Ramos Pernas				       #
-# e-mail: miguel.ramos.pernas@cern.ch	                       #
-#==============================================================#
+#==============================================================
+# Function to load the python environment for the Isis package
+#--------------------------------------------------------------
+# AUTHOR: Miguel Ramos Pernas
+# e-mail: miguel.ramos.pernas@cern.ch
+#==============================================================
 
 usage="
 $(basename "$0") [-h] [-i] [-e execfile] [-l loadfiles] [-p pyflags]

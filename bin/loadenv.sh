@@ -1,9 +1,9 @@
-#============================================#
-# Loads the environment for the Isis project #
-#--------------------------------------------#
-# AUTHOR: Miguel Ramos Pernas		     #
-# e-mail: miguel.ramos.pernas@cern.ch	     #
-#============================================#
+#============================================
+# Loads the environment for the Isis project
+#--------------------------------------------
+# AUTHOR: Miguel Ramos Pernas
+# e-mail: miguel.ramos.pernas@cern.ch
+#============================================
 
 # Setup message
 echo "*** Isis project ***"
