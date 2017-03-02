@@ -21,7 +21,6 @@
 
 
 import ROOT as rt
-from ROOT import Math as rmath
 
 from Isis.Algebra import Matrix, Inv
 from Isis.Decorators import DecoInputArgs
@@ -361,9 +360,9 @@ def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
     up_mean_lst = np.linspace(mean + 2*s_sy, mean, nsteps)
 
     ''' Adding the value at < mean > is necessary '''
-    lw_probs = map(lambda x: rmath.poisson_cdf_c(mean, x) + rmath.poisson_pdf(mean, x),
+    lw_probs = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
                    lw_mean_lst)
-    up_probs = map(lambda x: rmath.poisson_cdf(mean, x), up_mean_lst)
+    up_probs = map(lambda x: rt.Math.poisson_cdf(mean, x), up_mean_lst)
 
     pb = (1. - cl)/2.
 

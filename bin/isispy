@@ -7,69 +7,57 @@
 #==============================================================
 
 usage="
-$(basename "$0") [-h] [-i] [-e execfile] [-l loadfiles] [-p pyflags]
+$(basename "$0") [-h] [-i] [-p pyflags]
 
-Initialize a ipython session with the provided options and the Isis project loaded. If
-ipython is not available, python will be used instead.
+This is a wrapper over the script < isispy.py >. Initialize a ipython session
+with the provided options and the Isis project loaded. If ipython is not
+available, python will be used instead.
 
  -h  show this help text
- -e  executable file
- -i  run in interactive mode (by default if no executable file is specified)
- -l  files to load
+ -i  run in interactive mode (by default if no arguments are specified)
  -p  python flags
 "
 
+
+# In case an unknown option is given, it is considered as an option to < isispy.py >
+
 pyflags=""
-while getopts 'ha:e:il:p:' option; do
+isflags=""
+while getopts ':hip:' option; do
     case "$option" in
-	h) echo "$usage"
-	   exit
-	   ;;
-	a) args=$OPTARG
-	   ;;
-	e) execfile=$OPTARG
-	   ;;
-	i) pyflags="$pyflags -i"
-	   ;;
-	l) loadfiles=$OPTARG
-	   ;;
-	p) pyflags=$pyflags" $OPTARG"
-	   ;;
-	:) printf "\nError: missing argument for < -%s >\n" "$OPTARG" >&2
-	   echo "$usage" >&2
-	   exit 1
-	   ;;
-	\?) printf "\nError: illegal option: < -%s >\n" "$OPTARG" >&2
+	h)
+	    echo "$usage"
+	    exit
+	    ;;
+	i)
+	    pyflags="$pyflags -i"
+	    ;;
+	p)
+	    pyflags="$pyflags $OPTARG"
+	    ;;
+	:)
+	    printf "\nError: missing argument for < -%s >\n" "$OPTARG" >&2
 	    echo "$usage" >&2
 	    exit 1
+	    ;;
+	\?)
+	    isflags="$isflags -$OPTARG"
 	    ;;
     esac
 done
 shift $((OPTIND - 1))
 
 
-# Define the command to be executed
+# If no arguments are specified, run in interactive mode
 
-postsc=""
-
-if [ "$execfile" != "" ]; then
-    postsc=$postsc" -e $execfile"
-else
+if [ $# -eq 0 ]; then
     pyflags=" -i $pyflags"
-fi
-
-if [ "$loadfiles" != "" ]; then
-    postsc=$postsc" -l $loadfiles"
-fi
-
-if [ "$args" != "" ]; then
-    postsc="$postsc -a $args"
 fi
 
 
 # The script < isispy.py > is located at $ISIS_BIN
 
-cmd="$ISIS_BIN/isispy.py $postsc"
+cmd="$ISIS_BIN/isispy.py $isflags $@"
 
 
 # Checks whether any of ipython or python exists and initializes it with the
@@ -77,7 +65,7 @@ cmd="$ISIS_BIN/isispy.py $postsc"
 # of them are accesible the process is aborted.
 
 if   hash ipython 2>/dev/null; then
-    ipython $pyflags -c "%run $cmd"
+    ipython $pyflags --no-banner -c "%run $cmd"
 elif hash python  2>/dev/null; then
     python  $pyflags $cmd
 else
