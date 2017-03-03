@@ -8,6 +8,87 @@
 #==============================================================
 
 
+def initialize():
+    '''
+    Initialize the environment
+    '''
+    
+    ''' Store the current global variables '''
+    glb   = globals()
+    kfltr = lambda s: not s.startswith('__') and not s.endswith('__')
+    glbks = filter(kfltr, glb.keys())
+
+    args = parse_arguments()
+
+    ''' Load the specified files '''
+    load_files(args.load)
+
+    print '* The environment is set *'
+    print '**************************'
+    
+    ''' Execute the script provided '''
+    if args.executable:
+        execfile(args.executable, glb)
+        
+    if args.show_globals:
+        ''' Print the new global variables added to the shell '''
+
+        new_glbks = sorted(set(filter(kfltr, globals().keys())).difference(glbks))
+        if new_glbks:
+            print '**********************'
+            print '* New global variables'
+            sizes   = map(lambda s: len(s), new_glbks)
+            maxsize = max(sizes)
+            for i, (sz, kw) in enumerate(zip(sizes, new_glbks)):
+                print '* %s %s => %s' %(kw, (maxsize - sz)*' ', glb[kw])
+            print
+
+
+def load_files( files ):
+    '''
+    Load the given list of files and export them to the global scope
+    '''
+    
+    def make_filter( *sfx ):
+        ''' Thin filter given the suffix of the files '''
+        return lambda el: any(el.endswith(s) for s in sfx)
+    
+    pyfiles = filter(make_filter('.py'), files)
+    rtfiles = filter(make_filter('.root'), files)
+    ttfiles = filter(make_filter('.dat', '.txt'), files)
+    bnfiles = set(files).difference(pyfiles + rtfiles + ttfiles)
+    
+    import ROOT as rt
+    
+    glb = globals()
+
+    if any([rtfiles, ttfiles, bnfiles, pyfiles]):
+        print '* Loading input files'
+    
+    ''' Add root files '''
+    for i, f in enumerate(rtfiles):
+        fname = '_rf' + str(i)
+        print '* - Adding new root file < %s > as: %s' %(f, fname)
+        glb[fname] = rt.TFile(f, 'READ')
+
+    ''' Add text-based files '''
+    for i, f in enumerate(ttfiles):
+        fname = '_df' + str(i)
+        print '* - Adding new txt file < %s > as: %s' %(f, fname)
+        glb[fname] = open(f, 'rt')
+
+    ''' Add binary files '''
+    for i, f in enumerate(bnfiles):
+        fname = '_bf' + str(i)
+        print '* - Adding new binary file < %s > as: %s' %(f, fname)
+        glb[fname] = open(f, 'rb')
+
+    ''' Execute python files '''
+    for f in pyfiles:
+        print '* - Executing python file: %s' %f
+        execfile(f, glb)
+
+
 def parse_arguments():
     '''
     Parse the arguments. Use "isispy.py -h" for more details. As input it takes a
@@ -36,7 +117,8 @@ def parse_arguments():
     args = parser.parse_args()
     
     ''' If no options are specified, builds them using the argument < files > '''
-    if not any([args.arguments, args.executable, args.load]) and args.files:
+
+    if not args.executable and args.files:
 
         preex = args.files[0]
         
@@ -53,110 +135,35 @@ def parse_arguments():
         
     ''' The arguments are replaced by those specified by the user '''
     import sys
-    sys.argv = args.arguments
+    sys.argv = []
+    if args.executable:
+        sys.argv.append(args.executable)
+    sys.argv += args.arguments
 
     return args
-
-
-def load_files( files ):
-    '''
-    Load the given list of files and export them to the global scope
-    '''
-    
-    def make_filter( *sfx ):
-        ''' Thin filter given the suffix of the files '''
-        return lambda el: any(el.endswith(s) for s in sfx)
-    
-    pyfiles = filter(make_filter('.py'), files)
-    rtfiles = filter(make_filter('.root'), files)
-    ttfiles = filter(make_filter('.dat', '.txt'), files)
-    bnfiles = set(files).difference(pyfiles + rtfiles + ttfiles)
-    
-    from Isis.IBoost.PyGeneral import SendInfoMsg
-    import ROOT as rt
-    
-    glb = globals()
-
-    if any([rtfiles, ttfiles, bnfiles, pyfiles]):
-        print '\n*** Loading input files ***\n'
-    
-    ''' Add root files '''
-    for i, f in enumerate(rtfiles):
-        fname = '_rf' + str(i)
-        SendInfoMsg('Adding new root file < %s > as: %s' %(f, fname))
-        glb[fname] = rt.TFile(f, 'READ')
-
-    ''' Add text-based files '''
-    for i, f in enumerate(ttfiles):
-        fname = '_df' + str(i)
-        SendInfoMsg('Adding new txt file < %s > as: %s' %(f, fname))
-        glb[fname] = open(f, 'rt')
-
-    ''' Add binary files '''
-    for i, f in enumerate(bnfiles):
-        fname = '_bf' + str(i)
-        SendInfoMsg('Adding new binary file < %s > as: %s' %(f, fname))
-        glb[fname] = open(f, 'rb')
-
-    ''' Execute python files '''
-    for f in pyfiles:
-        SendInfoMsg('Executing python file: %s' %f)
-        execfile(f)
-
-
-def initialize():
-    ''' Store the current global variables '''
-    glb = globals()
-    kfltr = lambda s: not s.startswith('__') and not s.endswith('__')
-    glbks = filter(kfltr, glb.keys())
-
-    args = parse_arguments()
-
-    ''' Load the specified files '''
-    load_files(args.load)
-
-    print '\n****************************'
-    print '** The environment is set **'
-    print '****************************'
-    
-    ''' Execute the script provided '''
-    if args.executable:
-        execfile(args.executable)
-        
-    if args.show_globals:
-        ''' Print the new global variables added to the shell '''
-
-        print '\n*** New global variables ***\n'
-
-        new_glbks = sorted(set(filter(kfltr, globals().keys())).difference(glbks))
-        sizes     = map(lambda s: len(s), new_glbks)
-        maxsize   = max(sizes)
-        for i, (sz, kw) in enumerate(zip(sizes, new_glbks)):
-            print ' %s %s => %s' %(kw, (maxsize - sz)*' ', glb[kw])
 
 
 if __name__ == '__main__':
 
     ''' Startup message '''
-    print '********************************'
-    print '** Setting up the environment **'
-    print '********************************'
+    print '***********************************'
+    print '* Setting up the Isis environment *'
     
     ''' The imports must be written here since otherwise ROOT complains '''
 
     from Isis import *
     
-    print '\n*** Imports to the python shell ***\n'
+    print '* Imports to the python shell'
     
-    print '- All packages and modules from the Isis project'
+    print '* - All packages and modules from the Isis project'
 
     import ROOT as rt
-    print '- Set ROOT as < rt >'    
+    print '* - Set ROOT as < rt >'    
 
     import numpy as np
-    print '- Set numpy as < np >'
+    print '* - Set numpy as < np >'
     
     import scipy as sc
-    print '- Set scipy as < sc >'
+    print '* - Set scipy as < sc >'
     
     initialize()
