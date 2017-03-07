@@ -25,6 +25,7 @@
 
 #include "Messenger.h"
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -121,8 +122,8 @@ namespace General {
     else
       endpos = opts.find( ':', varpos );
     
-    // If no < = > symbol is found, it is considered that the variable is boolean. The static_cast
-    // call is needed to allow taking strings as values at compilation time.
+    // If no < = > symbol is found, it is considered that the variable is boolean. The
+    // static_cast call is needed to allow taking strings as values at compilation time.
     pos = opts.find( '=', varpos );
     if ( pos >= endpos ) {
       bool res = true;
@@ -171,6 +172,28 @@ namespace General {
     return ss.str();
   }
   
+  //_______________________________________________________________________________
+  // Interpolate the < y > value given two vectors and the associated < x > value.
+  // when dealing with integers, this function will return the integer part of
+  // the result, so no rounding will be made.
+  template<class typeA, class typeB>
+  double Interpolate( const std::vector<typeA> &xvalues,
+		      const std::vector<typeB> &yvalues,
+		      const typeA &value ) {
+
+    auto it = std::lower_bound(xvalues.cbegin(), xvalues.cend(), value);
+
+    size_t pos = it - xvalues.cbegin();
+
+    switch ( pos ) {
+      
+    case 0:
+      return yvalues.front();
+      
+    default:
+      return (yvalues.at(pos - 1) + yvalues.at(pos))/2.;
+    }
+  }
 }
 
 #endif
