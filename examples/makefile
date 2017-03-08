@@ -18,12 +18,6 @@ help:
 AdapBin: AdapBin.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
 
-CLsScan: CLsScan.cpp
-	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
-
-MakeBDT: MakeBDT.cpp
-	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
-
 ParseStr: ParseStr.cpp
 	$(COMPILER) $(CFLAGS) $^ $(MAIN) $(DIRSLIBS) -o $@.out
 
