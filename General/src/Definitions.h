@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 07/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -23,8 +23,23 @@
 #define __DEFINITIONS__
 
 
+#include <string>
+#include <vector>
+
+
 //_______________________________________________________________________________
 // No-operation statement
 #define NOOP
+
+namespace General {
+  
+  //_______________________________________________________________________________
+  // Define a vector of strings
+  using Strings = std::vector<std::string>;
+
+  //_______________________________________________________________________________
+  // Define a vector of doubles
+  using Doubles = std::vector<double>;
+}
 
 #endif

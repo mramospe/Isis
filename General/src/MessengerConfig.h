@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2016
+//  Last update: 17/02/2017
 //
 // ---------------------------------------------------------
 //

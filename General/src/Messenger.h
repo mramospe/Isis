@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2016
+//  Last update: 07/03/2017
 //
 // ---------------------------------------------------------
 //
@@ -25,7 +25,6 @@
 #ifndef __MESSENGER__
 #define __MESSENGER__
 
-#include "Definitions.h"
 #include "MessengerConfig.h"
 
 #include <cstdint>
