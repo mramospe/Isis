@@ -38,29 +38,29 @@ namespace Analysis {
     // Constructor
     CLsFactory();
 
-    // Constructor given the two hypothesis
+    // Constructor given the two hypothesis as arrays
     CLsFactory( const General::Doubles &h0, const General::Doubles &h1 );
 
     // Destructor
     ~CLsFactory();
     
     // Return the p-value of the null hypothesis
-    double Alpha( const double &t ) const;
+    inline double Alpha( const double &t ) const;
 
     // Return the p-value of the signal hypothesis
-    double Beta( const double &t ) const;
+    inline double Beta( const double &t ) const;
 
     // Return a class with all the information concerning the CLs method
     CLsResult Calculate( const General::Doubles &array ) const;
 
     // Calculate CLb
-    double CLb( const double &t ) const;
+    inline double CLb( const double &t ) const;
 
     // Calculate CLs
-    double CLs( const double &t ) const;
+    inline double CLs( const double &t ) const;
 
     // Calculate CLsb
-    double CLsb( const double &t ) const;
+    inline double CLsb( const double &t ) const;
 
     // Generate < n > events for each of the hypotheses
     void Generate( const size_t &n = 10000 );
@@ -70,6 +70,12 @@ namespace Analysis {
     
     // Return the signal hypothesis
     inline CLsHypothesis& GetSigHyp();
+
+    // Set the null hypothesis
+    inline void SetNullHyp( CLsHypothesis &hyp );
+
+    // Set the signal hypothesis
+    inline void SetSigHyp( CLsHypothesis &hyp );
 
     // Return the test statistics for a given array of values
     double TestStat( const General::Doubles &values ) const;
@@ -133,6 +139,19 @@ namespace Analysis {
     return fSigHyp;
   }
 
+  //_______________________________________________________________________________
+  //
+  inline void CLsFactory::SetNullHyp( CLsHypothesis &hyp ) {
+
+    fNullHyp = hyp;
+  }
+  
+  //_______________________________________________________________________________
+  //
+  inline void CLsFactory::SetSigHyp( CLsHypothesis &hyp ) {
+
+    fSigHyp = hyp;
+  }
 }
 
 #endif

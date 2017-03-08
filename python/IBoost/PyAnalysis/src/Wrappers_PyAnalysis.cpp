@@ -7,14 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 08/03/2017
 //
 // -------------------------------------------------------------------------------
 //
 //  Description:
 //
 //  Configuration of the functions to manage classes and functions from the
-//  package General
+//  package Analysis
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -25,14 +25,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include "GlobalWrappers.h"
-
-#include "AdaptiveBinning.h"
-#include "AdaptiveBinning1D.h"
-#include "AdaptiveBinning2D.h"
-#include "Bin.h"
-#include "RootUtils.h"
-
-#include "TPython.h"
+#include "PyAdaptiveBinning.h"
+#include "PyAnalysisBase.h"
+#include "PyStatistics.h"
 
 #include <string>
 
@@ -41,126 +36,6 @@ namespace an = Analysis;
 
 
 //_______________________________________________________________________________
-
-// Wrappers for the class AdaptiveBinning
-namespace AdBin {
-
-  py::list GetBinList( const an::AdaptiveBinning &adbin ) {
-  
-    return IBoost::StdVecToBoostList( adbin.GetBinList() );
-  }
-
-  PyObject* GetStruct( const an::AdaptiveBinning &adbin,
-		       const char *name = "",
-		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
-					     "TObject",
-					     false );
-  }  
-}
-
-// Wrappers for the class AdaptiveBinning1D
-namespace AdBin1D {
-  
-  boost::shared_ptr<an::AdaptiveBinning1D> Constructor( size_t occ,
-							double vmin,
-							double vmax,
-							py::list values,
-							py::list weights ) {
-  
-    auto vec_values  = IBoost::BoostListToStdVec<double>( values );
-    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
-    auto adbin       = new an::AdaptiveBinning1D(occ, vmin, vmax,
-						 vec_values, vec_weights);
-  
-    return boost::shared_ptr<an::AdaptiveBinning1D>( adbin );
-  }
-
-  boost::shared_ptr<an::AdaptiveBinning1D> Constructor_NoWgts( size_t occ,
-							       double vmin,
-							       double vmax,
-							       py::list values ) {
-    return Constructor(occ, vmin, vmax, values, py::list());
-  }
-
-  PyObject* GetStruct( const an::AdaptiveBinning1D &adbin,
-		       const char *name = "",
-		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
-					     "TH1D",
-					     false );
-  }
-
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetStruct_Overloads, GetStruct, 1, 3);
-}
-
-// Wrappers for the class AdaptiveBinning2D
-namespace AdBin2D {
-  
-  boost::shared_ptr<an::AdaptiveBinning2D> Constructor( size_t occ,
-							double xmin, double xmax,
-							double ymin, double ymax,
-							py::list xvalues,
-							py::list yvalues,
-							py::list weights ) {
-  
-    auto vec_xvalues = IBoost::BoostListToStdVec<double>( xvalues );
-    auto vec_yvalues = IBoost::BoostListToStdVec<double>( yvalues );
-    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
-    auto adbin       = new an::AdaptiveBinning2D(occ,
-						 xmin, xmax,
-						 ymin, ymax,
-						 vec_xvalues, vec_yvalues,
-						 vec_weights);
-  
-    return boost::shared_ptr<an::AdaptiveBinning2D>( adbin );
-  }
-
-  boost::shared_ptr<an::AdaptiveBinning2D> Constructor_NoWgts( size_t occ,
-							       double xmin,
-							       double xmax,
-							       double ymin,
-							       double ymax,
-							       py::list xvalues,
-							       py::list yvalues ) {
-  
-    return Constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
-  }
-
-  PyObject* GetAdjStruct( const an::AdaptiveBinning2D &adbin,
-			  const char *name = "",
-			  const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetAdjStruct(name, title),
-					     "TH2Poly",
-					     false );
-  }
-
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetAdjStruct_Overloads, GetAdjStruct, 1, 3);
-  
-  PyObject* GetStruct( const an::AdaptiveBinning2D &adbin,
-		       const char *name = "",
-		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
-					     "TH2Poly",
-					     false );
-  }
-
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetStruct_Overloads, GetStruct, 1, 3);
-}
-
-// Wrappers for functions and classes in RootUtils.h
-namespace RootUtils {
-
-  PyObject* GetSafeObject( PyObject *ifile_obj, const std::string &path ) {
-
-    TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
-    
-    return TPython::ObjectProxy_FromVoidPtr( an::GetSafeObject(ifile, path),
-					     "TObject",
-					     false );
-  }
-}
-
 
 BOOST_PYTHON_MODULE( PyAnalysis ) {
 
@@ -213,6 +88,68 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     .def_readonly("Ymin", &an::Bin2D::GetYmin)
     ;
 
+  // Wrapper from CLsFluctuator
+  py::class_<an::CLsFluctuator>("CLsFluctuator", py::init<>())
+    .def("Fluctuate", &an::CLsFluctuator::Fluctuate)
+    ;
+
+  // Wrapper from CLsPrior
+  py::class_<an::CLsPrior>("CLsPrior", py::init<>())
+    .def("Evaluate", &an::CLsPrior::Evaluate)
+    ;
+
+  // Wrapper from CLsResult
+  py::class_<an::CLsResult>("CLsResult",
+			    py::init<
+			    const double&,
+			    const double&,
+			    const double&,
+			    const double&,
+			    const double&>())
+    .def_readonly("Alpha"       , &an::CLsResult::Alpha)
+    .def_readonly("Beta"        , &an::CLsResult::Beta)
+    .def_readonly("CLb"         , &an::CLsResult::CLb)
+    .def_readonly("CLs"         , &an::CLsResult::CLs)
+    .def_readonly("CLsb"        , &an::CLsResult::CLsb)
+    .def_readonly("TestStat"    , &an::CLsResult::TestStat)
+    .def_readonly("Significance", &an::CLsResult::Significance)
+    .def("GaussSigPos"          , &an::CLsResult::GaussSigPos)
+    .def("IsDiscovery"          , &an::CLsResult::IsDiscovery)
+    .def("IsEvidence"           , &an::CLsResult::IsEvidence)
+    ;
+    
+  // Wrapper from CLsHypothesis
+  py::class_<an::CLsHypothesis>("CLsHypothesis",
+				py::init<const int&, const an::CLsFactory*>())
+    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor))
+    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoPrior))
+    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoFluctNoPrior))
+    .def("PValue"       , &an::CLsHypothesis::PValue)
+    .def("GetTSVals"    , &CLsHyp::GetTSVals)
+    .def("GetHyp"       , &CLsHyp::GetHyp)
+    .def("Generate"     , &an::CLsHypothesis::Generate)
+    .def("PoissonProb"  , &CLsHyp::PoissonProb)
+    .def("SetFluctuator", &an::CLsHypothesis::SetFluctuator)
+    .def("SetHypothesis", &CLsHyp::SetHypothesis, CLsHyp::SetHypothesis_Overloads())
+    .def("SetPrior"     , &an::CLsHypothesis::SetPrior)
+    .def("TestFromProb" , &an::CLsHypothesis::TestFromProb)
+    ;
+  
+  // Wrapper from CLsFactory
+  py::class_<an::CLsFactory>("CLsFactory", py::init<>())
+    .def("__init__"        , py::make_constructor(&CLsFact::Constructor))
+    .def("Alpha"           , &an::CLsFactory::Alpha)
+    .def("Beta"            , &an::CLsFactory::Beta)
+    .def("Calculate"       , &CLsFact::Calculate)
+    .def("CLb"             , &an::CLsFactory::CLb)
+    .def("CLs"             , &an::CLsFactory::CLs)
+    .def("CLsb"            , &an::CLsFactory::CLsb)
+    .def("Generate"        , &an::CLsFactory::Generate)
+    .def("TestStat"        , &CLsFact::TestStat)
+    .add_property("NullHyp", &CLsFact::GetNullHyp, &an::CLsFactory::SetNullHyp)
+    .add_property("SigHyp" , &CLsFact::GetSigHyp, &an::CLsFactory::SetSigHyp)
+    ;
+  
   // Wrappers from RootUtils
   py::def("GetSafeObject", &RootUtils::GetSafeObject);
 }

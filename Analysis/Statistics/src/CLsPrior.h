@@ -43,7 +43,7 @@ namespace Analysis {
     // observation
     virtual double Evaluate( const size_t &pos,
 			     const double &mean,
-			     const double &value ) = 0;
+			     const double &value );
 
   };
 

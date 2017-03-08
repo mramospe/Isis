@@ -28,4 +28,12 @@ namespace Analysis {
   //
   CLsPrior::~CLsPrior() { }
 
+  //_______________________________________________________________________________
+  //
+  double CLsPrior::Evaluate( const size_t &pos,
+			     const double &mean,
+			     const double &value ) {
+
+    return 1.;
+  }
 }

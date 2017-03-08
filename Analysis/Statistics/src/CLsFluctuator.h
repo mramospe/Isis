@@ -40,7 +40,7 @@ namespace Analysis {
     virtual ~CLsFluctuator();
 
     // Given the position and the value, fluctuate it using an user-defined function
-    virtual double Fluctuate( const size_t &pos, const double &value ) = 0;
+    virtual double Fluctuate( const size_t &pos, const double &value );
 
   };
   

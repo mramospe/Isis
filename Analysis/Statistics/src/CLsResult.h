@@ -54,38 +54,38 @@ namespace Analysis {
     // Destructor
     ~CLsResult();
 
-    // Return the CLs
-    const double& CLs() const;
-
-    // Return the CLb
-    const double& CLb() const;
-
-    // Return the CLsb
-    const double& CLsb() const;
-
     // Return the p-value of the null hypothesis
-    const double& Alpha() const;
+    double Alpha() const;
 
     // Return the p-value of the signal hypothesis
-    const double& Beta() const;
+    double Beta() const;
+    
+    // Return the CLb
+    double CLb() const;
 
-    // Return the value for the test statistics
-    const double& TestStat() const;
+    // Return the CLs
+    double CLs() const;
 
+    // Return the CLsb
+    double CLsb() const;
+    
     // Return the possition on a gaussian of mean = 0 and sigma = 1 for the result. If
     // it is greater than 0, it is equivalent to the significance.
     double GaussSigPos() const;
-    
-    // Return the significance
-    const double& Significance() const;
-
-    // Return whether the result establishes an evidence or not in the two-sided
-    // definition of the significance
-    bool IsEvidence() const;
 
     // Return whether the result establishes a discovery or not in the two-sided
     // definition of the significance
     bool IsDiscovery() const;
+    
+    // Return whether the result establishes an evidence or not in the two-sided
+    // definition of the significance
+    bool IsEvidence() const;
+
+    // Return the value for the test statistics
+    double TestStat() const;
+    
+    // Return the significance
+    double Significance() const;
 
   protected:
 
@@ -107,54 +107,41 @@ namespace Analysis {
     // Test statistics
     const double fTestStat;
   };
-
-  //_______________________________________________________________________________
-  //
-  inline const double& CLsResult::CLs() const {
-
-    return fCLs;
-  }
+  
   
   //_______________________________________________________________________________
   //
-  inline const double& CLsResult::CLb() const {
-
-    return fCLb;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline const double& CLsResult::CLsb() const {
-
-    return fBeta;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline const double& CLsResult::Alpha() const {
+  inline double CLsResult::Alpha() const {
 
     return fAlpha;
   }
 
   //_______________________________________________________________________________
   //
-  inline const double& CLsResult::Beta() const {
+  inline double CLsResult::Beta() const {
 
     return fBeta;
   }
 
   //_______________________________________________________________________________
   //
-  inline const double& CLsResult::TestStat() const {
+  inline double CLsResult::CLb() const {
 
-    return fTestStat;
+    return fCLb;
   }
 
   //_______________________________________________________________________________
   //
-  inline const double& CLsResult::Significance() const {
+  inline double CLsResult::CLs() const {
 
-    return fSig;
+    return fCLs;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline double CLsResult::CLsb() const {
+
+    return fBeta;
   }
 
   //_______________________________________________________________________________
@@ -166,6 +153,13 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
+  inline bool CLsResult::IsDiscovery() const {
+
+    return fSig >= DiscoveryStdPVal;
+  }
+
+  //_______________________________________________________________________________
+  //
   inline bool CLsResult::IsEvidence() const {
 
     return fSig >= EvidenceStdPVal;
@@ -173,10 +167,18 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline bool CLsResult::IsDiscovery() const {
+  inline double CLsResult::TestStat() const {
 
-    return fSig >= DiscoveryStdPVal;
+    return fTestStat;
   }
+
+  //_______________________________________________________________________________
+  //
+  inline double CLsResult::Significance() const {
+
+    return fSig;
+  }
+
 }
 
 #endif

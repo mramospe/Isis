@@ -27,5 +27,12 @@ namespace Analysis {
   //_______________________________________________________________________________
   //
   CLsFluctuator::~CLsFluctuator() { }
+
+  //_______________________________________________________________________________
+  //
+  double CLsFluctuator::Fluctuate( const size_t &pos, const double &value ) {
+
+    return value;
+  }
   
 }
