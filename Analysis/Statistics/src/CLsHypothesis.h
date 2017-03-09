@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 09/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -34,7 +34,7 @@
 namespace Analysis {
 
   // Enum to define the null and signal-type hypothesis
-  enum CLsHypoType { aNull, aSignal };
+  enum CLsHypTypes { aNone, aNull, aSignal };
 
   // Define the factory class
   class CLsFactory;
@@ -44,14 +44,9 @@ namespace Analysis {
 
   public:
 
-    // Constructor given the type and the pointer to the factory
-    CLsHypothesis( const int &type, const CLsFactory *factory );
-
     // Constructor given the type, the factory and the array. This class DOES NOT
     // take ownership of the prior.
-    CLsHypothesis( const int &type,
-		   const CLsFactory *factory,
-		   const General::Doubles &array,
+    CLsHypothesis( const General::Doubles &array,
 		   CLsFluctuator *fluct = 0,
 		   CLsPrior *prior = 0 );
 
@@ -73,6 +68,9 @@ namespace Analysis {
     // Return the poisson probability
     double PoissonProb( const General::Doubles &values ) const;
 
+    // Set the CLs factory class pointer
+    inline void SetFactory( const CLsFactory *factory );
+
     // Set the fluctuator class
     inline void SetFluctuator( CLsFluctuator *fluct );
 
@@ -83,6 +81,9 @@ namespace Analysis {
 
     // Set the prior
     inline void SetPrior( CLsPrior *prior );
+
+    // Set the type
+    inline void SetType( const int &type );
 
     // Get the test-statistics value associated to the given probability
     double TestFromProb( const double &prob );
@@ -113,6 +114,13 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
+  inline void CLsHypothesis::SetFactory( const CLsFactory *factory ) {
+
+    fFactory = factory;
+  }
+  
+  //_______________________________________________________________________________
+  //
   inline void CLsHypothesis::SetFluctuator( CLsFluctuator *fluct ) {
     fFluct = fluct;
   }
@@ -134,6 +142,13 @@ namespace Analysis {
   inline void CLsHypothesis::SetPrior( CLsPrior *prior ) {
 
     fPrior = prior;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline void CLsHypothesis::SetType( const int &type ) {
+
+    fType = type;
   }
 
   //_______________________________________________________________________________

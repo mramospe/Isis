@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 09/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -39,7 +39,7 @@ namespace Analysis {
     CLsFactory();
 
     // Constructor given the two hypothesis as arrays
-    CLsFactory( const General::Doubles &h0, const General::Doubles &h1 );
+    CLsFactory( CLsHypothesis &h0, CLsHypothesis &h1 );
 
     // Destructor
     ~CLsFactory();
@@ -66,10 +66,10 @@ namespace Analysis {
     void Generate( const size_t &n = 10000 );
     
     // Return the null hypothesis
-    inline CLsHypothesis& GetNullHyp();
+    inline CLsHypothesis* GetNullHyp();
     
     // Return the signal hypothesis
-    inline CLsHypothesis& GetSigHyp();
+    inline CLsHypothesis* GetSigHyp();
 
     // Set the null hypothesis
     inline void SetNullHyp( CLsHypothesis &hyp );
@@ -83,10 +83,10 @@ namespace Analysis {
   protected:
 
     // Null hypothesis
-    CLsHypothesis fNullHyp;
+    CLsHypothesis *fNullHyp;
 
     // Signal hypothesis
-    CLsHypothesis fSigHyp;
+    CLsHypothesis *fSigHyp;
 
   };
   
@@ -94,14 +94,14 @@ namespace Analysis {
   //
   inline double CLsFactory::Alpha( const double &t ) const {
     
-    return fNullHyp.PValue(t);
+    return fNullHyp->PValue(t);
   }
 
   //_______________________________________________________________________________
   //
   inline double CLsFactory::Beta( const double &t ) const {
 
-    return fSigHyp.PValue(t);
+    return fSigHyp->PValue(t);
   }
 
   //_______________________________________________________________________________
@@ -127,14 +127,14 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline CLsHypothesis& CLsFactory::GetNullHyp() {
+  inline CLsHypothesis* CLsFactory::GetNullHyp() {
 
     return fNullHyp;
   }
 
   //_______________________________________________________________________________
   //
-  inline CLsHypothesis& CLsFactory::GetSigHyp() {
+  inline CLsHypothesis* CLsFactory::GetSigHyp() {
 
     return fSigHyp;
   }
@@ -143,14 +143,20 @@ namespace Analysis {
   //
   inline void CLsFactory::SetNullHyp( CLsHypothesis &hyp ) {
 
-    fNullHyp = hyp;
+    fNullHyp = &hyp;
+
+    fNullHyp->SetFactory(this);
+    fNullHyp->SetType(CLsHypTypes::aNull);
   }
   
   //_______________________________________________________________________________
   //
   inline void CLsFactory::SetSigHyp( CLsHypothesis &hyp ) {
 
-    fSigHyp = hyp;
+    fSigHyp = &hyp;
+
+    fSigHyp->SetFactory(this);
+    fSigHyp->SetType(CLsHypTypes::aSignal);
   }
 }
 

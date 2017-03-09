@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 09/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -119,8 +119,7 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     ;
     
   // Wrapper from CLsHypothesis
-  py::class_<an::CLsHypothesis>("CLsHypothesis",
-				py::init<const int&, const an::CLsFactory*>())
+  py::class_<an::CLsHypothesis>("CLsHypothesis", py::no_init)
     .def("__init__"     , py::make_constructor(&CLsHyp::Constructor))
     .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoPrior))
     .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoFluctNoPrior))
@@ -129,15 +128,22 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     .def("GetHyp"       , &CLsHyp::GetHyp)
     .def("Generate"     , &an::CLsHypothesis::Generate)
     .def("PoissonProb"  , &CLsHyp::PoissonProb)
+    .def("SetFactory"   , &an::CLsHypothesis::SetFactory)
     .def("SetFluctuator", &an::CLsHypothesis::SetFluctuator)
     .def("SetHypothesis", &CLsHyp::SetHypothesis, CLsHyp::SetHypothesis_Overloads())
     .def("SetPrior"     , &an::CLsHypothesis::SetPrior)
     .def("TestFromProb" , &an::CLsHypothesis::TestFromProb)
     ;
+
+  py::enum_<an::CLsHypTypes>("CLsHypTypes")
+    .value("aNone"  , an::CLsHypTypes::aNone)
+    .value("aNull"  , an::CLsHypTypes::aNull)
+    .value("aSignal", an::CLsHypTypes::aSignal)
+    ;
   
   // Wrapper from CLsFactory
   py::class_<an::CLsFactory>("CLsFactory", py::init<>())
-    .def("__init__"        , py::make_constructor(&CLsFact::Constructor))
+    .def(py::init<an::CLsHypothesis&, an::CLsHypothesis&>())
     .def("Alpha"           , &an::CLsFactory::Alpha)
     .def("Beta"            , &an::CLsFactory::Beta)
     .def("Calculate"       , &CLsFact::Calculate)

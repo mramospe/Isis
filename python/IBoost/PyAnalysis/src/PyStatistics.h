@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 09/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -41,19 +41,7 @@ namespace an = Analysis;
 
 // Wrappers for the class CLsFactory
 namespace CLsFact {
-
-  //_______________________________________________________________________________
-  //
-  boost::shared_ptr<an::CLsFactory> Constructor( py::list h0, py::list h1 ) {
-
-    auto vh0 = IBoost::BoostListToStdVec<double>( h0 );
-    auto vh1 = IBoost::BoostListToStdVec<double>( h1 );
-
-    auto factory = new an::CLsFactory(vh0, vh1);
-
-    return boost::shared_ptr<an::CLsFactory>( factory );
-  }
-
+  
   //_______________________________________________________________________________
   //
   an::CLsResult Calculate( const an::CLsFactory &factory, py::list array ) {
@@ -67,14 +55,14 @@ namespace CLsFact {
   //
   an::CLsHypothesis GetNullHyp( an::CLsFactory &factory ) {
 
-    return factory.GetNullHyp();
+    return *(factory.GetNullHyp());
   }
 
   //_______________________________________________________________________________
   //
   an::CLsHypothesis GetSigHyp( an::CLsFactory &factory ) {
 
-    return factory.GetSigHyp();
+    return *(factory.GetSigHyp());
   }
 
   //_______________________________________________________________________________
@@ -93,14 +81,12 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<an::CLsHypothesis>
-  Constructor( int type,
-	       an::CLsFactory *factory,
-	       py::list lst,
+  Constructor( py::list lst,
 	       an::CLsFluctuator *fluct,
 	       an::CLsPrior *prior ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(type, factory, array, fluct, prior);
+    auto hyp   = new an::CLsHypothesis(array, fluct, prior);
 
     return boost::shared_ptr<an::CLsHypothesis>( hyp );
   }
@@ -108,13 +94,11 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<an::CLsHypothesis>
-  Constructor_NoPrior( int type,
-		       an::CLsFactory *factory,
-		       py::list lst,
+  Constructor_NoPrior( py::list lst,
 		       an::CLsFluctuator *fluct ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(type, factory, array, fluct);
+    auto hyp   = new an::CLsHypothesis(array, fluct);
 
     return boost::shared_ptr<an::CLsHypothesis>( hyp );
   }
@@ -122,12 +106,10 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<an::CLsHypothesis>
-  Constructor_NoFluctNoPrior( int type,
-			      an::CLsFactory *factory,
-			      py::list lst ) {
+  Constructor_NoFluctNoPrior( py::list lst ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(type, factory, array);
+    auto hyp   = new an::CLsHypothesis(array);
 
     return boost::shared_ptr<an::CLsHypothesis>( hyp );
   }

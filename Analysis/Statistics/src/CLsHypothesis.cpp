@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 09/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -34,25 +34,15 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  CLsHypothesis::CLsHypothesis( const int &type, const CLsFactory *factory ) :
-    fFactory( factory ),
-    fFluct( 0 ),
-    fPrior( 0 ),
-    fRndm( 0 ) { }
-
-  //_______________________________________________________________________________
-  //
-  CLsHypothesis::CLsHypothesis( const int &type,
-				const CLsFactory *factory,
-				const General::Doubles &array,
+  CLsHypothesis::CLsHypothesis( const General::Doubles &array,
 				CLsFluctuator *fluct,
 				CLsPrior *prior ) :
-    fFactory( factory ),
+    fFactory( 0 ),
     fFluct( fluct ),
     fHyp( array ),
     fPrior( prior ),
     fRndm( 0 ),
-    fType( type ) { }
+    fType( CLsHypTypes::aNone ) { }
 
   //_______________________________________________________________________________
   //
@@ -62,42 +52,47 @@ namespace Analysis {
   //
   void CLsHypothesis::Generate( const size_t &n ) {
 
-    size_t new_size = std::abs(n - fTSVals.size());
-  
-    bool change = (fTSVals.empty() || new_size);
-
-    switch ( change ) {
-
-    case true:
-
-      for ( size_t i = fTSVals.size(); i < new_size; ++i ) {
-
-	General::Doubles vec(fHyp);
-
-	// Randomize vector
-	for ( auto it = vec.begin(); it != vec.end(); ++it ) {
-
-	  double mean = *it;
-	  
-	  // Fluctuate the values
-	  if ( fFluct )
-	    mean = fFluct->Fluctuate(it - vec.begin(), mean);
-
-	  *it = fRndm.Poisson(mean);
-	}
-      
-	double tst = fFactory->TestStat(vec);
-
-	fTSVals.push_back(tst);
-      }
-
-      std::sort(fTSVals.begin(), fTSVals.end());
-      
-      break;
+    if ( fFactory ) {
     
-    default:
-      break;
+      size_t new_size = std::abs(n - fTSVals.size());
+  
+      bool change = (fTSVals.empty() || new_size);
+
+      switch ( change ) {
+
+      case true:
+
+	for ( size_t i = fTSVals.size(); i < new_size; ++i ) {
+
+	  General::Doubles vec(fHyp);
+
+	  // Randomize vector
+	  for ( auto it = vec.begin(); it != vec.end(); ++it ) {
+
+	    double mean = *it;
+	  
+	    // Fluctuate the values
+	    if ( fFluct )
+	      mean = fFluct->Fluctuate(it - vec.begin(), mean);
+
+	    *it = fRndm.Poisson(mean);
+	  }
+
+	  double tst = fFactory->TestStat(vec);
+
+	  fTSVals.push_back(tst);
+	}
+
+	std::sort(fTSVals.begin(), fTSVals.end());
+      
+	break;
+    
+      default:
+	break;
+      }
     }
+    else
+      IError << "CLs factory is not set" << IEndMsg;
   }
 
   //_______________________________________________________________________________
@@ -136,14 +131,20 @@ namespace Analysis {
   
     switch ( fType ) {
 
-    case CLsHypoType::aNull:
+    case CLsHypTypes::aNull:
       n = fTSVals.cend() - it;
       break;
-    case CLsHypoType::aSignal:
+      
+    case CLsHypTypes::aSignal:
       n = it - fTSVals.cbegin();
       break;
+      
+    case CLsHypTypes::aNone:
+      IError << "Hypothesis type is not set" << IEndMsg;
+      return 0;
+      
     default:
-      IError << "Unknown hypothesis type" << IEndMsg;
+      IError << "Unknown hypothesis type < " << fType << " >" << IEndMsg;
       return 0;
     }
 
