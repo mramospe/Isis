@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/03/2017
+#//  Last update: 10/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -214,13 +214,12 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '',
     return graph
 
 
-def DrawHistograms( hlst, drawopt = '', norm = True ):
+def DrawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     '''
     Draws the given list of histograms. If the variable < norm > is set to True,
-    then the histograms will be normalized and the function will return
-    the list with the clone histograms. It always returns a list with at least an
-    histogram used to give format to the plot. The draw options are set using the
-    < drawopt > keyword.
+    then the histograms will be normalized. It returns the histogram used to give
+    format to the plot, and the list of input histograms or the normalized clones.
+    The draw options are set using the < drawopt > keyword.
     '''
     if norm:
         imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
@@ -230,15 +229,31 @@ def DrawHistograms( hlst, drawopt = '', norm = True ):
         imax = max( h.GetMaximum() for h in hlst )
         imin = min( h.GetMinimum() for h in hlst )
         meth = rt.TH1.Draw
-    offset = ( imax + imin )/10.
-    vmin   = min( h.GetXaxis().GetXmin() for h in hlst )
-    vmax   = max( h.GetXaxis().GetXmax() for h in hlst )
-    hformat = hlst[ 0 ].__class__( 'HistFormat', 'HistFormat', 1, vmin, vmax )
+    
+    offset  = ( imax + imin )/10.
+    vmin    = min( h.GetXaxis().GetXmin() for h in hlst )
+    vmax    = max( h.GetXaxis().GetXmax() for h in hlst )
+    hformat = hlst[ 0 ].__class__( '', title, 1, vmin, vmax )
+    
     hformat.SetBinContent( 1, imin )
     hformat.GetYaxis().SetRangeUser( imin, imax + offset )
     hformat.Draw()
+    
     drawopt += 'SAME'
-    return [ hformat ] + [ meth( h, drawopt ) for h in hlst ]
+    
+    outhlst = [ hformat ]
+
+    for h in hlst:
+
+        hdr = meth( h, drawopt )
+
+        if hdr:
+            outhlst.append(hdr)
+    
+    if len(outhlst) == 1:
+        outhlst += hlst
+    
+    return outhlst
 
 
 def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
