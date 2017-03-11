@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/03/2017
+//  Last update: 10/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -49,16 +49,14 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  CLsResult CLsFactory::Calculate( const General::Doubles &array ) const {
+  CLsResult CLsFactory::Calculate( const double &tstat ) const {
 
-    double t = this->TestStat(array);
+    double alpha = this->Alpha(tstat);
+    double beta  = this->Beta(tstat);
+    double CLb   = this->CLb(tstat);
+    double CLs   = this->CLs(tstat);
     
-    double alpha = this->Alpha(t);
-    double beta  = this->Beta(t);
-    double CLb   = this->CLb(t);
-    double CLs   = this->CLs(t);
-    
-    return CLsResult(CLs, CLb, alpha, beta, t);
+    return CLsResult(CLs, CLb, alpha, beta, tstat);
   }
 
   //_______________________________________________________________________________

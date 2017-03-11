@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/03/2017
+//  Last update: 10/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -119,20 +119,20 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     ;
     
   // Wrapper from CLsHypothesis
-  py::class_<an::CLsHypothesis>("CLsHypothesis", py::no_init)
-    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor))
-    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoPrior))
-    .def("__init__"     , py::make_constructor(&CLsHyp::Constructor_NoFluctNoPrior))
-    .def("PValue"       , &an::CLsHypothesis::PValue)
-    .def("GetTSVals"    , &CLsHyp::GetTSVals)
-    .def("GetHyp"       , &CLsHyp::GetHyp)
-    .def("Generate"     , &an::CLsHypothesis::Generate)
-    .def("PoissonProb"  , &CLsHyp::PoissonProb)
-    .def("SetFactory"   , &an::CLsHypothesis::SetFactory)
-    .def("SetFluctuator", &an::CLsHypothesis::SetFluctuator)
-    .def("SetHypothesis", &CLsHyp::SetHypothesis, CLsHyp::SetHypothesis_Overloads())
-    .def("SetPrior"     , &an::CLsHypothesis::SetPrior)
-    .def("TestFromProb" , &an::CLsHypothesis::TestFromProb)
+  py::class_<an::CLsHypothesis>("CLsHypothesis", py::init<>())
+    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor))
+    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor_NoPrior))
+    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor_NoFluctNoPrior))
+    .def("PValue"          , &an::CLsHypothesis::PValue)
+    .def("GetTSVals"       , &CLsHyp::GetTSVals)
+    .def("GetHyp"          , &CLsHyp::GetHyp)
+    .def("Generate"        , &an::CLsHypothesis::Generate)
+    .def("PoissonProb"     , &CLsHyp::PoissonProb)
+    .def("SetFactory"      , &an::CLsHypothesis::SetFactory)
+    .def("SetFluctuator"   , &an::CLsHypothesis::SetFluctuator)
+    .def("SetHyp"          , &CLsHyp::SetHyp, CLsHyp::SetHyp_Overloads())
+    .def("SetPrior"        , &an::CLsHypothesis::SetPrior)
+    .def("TestStatFromProb", &an::CLsHypothesis::TestStatFromProb)
     ;
 
   py::enum_<an::CLsHypTypes>("CLsHypTypes")
@@ -146,7 +146,8 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     .def(py::init<an::CLsHypothesis&, an::CLsHypothesis&>())
     .def("Alpha"           , &an::CLsFactory::Alpha)
     .def("Beta"            , &an::CLsFactory::Beta)
-    .def("Calculate"       , &CLsFact::Calculate)
+    .def("Calculate"       , &CLsFact::CalculateFromArray)
+    .def("Calculate"       , CLsFact::CalculateFromDouble)
     .def("CLb"             , &an::CLsFactory::CLb)
     .def("CLs"             , &an::CLsFactory::CLs)
     .def("CLsb"            , &an::CLsFactory::CLsb)

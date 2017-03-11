@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/03/2017
+//  Last update: 10/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -44,12 +44,17 @@ namespace CLsFact {
   
   //_______________________________________________________________________________
   //
-  an::CLsResult Calculate( const an::CLsFactory &factory, py::list array ) {
+  an::CLsResult CalculateFromArray( const an::CLsFactory &factory, py::list array ) {
 
     auto vector = IBoost::BoostListToStdVec<double>( array );
 
     return factory.Calculate( vector );
   }
+
+  //_______________________________________________________________________________
+  //
+  an::CLsResult (an::CLsFactory::*CalculateFromDouble)( const double &tstat ) const =
+    &an::CLsFactory::Calculate;
 
   //_______________________________________________________________________________
   //
@@ -143,15 +148,15 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  void SetHypothesis( an::CLsHypothesis &hyp,
-		      py::list lst,
-		      an::CLsFluctuator *fluct = 0,
-		      an::CLsPrior *prior = 0 ) {
+  void SetHyp( an::CLsHypothesis &hyp,
+	       py::list lst,
+	       an::CLsFluctuator *fluct = 0,
+	       an::CLsPrior *prior = 0 ) {
 
     auto vec = IBoost::BoostListToStdVec<double>( lst );
 
-    hyp.SetHypothesis(vec, fluct, prior);
+    hyp.SetHyp(vec, fluct, prior);
   }
 
-  BOOST_PYTHON_FUNCTION_OVERLOADS(SetHypothesis_Overloads, SetHypothesis, 2, 4);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(SetHyp_Overloads, SetHyp, 2, 4);
 }

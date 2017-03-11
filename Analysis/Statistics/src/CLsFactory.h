@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/03/2017
+//  Last update: 10/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -50,8 +50,11 @@ namespace Analysis {
     // Return the p-value of the signal hypothesis
     inline double Beta( const double &t ) const;
 
-    // Return a class with all the information concerning the CLs method
-    CLsResult Calculate( const General::Doubles &array ) const;
+    // Return information concerning the CLs method given the test statistics value
+    CLsResult Calculate( const double &tstat ) const;
+    
+    // Return information concerning the CLs method given an array
+    inline CLsResult Calculate( const General::Doubles &array ) const;
 
     // Calculate CLb
     inline double CLb( const double &t ) const;
@@ -102,6 +105,15 @@ namespace Analysis {
   inline double CLsFactory::Beta( const double &t ) const {
 
     return fSigHyp->PValue(t);
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline CLsResult CLsFactory::Calculate( const General::Doubles &array ) const {
+
+    double t = this->TestStat(array);
+
+    return this->Calculate(t);
   }
 
   //_______________________________________________________________________________

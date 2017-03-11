@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 09/03/2017
+//  Last update: 10/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -46,7 +46,7 @@ namespace Analysis {
 
     // Constructor given the type, the factory and the array. This class DOES NOT
     // take ownership of the prior.
-    CLsHypothesis( const General::Doubles &array,
+    CLsHypothesis( const General::Doubles &array = {},
 		   CLsFluctuator *fluct = 0,
 		   CLsPrior *prior = 0 );
 
@@ -75,9 +75,9 @@ namespace Analysis {
     inline void SetFluctuator( CLsFluctuator *fluct );
 
     // Set the vector defining this hypothesis
-    inline void SetHypothesis( const General::Doubles &array,
-			       CLsFluctuator *fluct = 0,
-			       CLsPrior *prior = 0 );
+    inline void SetHyp( const General::Doubles &array,
+			CLsFluctuator *fluct = 0,
+			CLsPrior *prior = 0 );
 
     // Set the prior
     inline void SetPrior( CLsPrior *prior );
@@ -86,7 +86,7 @@ namespace Analysis {
     inline void SetType( const int &type );
 
     // Get the test-statistics value associated to the given probability
-    double TestFromProb( const double &prob );
+    double TestStatFromProb( const double &prob );
     
   protected:
 
@@ -127,9 +127,9 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetHypothesis( const General::Doubles &array,
-					    CLsFluctuator *fluct,
-					    CLsPrior *prior ) {
+  inline void CLsHypothesis::SetHyp( const General::Doubles &array,
+				     CLsFluctuator *fluct,
+				     CLsPrior *prior ) {
     
     fTSVals.clear();
     fFluct = fluct;
