@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/03/2017
+#//  Last update: 14/03/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -352,26 +352,34 @@ def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
         mean = int(round(mean))
         SendWarningMsg('Calculating poisson uncertainty of a non-integer value; '\
                        'returning values for closest integer < %i >' %mean)
-    
+
     s_sy = sqrt(mean)
+        
+    if mean != 0:
+        stp = s_sy
+    else:
+        stp = 2.
 
-    nsteps = int(2*s_sy/prec)
-    lw_mean_lst = np.linspace(mean - 2*s_sy, mean, nsteps)
-    up_mean_lst = np.linspace(mean + 2*s_sy, mean, nsteps)
-
-    ''' Adding the value at < mean > is necessary '''
-    lw_probs = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
-                   lw_mean_lst)
-    up_probs = map(lambda x: rt.Math.poisson_cdf(mean, x), up_mean_lst)
-
+    nsteps = int(2*stp/prec)
+    
     pb = (1. - cl)/2.
+    
+    if mean != 0:
+        ''' Adding the value at < mean > is necessary '''
+        lw_mean_lst = np.linspace(mean - 2*stp, mean, nsteps)
+        lw_probs    = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
+                       lw_mean_lst)
+        mean_lw = np.interp(pb, lw_probs, lw_mean_lst)
+        s_lw    = mean - mean_lw
+    else:
+        s_lw = 0.
+    
+    up_mean_lst = np.linspace(mean + 2*stp, mean, nsteps)
+    up_probs    = map(lambda x: rt.Math.poisson_cdf(mean, x), up_mean_lst)
+    mean_up     = np.interp(pb, up_probs, up_mean_lst)
 
-    mean_lw = np.interp(pb, lw_probs, lw_mean_lst)
-    mean_up = np.interp(pb, up_probs, up_mean_lst)
-
-    s_lw = mean - mean_lw
     s_up = mean_up - mean
-
+    
     return s_sy, s_lw, s_up
 
 
