@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 16/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -29,21 +29,21 @@
 
 namespace Analysis {
 
-  class CLsPrior {
+  struct CLsPrior {
 
   public:
 
     // Constructor
-    CLsPrior();
+    CLsPrior() { };
 
     // Virtual destructor
-    virtual ~CLsPrior();
+    virtual ~CLsPrior() { };
 
     // Evaluate the prior given the position, the mean and the given value from the
     // observation
     virtual double Evaluate( const size_t &pos,
 			     const double &mean,
-			     const double &value );
+			     const double &value ) = 0;
 
   };
 

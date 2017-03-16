@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 16/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -29,18 +29,18 @@
 
 namespace Analysis {
 
-  class CLsFluctuator {
+  struct CLsFluctuator {
 
   public:
 
     // Constructor
-    CLsFluctuator();
+    CLsFluctuator() { };
 
     // Virtual destructor
-    virtual ~CLsFluctuator();
+    virtual ~CLsFluctuator() { };
 
     // Given the position and the value, fluctuate it using an user-defined function
-    virtual double Fluctuate( const size_t &pos, const double &value );
+    virtual double Fluctuate( const size_t &pos, const double &value ) = 0;
 
   };
   

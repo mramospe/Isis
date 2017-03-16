@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2017
+//  Last update: 16/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -89,13 +89,13 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     ;
 
   // Wrapper from CLsFluctuator
-  py::class_<an::CLsFluctuator>("CLsFluctuator", py::init<>())
-    .def("Fluctuate", &an::CLsFluctuator::Fluctuate)
+  py::class_<CLsFluct::CLsFluctWrap, boost::noncopyable>("CLsFluctuator")
+    .def("Fluctuate", py::pure_virtual(&CLsFluct::CLsFluctWrap::Fluctuate))
     ;
 
   // Wrapper from CLsPrior
-  py::class_<an::CLsPrior>("CLsPrior", py::init<>())
-    .def("Evaluate", &an::CLsPrior::Evaluate)
+  py::class_<CLsPrior::CLsPriorWrap, boost::noncopyable>("CLsPrior")
+    .def("Evaluate", py::pure_virtual(&CLsPrior::CLsPriorWrap::Evaluate))
     ;
 
   // Wrapper from CLsResult

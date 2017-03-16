@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2017
+//  Last update: 16/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -78,6 +78,18 @@ namespace CLsFact {
 
     return factory.TestStat( vector );
   }
+}
+
+// Wrappers for the class CLsFluctuator
+namespace CLsFluct {
+
+  struct CLsFluctWrap : an::CLsFluctuator, py::wrapper<an::CLsFluctuator> {
+    
+    double Fluctuate( const size_t &pos, const double &value ) {
+
+      return this->get_override("Fluctuate")(pos, value);
+    }
+  };
 }
 
 // Wrappers for the class CLsHypothesis
@@ -159,4 +171,16 @@ namespace CLsHyp {
   }
 
   BOOST_PYTHON_FUNCTION_OVERLOADS(SetHyp_Overloads, SetHyp, 2, 4);
+}
+
+// Wrappers for the class CLsPrior
+namespace CLsPrior {
+
+  struct CLsPriorWrap : an::CLsPrior, py::wrapper<an::CLsPrior> {
+
+    double Evaluate( const size_t &pos, const double &mean, const double &value ) {
+
+      return this->get_override("Evaluate")();
+    }
+  };
 }
