@@ -180,7 +180,7 @@ namespace CLsPrior {
 
     double Evaluate( const size_t &pos, const double &mean, const double &value ) {
 
-      return this->get_override("Evaluate")();
+      return this->get_override("Evaluate")(pos, mean, value);
     }
   };
 }
