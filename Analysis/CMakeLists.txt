@@ -2,8 +2,8 @@
 # Here the Analysis project is defined. Each folder placed in the same
 # directory as this file is considered as a subpackage, and it is added to
 # the compilation process.
-project(Analysis)
-file(GLOB pkgs ${PROJECT_SOURCE_DIR}/*)
+set(PKG_NAME Analysis)
+file(GLOB pkgs ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach(pkg ${pkgs})
   if(IS_DIRECTORY ${pkg})
     add_subdirectory(${pkg})

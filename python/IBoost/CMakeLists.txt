@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Name of the project
-project(IBoost)
+set(PKG_NAME IBoost)
 
 #----------------------------------------------------------------------------
 # Look for the Boost and python libraries
@@ -14,13 +14,13 @@ set(BOOSTPY_LIBS
 
 #----------------------------------------------------------------------------
 # Function to compile each of the boost packages
-function(self_build_boost_package libname)
-  file(GLOB source ${PROJECT_SOURCE_DIR}/src/*.cpp)
-  include_directories(${BINARY_INCLUDE_DIR})
+function(build_boost_package libname)
+  file(GLOB source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  include_directories(${INSTALL_INCLUDE_DIR})
   include_directories(${PYTHON_INCLUDE_DIRS})
   include_directories(${Boost_INCLUDE_DIRS})
-  include_directories(${PROJECT_SOURCE_DIR}/src)
-  set(${PROJECT_NAME} ${BOOST_OUTPUT_LIBRARY_DIR}/${libname})
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+  set(${PKG_NAME} ${BOOST_OUTPUT_LIBRARY_DIR}/${libname})
   add_library(${libname} SHARED ${source})
   set(libs IBoost ${BOOSTPY_LIBS})
   target_link_libraries(${libname} ${libs})
@@ -31,21 +31,21 @@ endfunction()
 
 #----------------------------------------------------------------------------
 # Compile common code to be used by the wrappers
-file(GLOB source ${PROJECT_SOURCE_DIR}/src/*.cpp)
-include_directories(${BINARY_INCLUDE_DIR})
+file(GLOB source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+include_directories(${INSTALL_INCLUDE_DIR})
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR}/src)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-add_library(${PROJECT_NAME} SHARED ${source})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_library(${PKG_NAME} SHARED ${source})
 set(libs ${BOOSTPY_LIBS})
-target_link_libraries(${PROJECT_NAME} ${libs})
+target_link_libraries(${PKG_NAME} ${libs})
 add_dependencies(${libname} Analysis General)
 
 #----------------------------------------------------------------------------
 # Define the output location of the compiled libraries
-self_make_directory(${PYBINARY}/${PROJECT_NAME})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYBINARY}/${PROJECT_NAME})
+file(MAKE_DIRECTORY ${PYBINARY}/${PKG_NAME})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYBINARY}/${PKG_NAME})
 
 #----------------------------------------------------------------------------
 # Specify the custom boost packages

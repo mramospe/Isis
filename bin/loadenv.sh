@@ -38,6 +38,10 @@ if [[ $PYTHONPATH != *$ISIS_PYTHON* ]]; then
 fi
 echo "Extended python path from: $ISIS_PYTHON"
 
+# Export cmake variables
+export CMAKE_PREFIX_PATH=$ISIS:$CMAKE_PREFIX_PATH
+echo "Extended CMake prefix path with: $ISIS"
+
 # Defines the alias to the scripts
 alias readCuts='python $ISIS_SCRIPTS/readCuts.py'
 echo "Defined alias for scripts at: $ISIS_SCRIPTS"
