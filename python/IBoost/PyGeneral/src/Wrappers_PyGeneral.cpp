@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2016
+//  Last update: 20/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -24,6 +24,7 @@
 #include <boost/python/scope.hpp>
 
 #include "CutManager.h"
+#include "Definitions.h"
 #include "Messenger.h"
 #include "MessengerConfig.h"
 #include "LoopArray.h"
@@ -93,6 +94,9 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
     .def("__getitem__"  , &gl::CutManager::operator[])
     ;
 
+  // Wrappers from Definitions.h
+  py::scope().attr("ISIS_VERSION") = ISIS_VERSION;
+  
   // Wrappers from GlobalMessenger.h
   py::def("SendFormattedMsg", &Msg::SendFormattedMsg, Msg::SendFormattedMsg_Overloads());
   py::def("SendMsg"         , &Msg::SendMsg);

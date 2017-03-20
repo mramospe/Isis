@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 07/03/2017
+//  Last update: 20/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -26,6 +26,10 @@
 #include <string>
 #include <vector>
 
+
+//_______________________________________________________________________________
+// The Isis version, set by cmake at build time
+#define ISIS_VERSION "${PROJECT_VERSION}"
 
 //_______________________________________________________________________________
 // No-operation statement

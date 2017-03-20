@@ -146,8 +146,10 @@ def parse_arguments():
 if __name__ == '__main__':
 
     ''' Startup message '''
-    print '***********************************'
-    print '* Setting up the Isis environment *'
+    from Isis.IBoost.PyGeneral import ISIS_VERSION
+    start = '* Setting up the Isis environment (v%s) *' %ISIS_VERSION
+    print len(start)*'*'
+    print start
     
     ''' The imports must be written here since otherwise ROOT complains '''
 
