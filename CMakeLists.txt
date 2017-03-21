@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 20/03/2017
+#  Last update: 21/03/2017
 #
 #  Description:
 #
@@ -59,6 +59,7 @@ execute_process(
 set(INSTALL_LIB_DIR      lib      CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR      bin      CACHE PATH "Installation directory for executables")
 set(INSTALL_INCLUDE_DIR  include  CACHE PATH "Installation directory for header files")
+set(INSTALL_PYTHON_DIR   python   CACHE PATH "Installation directory for python files")
 set(INSTALL_EXAMPLES_DIR examples CACHE PATH "Installation directory for examples")
 set(INSTALL_SCRIPTS_DIR  scripts  CACHE PATH "Installation directory for scripts")
 if(WIN32 AND NOT CYGWIN)
@@ -68,7 +69,7 @@ else()
 endif()
 set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR}
   CACHE PATH "Installation directory for CMake files")
-foreach(dir LIB BIN INCLUDE EXAMPLES SCRIPTS CMAKE)
+foreach(dir LIB BIN INCLUDE PYTHON EXAMPLES SCRIPTS CMAKE)
   set(var INSTALL_${dir}_DIR)
   if(NOT IS_ABSOLUTE "${${var}}")
     set(${var} "${CMAKE_BINARY_DIR}/${${var}}")
@@ -95,15 +96,14 @@ function(copy_directory inputdir outputdir)
       get_filename_component(name ${file} NAME)
       copy_directory(${file} ${outputdir}/${name})
     else()
-      configure_file(${file} ${outputdir} COPYONLY)
+      configure_file(${file} ${outputdir} @ONLY)
     endif()
   endforeach()
   
 endfunction()
 #----------------------------------------------------------------------------
 # This function defines the general way to compile the code of a package in
-# the project. In spite of this, one can define another way to perform this
-# task, as long as the library is correctly exported.
+# the project
 function(build_package libname deps)
   
   set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -137,11 +137,9 @@ endfunction()
 #============================================================================
 
 #----------------------------------------------------------------------------
-# The python folder is created only if the source directory is equal to the
-# binary directory. The same happens with the copy of the Examples folder and
-# the bin directory.
+# The python folder is the only one which is not entirely copied
 if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
-  file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/python/Isis)
+  file(MAKE_DIRECTORY ${INSTALL_PYTHON_DIR}/Isis)
   copy_directory(${PROJECT_SOURCE_DIR}/scripts ${INSTALL_SCRIPTS_DIR})
   copy_directory(${PROJECT_SOURCE_DIR}/examples ${INSTALL_EXAMPLES_DIR})
   copy_directory(${PROJECT_SOURCE_DIR}/bin ${INSTALL_BIN_DIR})
@@ -161,8 +159,9 @@ message("-- Output library directory set to: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
 #----------------------------------------------------------------------------
 # Adds the different main packages of the project. The list of libraries is
-# reversed to avoid linking problems. The python subdirectory depends on the
-# project libraries, so it must be added after the list is reversed.
+# reversed to correctly solve the dependencies. The python subdirectory
+# depends on the project libraries, so it must be added after the list is
+# reversed.
 set(PROJECT_LIBRARIES)
 add_subdirectory(General)
 add_subdirectory(Analysis)
@@ -170,8 +169,7 @@ list(REVERSE PROJECT_LIBRARIES)
 add_subdirectory(python)
 
 #----------------------------------------------------------------------------
-# Copies the example files. If the option BUILD_EXAMPLES is ON, the scripts
-# will be compiled.
+# Build the example files if the option BUILD_EXAMPLES is set to ON
 if(BUILD_EXAMPLES)
   if(${BUILD_EXAMPLES} STREQUAL "ON")
     message("-- The examples will be built")
