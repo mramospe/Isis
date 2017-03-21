@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -29,7 +29,6 @@
 #include "TPython.h"
 
 namespace py = boost::python;
-namespace an = Analysis;
 
 
 //_______________________________________________________________________________
@@ -39,14 +38,14 @@ namespace AdBin {
 
   //_______________________________________________________________________________
   //
-  py::list GetBinList( const an::AdaptiveBinning &adbin ) {
+  py::list GetBinList( const Isis::AdaptiveBinning &adbin ) {
   
     return IBoost::StdVecToBoostList( adbin.GetBinList() );
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const an::AdaptiveBinning &adbin,
+  PyObject* GetStruct( const Isis::AdaptiveBinning &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
     return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
@@ -60,32 +59,32 @@ namespace AdBin1D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::AdaptiveBinning1D> Constructor( size_t occ,
-							double vmin,
-							double vmax,
-							py::list values,
-							py::list weights ) {
+  boost::shared_ptr<Isis::AdaptiveBinning1D> Constructor( size_t occ,
+							  double vmin,
+							  double vmax,
+							  py::list values,
+							  py::list weights ) {
   
     auto vec_values  = IBoost::BoostListToStdVec<double>( values );
     auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
-    auto adbin       = new an::AdaptiveBinning1D(occ, vmin, vmax,
-						 vec_values, vec_weights);
+    auto adbin       = new Isis::AdaptiveBinning1D(occ, vmin, vmax,
+						   vec_values, vec_weights);
   
-    return boost::shared_ptr<an::AdaptiveBinning1D>( adbin );
+    return boost::shared_ptr<Isis::AdaptiveBinning1D>( adbin );
   }
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::AdaptiveBinning1D> Constructor_NoWgts( size_t occ,
-							       double vmin,
-							       double vmax,
-							       py::list values ) {
+  boost::shared_ptr<Isis::AdaptiveBinning1D> Constructor_NoWgts( size_t occ,
+								 double vmin,
+								 double vmax,
+								 py::list values ) {
     return Constructor(occ, vmin, vmax, values, py::list());
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const an::AdaptiveBinning1D &adbin,
+  PyObject* GetStruct( const Isis::AdaptiveBinning1D &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
     return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
@@ -101,41 +100,41 @@ namespace AdBin2D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::AdaptiveBinning2D> Constructor( size_t occ,
-							double xmin, double xmax,
-							double ymin, double ymax,
-							py::list xvalues,
-							py::list yvalues,
-							py::list weights ) {
+  boost::shared_ptr<Isis::AdaptiveBinning2D> Constructor( size_t occ,
+							  double xmin, double xmax,
+							  double ymin, double ymax,
+							  py::list xvalues,
+							  py::list yvalues,
+							  py::list weights ) {
   
     auto vec_xvalues = IBoost::BoostListToStdVec<double>( xvalues );
     auto vec_yvalues = IBoost::BoostListToStdVec<double>( yvalues );
     auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
-    auto adbin       = new an::AdaptiveBinning2D(occ,
-						 xmin, xmax,
-						 ymin, ymax,
-						 vec_xvalues, vec_yvalues,
-						 vec_weights);
+    auto adbin       = new Isis::AdaptiveBinning2D(occ,
+						   xmin, xmax,
+						   ymin, ymax,
+						   vec_xvalues, vec_yvalues,
+						   vec_weights);
   
-    return boost::shared_ptr<an::AdaptiveBinning2D>( adbin );
+    return boost::shared_ptr<Isis::AdaptiveBinning2D>( adbin );
   }
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::AdaptiveBinning2D> Constructor_NoWgts( size_t occ,
-							       double xmin,
-							       double xmax,
-							       double ymin,
-							       double ymax,
-							       py::list xvalues,
-							       py::list yvalues ) {
+  boost::shared_ptr<Isis::AdaptiveBinning2D> Constructor_NoWgts( size_t occ,
+								 double xmin,
+								 double xmax,
+								 double ymin,
+								 double ymax,
+								 py::list xvalues,
+								 py::list yvalues ) {
   
     return Constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetAdjStruct( const an::AdaptiveBinning2D &adbin,
+  PyObject* GetAdjStruct( const Isis::AdaptiveBinning2D &adbin,
 			  const char *name = "",
 			  const char *title = "" ) {
     return TPython::ObjectProxy_FromVoidPtr( adbin.GetAdjStruct(name, title),
@@ -147,7 +146,7 @@ namespace AdBin2D {
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const an::AdaptiveBinning2D &adbin,
+  PyObject* GetStruct( const Isis::AdaptiveBinning2D &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
     return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),

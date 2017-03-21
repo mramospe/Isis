@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -24,7 +24,6 @@
 #include "TPython.h"
 
 namespace py = boost::python;
-namespace an = Analysis;
 
 
 //_______________________________________________________________________________
@@ -38,7 +37,7 @@ namespace RootUtils {
 
     TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
     
-    return TPython::ObjectProxy_FromVoidPtr( an::GetSafeObject(ifile, path),
+    return TPython::ObjectProxy_FromVoidPtr( Isis::GetSafeObject(ifile, path),
 					     "TObject",
 					     false );
   }

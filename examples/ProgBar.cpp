@@ -9,7 +9,7 @@
 int main() {
 
   // Initializes the progress bar with all options
-  General::ProgressBar prbar("Bar=50:Percentage=1:Time:Date=Start-End");
+  Isis::ProgressBar prbar("Bar=50:Percentage=1:Time:Date=Start-End");
   
   // Sets the color of the different options
   prbar.SetColor( "Bar=32;41;1:Percentage=33;45;1:Time=33;3:StartDate=35;42;2:EndDate=31;45;2" );

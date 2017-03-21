@@ -51,7 +51,7 @@ int main() {
   itree = (TTree*) ifile -> Get( "DecayTree" );
 
   // Creates the different particles of the taking part of the generation
-  Analysis::DecayParticle
+  Isis::DecayParticle
     Bs0( "B_s0" ),
     D0( "D0" ),
     pi0( "pi0" ),
@@ -63,12 +63,12 @@ int main() {
   TFile *ofile = TFile::Open( "files/ToyMCout.root", "RECREATE" );
 
   // Initializes the class
-  Analysis::ToyMCgenerator gen( Bs0,
-				itree,
-				"B0_PX",
-				"B0_PY",
-				"B0_PZ",
-				"B0_PE" );
+  Isis::ToyMCgenerator gen( Bs0,
+			    itree,
+			    "B0_PX",
+			    "B0_PY",
+			    "B0_PZ",
+			    "B0_PE" );
 
   // Adds the daughters to the different mother particles. The masses are
   // taken in this case as those of the PDG database.

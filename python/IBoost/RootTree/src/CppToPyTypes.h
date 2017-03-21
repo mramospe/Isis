@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 
 namespace IBoost {
 
-  boost::python::object BoostObjectFromBufferVariable( const General::BufferVariable &var );
+  boost::python::object BoostObjectFromBufferVariable( const Isis::BufferVariable &var );
 
 }
 

@@ -15,10 +15,10 @@
 #include <vector>
 
 // Function to write the objects for a given cluster (histograms and scatter plot) in the output folder
-void WriteForCluster( Analysis::ClusterFactory &factory, const size_t &icl ) {
+void WriteForCluster( Isis::ClusterFactory &factory, const size_t &icl ) {
   
   std::cout << "Accesing cluster " << icl << std::endl;
-  Analysis::Cluster *cl = factory.GetCluster( icl );
+  Isis::Cluster *cl = factory.GetCluster( icl );
 
   // Fills the vectors with the information of the cluster points
   std::vector<double> vec, vx, vy, vg, vh;
@@ -71,7 +71,7 @@ int main() {
   of -> cd();
 
   // Creates the cluster factory parsing the corresponding options
-  Analysis::ClusterFactory factory( "nClusters=7:nIter=10:ClusteringMethod=Convergence:ComDefMethod=Distance:Verbose:ManageClusters:MaxComVar=0.1:nComStdDev=1" );
+  Isis::ClusterFactory factory( "nClusters=7:nIter=10:ClusteringMethod=Convergence:ComDefMethod=Distance:Verbose:ManageClusters:MaxComVar=0.1:nComStdDev=1" );
   factory.AddVariable( "x" );
   factory.AddVariable( "y" );
   factory.AddVariable( "g" );

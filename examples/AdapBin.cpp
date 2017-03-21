@@ -33,7 +33,7 @@ int main() {
   std::cout << "Generated input sample" << std::endl;
 
   // Makes the adaptive binning histograms
-  Analysis::AdaptiveBinning2D AB( 40, -200, 200, 0, 1000, xVar, yVar );
+  Isis::AdaptiveBinning2D AB( 40, -200, 200, 0, 1000, xVar, yVar );
 
   TH2Poly *hStr    = AB.GetStruct( "hStr", "hStr" );
   TH2Poly *hAdj    = AB.GetAdjStruct( "hAdj", "hAdj" );

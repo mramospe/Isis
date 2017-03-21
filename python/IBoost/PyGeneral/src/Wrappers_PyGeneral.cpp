@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/03/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -33,7 +33,6 @@
 #include <string>
 
 namespace py = boost::python;
-namespace gl = General;
 
 
 //_______________________________________________________________________________
@@ -42,11 +41,11 @@ namespace gl = General;
 namespace CutMgr {
   
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(BookCut_Overloads,
-					 gl::CutManager::BookCut,
+					 Isis::CutManager::BookCut,
 					 1, 2);
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MakeMergedCut_Overloads,
-					 gl::CutManager::MakeMergedCut,
+					 Isis::CutManager::MakeMergedCut,
 					 0, 1);
 }
 
@@ -55,11 +54,11 @@ namespace Msg {
 
   // Function to send a formatted message
   void SendFormattedMsg( const std::string &msg,
-			 const int &fgcol = General::ANSIFormat::aNoColor,
-			 const int &bgcol = General::ANSIFormat::aNoColor,
-			 const int &sty = General::ANSIFormat::aNoStyle ) {
+			 const int &fgcol = Isis::ANSIFormat::aNoColor,
+			 const int &bgcol = Isis::ANSIFormat::aNoColor,
+			 const int &sty = Isis::ANSIFormat::aNoStyle ) {
 
-    General::Messenger("", std::cout, fgcol, bgcol, sty) << msg << IEndMsg;
+    Isis::Messenger("", std::cout, fgcol, bgcol, sty) << msg << IEndMsg;
   }
   BOOST_PYTHON_FUNCTION_OVERLOADS(SendFormattedMsg_Overloads,
 				  SendFormattedMsg,
@@ -81,17 +80,17 @@ namespace Msg {
 BOOST_PYTHON_MODULE( PyGeneral ) {
 
   // Wrappers from CutManager.h
-  py::class_<gl::CutManager>("CutManager", py::init<const std::string&>())
-    .def(py::init<const gl::CutManager&>())
-    .def("BookCut"      , &gl::CutManager::BookCut, CutMgr::BookCut_Overloads())
-    .def("Clear"        , &gl::CutManager::Clear)
-    .def("Close"        , &gl::CutManager::Close)
-    .def("GetCut"       , &gl::CutManager::GetCut)
-    .def("MakeMergedCut", &gl::CutManager::MakeMergedCut, CutMgr::MakeMergedCut_Overloads())
-    .def("Open"         , &gl::CutManager::Open)
-    .def("Print"        , &gl::CutManager::Print)
-    .def("Remove"       , &gl::CutManager::Remove)
-    .def("__getitem__"  , &gl::CutManager::operator[])
+  py::class_<Isis::CutManager>("CutManager", py::init<const std::string&>())
+    .def(py::init<const Isis::CutManager&>())
+    .def("BookCut"      , &Isis::CutManager::BookCut, CutMgr::BookCut_Overloads())
+    .def("Clear"        , &Isis::CutManager::Clear)
+    .def("Close"        , &Isis::CutManager::Close)
+    .def("GetCut"       , &Isis::CutManager::GetCut)
+    .def("MakeMergedCut", &Isis::CutManager::MakeMergedCut, CutMgr::MakeMergedCut_Overloads())
+    .def("Open"         , &Isis::CutManager::Open)
+    .def("Print"        , &Isis::CutManager::Print)
+    .def("Remove"       , &Isis::CutManager::Remove)
+    .def("__getitem__"  , &Isis::CutManager::operator[])
     ;
 
   // Wrappers from Definitions.h
@@ -107,51 +106,51 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
   { // ANSIFormat scope
     class ANSIFormatNSP { };
     py::scope ANSIFormat = py::class_<ANSIFormatNSP>("ANSIFormat")
-      .def_readwrite("ErrorColor"  , &gl::ANSIFormat::ErrorColor)
-      .def_readwrite("InfoColor"   , &gl::ANSIFormat::InfoColor)
-      .def_readwrite("WarningColor", &gl::ANSIFormat::WarningColor)
+      .def_readwrite("ErrorColor"  , &Isis::ANSIFormat::ErrorColor)
+      .def_readwrite("InfoColor"   , &Isis::ANSIFormat::InfoColor)
+      .def_readwrite("WarningColor", &Isis::ANSIFormat::WarningColor)
       ;
   
-    py::enum_<gl::ANSIFormat::Colors>("Colors")
-      .value("aBlack"  , gl::ANSIFormat::aBlack)
-      .value("aRed"    , gl::ANSIFormat::aRed)
-      .value("aGreen"  , gl::ANSIFormat::aGreen)
-      .value("aYellow" , gl::ANSIFormat::aYellow)
-      .value("aBlue"   , gl::ANSIFormat::aBlue)
-      .value("aMagenta", gl::ANSIFormat::aMagenta)
-      .value("aCyan"   , gl::ANSIFormat::aCyan)
-      .value("aWhite"  , gl::ANSIFormat::aWhite)
-      .value("aNoColor", gl::ANSIFormat::aNoColor)
+    py::enum_<Isis::ANSIFormat::Colors>("Colors")
+      .value("aBlack"  , Isis::ANSIFormat::aBlack)
+      .value("aRed"    , Isis::ANSIFormat::aRed)
+      .value("aGreen"  , Isis::ANSIFormat::aGreen)
+      .value("aYellow" , Isis::ANSIFormat::aYellow)
+      .value("aBlue"   , Isis::ANSIFormat::aBlue)
+      .value("aMagenta", Isis::ANSIFormat::aMagenta)
+      .value("aCyan"   , Isis::ANSIFormat::aCyan)
+      .value("aWhite"  , Isis::ANSIFormat::aWhite)
+      .value("aNoColor", Isis::ANSIFormat::aNoColor)
       ;
-    py::enum_<gl::ANSIFormat::Styles>("Styles")
-      .value("aNormal"   , gl::ANSIFormat::aNormal)
-      .value("aBold"     , gl::ANSIFormat::aBold)
-      .value("aFaint"    , gl::ANSIFormat::aFaint)
-      .value("aItalic"   , gl::ANSIFormat::aItalic)
-      .value("aUnderline", gl::ANSIFormat::aUnderline)
-      .value("aNoStyle"  , gl::ANSIFormat::aNoStyle)
+    py::enum_<Isis::ANSIFormat::Styles>("Styles")
+      .value("aNormal"   , Isis::ANSIFormat::aNormal)
+      .value("aBold"     , Isis::ANSIFormat::aBold)
+      .value("aFaint"    , Isis::ANSIFormat::aFaint)
+      .value("aItalic"   , Isis::ANSIFormat::aItalic)
+      .value("aUnderline", Isis::ANSIFormat::aUnderline)
+      .value("aNoStyle"  , Isis::ANSIFormat::aNoStyle)
       ;
   }
 
   // Wrappers from LoopArray.h
-  py::class_<gl::LoopArray>("LoopArray", py::init<>())
+  py::class_<Isis::LoopArray>("LoopArray", py::init<>())
     .def(py::init<const size_t&, const size_t&, const size_t&>())
-    .def(py::init<const gl::LoopArray&>())
-    .def("AddIndex"   , &gl::LoopArray::AddIndex)
-    .def("GetNindices", &gl::LoopArray::GetNindices)
-    .def("GetNloops"  , &gl::LoopArray::GetNloops)
-    .def("GetPos"     , &gl::LoopArray::GetPos)
-    .def("Next"       , &gl::LoopArray::Next)
-    .def("Start"      , &gl::LoopArray::Start)
-    .def("Status"     , &gl::LoopArray::Status)
-    .def("__getitem__", &gl::LoopArray::operator[])
+    .def(py::init<const Isis::LoopArray&>())
+    .def("AddIndex"   , &Isis::LoopArray::AddIndex)
+    .def("GetNindices", &Isis::LoopArray::GetNindices)
+    .def("GetNloops"  , &Isis::LoopArray::GetNloops)
+    .def("GetPos"     , &Isis::LoopArray::GetPos)
+    .def("Next"       , &Isis::LoopArray::Next)
+    .def("Start"      , &Isis::LoopArray::Start)
+    .def("Status"     , &Isis::LoopArray::Status)
+    .def("__getitem__", &Isis::LoopArray::operator[])
     ;
   
   // Wrappers from ProgessBar.h
-  py::class_<gl::ProgressBar>("ProgressBar", py::init<const char*>())
-    .def("End"     , &gl::ProgressBar::End)
-    .def("Print"   , &gl::ProgressBar::Print)
-    .def("SetColor", &gl::ProgressBar::SetColor)
-    .def("Start"   , &gl::ProgressBar::Start)
+  py::class_<Isis::ProgressBar>("ProgressBar", py::init<const char*>())
+    .def("End"     , &Isis::ProgressBar::End)
+    .def("Print"   , &Isis::ProgressBar::Print)
+    .def("SetColor", &Isis::ProgressBar::SetColor)
+    .def("Start"   , &Isis::ProgressBar::Start)
     ;
 }

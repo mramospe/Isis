@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@ namespace py = boost::python;
 
 //_______________________________________________________________________________
 // Return a boost object from a given BufferVariable containing its value
-py::object IBoost::BoostObjectFromBufferVariable( const General::BufferVariable &var ) {
+py::object IBoost::BoostObjectFromBufferVariable( const Isis::BufferVariable &var ) {
 
   switch (var.GetType()) {
   case 'B':

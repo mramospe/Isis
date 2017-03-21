@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/03/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -34,7 +34,6 @@
 #include "TPython.h"
 
 namespace py = boost::python;
-namespace an = Analysis;
 
 
 //_______________________________________________________________________________
@@ -44,7 +43,7 @@ namespace CLsFact {
   
   //_______________________________________________________________________________
   //
-  an::CLsResult CalculateFromArray( const an::CLsFactory &factory, py::list array ) {
+  Isis::CLsResult CalculateFromArray( const Isis::CLsFactory &factory, py::list array ) {
 
     auto vector = IBoost::BoostListToStdVec<double>( array );
 
@@ -53,26 +52,26 @@ namespace CLsFact {
 
   //_______________________________________________________________________________
   //
-  an::CLsResult (an::CLsFactory::*CalculateFromDouble)( const double &tstat ) const =
-    &an::CLsFactory::Calculate;
+  Isis::CLsResult (Isis::CLsFactory::*CalculateFromDouble)( const double &tstat ) const =
+    &Isis::CLsFactory::Calculate;
 
   //_______________________________________________________________________________
   //
-  an::CLsHypothesis GetNullHyp( an::CLsFactory &factory ) {
+  Isis::CLsHypothesis GetNullHyp( Isis::CLsFactory &factory ) {
 
     return *(factory.GetNullHyp());
   }
 
   //_______________________________________________________________________________
   //
-  an::CLsHypothesis GetSigHyp( an::CLsFactory &factory ) {
+  Isis::CLsHypothesis GetSigHyp( Isis::CLsFactory &factory ) {
 
     return *(factory.GetSigHyp());
   }
 
   //_______________________________________________________________________________
   //
-  double TestStat( const an::CLsFactory &factory, py::list values ) {
+  double TestStat( const Isis::CLsFactory &factory, py::list values ) {
 
     auto vector = IBoost::BoostListToStdVec<double>( values );
 
@@ -83,7 +82,7 @@ namespace CLsFact {
 // Wrappers for the class CLsFluctuator
 namespace CLsFluct {
 
-  struct CLsFluctWrap : an::CLsFluctuator, py::wrapper<an::CLsFluctuator> {
+  struct CLsFluctWrap : Isis::CLsFluctuator, py::wrapper<Isis::CLsFluctuator> {
     
     double Fluctuate( const size_t &pos, const double &value ) {
 
@@ -97,43 +96,43 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::CLsHypothesis>
+  boost::shared_ptr<Isis::CLsHypothesis>
   Constructor( py::list lst,
-	       an::CLsFluctuator *fluct,
-	       an::CLsPrior *prior ) {
+	       Isis::CLsFluctuator *fluct,
+	       Isis::CLsPrior *prior ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(array, fluct, prior);
+    auto hyp   = new Isis::CLsHypothesis(array, fluct, prior);
 
-    return boost::shared_ptr<an::CLsHypothesis>( hyp );
+    return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
   }
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::CLsHypothesis>
+  boost::shared_ptr<Isis::CLsHypothesis>
   Constructor_NoPrior( py::list lst,
-		       an::CLsFluctuator *fluct ) {
+		       Isis::CLsFluctuator *fluct ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(array, fluct);
+    auto hyp   = new Isis::CLsHypothesis(array, fluct);
 
-    return boost::shared_ptr<an::CLsHypothesis>( hyp );
+    return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
   }
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<an::CLsHypothesis>
+  boost::shared_ptr<Isis::CLsHypothesis>
   Constructor_NoFluctNoPrior( py::list lst ) {
 
     auto array = IBoost::BoostListToStdVec<double>( lst );
-    auto hyp   = new an::CLsHypothesis(array);
+    auto hyp   = new Isis::CLsHypothesis(array);
 
-    return boost::shared_ptr<an::CLsHypothesis>( hyp );
+    return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
   }
 
   //_______________________________________________________________________________
   //
-  py::list GetHyp( const an::CLsHypothesis &hyp ) {
+  py::list GetHyp( const Isis::CLsHypothesis &hyp ) {
 
     auto vec = hyp.GetHyp();
 
@@ -142,7 +141,7 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  double PoissonProb( const an::CLsHypothesis &hyp, py::list values ) {
+  double PoissonProb( const Isis::CLsHypothesis &hyp, py::list values ) {
 
     auto vec = IBoost::BoostListToStdVec<double>( values );
 
@@ -151,7 +150,7 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  py::list GetTSVals( const an::CLsHypothesis &hyp ) {
+  py::list GetTSVals( const Isis::CLsHypothesis &hyp ) {
 
     auto vec = hyp.GetTSVals();
 
@@ -160,10 +159,10 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  void SetHyp( an::CLsHypothesis &hyp,
+  void SetHyp( Isis::CLsHypothesis &hyp,
 	       py::list lst,
-	       an::CLsFluctuator *fluct = 0,
-	       an::CLsPrior *prior = 0 ) {
+	       Isis::CLsFluctuator *fluct = 0,
+	       Isis::CLsPrior *prior = 0 ) {
 
     auto vec = IBoost::BoostListToStdVec<double>( lst );
 
@@ -176,7 +175,7 @@ namespace CLsHyp {
 // Wrappers for the class CLsPrior
 namespace CLsPrior {
 
-  struct CLsPriorWrap : an::CLsPrior, py::wrapper<an::CLsPrior> {
+  struct CLsPriorWrap : Isis::CLsPrior, py::wrapper<Isis::CLsPrior> {
 
     double Evaluate( const size_t &pos, const double &mean, const double &value ) {
 

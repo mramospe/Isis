@@ -30,7 +30,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   class LorentzVector {
 

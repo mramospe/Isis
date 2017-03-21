@@ -27,7 +27,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  TObject* Isis::GetSafeObject( TFile *ifile, const std::string &path ) {
+  TObject* GetSafeObject( TFile *ifile, const std::string &path ) {
 
     TObject *obj = ifile->Get(path.c_str());
 

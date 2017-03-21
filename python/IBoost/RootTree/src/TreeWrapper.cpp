@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -60,10 +60,10 @@ namespace py = boost::python;
 // to a list
 
 // Constructor
-IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var ) :
+IBoost::BuffVarWriter::BuffVarWriter( Isis::BufferVariable *var ) :
   Var( var ) { }
 // Constructor given the variable and a list
-IBoost::BuffVarWriter::BuffVarWriter( General::BufferVariable *var, py::list lst ) :
+IBoost::BuffVarWriter::BuffVarWriter( Isis::BufferVariable *var, py::list lst ) :
   Var( var ), List( lst ) { }
 // Destructor
 IBoost::BuffVarWriter::~BuffVarWriter() {  }
@@ -81,7 +81,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 				    const char *cuts ) {
   
   TFile *ifile = TFile::Open( fpath );
-  TTree *itree = static_cast<TTree*>(Analysis::GetSafeObject( ifile, tpath ));
+  TTree *itree = static_cast<TTree*>(Isis::GetSafeObject( ifile, tpath ));
 
   // Extracts the list of events to be used
   itree->Draw(">>evtlist", cuts);
@@ -89,7 +89,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
   
   itree->SetBranchStatus("*", 0);
   
-  Analysis::TreeBuffer buffer( itree );
+  Isis::TreeBuffer buffer( itree );
   const py::ssize_t nvars = py::len( vars );
   std::map<const char*, IBoost::BuffVarWriter*> outmap;
   for ( py::ssize_t i = 0; i < nvars; ++i ) {
@@ -98,7 +98,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 
     // Get the variables from the given expressions
     std::vector<std::string> brnames;
-    size_t nadded = Analysis::GetBranchNames(brnames, itree, var);
+    size_t nadded = Isis::GetBranchNames(brnames, itree, var);
     if ( !nadded )
       IWarning << "No variables have been found following expression < "
 	       << var << " >" << IEndMsg;
@@ -107,7 +107,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
     // variable is enabled
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
       itree->SetBranchStatus(it->c_str(), 1);
-      General::BufferVariable *bvar = buffer.LoadVariable( *it );
+      Isis::BufferVariable *bvar = buffer.LoadVariable( *it );
       outmap[ it->c_str() ] = new IBoost::BuffVarWriter( bvar );
     }
   }
@@ -177,7 +177,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   
   // Prepare the variables to iterate with. The vector keeps
   // track of the types for each variable.
-  Analysis::TreeBuffer buffer( tree );
+  Isis::TreeBuffer buffer( tree );
 
   auto vars = IBoost::BoostListToStdVec<std::string>( varkeys );
 
@@ -189,12 +189,12 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
     // Get the variables from the given expressions
     const char *exp = IBoost::ExtractFromIndex<const char*>(variables, i);
     std::vector<std::string> brnames;
-    General::StringVectorFilter(brnames, vars, exp);
+    Isis::StringVectorFilter(brnames, vars, exp);
 
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
       const char *var = it->c_str();
       char type = IBoost::PyTypeFromObject( vardict[ var ][ 0 ] );
-      General::BufferVariable *buffvar = buffer.CreateVariable( var, type );
+      Isis::BufferVariable *buffvar = buffer.CreateVariable( var, type );
       varmap[ var ] =
 	new IBoost::BuffVarWriter( buffvar,
 				   py::extract<py::list>( vardict[ var ] ) );

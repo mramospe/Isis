@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -43,13 +43,13 @@ namespace IBoost {
   // CLASSES
   struct BuffVarWriter {
 
-    BuffVarWriter( General::BufferVariable *var = 0 );
-    BuffVarWriter( General::BufferVariable *var, boost::python::list lst );
+    BuffVarWriter( Isis::BufferVariable *var = 0 );
+    BuffVarWriter( Isis::BufferVariable *var, boost::python::list lst );
     ~BuffVarWriter();
 
     void AutoAppend();
 
-    General::BufferVariable *Var;
+    Isis::BufferVariable *Var;
     boost::python::list      List;
   };
 
