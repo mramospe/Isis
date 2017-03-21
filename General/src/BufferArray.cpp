@@ -13,10 +13,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream>
-
+#include "Definitions.h"
 #include "BufferArray.h"
 #include "Messenger.h"
+
+#include <iostream>
 
 
 //_______________________________________________________________________________
@@ -63,7 +64,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void BufferArray::ExtractNames( std::vector<std::string> &names ) {
+  void BufferArray::ExtractNames( Strings &names ) {
   
     for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
       names.push_back( it->first );

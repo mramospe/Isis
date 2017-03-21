@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "SmartName.h"
 #include "Utils.h"
 
@@ -37,7 +38,7 @@ namespace Isis {
   //
   bool SmartName::Find( const std::string &other ) const {
   
-    std::vector<std::string> vec;
+    Strings vec;
     SplitString( vec, fName, std::string( 1, fSep ) );
   
     return std::find( vec.begin(), vec.end(), other ) != vec.end();

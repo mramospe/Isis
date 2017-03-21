@@ -14,6 +14,7 @@
 
 
 #include "AdaptiveBinning2D.h"
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include "TLeaf.h"
@@ -37,25 +38,25 @@ namespace Isis {
 					double      xmax,
 					double      ymin,
 					double      ymax,
-					const std::vector<double> &xvalues,
-					const std::vector<double> &yvalues,
-					const std::vector<double> &weights ) :
+					const Doubles &xvalues,
+					const Doubles &yvalues,
+					const Doubles &weights ) :
     AdaptiveBinning(),
     fXmax( xmax ),
     fXmin( xmin ),
     fYmax( ymax ),
     fYmin( ymin ) {
   
-    const std::vector<double> *wData( &weights );
+    const Doubles *wData( &weights );
     if ( !wData->size() )
-      wData = new std::vector<double>( xvalues.size(), 1 );
+      wData = new Doubles( xvalues.size(), 1 );
 
     // Gets the minimum distance between points
     double
       delta_x = std::abs( xvalues.front() - xvalues.back() ),
       delta_y = std::abs( yvalues.front() - yvalues.back() );
 
-    std::vector<double> xvals( xvalues.begin(), xvalues.end() );
+    Doubles xvals( xvalues.begin(), xvalues.end() );
     std::sort( xvals.begin(), xvals.end() );
     for ( auto it = xvals.begin() + 1; it != xvals.end(); ++it ) {
       double new_delta = std::abs( *it - *(it - 1) );
@@ -63,7 +64,7 @@ namespace Isis {
 	delta_x = new_delta;
     }
   
-    std::vector<double> yvals( yvalues.begin(), yvalues.end() );
+    Doubles yvals( yvalues.begin(), yvalues.end() );
     std::sort( yvals.begin(), yvals.end() );
     for ( auto it = yvals.begin() + 1; it != yvals.end(); ++it ) {
       double new_delta = std::abs( *it - *(it - 1) );

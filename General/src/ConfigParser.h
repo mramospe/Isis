@@ -27,6 +27,7 @@
 #ifndef CONFIG_PARSER
 #define CONFIG_PARSER
 
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include <iostream>
@@ -43,7 +44,7 @@ namespace Isis {
   class ConfigParser {
 
     // Definition of types used by this class
-    typedef std::pair< std::string, std::vector<std::string> > ConfigOptPair;
+    typedef std::pair<std::string, Strings> ConfigOptPair;
     typedef std::map<std::string, ConfigOptPair>               ConfigMap;
     typedef std::vector< std::pair<std::string, const char> >  TypeVec;
 
@@ -58,7 +59,7 @@ namespace Isis {
     // Books a new variable, storing also its type
     void BookConfigOpt( const std::string &name,
 			const char &type,
-			const std::vector<std::string> &poss = {} );
+			const Strings &poss = {} );
 
     // Parses the options given to the main function. Both input variables must be
     // those passed to the executable.

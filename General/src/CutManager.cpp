@@ -14,6 +14,7 @@
 
 
 #include "CutManager.h"
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include <algorithm>
@@ -135,7 +136,7 @@ namespace Isis {
       }
     }
     // Changes the name of the conditionals in the cuts set
-    for ( std::map<std::string, std::string>::iterator it = fOptions.begin();
+    for ( StrMap::iterator it = fOptions.begin();
 	  it != fOptions.end(); ++it )
       while ( ( pos = cuts.find( it->first ) ) != std::string::npos )
 	cuts.replace( pos, ( it->first ).size(), it->second );

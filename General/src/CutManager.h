@@ -34,6 +34,7 @@
 #ifndef CUT_MANAGER
 #define CUT_MANAGER
 
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include <iostream>
@@ -87,10 +88,10 @@ namespace Isis {
     inline void Remove( const std::string &key );
 
     // Gets the location of the begin of the map of cuts
-    inline std::map<std::string, std::string>::iterator begin();
+    inline StrMap::iterator begin();
 
     // Gets the location of the end of the map of cuts
-    inline std::map<std::string, std::string>::iterator end();
+    inline StrMap::iterator end();
 
     // Operator to get the cut with name < key >
     inline std::string operator [] ( const std::string &key ) const;
@@ -98,13 +99,13 @@ namespace Isis {
   protected:
 
     // Map of cuts stored by key
-    std::map<std::string, std::string> fCuts;
+    StrMap fCuts;
 
     // Input file to read from
     std::shared_ptr<std::ifstream> fFile;
 
     // Map to store conversions from 'and' => '&&' and 'or' => '||'
-    std::map<std::string, std::string> fOptions;
+    StrMap fOptions;
 
   };
 
@@ -125,13 +126,13 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline std::map<std::string, std::string>::iterator CutManager::begin() {
+  inline StrMap::iterator CutManager::begin() {
     return fCuts.begin();
   }
 
   //_______________________________________________________________________________
   //
-  inline std::map<std::string, std::string>::iterator CutManager::end() {
+  inline StrMap::iterator CutManager::end() {
     return fCuts.end();
   }
 

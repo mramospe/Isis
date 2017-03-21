@@ -13,6 +13,7 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "DecayParticle.h"
 
 #include "RooAbsPdf.h"
@@ -60,13 +61,13 @@ namespace Isis {
     width = ( width/mass < 1E-6 ? 0 : width );
 
     // Changes the symbols in the name
-    std::map<std::string, std::string> mp;
+    StrMap mp;
     mp[ "+" ] = "plus";
     mp[ "-" ] = "minus";
     mp[ "*" ] = "st";
 
     size_t fpos;
-    for ( std::map<std::string, std::string>::iterator it = mp.begin();
+    for ( StrMap::iterator it = mp.begin();
 	  it != mp.end(); it++ ) {
 
       fpos = fName.find( it->first );

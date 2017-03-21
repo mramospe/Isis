@@ -25,6 +25,7 @@
 #define ADAPTIVE_BINNING_2D
 
 #include "AdaptiveBinning.h"
+#include "Definitions.h"
 #include "Bin2D.h"
 
 #include <iostream>
@@ -51,9 +52,9 @@ namespace Isis {
 		       double xmax,
 		       double ymin,
 		       double ymax,
-		       const std::vector<double> &xvalues,
-		       const std::vector<double> &yvalues,
-		       const std::vector<double> &weights = std::vector<double>() );
+		       const Doubles &xvalues,
+		       const Doubles &yvalues,
+		       const Doubles &weights = Doubles() );
 
     // Destructor
     ~AdaptiveBinning2D();

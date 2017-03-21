@@ -14,6 +14,7 @@
 
 
 #include "ConfigParser.h"
+#include "Definitions.h"
 #include "Messenger.h"
 #include "Utils.h"
 
@@ -36,7 +37,7 @@ namespace Isis {
   //
   void ConfigParser::BookConfigOpt( const std::string &name,
 				    const char &type,
-				    const std::vector<std::string> &poss ) {
+				    const Strings &poss ) {
     
     switch ( type ) {
     case 'D':

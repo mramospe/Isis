@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "Messenger.h"
 #include "Utils.h"
 
@@ -43,8 +44,8 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   std::string CenterString( const std::string &str,
-				     const size_t      &size,
-				     const char        &ch ) {
+			    const size_t      &size,
+			    const char        &ch ) {
     unsigned short int
       rst = size - str.size(),
       coc = rst / 2;
@@ -56,14 +57,13 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void CheckParseOpts( const std::string              &str,
-				const std::vector<std::string> &lst ) {
+  void CheckParseOpts( const std::string &str, const Strings &lst ) {
 
     std::string name, opt;
     size_t pos;
 
     // Splits the string to get the different options
-    std::vector<std::string> splt;  
+    Strings splt;  
     SplitString( splt, str, ":" );
 
     // Performs the loop over the splitted options to verify that they are
@@ -99,9 +99,9 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ReplaceNames( std::vector<std::string> &vector, std::string istr, std::string ostr ) {
+  void ReplaceNames( Strings &vector, std::string istr, std::string ostr ) {
     size_t pos;
-    for ( std::vector<std::string>::iterator it = vector.begin();
+    for ( Strings::iterator it = vector.begin();
 	  it != vector.end();
 	  it++ ) {
       pos = it -> find( istr );
@@ -112,9 +112,9 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void SplitString( std::vector<std::string> &output,
-			     const std::string        &str,
-			     const std::string        &expr ) {
+  void SplitString( Strings &output,
+		    const std::string &str,
+		    const std::string &expr ) {
     size_t strpos, pos = 0;
     while ( ( strpos = str.find( expr, pos ) ) != std::string::npos ) {
       output.push_back( str.substr( pos, strpos - pos ) );
@@ -125,12 +125,12 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void StringVectorFilter( std::vector<std::string>       &output,
-				    const std::vector<std::string> &input,
-				    const std::string              &expr ) {
+  void StringVectorFilter( Strings &output,
+			   const Strings &input,
+			   const std::string &expr ) {
 
     // Splits the input string using the character < * >
-    std::vector<std::string> splitVec;
+    Strings splitVec;
     SplitString( splitVec, expr, "*" );
 
     // Defines two boolean variables that determine if the first or the last word provided

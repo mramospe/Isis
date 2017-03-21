@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "Messenger.h"
 #include "OutputTable.h"
 #include "Utils.h"
@@ -76,7 +77,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void OutputTable::SetFormat( const char *format, const std::vector<std::string> &titles ) {
+  void OutputTable::SetFormat( const char *format, const Strings &titles ) {
     fIvar = 0;
     if ( fSizes.size() )
       fSizes.clear();
@@ -149,7 +150,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   void OutputTable::SetFormat( const char *format ... ) {
-    std::vector<std::string> titles;
+    Strings titles;
     va_list args;
     va_start( args, format );
     const char *cptr = format;

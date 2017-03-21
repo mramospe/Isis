@@ -14,6 +14,7 @@
 
 
 #include "ClusterPoint.h"
+#include "Definitions.h"
 
 
 //_______________________________________________________________________________
@@ -27,8 +28,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  ClusterPoint::ClusterPoint( const std::vector<double> &values,
-			      const double &wgt ) :
+  ClusterPoint::ClusterPoint( const Doubles &values, const double &wgt ) :
     fValues( values ), fWeight( wgt ) { }
 
   //_______________________________________________________________________________

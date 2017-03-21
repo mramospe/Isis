@@ -25,6 +25,7 @@
 #define ADAPTIVE_BINNING_1D
 
 #include "AdaptiveBinning.h"
+#include "Definitions.h"
 #include "Bin1D.h"
 
 #include "TH1D.h"
@@ -48,8 +49,8 @@ namespace Isis {
     AdaptiveBinning1D( size_t  occ,
 		       double  vmin,
 		       double  vmax,
-		       const std::vector<double> &values,
-		       const std::vector<double> &weights = std::vector<double>() );
+		       const Doubles &values,
+		       const Doubles &weights = Doubles() );
 
     // Destructor
     ~AdaptiveBinning1D();

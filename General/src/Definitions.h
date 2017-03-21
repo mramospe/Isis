@@ -22,7 +22,7 @@
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
 
-
+#include <map>
 #include <string>
 #include <vector>
 
@@ -38,12 +38,17 @@
 namespace Isis {
   
   //_______________________________________________________________________________
+  // Define a vector of doubles
+  using Doubles = std::vector<double>;
+
+  //_______________________________________________________________________________
   // Define a vector of strings
   using Strings = std::vector<std::string>;
 
   //_______________________________________________________________________________
-  // Define a vector of doubles
-  using Doubles = std::vector<double>;
+  // Define maps with strings as keys and values
+  using StrMap = std::map<std::string, std::string>;
+  
 }
 
 #endif

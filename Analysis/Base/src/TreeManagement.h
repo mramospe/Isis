@@ -23,6 +23,8 @@
 #ifndef TREE_MANAGEMENT
 #define TREE_MANAGEMENT
 
+#include "Definitions.h"
+
 #include "TTree.h"
 
 #include <string>
@@ -35,13 +37,13 @@ namespace Isis {
 
   // Appends to the given vector all the names of the branches in a tree. Returns
   // the number of branches appended.
-  size_t GetBranchNames( std::vector<std::string> &vector,
+  size_t GetBranchNames( Strings &vector,
 			 TTree *inputTree,
 			 const std::string &expr = "" );
 
   // Appends to the given vector all the titles of the branches in a tree. Returns
   // the number of branches appended.
-  size_t GetBranchTitles( std::vector<std::string> &vector,
+  size_t GetBranchTitles( Strings &vector,
 			  TTree *inputTree,
 			  const std::string &expr = "" );
 
@@ -54,7 +56,7 @@ namespace Isis {
   // Returns the number of variables of a certain type in a given vector and tree
   size_t GetNvarsWithTypeIn( TTree *inputTree,
 			     const char &type,
-			     const std::vector<std::string> &vector );
+			     const Strings &vector );
 
   // Gets the type of a variable in a tree
   char GetVarType( TTree *inputTree, const std::string &var );

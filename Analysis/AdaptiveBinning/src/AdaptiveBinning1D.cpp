@@ -14,6 +14,7 @@
 
 
 #include "AdaptiveBinning1D.h"
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include "TLeaf.h"
@@ -36,8 +37,8 @@ namespace Isis {
   AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
 					double  vmin,
 					double  vmax,
-					const std::vector<double> &values,
-					const std::vector<double> &weights ) :
+					const Doubles &values,
+					const Doubles &weights ) :
     AdaptiveBinning(),
     fMax( vmax ),
     fMin( vmin ) {

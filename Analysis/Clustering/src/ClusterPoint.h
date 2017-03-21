@@ -23,6 +23,8 @@
 #ifndef CLUSTER_POINT
 #define CLUSTER_POINT
 
+#include "Definitions.h"
+
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -40,7 +42,7 @@ namespace Isis {
     ClusterPoint( const size_t &nvars = 0, const double &wgt = 1 );
 
     // Constructor given a vector of values
-    ClusterPoint( const std::vector<double> &values, const double &wgt = 1 );
+    ClusterPoint( const Doubles &values, const double &wgt = 1 );
 
     // Destructor
     virtual ~ClusterPoint();
@@ -49,22 +51,21 @@ namespace Isis {
     inline const double GetValue( const size_t &index ) const;
 
     // Returns the vector with the values and the weights
-    inline const std::vector<double>& GetValues() const;
+    inline const Doubles& GetValues() const;
 
     // Returns the global weight of the point
     inline const double GetWeight() const;
 
     // Normalizes the point given the normalization factors for each variable
-    inline void Normalize( const std::vector<double> &norm );
+    inline void Normalize( const Doubles &norm );
 
     // Sets the values for this point
-    inline void SetValues( const std::vector<double> &values,
-			   const double              &wgt = 1 );
+    inline void SetValues( const Doubles &values, const double  &wgt = 1 );
 
   protected:
   
     // Vector with the values for each dimension
-    std::vector<double> fValues;
+    Doubles fValues;
 
     // Weight of the point
     double fWeight;
@@ -79,7 +80,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  const std::vector<double>& ClusterPoint::GetValues() const { return fValues; }
+  const Doubles& ClusterPoint::GetValues() const { return fValues; }
 
   //_______________________________________________________________________________
   //
@@ -87,7 +88,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterPoint::Normalize( const std::vector<double> &norm ) {
+  void ClusterPoint::Normalize( const Doubles &norm ) {
     auto itv = fValues.begin();
     auto itm = norm.begin();
     while ( itv != fValues.end() )
@@ -96,7 +97,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterPoint::SetValues( const std::vector<double> &values, const double &wgt ) {
+  void ClusterPoint::SetValues( const Doubles &values, const double &wgt ) {
     fValues = values;
     fWeight = wgt;
   }

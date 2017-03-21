@@ -14,6 +14,7 @@
 
 
 #include "Bin2D.h"
+#include "Definitions.h"
 
 #include <algorithm>
 
@@ -105,7 +106,7 @@ namespace Isis {
   void Bin2D::CalcMedians() {
   
     // Sorts the data ( with the weights )
-    std::vector<double>
+    Doubles
       xw_sorted( this->Sort( fXpoints, fWpoints ) ),
       yw_sorted( this->Sort( fYpoints, fWpoints ) );
 
@@ -142,15 +143,15 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  std::vector<double> Bin2D::Sort( std::vector<double> &dvector,
-				   std::vector<double> &wvector ) {
+  Doubles Bin2D::Sort( Doubles &dvector, Doubles &wvector ) {
+    
     std::vector< std::pair<double, double> > order( dvector.size() );
     for ( size_t i = 0; i < order.size(); i++ )
       order[ i ] = std::make_pair( dvector[ i ], wvector[ i ] );
     std::sort( order.begin(), order.end(),
 	       [] ( const std::pair<double, double> &a,
 		    const std::pair<double, double> &b ) { return a.first < b.first; } );
-    std::vector<double> swvector( order.size() );
+    Doubles swvector( order.size() );
     for ( size_t i = 0; i < order.size(); i++ ) {
       dvector [ i ] = order[ i ].first;
       swvector[ i ] = order[ i ].second;

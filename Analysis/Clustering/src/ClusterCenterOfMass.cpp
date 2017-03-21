@@ -14,6 +14,7 @@
 
 
 #include "ClusterCenterOfMass.h"
+#include "Definitions.h"
 
 
 //_______________________________________________________________________________
@@ -91,7 +92,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterCenterOfMass::Normalize( const std::vector<double> &norm ) {
+  void ClusterCenterOfMass::Normalize( const Doubles &norm ) {
 
     ClusterPoint::Normalize( norm );
 
@@ -108,7 +109,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterCenterOfMass::SetValues( const std::vector<double> &values ) {
+  void ClusterCenterOfMass::SetValues( const Doubles &values ) {
     
     ClusterPoint::SetValues( values );
     fMeanOfSquares = values;

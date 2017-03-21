@@ -15,6 +15,7 @@
 
 #include "CLsFactory.h"
 #include "CLsResult.h"
+#include "Definitions.h"
 #include "Messenger.h"
 #include "MessengerConfig.h"
 #include "Utils.h"

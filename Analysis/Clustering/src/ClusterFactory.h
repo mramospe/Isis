@@ -29,6 +29,7 @@
 #define CLUSTER_FACTORY
 
 #include "Cluster.h"
+#include "Definitions.h"
 
 #include <map>
 #include <vector>
@@ -107,8 +108,7 @@ namespace Isis {
     // Sets the weights for a given cluster. This weights are only taken into account
     // if the class does not manage the number of clusters. If < index > is negative,
     // the weights will be applied to all clusters (included the factory).
-    inline void SetClusterWeights( const int &index,
-				   const std::vector<double> &wgts );
+    inline void SetClusterWeights( const int &index, const Doubles &wgts );
 
   protected:
 
@@ -119,16 +119,16 @@ namespace Isis {
     std::vector<Cluster> fClusters;
 
     // Weights associated with each cluster
-    std::map< size_t, std::vector<double> > fClusterWeights;
+    std::map<size_t, Doubles> fClusterWeights;
 
     // Internal variable to store the points which have already been processed
     std::vector<PointArray::iterator> fPointsToAvoid;
 
     // Vector with the normalization for each of the variables
-    std::vector<double> fVarNorm;
+    Doubles fVarNorm;
 
     // Vector storing the order of the variables
-    std::vector<std::string> fVarOrder;
+    Strings fVarOrder;
 
     // -------------
     // Configuration

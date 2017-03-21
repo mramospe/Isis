@@ -24,6 +24,7 @@
 #define CLUSTER_CENTER_OF_MASS
 
 #include "ClusterPoint.h"
+#include "Definitions.h"
 
 
 //_______________________________________________________________________________
@@ -50,16 +51,16 @@ namespace Isis {
     void AttachPoint( const ClusterPoint &point );
 
     // Normalizes the position of this center of mass
-    void Normalize( const std::vector<double> &norm );
+    void Normalize( const Doubles &norm );
 
     // Sets the position of the center of mass
-    void SetValues( const std::vector<double> &values );
+    void SetValues( const Doubles &values );
 
     // Adds one dimension to the center of mass
     inline void AddDimension();
 
     // Returns the vector to the mean of squares
-    inline const std::vector<double>& GetMeanOfSquares() const;
+    inline const Doubles& GetMeanOfSquares() const;
 
     // Initializes the class setting the internal weight to zero and defining
     // the position
@@ -77,7 +78,7 @@ namespace Isis {
   protected:
 
     // Vector storing the mean of squares for each point
-    std::vector<double> fMeanOfSquares;
+    Doubles fMeanOfSquares;
     
   };
   
@@ -90,7 +91,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline const std::vector<double>& ClusterCenterOfMass::GetMeanOfSquares() const {
+  inline const Doubles& ClusterCenterOfMass::GetMeanOfSquares() const {
     return fMeanOfSquares;
   }
 

@@ -14,6 +14,7 @@
 
 
 #include "Cluster.h"
+#include "Definitions.h"
 
 
 //_______________________________________________________________________________
@@ -35,7 +36,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  Cluster::Cluster( const std::vector<double> &weights ) :
+  Cluster::Cluster( const Doubles &weights ) :
     fWeights( weights ) { }
 
   //_______________________________________________________________________________
@@ -95,7 +96,7 @@ namespace Isis {
 
     Cluster cluster( clusterA );
 
-    std::vector<double> &weights = cluster.fWeights;
+    Doubles &weights = cluster.fWeights;
     auto itwB = clusterB.fWeights.begin();
     auto itw  = weights.begin();
   
@@ -115,7 +116,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void Cluster::Normalize( const std::vector<double> &values ) {
+  void Cluster::Normalize( const Doubles &values ) {
     for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
       it->Normalize( values );
     fCenterOfMass.Normalize( values );

@@ -3,6 +3,8 @@
 ///////////////////////////////////////////////////
 
 #include "AdaptiveBinning2D.h"
+#include "Definitions.h"
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
@@ -18,7 +20,7 @@ int main() {
   // Creates the input sample
   TFile *ifile = TFile::Open( "files/AdapBin.root", "RECREATE" );
 
-  std::vector<double> xVar, yVar;
+  Isis::Doubles xVar, yVar;
   for ( size_t i = 0; i < 10000; i++ ) {
 
     if ( gRandom -> Uniform() > 0.5 ) {

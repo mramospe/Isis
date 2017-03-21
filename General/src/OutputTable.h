@@ -30,6 +30,8 @@
 #ifndef OUTPUT_TABLE
 #define OUTPUT_TABLE
 
+#include "Definitions.h"
+
 #include <cstdarg>
 #include <iostream>
 #include <sstream>
@@ -63,7 +65,7 @@ namespace Isis {
 
     // Sets the format for the current table. To know which imput parameters are
     // allowed to be introduced see the < SetFormat( const char *format ... ) > method.
-    void SetFormat( const char *format, const std::vector<std::string> &titles );
+    void SetFormat( const char *format, const Strings &titles );
 
     // Sets the format of the elements displayed in the table. There can be displayed
     // values of any kind: boolean (b), short integers (i), integers (I), floats (f),
@@ -136,7 +138,7 @@ namespace Isis {
     unsigned short int fStrLength;
 
     // Title for each of the variables
-    std::vector<std::string> fTitles;
+    Strings fTitles;
 
   };
   

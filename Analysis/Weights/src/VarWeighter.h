@@ -25,6 +25,7 @@
 #ifndef VAR_WEIGHTER
 #define VAR_WEIGHTER
 
+#include "Definitions.h"
 #include "VarBin.h"
 
 #include "TBranch.h"
@@ -101,7 +102,7 @@ namespace Isis {
     TTree *fWgtTree;
 
     // Map containing name and title for each variable
-    std::map<std::string, std::string> fVariables;
+    StrMap fVariables;
 
   private:
 

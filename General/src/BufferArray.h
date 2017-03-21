@@ -28,11 +28,12 @@
 #ifndef BUFFER_ARRAY
 #define BUFFER_ARRAY
 
+#include "BufferVariable.h"
+#include "Definitions.h"
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include "BufferVariable.h"
 
 
 //_______________________________________________________________________________
@@ -65,7 +66,7 @@ namespace Isis {
     BufferVariable* AddVariable( const std::string &name, const char &type );
     
     // Appends to the new vector the names of the current array
-    void ExtractNames( std::vector<std::string> &vector );
+    void ExtractNames( Strings &vector );
 
     // Converts the values stored in this array to a string
     std::string ToString() const;

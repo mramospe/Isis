@@ -23,6 +23,7 @@
 #ifndef __UTILS__
 #define __UTILS__
 
+#include "Definitions.h"
 #include "Messenger.h"
 
 #include <cmath>
@@ -49,27 +50,24 @@ namespace Isis {
   // Checks the current expression to see if it can be pased. If a list of strings
   // is given, a check is made to see if all the names in the current expression
   // are contained in such list.
-  void CheckParseOpts( const std::string              &str,
-		       const std::vector<std::string> &lst = {} );
+  void CheckParseOpts( const std::string &str, const Strings &lst = {} );
 
   // This function replaces all the substrings of the strings storaged in a vector
   // with another
-  void ReplaceNames( std::vector<std::string> &vector,
-		     std::string               istr,
-		     std::string               ostr );
+  void ReplaceNames( Strings &vector, std::string istr, std::string ostr );
 
   // Splits a given string < str > taking into account the expression < expr > that
   // appears on it. The output is appended to the given vector.
-  void SplitString( std::vector<std::string> &output,
-		    const std::string        &str,
-		    const std::string        &expr );
+  void SplitString( Strings &output,
+		    const std::string &str,
+		    const std::string &expr );
 
   // Filters the entries in the given vector following the rules imposed by the
   // input variable < expr >. The strings that pass the filter are attached to the
   // output vector.
-  void StringVectorFilter( std::vector<std::string>       &output,
-			   const std::vector<std::string> &input,
-			   const std::string              &expr );
+  void StringVectorFilter( Strings &output,
+			   const Strings &input,
+			   const std::string &expr );
 
   // Trims the given string using < trexpr >. All the elements that match this
   // expression in the front and back of < str > will be removed.

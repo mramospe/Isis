@@ -24,6 +24,7 @@
 #define BIN_2D
 
 #include "Bin.h"
+#include "Definitions.h"
 
 #include <vector>
 
@@ -90,7 +91,7 @@ namespace Isis {
     double fXminPoint;
 
     // Vector with the values in the X direction
-    std::vector<double> fXpoints;
+    Doubles fXpoints;
 
     // Maximum value in the Y direction
     double fYmax;
@@ -108,10 +109,10 @@ namespace Isis {
     double fYminPoint;
 
     // Vector with the values in the Y direction
-    std::vector<double> fYpoints;
+    Doubles fYpoints;
 
     // Vector with the values for the weights of each point
-    std::vector<double> fWpoints;
+    Doubles fWpoints;
 
   protected:
 
@@ -128,8 +129,7 @@ namespace Isis {
     
     // Sorts the data and the weights and returns the sorted vector of weights for
     // that data sample
-    std::vector<double> Sort( std::vector<double> &dvector,
-			      std::vector<double> &wvector );
+    Doubles Sort( Doubles &dvector, Doubles &wvector );
 
   };
 

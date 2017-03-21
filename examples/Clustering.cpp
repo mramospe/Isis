@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "ClusterFactory.h"
+#include "Definitions.h"
 
 #include "TDirectory.h"
 #include "TFile.h"
@@ -21,7 +22,7 @@ void WriteForCluster( Isis::ClusterFactory &factory, const size_t &icl ) {
   Isis::Cluster *cl = factory.GetCluster( icl );
 
   // Fills the vectors with the information of the cluster points
-  std::vector<double> vec, vx, vy, vg, vh;
+  Isis::Doubles vec, vx, vy, vg, vh;
   for ( auto it = cl -> GetPoints().begin(); it != cl -> GetPoints().end(); ++it ) {
     vec = it -> GetValues();
     vx.push_back( vec[ 0 ] );
@@ -79,7 +80,7 @@ int main() {
 
   // Generates the data. Four different variables are defined
   TRandom3 rndm;
-  std::vector<double> VX, VY, VG, VH, value( 4 );
+  Isis::Doubles VX, VY, VG, VH, value( 4 );
   bool xdec, ydec;
   double
     sigmaXY = 1.5,

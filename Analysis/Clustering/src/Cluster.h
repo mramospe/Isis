@@ -25,6 +25,7 @@
 #define __CLUSTER__
 
 #include "ClusterCenterOfMass.h"
+#include "Definitions.h"
 
 #include <iostream>
 
@@ -47,7 +48,7 @@ namespace Isis {
     Cluster( const Cluster &other );
 
     // Constructor given the array of weights
-    Cluster( const std::vector<double> &weights );
+    Cluster( const Doubles &weights );
 
     // Destructor
     virtual ~Cluster();
@@ -63,7 +64,7 @@ namespace Isis {
 				  const ClusterPoint &pointB ) const;
 
     // Normalizes the values in the points of the cluster
-    void Normalize( const std::vector<double> &values );
+    void Normalize( const Doubles &values );
   
     // Adds a new point given a cluster point
     inline void AddPoint( const ClusterPoint &point );
@@ -84,7 +85,7 @@ namespace Isis {
     inline void InitCenterOfMass( const ClusterPoint &com );
 
     // Normalizes the center of mass of this cluster
-    inline void NormalizeCenterOfMass( const std::vector<double> &values );
+    inline void NormalizeCenterOfMass( const Doubles &values );
 
     // Removes the points of the current cluster
     inline void RemovePoints();
@@ -96,7 +97,7 @@ namespace Isis {
     inline void SetCenterOfMass( const ClusterPoint &com );
 
     // Sets the weights for each variable in the points for this cluster
-    inline void SetWeights( const std::vector<double> &weights );
+    inline void SetWeights( const Doubles &weights );
 
     // Merges two clusters into one, owning all the points
     static Cluster MergeClusters( const Cluster &clusterA, const Cluster &clusterB );
@@ -110,7 +111,7 @@ namespace Isis {
     PointArray fPoints;
 
     // Vector of weights for each point
-    std::vector<double> fWeights;
+    Doubles fWeights;
     
   };
 
@@ -147,7 +148,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void Cluster::NormalizeCenterOfMass( const std::vector<double> &values ) {
+  void Cluster::NormalizeCenterOfMass( const Doubles &values ) {
     fCenterOfMass.Normalize( values );
   }
 
@@ -165,7 +166,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void Cluster::SetWeights( const std::vector<double> &weights ) { fWeights = weights; }
+  void Cluster::SetWeights( const Doubles &weights ) { fWeights = weights; }
 
 }
 

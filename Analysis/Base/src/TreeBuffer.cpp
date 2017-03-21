@@ -13,6 +13,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "TreeBuffer.h"
 #include "TreeManagement.h"
 #include "Utils.h"
@@ -62,7 +63,7 @@ namespace Isis {
   //
   void TreeBuffer::Load( const std::string &expr ) {
   
-    std::vector<std::string> variables;
+    Strings variables;
     GetBranchNames( variables, fTree, expr );
 
     for ( auto it = variables.begin(); it != variables.end(); ++it )

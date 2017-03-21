@@ -14,6 +14,7 @@
 
 
 #include "ClusterFactory.h"
+#include "Definitions.h"
 #include "Messenger.h"
 #include "Utils.h"
 
@@ -237,7 +238,7 @@ namespace Isis {
   
     // Renormalizes the values in the different clusters, so the points now will have the true
     // value stored
-    std::vector<double> invnorm( fVarNorm );
+    Doubles invnorm( fVarNorm );
     for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
       *it = 1/(*it);
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
@@ -442,7 +443,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   void ClusterFactory::SetClusterWeights( const int &index,
-					  const std::vector<double> &wgts ) {
+					  const Doubles &wgts ) {
     if ( wgts.size() != fVarNorm.size() ) {
       IError << "The length of the weights must match the number of variables" << IEndMsg;
       return;
@@ -476,7 +477,7 @@ namespace Isis {
 
     if ( dec ) {
       // Removes the normalization from the clusters
-      std::vector<double> invnorm( fVarNorm );
+      Doubles invnorm( fVarNorm );
       for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
 	*it = 1./(*it);
       for ( auto it = fClusters.begin(); it != fClusters.end(); ++it )
@@ -580,7 +581,7 @@ namespace Isis {
     // or till the maximum number of iterations is satisfied.
     size_t iiter = 0;
     double maxdst = fMaxComVar*fVarNorm.size();
-    std::vector<double> comdists( fClusters.size() );
+    Doubles comdists( fClusters.size() );
     PointArray centersOfMass( fClusters.size() );
   
     do {
@@ -619,7 +620,7 @@ namespace Isis {
   
     // Generates the clusters taking into account the distances from the points to them
     std::cout << "Merging process started" << std::endl;
-    std::vector<double> distances( fClusters.size() );
+    Doubles distances( fClusters.size() );
     for ( auto itp = fPoints.begin(); itp != fPoints.end(); ++itp ) {
     
       if ( std::find( fPointsToAvoid.begin(), fPointsToAvoid.end(), itp ) == fPointsToAvoid.end() ) {
@@ -649,7 +650,7 @@ namespace Isis {
   
     // Vector to store the distances between centers of mass and points, as well as among the clusters
     double maxdst = fMaxComVar*fVarNorm.size();
-    std::vector<double> comdists( fClusters.size(), 2*maxdst );
+    Doubles comdists( fClusters.size(), 2*maxdst );
   
     // Saves the current centers of mass for the clusters
     PointArray centersOfMass( fClusters.size() );
@@ -694,7 +695,7 @@ namespace Isis {
   
     // Calculates the dispersions of the clusters to get the selection decision
     std::cout << "Calculating dispersions of clusters" << std::endl;
-    std::vector<double> dispersions( fClusters.size() );
+    Doubles dispersions( fClusters.size() );
     auto itdr = dispersions.begin();
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++itdr )
       *itdr = it->Dispersion();

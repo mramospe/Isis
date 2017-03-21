@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "Messenger.h"
 #include "Utils.h"
 #include "VarWeighter.h"
@@ -261,7 +262,7 @@ namespace Isis {
     std::map<std::string, double> valuesmap;
     this->SetupTrees( refleafmap, wgtleafmap, valuesmap );
   
-    std::vector<std::string> variables;
+    Strings variables;
     TLeaf *leaf;
     for ( auto it = fVariables.begin(); it != fVariables.end(); it++ )
       variables.push_back( it->first );

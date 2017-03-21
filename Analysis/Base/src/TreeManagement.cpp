@@ -13,6 +13,7 @@
 /////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "Messenger.h"
 #include "TreeManagement.h"
 #include "Utils.h"
@@ -33,12 +34,12 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  size_t GetBranchNames( std::vector<std::string> &vector,
+  size_t GetBranchNames( Strings &vector,
 			 TTree *inputTree,
 			 const std::string &expr ) {
   
     TObjArray *brList = inputTree -> GetListOfBranches();
-    std::vector<std::string> brVector( brList -> GetEntries() );
+    Strings brVector( brList -> GetEntries() );
     for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
       brVector[ ibr ] = brList -> At( ibr ) -> GetName();
   
@@ -53,12 +54,12 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  size_t GetBranchTitles( std::vector<std::string> &vector,
+  size_t GetBranchTitles( Strings &vector,
 			  TTree *inputTree,
 			  const std::string &expr ) {
   
     TObjArray *brList = inputTree -> GetListOfBranches();
-    std::vector<std::string> brVector( brList -> GetEntries() );
+    Strings brVector( brList -> GetEntries() );
     for ( int ibr = 0; ibr < brList -> GetEntries(); ++ibr )
       brVector[ ibr ] = brList -> At( ibr ) -> GetTitle();
 
@@ -75,7 +76,7 @@ namespace Isis {
   //
   size_t GetNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
   
-    std::vector<std::string> vector;
+    Strings vector;
     GetBranchNames( vector, inputTree, expr );
     return vector.size();
   }
@@ -99,7 +100,7 @@ namespace Isis {
   //
   size_t GetNvarsWithTypeIn( TTree *inputTree,
 			     const char &type,
-			     const std::vector<std::string> &vector ) {
+			     const Strings &vector ) {
   
     TObjArray *brList = inputTree -> GetListOfBranches();
     std::string title;
@@ -128,8 +129,8 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   void MakeTreeChangingNames( TTree *inputTree,
-			      const std::vector<std::string> &ivars,
-			      const std::vector<std::string> &ovars ) {
+			      const Strings &ivars,
+			      const Strings &ovars ) {
 
     // Sends a warning message if the number of input variables is different to
     // the number of output variables

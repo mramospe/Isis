@@ -25,6 +25,7 @@
 #include "CLsHypothesis.h"
 #include "CLsPrior.h"
 #include "CLsResult.h"
+#include "Definitions.h"
 
 
 //_______________________________________________________________________________

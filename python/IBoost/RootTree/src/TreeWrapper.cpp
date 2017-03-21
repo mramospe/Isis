@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Definitions.h"
 #include "CppToPyTypes.h"
 #include "GlobalWrappers.h"
 #include "TreeWrapper.h"
@@ -97,7 +98,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
     auto var = IBoost::ExtractFromIndex<const char*>(vars, i);
 
     // Get the variables from the given expressions
-    std::vector<std::string> brnames;
+    Isis::Strings brnames;
     size_t nadded = Isis::GetBranchNames(brnames, itree, var);
     if ( !nadded )
       IWarning << "No variables have been found following expression < "
@@ -188,7 +189,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
 
     // Get the variables from the given expressions
     const char *exp = IBoost::ExtractFromIndex<const char*>(variables, i);
-    std::vector<std::string> brnames;
+    Isis::Strings brnames;
     Isis::StringVectorFilter(brnames, vars, exp);
 
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
