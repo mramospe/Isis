@@ -6,7 +6,7 @@
 #=======================================================#
 
 # C++ flags
-cflags="-Wall -std=c++11 -pthread -Wno-unused-local-typedefs"
+cflags="-Wall -O2 -std=c++11 -pthread -Wno-unused-local-typedefs"
 
 # Paths to the include folders
 iinclude=-I$ISIS/include

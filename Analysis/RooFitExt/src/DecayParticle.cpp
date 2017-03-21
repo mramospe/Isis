@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // ----------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ void Analysis::DecayParticle::SetBranches( TTree *tree ) {
 //
 void Analysis::DecayParticle::SetDistribution( double width, double sigma ) {
 
-  RooAbsPdf  *pdf;
+  RooAbsPdf  *pdf = 0;
   RooRealVar *rmass = new RooRealVar( "rmass", "rmass",
 				      fMass - 3*( width + sigma ),
 				      fMass + 3*( width + sigma ) );

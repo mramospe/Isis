@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   fYmin( ymin ) {
   
   const std::vector<double> *wData( &weights );
-  if ( !wData -> size() )
+  if ( !wData->size() )
     wData = new std::vector<double>( xvalues.size(), 1 );
 
   // Gets the minimum distance between points
@@ -81,7 +81,7 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 
   // Gets the sum of the weights (to get the number of true entries)
   double sum_of_evts = 0;
-  for ( auto it = wData -> begin(); it != wData -> end(); ++it )
+  for ( auto it = wData->begin(); it != wData->end(); ++it )
     sum_of_evts += *it;
 
   // Makes the adaptive bins
@@ -100,12 +100,16 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   
   for ( size_t i = 0; i < max_iter; ++i ) {
     for ( size_t ibin = 0; ibin < nbins; ++ibin ) {
-      Analysis::Bin2D *bin;
-      for ( size_t ievt = 0; ievt < wData -> size(); ++ievt ) {
+      
+      Analysis::Bin2D *bin = static_cast<Analysis::Bin2D*>(fBinList[0]);
+      
+      for ( size_t ievt = 1; ievt < wData->size(); ++ievt ) {
+	
 	bin = static_cast<Analysis::Bin2D*>( fBinList[ ibin ] );
-	bin -> Fill( xvalues.at( ievt ), yvalues.at( ievt ), wData -> at( ievt ) );
+	bin->Fill( xvalues.at( ievt ), yvalues.at( ievt ), wData->at( ievt ) );
       }
-      fBinList.push_back( bin -> Divide( xrange, yrange ) );
+      
+      fBinList.push_back( bin->Divide( xrange, yrange ) );
     }
     // Sets the new number of bins
     nbins *= 2;
@@ -113,10 +117,10 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
 
   // Fills the data for the last time to get the limits of the bins
   for ( auto itbin = fBinList.begin(); itbin != fBinList.end(); ++itbin )
-    for ( size_t ievt = 0; ievt < wData -> size(); ++ievt )
-      static_cast<Analysis::Bin2D*>( *itbin ) -> Fill( xvalues.at( ievt ),
+    for ( size_t ievt = 0; ievt < wData->size(); ++ievt )
+      static_cast<Analysis::Bin2D*>( *itbin )->Fill( xvalues.at( ievt ),
 						       yvalues.at( ievt ),
-						       wData -> at( ievt ) );
+						       wData->at( ievt ) );
 
   // Makes the list of adjusted bins
   fAdjBinList = std::vector<Analysis::Bin2D*>( fBinList.size() );
@@ -129,7 +133,7 @@ Analysis::AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
   }
 
   for ( auto itbin = fAdjBinList.begin(); itbin != fAdjBinList.end(); ++itbin )
-    (*itbin) -> AdjustBin( fXmin, fXmax, fYmin, fYmax, delta );
+    (*itbin)->AdjustBin( fXmin, fXmax, fYmin, fYmax, delta );
   
   // If the vector of weights has been allocated, it is destroyed
   if ( !weights.size() )
@@ -148,10 +152,13 @@ Analysis::AdaptiveBinning2D::~AdaptiveBinning2D() {
 //
 TH2Poly* Analysis::AdaptiveBinning2D::GetAdjStruct( const char *name,
 						    const char *title ) const {
+  
   TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );
   for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end();	++it ) {
+    
     Analysis::Bin2D *bin = static_cast<Analysis::Bin2D*>( *it );
-    hist -> AddBin( bin -> fXmin, bin -> fYmin, bin -> fXmax, bin -> fYmax );
+    
+    hist->AddBin( bin->fXmin, bin->fYmin, bin->fXmax, bin->fYmax );
   }
   return hist;
 }
@@ -160,10 +167,13 @@ TH2Poly* Analysis::AdaptiveBinning2D::GetAdjStruct( const char *name,
 //
 TH2Poly* Analysis::AdaptiveBinning2D::GetStruct( const char *name,
 						 const char *title ) const {
+  
   TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );
   for ( auto it = fBinList.begin(); it != fBinList.end(); ++it ) {
+    
     Analysis::Bin2D *bin = static_cast<Analysis::Bin2D*>( *it );
-    hist -> AddBin( bin -> fXmin, bin -> fYmin, bin -> fXmax, bin -> fYmax );
+    
+    hist->AddBin( bin->fXmin, bin->fYmin, bin->fXmax, bin->fYmax );
   }
   return hist;
 }
