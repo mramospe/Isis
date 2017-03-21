@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -39,7 +39,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   class OutputTable {
 
@@ -152,7 +152,7 @@ namespace General {
 
   //_______________________________________________________________________________
   //
-  void General::OutputTable::PrintLine() { std::cout << this->GetLine() << std::endl; }
+  void OutputTable::PrintLine() { std::cout << this->GetLine() << std::endl; }
 
   //_______________________________________________________________________________
   //

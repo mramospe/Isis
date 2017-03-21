@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------
 //
@@ -32,7 +32,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
   
   namespace ANSIFormat {
 
@@ -61,16 +61,16 @@ namespace General {
   // Function to check whether color must be applied or not
   bool ApplyColor( const std::ostream &os );
 
-  // Function to replace < endl > for the class General::Messenger
+  // Function to replace < endl > for the class Isis::Messenger
   std::ostream& EndMsgLine( std::ostream &os );
 }
 
 //_______________________________________________________________________________
 // Definition of the objects to display the basic types of messages
-#define IBegMsg  General::Messenger("--- "     , std::cout, General::ANSIFormat::aNoColor)
-#define IError   General::Messenger("ERROR: "  , std::cerr, General::ANSIFormat::ErrorColor)
-#define IInfo    General::Messenger("INFO: "   , std::cout, General::ANSIFormat::InfoColor)
-#define IWarning General::Messenger("WARNING: ", std::cout, General::ANSIFormat::WarningColor)
-#define IEndMsg  General::EndMsgLine
+#define IBegMsg  Isis::Messenger("--- "     , std::cout, Isis::ANSIFormat::aNoColor)
+#define IError   Isis::Messenger("ERROR: "  , std::cerr, Isis::ANSIFormat::ErrorColor)
+#define IInfo    Isis::Messenger("INFO: "   , std::cout, Isis::ANSIFormat::InfoColor)
+#define IWarning Isis::Messenger("WARNING: ", std::cout, Isis::ANSIFormat::WarningColor)
+#define IEndMsg  Isis::EndMsgLine
 
 #endif

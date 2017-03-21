@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/03/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -35,7 +35,7 @@
 // No-operation statement
 #define NOOP
 
-namespace General {
+namespace Isis {
   
   //_______________________________________________________________________________
   // Define a vector of strings

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 21/03/2017
 //
 // -----------------------------------------------------------------------------
 //
@@ -37,14 +37,14 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   class BufferArray {
         
   public:
     
     // Definition of internal variables
-    typedef General::BufferVariable BuffVar;
+    typedef BufferVariable BuffVar;
     typedef bool (*SortFunc)( const std::string &stra, const std::string &strb );
     typedef std::map<std::string, BuffVar*, SortFunc> BuffVarMap;
     
@@ -102,7 +102,7 @@ namespace General {
   //
   inline void BufferArray::Clear() {
     for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
-      delete it -> second;
+      delete it->second;
     fVarMap.clear();
   }
 
@@ -136,7 +136,7 @@ namespace General {
 
   //_______________________________________________________________________________
   //
-  inline General::BufferVariable& BufferArray::operator [] ( const std::string &name ) {
+  inline BufferVariable& BufferArray::operator [] ( const std::string &name ) {
     return *(fVarMap.at( name ));
   }
 

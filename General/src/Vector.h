@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   class Vector {
 
@@ -214,7 +214,7 @@ namespace General {
 
   //_______________________________________________________________________________
   //
-  inline double Vector::Dot( const General::Vector &vec ) const {
+  inline double Vector::Dot( const Vector &vec ) const {
     return fX*vec.fX + fY*vec.fY + fZ*vec.fZ;
   }
 
@@ -340,7 +340,7 @@ namespace General {
   //_______________________________________________________________________________
   //
   inline Vector Vector::operator / ( const double &val ) const {
-    return General::Vector( fX/val, fY/val, fZ/val );
+    return Vector( fX/val, fY/val, fZ/val );
   }
   
   //_______________________________________________________________________________

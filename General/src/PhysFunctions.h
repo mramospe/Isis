@@ -7,7 +7,7 @@
 //  AUTHOR : Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last Update: 16/02/2017
+//  Last Update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -28,7 +28,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   // Return the proper lifetime multiplied by the speed of light
   double CTAU( LorentzVector TLV, Vector OwnPV, Vector EndV );

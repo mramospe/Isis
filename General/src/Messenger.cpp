@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 07/03/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -19,56 +19,62 @@
 
 
 //_______________________________________________________________________________
-//
-General::Messenger::Messenger( const std::string &start,
-			       std::ostream &os,
-			       const int &fgcol,
-			       const int &bgcol,
-			       const int &sty ) :
-  fOStream( &os ) {
 
-  // Check if color must be applied
-  switch ( ApplyColor(os) ) {
-    
-  case true:
-    
-    *fOStream << "\033[";
+namespace Isis {
 
-    // Configure foreground color
-    switch ( fgcol ) {
+  //_______________________________________________________________________________
+  //
+  Messenger::Messenger( const std::string &start,
+			std::ostream &os,
+			const int &fgcol,
+			const int &bgcol,
+			const int &sty ) :
+    fOStream( &os ) {
+
+    // Check if color must be applied
+    switch ( ApplyColor(os) ) {
+    
+    case true:
+    
+      *fOStream << "\033[";
+
+      // Configure foreground color
+      switch ( fgcol ) {
       
-    case ANSIFormat::aNoColor:
-      NOOP;
+      case ANSIFormat::aNoColor:
+	NOOP;
       
+      default:
+	*fOStream << ";3" << std::to_string( fgcol );
+      }
+
+      // Configure background color
+      switch ( bgcol ) {
+      case ANSIFormat::aNoColor:
+	NOOP;
+      default:
+	*fOStream << ";4" << std::to_string( bgcol );
+      }
+
+      // Configure style
+      switch ( sty ) {
+      case ANSIFormat::aNoStyle:
+	NOOP;
+      default:
+	*fOStream << ";" << std::to_string( sty );
+      }
+      
+      *fOStream << "m";
+    
     default:
-      *fOStream << ";3" << std::to_string( fgcol );
+      NOOP;
     }
 
-    // Configure background color
-    switch ( bgcol ) {
-    case ANSIFormat::aNoColor:
-      NOOP;
-    default:
-      *fOStream << ";4" << std::to_string( bgcol );
-    }
-
-    // Configure style
-    switch ( sty ) {
-    case ANSIFormat::aNoStyle:
-      NOOP;
-    default:
-      *fOStream << ";" << std::to_string( sty );
-    }
-      
-    *fOStream << "m";
-    
-  default:
-    NOOP;
+    *fOStream << start;
   }
 
-  *fOStream << start;
-}
+  //_______________________________________________________________________________
+  //
+  Messenger::~Messenger() { }
 
-//_______________________________________________________________________________
-//
-General::Messenger::~Messenger() { }
+}

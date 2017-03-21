@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 07/03/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------
 //
@@ -31,7 +31,9 @@
 #include <iostream>
 
 
-namespace General {
+//_______________________________________________________________________________
+
+namespace Isis {
   
   class Messenger {
   

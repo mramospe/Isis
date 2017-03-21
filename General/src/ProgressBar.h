@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 16/02/2017
+//  Last update: 21/03/2017
 //
 // ----------------------------------------------------------------
 //
@@ -56,7 +56,7 @@
 
 //_______________________________________________________________________________
 
-namespace General {
+namespace Isis {
 
   class ProgressBar {
 

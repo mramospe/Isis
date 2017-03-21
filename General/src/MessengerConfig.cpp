@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 07/03/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -20,39 +20,42 @@
 #include <iostream>
 
 
-using namespace General::ANSIFormat;
-
-
 //_______________________________________________________________________________
-//
-int General::ANSIFormat::ErrorColor   = aRed;
-int General::ANSIFormat::InfoColor    = aGreen;
-int General::ANSIFormat::WarningColor = aYellow;
 
-//_______________________________________________________________________________
-//
-bool General::ApplyColor( const std::ostream &os ) {
+namespace Isis {
 
-  if ( &os == &std::cout )
-    return General::ANSIFormat::ColoredStdOut;
-  else if ( &os == &std::cerr )
-    return General::ANSIFormat::ColoredStdErr;
-  else
-    return false;
-}
+  //_______________________________________________________________________________
+  //
+  int ANSIFormat::ErrorColor   = aRed;
+  int ANSIFormat::InfoColor    = aGreen;
+  int ANSIFormat::WarningColor = aYellow;
 
-//_______________________________________________________________________________
-//
-std::ostream& General::EndMsgLine( std::ostream &os ) {
+  //_______________________________________________________________________________
+  //
+  bool ApplyColor( const std::ostream &os ) {
 
-  switch( ApplyColor(os) ) {
-  case true:
-    os << "\033[0m";
-  default:
-    NOOP;
+    if ( &os == &std::cout )
+      return ANSIFormat::ColoredStdOut;
+    else if ( &os == &std::cerr )
+      return ANSIFormat::ColoredStdErr;
+    else
+      return false;
   }
+
+  //_______________________________________________________________________________
+  //
+  std::ostream& EndMsgLine( std::ostream &os ) {
+
+    switch( ApplyColor(os) ) {
+    case true:
+      os << "\033[0m";
+    default:
+      NOOP;
+    }
     
-  os << std::endl;
+    os << std::endl;
   
-  return os;
+    return os;
+  }
+
 }

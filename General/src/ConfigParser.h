@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2016
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -38,7 +38,7 @@
 
 //_______________________________________________________________________________ 
 
-namespace General {
+namespace Isis {
 
   class ConfigParser {
 
