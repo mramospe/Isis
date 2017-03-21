@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
@@ -21,86 +21,92 @@
 
 
 //_______________________________________________________________________________
-//
-Analysis::VarBin::VarBin() : fError( 0 ), fNentries( 0 ), fWeight( 0 ) { }
 
-//_______________________________________________________________________________
-//
-Analysis::VarBin::~VarBin() { }
+namespace Isis {
 
-//_______________________________________________________________________________
-//
-void Analysis::VarBin::IfInsideAdd( const std::map<std::string, double> &values ) {
-  for ( auto it = values.begin(); it != values.end(); it++ )
-    if ( this -> IsOutside( it -> first, it -> second ) )
-      return;
-  fNentries++;
-}
+  //_______________________________________________________________________________
+  //
+  VarBin::VarBin() : fError( 0 ), fNentries( 0 ), fWeight( 0 ) { }
 
-//_______________________________________________________________________________
-//
-bool Analysis::VarBin::IsOutside( const std::string &vname, const double &value ) {
-  std::pair<double, double> *range = &fVarRanges[ vname ];
-  if ( value < range -> first || value >= range -> second )
-    return true;
-  return false;
-}
+  //_______________________________________________________________________________
+  //
+  VarBin::~VarBin() { }
 
-//_______________________________________________________________________________
-//
-bool Analysis::VarBin::IsOutside( const std::map<std::string, double> &values ) {
-  for ( auto it = values.begin(); it != values.end(); it++ )
-    if ( this -> IsOutside( it -> first, it -> second ) )
-      return true;
-  return false;
-}
-
-//_______________________________________________________________________________
-//
-void Analysis::VarBin::Print( const size_t &width ) {
-  std::pair<double, double> *pair;
-  for ( auto itm = fVarRanges.begin(); itm != fVarRanges.end(); itm++ ) {
-    pair = &itm -> second;
-    std::cout << std::right << std::setw( width ) <<
-      pair -> first << std::setw( width ) << pair -> second << " |";
+  //_______________________________________________________________________________
+  //
+  void VarBin::IfInsideAdd( const std::map<std::string, double> &values ) {
+    for ( auto it = values.begin(); it != values.end(); it++ )
+      if ( this -> IsOutside( it -> first, it -> second ) )
+	return;
+    fNentries++;
   }
-  std::cout << std::endl;
-}
 
-//_______________________________________________________________________________
-//
-void Analysis::VarBin::SetWeight( const size_t &rentries,
-				  const double &ratio,
-				  const double &sratio,
-				  const double &maxrelerr ) {
-  if ( rentries && fNentries ) {
-    double
-      rw = rentries*1./fNentries,
-      ir = 1./rentries,
-      iw = 1./fNentries;
-    fError  = rw*std::sqrt( ratio*ratio*( ir + iw ) + sratio*sratio );
-    fWeight = rw*ratio;
-    if ( fError/fWeight > maxrelerr ) {
-      fError  = 0;
+  //_______________________________________________________________________________
+  //
+  bool VarBin::IsOutside( const std::string &vname, const double &value ) {
+    std::pair<double, double> *range = &fVarRanges[ vname ];
+    if ( value < range -> first || value >= range -> second )
+      return true;
+    return false;
+  }
+
+  //_______________________________________________________________________________
+  //
+  bool VarBin::IsOutside( const std::map<std::string, double> &values ) {
+    for ( auto it = values.begin(); it != values.end(); it++ )
+      if ( this -> IsOutside( it -> first, it -> second ) )
+	return true;
+    return false;
+  }
+
+  //_______________________________________________________________________________
+  //
+  void VarBin::Print( const size_t &width ) {
+    std::pair<double, double> *pair;
+    for ( auto itm = fVarRanges.begin(); itm != fVarRanges.end(); itm++ ) {
+      pair = &itm -> second;
+      std::cout << std::right << std::setw( width ) <<
+	pair -> first << std::setw( width ) << pair -> second << " |";
+    }
+    std::cout << std::endl;
+  }
+
+  //_______________________________________________________________________________
+  //
+  void VarBin::SetWeight( const size_t &rentries,
+			  const double &ratio,
+			  const double &sratio,
+			  const double &maxrelerr ) {
+    if ( rentries && fNentries ) {
+      double
+	rw = rentries*1./fNentries,
+	ir = 1./rentries,
+	iw = 1./fNentries;
+      fError  = rw*std::sqrt( ratio*ratio*( ir + iw ) + sratio*sratio );
+      fWeight = rw*ratio;
+      if ( fError/fWeight > maxrelerr ) {
+	fError  = 0;
+	fWeight = 0;
+      }
+    }
+    else {
       fWeight = 0;
+      fError  = 0;
     }
   }
-  else {
-    fWeight = 0;
-    fError  = 0;
-  }
-}
 
-//_______________________________________________________________________________
-//
-std::vector<Analysis::VarBin> Analysis::VarBin::Split( const std::string &name,
-						       const size_t      &nbins,
-						       const double      &min,
-						       const double      &max ) {
-  double step = ( max - min )/nbins;
-  std::vector<Analysis::VarBin> outvector( nbins, *this );
-  for ( size_t i = 0; i < nbins; i++ )
-    outvector[ i ].fVarRanges[ name ] = std::make_pair( min + i*step, min + ( i + 1 )*step );
-  outvector.back().fVarRanges[ name ].second = max;
-  return outvector;
+  //_______________________________________________________________________________
+  //
+  std::vector<VarBin> VarBin::Split( const std::string &name,
+				     const size_t      &nbins,
+				     const double      &min,
+				     const double      &max ) {
+    double step = ( max - min )/nbins;
+    std::vector<VarBin> outvector( nbins, *this );
+    for ( size_t i = 0; i < nbins; i++ )
+      outvector[ i ].fVarRanges[ name ] = std::make_pair( min + i*step, min + ( i + 1 )*step );
+    outvector.back().fVarRanges[ name ].second = max;
+    return outvector;
+  }
+
 }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -17,19 +17,25 @@
 
 
 //______________________________________________________________________________
-//
-Analysis::AdaptiveBinning::AdaptiveBinning() { }
 
-//______________________________________________________________________________
-//
-Analysis::AdaptiveBinning::~AdaptiveBinning() {
+namespace Isis {
 
-  for ( auto it = fBinList.begin(); it != fBinList.end(); ++it )
-    delete (*it);
-}
+  //______________________________________________________________________________
+  //
+  AdaptiveBinning::AdaptiveBinning() { }
 
-//______________________________________________________________________________
-//
-TObject* Analysis::AdaptiveBinning::GetStruct( const char *name, const char *title ) const {
-  return 0;
+  //______________________________________________________________________________
+  //
+  AdaptiveBinning::~AdaptiveBinning() {
+
+    for ( auto it = fBinList.begin(); it != fBinList.end(); ++it )
+      delete (*it);
+  }
+
+  //______________________________________________________________________________
+  //
+  TObject* AdaptiveBinning::GetStruct( const char *name, const char *title ) const {
+    return 0;
+  }
+
 }

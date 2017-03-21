@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   class Cluster {
 
@@ -123,7 +123,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  double Cluster::DistanceToCluster( const Analysis::ClusterPoint &point ) const {
+  double Cluster::DistanceToCluster( const ClusterPoint &point ) const {
     return this -> DistanceBetweenPoints( fCenterOfMass, point );
   }
 

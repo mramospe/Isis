@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -22,15 +22,21 @@
 #include <string>
 
 //_______________________________________________________________________________
-//
-TObject* Analysis::GetSafeObject( TFile *ifile, const std::string &path ) {
 
-  TObject *obj = ifile->Get(path.c_str());
+namespace Isis {
 
-  if ( !obj )
-    IError <<
-      "Unable to get object < " << path << " > from file: " << ifile->GetName()
-				<< IEndMsg;
+  //_______________________________________________________________________________
+  //
+  TObject* Isis::GetSafeObject( TFile *ifile, const std::string &path ) {
 
-  return obj;
+    TObject *obj = ifile->Get(path.c_str());
+
+    if ( !obj )
+      IError <<
+	"Unable to get object < " << path << " > from file: " << ifile->GetName()
+				  << IEndMsg;
+
+    return obj;
+  }
+
 }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // -------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   // Appends to the given vector all the names of the branches in a tree. Returns
   // the number of branches appended.

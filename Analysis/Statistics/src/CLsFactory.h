@@ -29,7 +29,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   class CLsFactory {
 
@@ -54,7 +54,7 @@ namespace Analysis {
     CLsResult Calculate( const double &tstat ) const;
     
     // Return information concerning the CLs method given an array
-    inline CLsResult Calculate( const General::Doubles &array ) const;
+    inline CLsResult Calculate( const Doubles &array ) const;
 
     // Calculate CLb
     inline double CLb( const double &t ) const;
@@ -81,7 +81,7 @@ namespace Analysis {
     inline void SetSigHyp( CLsHypothesis &hyp );
 
     // Return the test statistics for a given array of values
-    double TestStat( const General::Doubles &values ) const;
+    double TestStat( const Doubles &values ) const;
 
   protected:
 
@@ -109,7 +109,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline CLsResult CLsFactory::Calculate( const General::Doubles &array ) const {
+  inline CLsResult CLsFactory::Calculate( const Doubles &array ) const {
 
     double t = this->TestStat(array);
 

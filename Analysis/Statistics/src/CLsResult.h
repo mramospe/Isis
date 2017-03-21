@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 08/03/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   // Global variable to control the p-value required to have an evidence
   // default = (3*sigma) in the two-sided definition of the significance

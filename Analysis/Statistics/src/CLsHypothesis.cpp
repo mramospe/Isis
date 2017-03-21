@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 11/03/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -30,11 +30,11 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   //_______________________________________________________________________________
   //
-  CLsHypothesis::CLsHypothesis( const General::Doubles &array,
+  CLsHypothesis::CLsHypothesis( const Doubles &array,
 				CLsFluctuator *fluct,
 				CLsPrior *prior ) :
     fFactory( 0 ),
@@ -58,7 +58,7 @@ namespace Analysis {
     
       for ( size_t i = 0; i < n; ++i ) {
 
-	General::Doubles vec(fHyp);
+	Doubles vec(fHyp);
 
 	// Randomize vector
 	for ( auto it = vec.begin(); it != vec.end(); ++it ) {
@@ -87,7 +87,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  double CLsHypothesis::PoissonProb( const General::Doubles &values ) const {
+  double CLsHypothesis::PoissonProb( const Doubles &values ) const {
 
     double prob = 1.;
 
@@ -119,7 +119,7 @@ namespace Analysis {
     // Return the first element greater than < t >. This comes from the definition
     // of CLsb and CLb, which are probabilities with respect to measuring less or
     // equal events as the observed.
-    General::Doubles::const_iterator it =
+    Doubles::const_iterator it =
       std::upper_bound(fTSVals.cbegin(), fTSVals.cend(), t);
 
     switch ( fType ) {

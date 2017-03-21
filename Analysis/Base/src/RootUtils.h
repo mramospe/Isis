@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -30,7 +30,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   // Get a pointer to an object in a TFile and send an error message if the operation
   // fails

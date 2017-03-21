@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -32,9 +32,9 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
   
-  class TreeBuffer: public General::BufferArray {
+  class TreeBuffer: public BufferArray {
     
   public:
     
@@ -58,15 +58,15 @@ namespace Analysis {
     void AttachTree( TTree *tree );
 
     // Creates a new variable in the attached tree given the name and its type
-    General::BufferVariable* CreateVariable( const std::string &name, const char &type );
+    BufferVariable* CreateVariable( const std::string &name, const char &type );
 
     // Loads the variables satisfying the requirements in the given expression
     void Load( const std::string &expr );
 
     // Loads a variable from the attached tree. Automatically determines the type of
-    // the variable and constructs a General::BufferVariable class to set the branch
+    // the variable and constructs a BufferVariable class to set the branch
     // address to.
-    General::BufferVariable* LoadVariable( const std::string &name );
+    BufferVariable* LoadVariable( const std::string &name );
 
     // Changes the status of the branches in the attached tree to that given to the
     // function
@@ -96,13 +96,13 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline void TreeBuffer::Fill() { fTree -> Fill(); }
+  inline void TreeBuffer::Fill() { fTree->Fill(); }
 
   //_______________________________________________________________________________
   //
   inline void TreeBuffer::FillBranches() {
     for ( auto it = fBranchVector.begin(); it != fBranchVector.end(); ++it )
-      (*it) -> Fill();
+      (*it)->Fill();
   }
 
   //_______________________________________________________________________________

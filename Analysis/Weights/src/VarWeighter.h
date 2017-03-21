@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   class VarWeighter {
 
@@ -87,12 +87,12 @@ namespace Analysis {
     void Print( const size_t &prec = 4 );
 
     // Returns the vector of bins of the class
-    inline const std::vector<Analysis::VarBin>& GetBinVector() const;
+    inline const std::vector<VarBin>& GetBinVector() const;
 
   protected:
 
     // Vector of bins
-    std::vector<Analysis::VarBin> fBinVector;
+    std::vector<VarBin> fBinVector;
 
     // Tree used as a reference to make the bins
     TTree *fRefTree;
@@ -121,7 +121,7 @@ namespace Analysis {
     void FillBinVector( TTree *tree,
 			std::map<std::string, TLeaf*> &wgtleafmap,
 			std::map<std::string, double> &valuesmap,
-			std::vector<Analysis::VarBin> &binvector );
+			std::vector<VarBin> &binvector );
 
     // Disables all the branches that are not in the map of leaves. Only those to be
     // used are enabled. Also defines the keys for the given maps.
@@ -133,7 +133,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline const std::vector<Analysis::VarBin>& VarWeighter::GetBinVector() const {
+  inline const std::vector<VarBin>& VarWeighter::GetBinVector() const {
     return fBinVector;
   }
 
@@ -147,7 +147,7 @@ namespace Analysis {
 			  void    *saddress,
 			  std::map<std::string, double> &valuesmap,
 			  const std::map<std::string, TLeaf*> &newleafmap ) {
-    std::vector<Analysis::VarBin>::iterator itw;
+    std::vector<VarBin>::iterator itw;
     for ( Long64_t ievt = 0; ievt < tree->GetEntries(); ievt++ ) {
       tree->GetEntry( ievt );
       for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )

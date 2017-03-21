@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   // Enum to define the null and signal-type hypothesis
   enum CLsHypTypes { aNone, aNull, aSignal };
@@ -46,7 +46,7 @@ namespace Analysis {
 
     // Constructor given the type, the factory and the array. This class DOES NOT
     // take ownership of the prior.
-    CLsHypothesis( const General::Doubles &array = {},
+    CLsHypothesis( const Doubles &array = {},
 		   CLsFluctuator *fluct = 0,
 		   CLsPrior *prior = 0 );
 
@@ -54,10 +54,10 @@ namespace Analysis {
     ~CLsHypothesis();
 
     // Return the vector containing the test-statistics values
-    const General::Doubles& GetTSVals() const;
+    const Doubles& GetTSVals() const;
 
     // Return the vector defining this hypothesis
-    const General::Doubles& GetHyp() const;
+    const Doubles& GetHyp() const;
 
     // Return the p-value for the given test-statistics value
     double PValue( const double &t ) const;
@@ -66,7 +66,7 @@ namespace Analysis {
     void Generate( const size_t &n );
 
     // Return the poisson probability
-    double PoissonProb( const General::Doubles &values ) const;
+    double PoissonProb( const Doubles &values ) const;
 
     // Set the CLs factory class pointer
     inline void SetFactory( const CLsFactory *factory );
@@ -75,7 +75,7 @@ namespace Analysis {
     inline void SetFluctuator( CLsFluctuator *fluct );
 
     // Set the vector defining this hypothesis
-    inline void SetHyp( const General::Doubles &array,
+    inline void SetHyp( const Doubles &array,
 			CLsFluctuator *fluct = 0,
 			CLsPrior *prior = 0 );
 
@@ -97,16 +97,16 @@ namespace Analysis {
     CLsFluctuator *fFluct;
     
     // Vector defining the hypothesis
-    General::Doubles fHyp;
+    Doubles fHyp;
 
     // Prior for the probability
-    Analysis::CLsPrior *fPrior;
+    CLsPrior *fPrior;
 
     // Random number generator
     TRandom3 fRndm;
 
     // Vector with the values of the test-statistics
-    General::Doubles fTSVals;
+    Doubles fTSVals;
 
     // Type of the hypothesis
     int fType;
@@ -127,7 +127,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetHyp( const General::Doubles &array,
+  inline void CLsHypothesis::SetHyp( const Doubles &array,
 				     CLsFluctuator *fluct,
 				     CLsPrior *prior ) {
     
@@ -153,14 +153,14 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  inline const General::Doubles& CLsHypothesis::GetHyp() const {
+  inline const Doubles& CLsHypothesis::GetHyp() const {
 
     return fHyp;
   }
 
   //_______________________________________________________________________________
   //
-  inline const General::Doubles& CLsHypothesis::GetTSVals() const {
+  inline const Doubles& CLsHypothesis::GetTSVals() const {
     
     return fTSVals;
   }

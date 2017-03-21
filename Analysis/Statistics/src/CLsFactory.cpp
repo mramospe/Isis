@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@
 
 //_______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   //_______________________________________________________________________________
   //
@@ -73,7 +73,7 @@ namespace Analysis {
 
   //_______________________________________________________________________________
   //
-  double CLsFactory::TestStat( const General::Doubles &values ) const {
+  double CLsFactory::TestStat( const Doubles &values ) const {
 
     double t0 = fNullHyp->PoissonProb(values);
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -17,18 +17,24 @@
 
 
 //______________________________________________________________________________
-//
-Analysis::Bin1D::Bin1D( const double &vmin ) : Bin(), fMin( vmin ) { }
 
-//______________________________________________________________________________
-//
-Analysis::Bin1D::~Bin1D() { }
+namespace Isis {
 
-//______________________________________________________________________________
-//
-void Analysis::Bin1D::Fill( const double &pos, const double &weight ) {
-  if ( pos < fMin )
-    fMin = pos;
-  fEntries++;
-  fSumOfWeights += weight;
+  //______________________________________________________________________________
+  //
+  Bin1D::Bin1D( const double &vmin ) : Bin(), fMin( vmin ) { }
+
+  //______________________________________________________________________________
+  //
+  Bin1D::~Bin1D() { }
+
+  //______________________________________________________________________________
+  //
+  void Bin1D::Fill( const double &pos, const double &weight ) {
+    if ( pos < fMin )
+      fMin = pos;
+    fEntries++;
+    fSumOfWeights += weight;
+  }
+
 }

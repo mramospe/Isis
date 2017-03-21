@@ -34,245 +34,251 @@
 
 
 //_______________________________________________________________________________
-//
-Analysis::DecayParticle::DecayParticle( const char *name, double sigma ) :
-  fName( name ),
-  fNdaughters( 0 ),
-  fPDF( 0 ) {
 
-  // Reads the data from the PDG database
-  TDatabasePDG pdg;
+namespace Isis {
 
-  pdg.ReadPDGTable();
+  //_______________________________________________________________________________
+  //
+  DecayParticle::DecayParticle( const char *name, double sigma ) :
+    fName( name ),
+    fNdaughters( 0 ),
+    fPDF( 0 ) {
 
-  TParticlePDG *particle( pdg.GetParticle( name ) );
+    // Reads the data from the PDG database
+    TDatabasePDG pdg;
 
-  // Converts the mass and width in GeV to MeV
-  double
-    mass( particle->Mass()*1000 ),
-    width( particle->Width()*1000 );
+    pdg.ReadPDGTable();
 
-  // Checks if the width is so small to work with it
-  width = ( width/mass < 1E-6 ? 0 : width );
+    TParticlePDG *particle( pdg.GetParticle( name ) );
 
-  // Changes the symbols in the name
-  std::map<std::string, std::string> mp;
-  mp[ "+" ] = "plus";
-  mp[ "-" ] = "minus";
-  mp[ "*" ] = "st";
+    // Converts the mass and width in GeV to MeV
+    double
+      mass( particle->Mass()*1000 ),
+      width( particle->Width()*1000 );
 
-  size_t fpos;
-  for ( std::map<std::string, std::string>::iterator it = mp.begin();
-	it != mp.end(); it++ ) {
+    // Checks if the width is so small to work with it
+    width = ( width/mass < 1E-6 ? 0 : width );
 
-    fpos = fName.find( it->first );
-    if ( fpos != std::string::npos )
-      fName.replace( fpos, fpos + 1, mp[ it->first ] );
+    // Changes the symbols in the name
+    std::map<std::string, std::string> mp;
+    mp[ "+" ] = "plus";
+    mp[ "-" ] = "minus";
+    mp[ "*" ] = "st";
+
+    size_t fpos;
+    for ( std::map<std::string, std::string>::iterator it = mp.begin();
+	  it != mp.end(); it++ ) {
+
+      fpos = fName.find( it->first );
+      if ( fpos != std::string::npos )
+	fName.replace( fpos, fpos + 1, mp[ it->first ] );
+    }
+
+    fMass = mass;
+
+    // If does exist any or both width and sigma, it sets the mass distribution
+    if ( width || sigma )
+      this->SetDistribution( width, sigma );
   }
 
-  fMass = mass;
+  //_______________________________________________________________________________
+  //
+  DecayParticle::DecayParticle( const char *name,
+				RooAbsPdf  *pdf,
+				RooRealVar &mass ) :
+    fName( name ),
+    fNdaughters( 0 ),
+    fPDF( pdf->asTF( RooArgList( mass ) ) ) { }
 
-  // If does exist any or both width and sigma, it sets the mass distribution
-  if ( width || sigma )
+  //_______________________________________________________________________________
+  //
+  DecayParticle::DecayParticle( const char *name,
+				TF1        *pdf ) :
+    fName( name ),
+    fNdaughters( 0 ),
+    fPDF( pdf ) { }
+
+  //_______________________________________________________________________________
+  //
+  DecayParticle::DecayParticle( const char *name,
+				double      mass,
+				double      width,
+				double      sigma ) :
+    fMass( mass ),
+    fName( name ),
+    fNdaughters( 0 ),
+    fPDF( 0 ) {
+
     this->SetDistribution( width, sigma );
-}
+  }
 
-//_______________________________________________________________________________
-//
-Analysis::DecayParticle::DecayParticle( const char *name,
-					RooAbsPdf  *pdf,
-					RooRealVar &mass ) :
-  fName( name ),
-  fNdaughters( 0 ),
-  fPDF( pdf->asTF( RooArgList( mass ) ) ) { }
+  //_______________________________________________________________________________
+  //
+  DecayParticle::~DecayParticle() {
 
-//_______________________________________________________________________________
-//
-Analysis::DecayParticle::DecayParticle( const char *name,
-					TF1        *pdf ) :
-  fName( name ),
-  fNdaughters( 0 ),
-  fPDF( pdf ) { }
+    if ( fPDF )
+      delete fPDF;
 
-//_______________________________________________________________________________
-//
-Analysis::DecayParticle::DecayParticle( const char *name,
-					double      mass,
-					double      width,
-					double      sigma ) :
-  fMass( mass ),
-  fName( name ),
-  fNdaughters( 0 ),
-  fPDF( 0 ) {
+    if ( fPDFbase.size() )
+      for ( std::vector<RooAbsReal*>::iterator it = fPDFbase.begin();
+	    it != fPDFbase.end(); it++ )
+	delete ( *it );
+  }
 
-  this->SetDistribution( width, sigma );
-}
+  //_______________________________________________________________________________
+  //
+  std::string DecayParticle::GetDecay() {
 
-//_______________________________________________________________________________
-//
-Analysis::DecayParticle::~DecayParticle() {
+    std::string out( fName );
 
-  if ( fPDF )
-    delete fPDF;
+    if ( fParticles.size() != 0 ) {
 
-  if ( fPDFbase.size() )
-    for ( std::vector<RooAbsReal*>::iterator it = fPDFbase.begin();
-	  it != fPDFbase.end(); it++ )
-      delete ( *it );
-}
+      out += "->(";
+      out += fParticles[ 0 ]->GetDecay();
 
-//_______________________________________________________________________________
-//
-std::string Analysis::DecayParticle::GetDecay() {
-
-  std::string out( fName );
-
-  if ( fParticles.size() != 0 ) {
-
-    out += "->(";
-    out += fParticles[ 0 ]->GetDecay();
-
-    for ( std::vector<Analysis::DecayParticle*>::iterator it = fParticles.begin() + 1;
-	  it != fParticles.end(); it++ ) {
+      for ( std::vector<DecayParticle*>::iterator it = fParticles.begin() + 1;
+	    it != fParticles.end(); it++ ) {
     
-      out += ", ";
-      out += ( *it )->Name();
+	out += ", ";
+	out += ( *it )->Name();
+      }
+
+      out += ")";
     }
 
-    out += ")";
+    return out;
   }
 
-  return out;
-}
+  //_______________________________________________________________________________
+  //
+  double DecayParticle::GetMass() {
 
-//_______________________________________________________________________________
-//
-double Analysis::DecayParticle::GetMass() {
+    if ( fPDF )
+      fMass = fPDF->GetRandom();
 
-  if ( fPDF )
-    fMass = fPDF->GetRandom();
+    return fMass;
+  }
 
-  return fMass;
-}
+  //_______________________________________________________________________________
+  //
+  unsigned int DecayParticle::GetNparticles() {
 
-//_______________________________________________________________________________
-//
-unsigned int Analysis::DecayParticle::GetNparticles() {
+    unsigned int np( 1 );
 
-  unsigned int np( 1 );
+    for ( std::vector<DecayParticle*>::iterator it = fParticles.begin();
+	  it != fParticles.end(); it++ )
+      np += ( *it )->GetNparticles();
 
-  for ( std::vector<Analysis::DecayParticle*>::iterator it = fParticles.begin();
-	it != fParticles.end(); it++ )
-    np += ( *it )->GetNparticles();
+    return np;
+  }
 
-  return np;
-}
+  //_______________________________________________________________________________
+  //
+  void DecayParticle::Remove( DecayParticle &particle ) {
 
-//_______________________________________________________________________________
-//
-void Analysis::DecayParticle::Remove( Analysis::DecayParticle &particle ) {
+    bool dec( true );
 
-  bool dec( true );
-
-  for ( std::vector<DecayParticle*>::iterator it = fParticles.begin();
-	it != fParticles.end() && dec ; it++ )
-    if ( ( *it ) == &particle ) {
+    for ( std::vector<DecayParticle*>::iterator it = fParticles.begin();
+	  it != fParticles.end() && dec ; it++ )
+      if ( ( *it ) == &particle ) {
 	
-      dec = false;
+	dec = false;
 	
-      fParticles.erase( it );
+	fParticles.erase( it );
 
-      fNdaughters--;
+	fNdaughters--;
+      }
+  }
+
+  //_______________________________________________________________________________
+  //
+  void DecayParticle::SetBranches( TTree *tree ) {
+
+    std::string
+      br_name,
+      mag[ 6 ] = { "_M", "_PX", "_PY", "_PZ", "_PE", "_GenWeight" };
+
+    br_name = fName + mag[ 0 ];
+    tree->Branch( br_name.c_str(), &fMass, ( br_name + "/D" ).c_str() );
+    std::cout << " " << br_name;
+
+    for ( unsigned int i = 1; i < 5; i++ ) {
+
+      br_name = fName + mag[ i ];
+      tree->Branch( br_name.c_str(), &fVector( i - 1 ), ( br_name + "/D" ).c_str() );
+      std::cout << ", " << br_name;
     }
-}
+    if ( fNdaughters != 0 ) {
 
-//_______________________________________________________________________________
-//
-void Analysis::DecayParticle::SetBranches( TTree *tree ) {
+      br_name = fName + mag[ 5 ];
+      tree->Branch( br_name.c_str(), &fGenWeight, ( br_name + "/D" ).c_str() );
+      std::cout << ", " << br_name;
+    } 
+    std::cout << std::endl;
 
-  std::string
-    br_name,
-    mag[ 6 ] = { "_M", "_PX", "_PY", "_PZ", "_PE", "_GenWeight" };
-
-  br_name = fName + mag[ 0 ];
-  tree->Branch( br_name.c_str(), &fMass, ( br_name + "/D" ).c_str() );
-  std::cout << " " << br_name;
-
-  for ( unsigned int i = 1; i < 5; i++ ) {
-
-    br_name = fName + mag[ i ];
-    tree->Branch( br_name.c_str(), &fVector( i - 1 ), ( br_name + "/D" ).c_str() );
-    std::cout << ", " << br_name;
+    for ( std::vector<DecayParticle*>::iterator it = fParticles.begin();
+	  it != fParticles.end(); it++ ) ( *it )->SetBranches( tree );
   }
-  if ( fNdaughters != 0 ) {
 
-    br_name = fName + mag[ 5 ];
-    tree->Branch( br_name.c_str(), &fGenWeight, ( br_name + "/D" ).c_str() );
-    std::cout << ", " << br_name;
-  } 
-  std::cout << std::endl;
+  //_______________________________________________________________________________
+  //
+  void DecayParticle::SetDistribution( double width, double sigma ) {
 
-  for ( std::vector<Analysis::DecayParticle*>::iterator it = fParticles.begin();
-	it != fParticles.end(); it++ ) ( *it )->SetBranches( tree );
-}
+    RooAbsPdf  *pdf = 0;
+    RooRealVar *rmass = new RooRealVar( "rmass", "rmass",
+					fMass - 3*( width + sigma ),
+					fMass + 3*( width + sigma ) );
 
-//_______________________________________________________________________________
-//
-void Analysis::DecayParticle::SetDistribution( double width, double sigma ) {
+    if ( width || sigma ) {
+      if ( width && !sigma )
+	pdf = new RooBreitWigner( "BMass", "BMass",
+				  *rmass,
+				  RooFit::RooConst( fMass ),
+				  RooFit::RooConst( width ) );
+      else if ( !width && sigma )
+	pdf = new RooGaussian( "GMass", "GMass",
+			       *rmass,
+			       RooFit::RooConst( fMass ),
+			       RooFit::RooConst( sigma ) );
+      else if ( width && sigma )
+	pdf = new RooVoigtian( "VMass", "VMass",
+			       *rmass,
+			       RooFit::RooConst( fMass ),
+			       RooFit::RooConst( width ),
+			       RooFit::RooConst( sigma ) );
 
-  RooAbsPdf  *pdf = 0;
-  RooRealVar *rmass = new RooRealVar( "rmass", "rmass",
-				      fMass - 3*( width + sigma ),
-				      fMass + 3*( width + sigma ) );
+      fPDF = pdf->asTF( RooArgList( *rmass ) );
 
-  if ( width || sigma ) {
-    if ( width && !sigma )
-      pdf = new RooBreitWigner( "BMass", "BMass",
-				*rmass,
-				RooFit::RooConst( fMass ),
-				RooFit::RooConst( width ) );
-    else if ( !width && sigma )
-      pdf = new RooGaussian( "GMass", "GMass",
-			     *rmass,
-			     RooFit::RooConst( fMass ),
-			     RooFit::RooConst( sigma ) );
-    else if ( width && sigma )
-      pdf = new RooVoigtian( "VMass", "VMass",
-			     *rmass,
-			     RooFit::RooConst( fMass ),
-			     RooFit::RooConst( width ),
-			     RooFit::RooConst( sigma ) );
-
-    fPDF = pdf->asTF( RooArgList( *rmass ) );
-
-    fPDFbase.push_back( pdf );
-    fPDFbase.push_back( rmass );
+      fPDFbase.push_back( pdf );
+      fPDFbase.push_back( rmass );
+    }
+    else
+      fVector.SetXYZM( 0, 0, 0, fMass );
   }
-  else
-    fVector.SetXYZM( 0, 0, 0, fMass );
-}
 
-//_______________________________________________________________________________
-//
-void Analysis::DecayParticle::GenPhaseSpace( double px, double py, double pz ) {
+  //_______________________________________________________________________________
+  //
+  void DecayParticle::GenPhaseSpace( double px, double py, double pz ) {
 
-  double masses[ fNdaughters ];
+    double masses[ fNdaughters ];
 
-  for ( unsigned int i = 0; i < fNdaughters; i++ )
-    masses[ i ] = fParticles[ i ]->GetMass();
+    for ( unsigned int i = 0; i < fNdaughters; i++ )
+      masses[ i ] = fParticles[ i ]->GetMass();
   
-  fPHSP.SetDecay( fVector, fNdaughters, masses );
+    fPHSP.SetDecay( fVector, fNdaughters, masses );
 
-  fGenWeight = fPHSP.Generate();
+    fGenWeight = fPHSP.Generate();
 
-  for ( unsigned int i = 0; i < fNdaughters; i++ ) {
+    for ( unsigned int i = 0; i < fNdaughters; i++ ) {
 
-    fParticles[ i ]->SetPxPyPzE( fPHSP.GetDecay( i )->Px(),
+      fParticles[ i ]->SetPxPyPzE( fPHSP.GetDecay( i )->Px(),
 				   fPHSP.GetDecay( i )->Py(),
 				   fPHSP.GetDecay( i )->Pz(),
 				   fPHSP.GetDecay( i )->E() );
 
-    if ( fParticles[ i ]->fNdaughters != 0 )
-      fParticles[ i ]->GenPhaseSpace();
+      if ( fParticles[ i ]->fNdaughters != 0 )
+	fParticles[ i ]->GenPhaseSpace();
+    }
   }
+
 }

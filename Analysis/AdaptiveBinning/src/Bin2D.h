@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -30,7 +30,7 @@
 
 //______________________________________________________________________________
 
-namespace Analysis {
+namespace Isis {
 
   class AdaptiveBinning2D;
 
@@ -135,19 +135,19 @@ namespace Analysis {
 
   //______________________________________________________________________________
   //
-  inline const double Analysis::Bin2D::GetXmax() const { return fXmax; }
+  inline const double Bin2D::GetXmax() const { return fXmax; }
 
   //______________________________________________________________________________
   //
-  inline const double Analysis::Bin2D::GetXmin() const { return fXmin; }
+  inline const double Bin2D::GetXmin() const { return fXmin; }
 
   //______________________________________________________________________________
   //
-  inline const double Analysis::Bin2D::GetYmax() const { return fYmax; }
+  inline const double Bin2D::GetYmax() const { return fYmax; }
 
   //______________________________________________________________________________
   //
-  inline const double Analysis::Bin2D::GetYmin() const { return fYmin; }
+  inline const double Bin2D::GetYmin() const { return fYmin; }
 
 }
 

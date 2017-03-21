@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 21/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -17,16 +17,22 @@
 
 
 //_______________________________________________________________________________
-//
-Analysis::ClusterPoint::ClusterPoint( const size_t &nvars, const double &wgt ) :
-  fValues( nvars ), fWeight( wgt ) { }
 
-//_______________________________________________________________________________
-//
-Analysis::ClusterPoint::ClusterPoint( const std::vector<double> &values,
-				      const double &wgt ) :
-  fValues( values ), fWeight( wgt ) { }
+namespace Isis {
 
-//_______________________________________________________________________________
-//
-Analysis::ClusterPoint::~ClusterPoint() { };
+  //_______________________________________________________________________________
+  //
+  ClusterPoint::ClusterPoint( const size_t &nvars, const double &wgt ) :
+    fValues( nvars ), fWeight( wgt ) { }
+
+  //_______________________________________________________________________________
+  //
+  ClusterPoint::ClusterPoint( const std::vector<double> &values,
+			      const double &wgt ) :
+    fValues( values ), fWeight( wgt ) { }
+
+  //_______________________________________________________________________________
+  //
+  ClusterPoint::~ClusterPoint() { };
+
+}
