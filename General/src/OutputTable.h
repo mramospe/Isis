@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 22/03/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -126,13 +126,13 @@ namespace Isis {
     size_t fNlines;
 
     // Vector to store the number of variables to be printed and the precision for each
-    std::vector<size_t> fPrecisions;
+    Sizes fPrecisions;
 
     // Internal variable to separate blocks
     std::string fSeparator;
 
     // Vector storing the size of the elements to be printed in each column
-    std::vector<size_t> fSizes;
+    Sizes fSizes;
 
     // Length of the variables which are strings
     unsigned short int fStrLength;

@@ -42,6 +42,10 @@ namespace Isis {
   using Doubles = std::vector<double>;
 
   //_______________________________________________________________________________
+  // Define a vector of size values
+  using Sizes = std::vector<size_t>;
+  
+  //_______________________________________________________________________________
   // Define a vector of strings
   using Strings = std::vector<std::string>;
 

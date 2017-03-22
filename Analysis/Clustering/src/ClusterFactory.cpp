@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 22/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -554,7 +554,7 @@ namespace Isis {
   void ClusterFactory::RandomCentersOfMass() {
   
     // Generates a random vector with the position associated with each center of mass
-    std::vector<size_t> positions( fClusters.size() );
+    Sizes positions( fClusters.size() );
     size_t rndm;
     for ( auto it = positions.begin(); it != positions.end(); ++it ) {
       do {
@@ -565,7 +565,7 @@ namespace Isis {
 
     // Attaches one center of mass to each cluster
     std::vector<Cluster>::iterator it;
-    std::vector<size_t>::iterator itp;
+    Sizes::iterator itp;
     for ( it = fClusters.begin(), itp = positions.begin(); it != fClusters.end(); ++it, ++itp )
       it->InitCenterOfMass( fPoints[ *itp ] );
 

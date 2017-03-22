@@ -12,6 +12,7 @@ echo "*** Isis project (v@PROJECT_VERSION@)***"
 export ISIS_ROOT="@CMAKE_BINARY_DIR@"
 export ISIS_BIN="@INSTALL_BIN_DIR@"
 export ISIS_LIB="@INSTALL_LIB_DIR@"
+export ISIS_INCLUDE="@INSTALL_INCLUDE_DIR@"
 export ISIS_PYTHON="@INSTALL_PYTHON_DIR@"
 
 # Displays the path to the Isis folder
