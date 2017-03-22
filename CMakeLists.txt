@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 21/03/2017
+#  Last update: 22/03/2017
 #
 #  Description:
 #
@@ -19,6 +19,10 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 cmake_policy(SET CMP0048 NEW)
 project(Isis VERSION 3.1)
+
+#----------------------------------------------------------------------------
+# C++ compiler flags
+set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11 -pthread -Wno-unused-local-typedefs")
 
 #----------------------------------------------------------------------------
 # Suffix for the shared libraries
@@ -38,21 +42,11 @@ endif()
 #----------------------------------------------------------------------------
 # The path to the FindROOT.cmake file is specified here
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${USER_ROOT_PATH}/etc/cmake)
-find_package(ROOT REQUIRED)
+set(ROOT_LIB_SET
+  Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics
+  MathCore Thread EG Html RooFitCore Minuit RooFit PyROOT)
+find_package(ROOT REQUIRED COMPONENTS ${ROOT_LIB_SET})
 include_directories(${ROOT_INCLUDE_DIR})
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/bin/./Isis-config --rlibs
-  OUTPUT_VARIABLE ROOT_LIBRARIES
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-#----------------------------------------------------------------------------
-# Sets the compiler flags
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/bin/./Isis-config --cflags
-  OUTPUT_VARIABLE CMAKE_CXX_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
 
 #----------------------------------------------------------------------------
 # Set the installation directories
@@ -137,15 +131,6 @@ endfunction()
 #============================================================================
 
 #----------------------------------------------------------------------------
-# The python folder is the only one which is not entirely copied
-if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
-  file(MAKE_DIRECTORY ${INSTALL_PYTHON_DIR}/Isis)
-  copy_directory(${PROJECT_SOURCE_DIR}/scripts ${INSTALL_SCRIPTS_DIR})
-  copy_directory(${PROJECT_SOURCE_DIR}/examples ${INSTALL_EXAMPLES_DIR})
-  copy_directory(${PROJECT_SOURCE_DIR}/bin ${INSTALL_BIN_DIR})
-endif()
-
-#----------------------------------------------------------------------------
 # Makes the directory for the include files
 set(INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${INSTALL_INCLUDE_DIR})
@@ -167,6 +152,29 @@ add_subdirectory(General)
 add_subdirectory(Analysis)
 list(REVERSE PROJECT_LIBRARIES)
 add_subdirectory(python)
+
+#----------------------------------------------------------------------------
+# Generate two lists with the libraries from Root and this project prepended
+# by "-l" and ordered following the dependencies
+function(format_lib_list var prefix)
+  set(list)
+  foreach(f ${ARGN})
+    list(APPEND list "${prefix}${f}")
+  endforeach(f)
+  string(REPLACE ";" " " list "${list}")
+  set(${var} "${list}" PARENT_SCOPE)
+endfunction(format_lib_list)
+
+format_lib_list(ROOT_LIBRARIES_TO_LD "-l" ${ROOT_LIB_SET})
+format_lib_list(PROJECT_LIBRARIES_TO_LD "-l" ${PROJECT_LIBRARIES})
+
+#----------------------------------------------------------------------------
+# The python folder is the only one which is not entirely copied
+if(NOT ${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
+  copy_directory(${PROJECT_SOURCE_DIR}/scripts ${INSTALL_SCRIPTS_DIR})
+  copy_directory(${PROJECT_SOURCE_DIR}/examples ${INSTALL_EXAMPLES_DIR})
+  copy_directory(${PROJECT_SOURCE_DIR}/bin ${INSTALL_BIN_DIR})
+endif()
 
 #----------------------------------------------------------------------------
 # Build the example files if the option BUILD_EXAMPLES is set to ON

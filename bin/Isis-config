@@ -1,45 +1,72 @@
-#=======================================================#
-# Configuration script to compile the Isis c++ packages #
-#-------------------------------------------------------#
-# AUTHOR: Miguel Ramos Pernas		                #
-# e-mail: miguel.ramos.pernas@cern.ch	                #
-#=======================================================#
+#!/bin/bash
+#=================================================#
+# Script to extract the build information of Isis #
+#-------------------------------------------------#
+# AUTHOR: Miguel Ramos Pernas		          #
+# e-mail: miguel.ramos.pernas@cern.ch	          #
+#=================================================#
+
+# Help for this script
+usage="
+$(basename "$0") [--cflags] [--help | -h] [--incdirs] [--libs] [--version]
+
+Return information about the Isis configuration:
+
+--cflags    : C++ compiler flags used to compile the Isis project
+--help | -h : Display this information message
+--incdirs   : Include directories for both Root and Isis headers
+--libs      : Paths to Root and Isis libraries with their names
+--version   : Isis version
+"
 
 # C++ flags
-cflags="-Wall -O2 -std=c++11 -pthread -Wno-unused-local-typedefs"
+cflags="@CMAKE_CXX_FLAGS@"
 
 # Paths to the include folders
-iinclude=-I$ISIS_ROOT/include
-rinclude=-I`root-config --incdir`
+iinclude="-I@INSTALL_INCLUDE_DIR@"
+rinclude="-I@ROOT_INCLUDE_DIR@"
 
 # C++ libraries (both Root and Isis)
-rlibs=`root-config --libs`" -lEG -lHtml -lRooFitCore -lMinuit -lRooFit -lPyROOT"
-ilibs=-L$ISIS_LIB" "-lRFExt" "-lAdBin" "-lStats" "-lWgts" "-lCluster" "-lAnalysis" "-lGeneral
+rlibs="-L@ROOT_LIBRARY_DIR@ @ROOT_LIBRARIES_TO_LD@"
+ilibs="-L@INSTALL_LIB_DIR@ @PROJECT_LIBRARIES_TO_LD@"
+alibs="$rlibs $ilibs"
 
 out=""
 
-for opt in $@
+while [[ $# -gt 0 ]]
 do
-    if [ "$opt" = "--cflags" ]; then
-	add=$cflags
-    elif [ "$opt" = "--incdirs" ]; then
-	add=$rinclude" "$iinclude
-    elif [ "$opt" = "--rlibs" ]; then
-	add=$rlibs
-    elif [ "$opt" = "--libs" ]; then
-	add=$ilibs" "$rlibs
-    else
-	echo " Isis configuration option < $opt > not known"
-	break
-    fi
-    
-    if [ "$out" = "" ]; then
-       	 out=$add
-    else
-	 out="$out $add"
-    fi
+    key="$1"
+
+    case $key in
+	-h|--help)
+	    echo "$usage"
+	    exit
+	    ;;
+	--cflags)
+	    out="$out $cflags"
+	    shift
+	    ;;
+	--incdirs)
+	    out="$out $rinclude $iinclude"
+	    shift
+	    ;;
+	--libs)
+	    out="$out $alibs"
+	    shift
+	    ;;
+	--version)
+	    out="$out @PROJECT_VERSION@"
+	    shift
+	    ;;
+	*)
+	    echo "ERROR: Unknown option: $key"
+	    exit
+	    ;;
+    esac
 done
 
 if [ "$out" != "" ]; then
-   echo $out
+    echo "${out:1}"
+else
+    echo "$usage"
 fi
