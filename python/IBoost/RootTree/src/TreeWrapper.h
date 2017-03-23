@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -47,27 +47,27 @@ namespace IBoost {
     BuffVarWriter( Isis::BufferVariable *var, boost::python::list lst );
     ~BuffVarWriter();
 
-    void AutoAppend();
+    void autoAppend();
 
     Isis::BufferVariable *Var;
-    boost::python::list      List;
+    boost::python::list   List;
   };
 
   
   // FUNCTIONS
-  boost::python::dict BoostDictFromTree( const char *fpath,
-					 const char *tpath,
-					 boost::python::object &vars,
-					 const char *cuts = 0 );
-  boost::python::object BoostDictToTree( boost::python::tuple args,
+  boost::python::dict treeToBoostDict( const char *fpath,
+				       const char *tpath,
+				       boost::python::object &vars,
+				       const char *cuts = 0 );
+  boost::python::object boostDictToTree( boost::python::tuple args,
 					 boost::python::dict kwargs );
-  boost::python::list BoostListFromTree( const char *fpath,
-					 const char *tpath,
-					 const char *var,
-					 const char *cuts = 0 );
-  boost::python::object BoostListToTree( boost::python::tuple args,
+  boost::python::list treeToBoostList( const char *fpath,
+				       const char *tpath,
+				       const char *var,
+				       const char *cuts = 0 );
+  boost::python::object boostListToTree( boost::python::tuple args,
 					 boost::python::dict kwargs );
-  char PyTypeFromObject( boost::python::object object );
+  char pyTypeFromObject( boost::python::object object );
 
 }
   

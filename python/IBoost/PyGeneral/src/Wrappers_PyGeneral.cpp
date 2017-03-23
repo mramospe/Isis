@@ -53,28 +53,28 @@ namespace CutMgr {
 namespace Msg {
 
   // Function to send a formatted message
-  void SendFormattedMsg( const std::string &msg,
+  void sendFormattedMsg( const std::string &msg,
 			 const int &fgcol = Isis::ANSIFormat::aNoColor,
 			 const int &bgcol = Isis::ANSIFormat::aNoColor,
 			 const int &sty = Isis::ANSIFormat::aNoStyle ) {
 
     Isis::Messenger("", std::cout, fgcol, bgcol, sty) << msg << IEndMsg;
   }
-  BOOST_PYTHON_FUNCTION_OVERLOADS(SendFormattedMsg_Overloads,
-				  SendFormattedMsg,
+  BOOST_PYTHON_FUNCTION_OVERLOADS(sendFormattedMsg_Overloads,
+				  sendFormattedMsg,
 				  1, 4);
 
   // Function to send an usual message
-  void SendMsg( const std::string &msg ) { IBegMsg << msg << IEndMsg; }
+  void sendMsg( const std::string &msg ) { IBegMsg << msg << IEndMsg; }
 
   // Function to send an error message
-  void SendErrorMsg( const std::string &msg ) { IError << msg << IEndMsg; }
+  void sendErrorMsg( const std::string &msg ) { IError << msg << IEndMsg; }
 
   // Function to send an information message
-  void SendInfoMsg( const std::string &msg ) { IInfo << msg << IEndMsg; }
+  void sendInfoMsg( const std::string &msg ) { IInfo << msg << IEndMsg; }
 
   // Function to send a warning message
-  void SendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
+  void sendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
 }
 
 BOOST_PYTHON_MODULE( PyGeneral ) {
@@ -97,11 +97,11 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
   py::scope().attr("ISIS_VERSION") = ISIS_VERSION;
   
   // Wrappers from GlobalMessenger.h
-  py::def("SendFormattedMsg", &Msg::SendFormattedMsg, Msg::SendFormattedMsg_Overloads());
-  py::def("SendMsg"         , &Msg::SendMsg);
-  py::def("SendErrorMsg"    , &Msg::SendErrorMsg);
-  py::def("SendInfoMsg"     , &Msg::SendInfoMsg);
-  py::def("SendWarningMsg"  , &Msg::SendWarningMsg);
+  py::def("sendFormattedMsg", &Msg::sendFormattedMsg, Msg::sendFormattedMsg_Overloads());
+  py::def("sendMsg"         , &Msg::sendMsg);
+  py::def("sendErrorMsg"    , &Msg::sendErrorMsg);
+  py::def("sendInfoMsg"     , &Msg::sendInfoMsg);
+  py::def("sendWarningMsg"  , &Msg::sendWarningMsg);
 
   { // ANSIFormat scope
     class ANSIFormatNSP { };

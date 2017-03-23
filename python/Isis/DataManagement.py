@@ -25,10 +25,9 @@ import numpy as np
 
 import ROOT as rt
 
-from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
-from Isis.IBoost.RootTree import DictFromTree, ListFromTree, TreeFromDict, TreeFromList
-from Isis.Algebra import LongVector, Matrix
-from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
+from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
+from Isis.IBoost.RootTree import treeToDict, treeToList, dictToTree, listToTree
+from Isis.Utils import formatEvalExpr, joinDicts, mergeDicts, stringListFilter
 
 
 class DataMgr( dict ):
@@ -47,7 +46,7 @@ class DataMgr( dict ):
         - ftype: Type for the input file.
         - variables: List of variables to be booked.
         - colid: In case of loading a txt file, it refers to the columns to be
-        added (see function < DictFromTxt >.
+        added (see function < txtToDict >.
         
         All the constructors finally call the constructor given a
         dictionary-like class.
@@ -56,13 +55,13 @@ class DataMgr( dict ):
         if isinstance( path, str ):
             if ftype:
                 if ftype == 'root':
-                    self.__init__( name, DictFromTree( path, tree, variables ) )
+                    self.__init__( name, treeToDict( path, tree, variables ) )
                 elif ftype == 'txt':
-                    self.__init__( name, DictFromTxt( path, variables, colid ) )
+                    self.__init__( name, txtToDict( path, variables, colid ) )
                 else:
-                    SendErrorMsg('%s => Unknown input file type < %s >' %(name, ftype))
+                    sendErrorMsg('%s => Unknown input file type < %s >' %(name, ftype))
             else:
-                SendErrorMsg('%s => The input file type must be specified' %name)
+                sendErrorMsg('%s => The input file type must be specified' %name)
         else:
             for kw, lst in path.iteritems():
                 self[ kw ] = list( lst )
@@ -72,7 +71,7 @@ class DataMgr( dict ):
         
             wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
             if wrong:
-                SendErrorMsg('%s => The lists stored in the manager '\
+                sendErrorMsg('%s => The lists stored in the manager '\
                              'have different lengths' %self.Name)
 
     def __add__( self, other ):
@@ -85,7 +84,7 @@ class DataMgr( dict ):
             mgr[ var ] = self[ var ] + other[ var ]
         no_booked = set( self.keys() + other.keys() ).difference( true_vars )
         if no_booked:
-            SendWarningMsg('%s => The following variables are not '\
+            sendWarningMsg('%s => The following variables are not '\
                            'booked: %s' %(mgr.Name, no_booked))
         return mgr
 
@@ -120,9 +119,9 @@ class DataMgr( dict ):
             raise StopIteration
         else:
             self.Iterator += 1
-            return self.GetEventDict( self.Iterator - 1 )
+            return self.getEventDict( self.Iterator - 1 )
             
-    def Copy( self, name = '' ):
+    def copy( self, name = '' ):
         '''
         Returns a copy of this class
         '''
@@ -130,14 +129,14 @@ class DataMgr( dict ):
             name = self.Name + '_copy'
         return DataMgr( name, self )
     
-    def GetCutList( self, cut, mathmod = math ):
+    def getCutList( self, cut, mathmod = math ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
-        cut, variables = FormatEvalExpr( cut, mathmod )
+        cut, variables = formatEvalExpr( cut, mathmod )
         varstoadd = [ v for v in variables if v not in self ]
         if varstoadd:
-            SendErrorMsg('Need to load additional variables to apply the cuts: %s'
+            sendErrorMsg('Need to load additional variables to apply the cuts: %s'
                          %varstoadd)
             return
         values = [ self[ var ] for var in variables ]
@@ -145,26 +144,26 @@ class DataMgr( dict ):
             cut = cut.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
         return eval( '[ ievt for ievt in xrange( len( self ) ) if ' + cut + ' ]' )
 
-    def GetEntries( self, selection = False, mathmod = math ):
+    def getEntries( self, selection = False, mathmod = math ):
         '''
         Gets the number of entries of the class. If a cut selection is given, it is
         calculated the number of events that satisfy those cuts.
         '''
         if self.keys():
             if selection:
-                return len(self.GetCutList(selection, mathmod))
+                return len(self.getCutList(selection, mathmod))
             else:
                 return len(next(self.itervalues()))
         else:
-            SendErrorMsg('Attempting to get entries from an empty data manager')
+            sendErrorMsg('Attempting to get entries from an empty data manager')
 
-    def GetEventDict( self, ievt ):
+    def getEventDict( self, ievt ):
         '''
         Returns a dictionary with the values of the variables at the given entry
         '''
         return dict( ( var, values[ ievt ] ) for var, values in self.iteritems() )
 
-    def GetEventTuple( self, ievt, *args ):
+    def getEventTuple( self, ievt, *args ):
         '''
         Gets the event at position ievt. Allows to get only the variables in < args >
         in the order specified.
@@ -174,13 +173,13 @@ class DataMgr( dict ):
         else:
             return tuple( [ values[ ievt ] for var, values in self.iteritems() ] )
 
-    def GetNvars( self ):
+    def getNvars( self ):
         '''
         Gets the number of variables in the class
         '''
         return len(self.keys())
 
-    def VarEvents( self, variables, cuts = False, mathmod = math ):
+    def varEvents( self, variables, cuts = False, mathmod = math ):
         '''
         Return a list of lists with the values associated with < variables >. If
         an element in < variables > is a variable, it gets the list of values for
@@ -188,7 +187,7 @@ class DataMgr( dict ):
         '''
         
         if cuts:
-            entries = self.GetCutList( cuts, mathmod )
+            entries = self.getCutList( cuts, mathmod )
         else:
             entries = xrange( len( self ) )
         
@@ -198,7 +197,7 @@ class DataMgr( dict ):
             if v in self:
                 fvars.append( v )
             else:
-                v, newv = FormatEvalExpr( v, mathmod )
+                v, newv = formatEvalExpr( v, mathmod )
                 fvars += newv 
             ''' The module is not imported, so the name must change '''
             truevars.append( v.replace( mathmod.__name__, 'mathmod' ) )
@@ -218,7 +217,7 @@ class DataMgr( dict ):
             cmd += ', output[ %i ]' %i
         return eval( cmd )
 
-    def MakeVariable( self, varname, arg, function = False ):
+    def makeVariable( self, varname, arg, function = False ):
         '''
         Makes another variable using those in the class. There are two different
         ways to do it. The first one consists on specifying the new variable name,
@@ -239,9 +238,9 @@ class DataMgr( dict ):
                 new_variable[ ievt ] = function( *values )
             self[ varname ] = new_variable
         else:
-            self[ varname ] = self.VarEvents( arg )
+            self[ varname ] = self.varEvents( arg )
 
-    def NewEvent( self, dic ):
+    def newEvent( self, dic ):
         '''
         Adds a new event to the manager. Values for all the variables have to be
         provided.
@@ -249,7 +248,7 @@ class DataMgr( dict ):
         for key, values in self.iteritems():
             values.append( dic[ key ] )
 
-    def Print( self, variables = [], cuts = '', mathmod = math, evts = -1, prec = 3 ):
+    def display( self, variables = [], cuts = '', mathmod = math, evts = -1, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -259,7 +258,7 @@ class DataMgr( dict ):
         '''
         
         if not self:
-            SendErrorMsg('%s => No variables booked in this manager' %self.Name)
+            sendErrorMsg('%s => No variables booked in this manager' %self.Name)
             return
         
         form = '%.' + str( prec ) + 'e'
@@ -298,7 +297,7 @@ class DataMgr( dict ):
         
         ''' Prints the values of the variables '''
         if cuts != '':
-            evtlst = self.GetCutList( cuts, mathmod )
+            evtlst = self.getCutList( cuts, mathmod )
         else:
             evtlst = xrange( len( self ) )
 
@@ -308,7 +307,7 @@ class DataMgr( dict ):
                 if i == evts: break
                 i += 1
                 vout = '| '
-                for var in self.GetEventTuple( ievt, *variables ):
+                for var in self.getEventTuple( ievt, *variables ):
                     vout += ( form %var ).rjust( maxsize ) + ' |'
                 print vout
             print deco + '\n'
@@ -319,13 +318,13 @@ class DataMgr( dict ):
                         '< Introduce q to exit, and any other input to continue printing >: '
                         ) == 'q': break
                 vout = '| '
-                for var in self.GetEventTuple( ievt, *variables ):
+                for var in self.getEventTuple( ievt, *variables ):
                     vout += ( form %var ).rjust( maxsize ) + ' |'
                 print vout
             if ievt + 1 == len( evtlst ):
                 print deco + '\n'
 
-    def RunCutEntries( self, var,
+    def runCutEntries( self, var,
                        sense    = '>',
                        npoints  = 100,
                        vmin     = None,
@@ -336,7 +335,7 @@ class DataMgr( dict ):
         from < vmin > to < vmax > in < npoints >.
         '''
         if sense not in ('>', '>=', '<', '<='):
-            SendErrorMsg('Unable to parse < %s > as a sense-like symbol')
+            sendErrorMsg('Unable to parse < %s > as a sense-like symbol')
             return
 
         values = self[var]
@@ -353,11 +352,11 @@ class DataMgr( dict ):
         points = []
         for ic in cuts:
             ct = var + str(ic)
-            points.append(self.GetEntries(ct))
+            points.append(self.getEntries(ct))
 
         return points
                 
-    def Save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
+    def save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
         '''
         Saves the given class values in a TTree. If < name > is not provided, the
         tree will be written in the external directory (to be constructed and
@@ -377,7 +376,7 @@ class DataMgr( dict ):
                 ofile = False
                 name  = rt.gDirectory.GetName()
             print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
-            TreeFromDict( self, name = tree_name, variables = variables )
+            dictToTree( self, name = tree_name, variables = variables )
             print self.Name, '=> Written', len( self ), 'entries'
             if ofile and close:
                 ofile.Close()
@@ -401,7 +400,7 @@ class DataMgr( dict ):
             else:
                 return ofile
     
-    def SubSample( self, name = '', cuts = '', mathmod = math, evts = -1, varset = '*' ):
+    def subSample( self, name = '', cuts = '', mathmod = math, evts = -1, varset = '*' ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be
@@ -415,7 +414,7 @@ class DataMgr( dict ):
         if name == '':
             name = self.Name + '_SubSample'
         if 'cuts' != '':
-            evtlst = self.GetCutList( cuts, mathmod )
+            evtlst = self.getCutList( cuts, mathmod )
         else:
             evtlst = evts
             
@@ -428,7 +427,7 @@ class DataMgr( dict ):
         return cmgr
 
 
-def DictFromTxt( fname, tnames = [], colid = [] ):
+def txtToDict( fname, tnames = [], colid = [] ):
     '''
     Creates a new dictionary containing the values of the variables stored on
     a txt file. The file path is specified in < fname >, while the names of the
@@ -449,14 +448,14 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
             tnames = [ line[ i ] for i in colid ]
         line = ifile.readline().split()
     elif any( isinstance( line[ i ], str ) for i in colid ):
-        SendErrorMsg('The first line of the input file has not the correct format')
+        sendErrorMsg('The first line of the input file has not the correct format')
         return
     else:
         if not tnames:
-            SendErrorMsg('The names of the variables in the colid have to be specified')
+            sendErrorMsg('The names of the variables in the colid have to be specified')
             return
         elif len( tnames ) != len( colid ):
-            SendErrorMsg('The names of the variables and the column index must match')
+            sendErrorMsg('The names of the variables and the column index must match')
             return
     convfuncs, varvalues = [], []
     for index, icol in enumerate( colid ):
@@ -470,7 +469,7 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
                 float( value )
                 convfuncs.append( float )
             except:
-                SendErrorMsg('Format for column < %s > not recognised' %i)
+                sendErrorMsg('Format for column < %s > not recognised' %i)
         varvalues.append( [ convfuncs[ -1 ]( value ) ] )
     for line in ifile:
         line = line.split()
@@ -480,7 +479,7 @@ def DictFromTxt( fname, tnames = [], colid = [] ):
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
 
 
-def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
+def varsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
     '''
     Return variables in a tree. If < regexps > are provided, only variables
     matching it will be returned.
@@ -499,7 +498,7 @@ def VarsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
             if addlst != []:
                 truenames += addlst
             else:
-                SendWarningMsg('No variables found matching '\
+                sendWarningMsg('No variables found matching '\
                                'expression < %s >' %expr)
         return truenames
     else:

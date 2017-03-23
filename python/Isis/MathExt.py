@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/02/2017
+#//  Last update: 23/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -22,7 +22,7 @@
 from math import sqrt, floor
 
 
-def Decompose( number ):
+def decompose( number ):
     '''
     Decomposes the given number in the smallest multiples. The result is given in
     a list, which is automatically ordered from the minimum multiple to the
@@ -38,7 +38,7 @@ def Decompose( number ):
     return result
 
 
-def GreaterComDiv( *args ):
+def greaterComDiv( *args ):
     '''
     Calculates the greater common divisor of a set of numbers
     '''
@@ -48,7 +48,7 @@ def GreaterComDiv( *args ):
     return cnt
 
 
-def IsPrime( number ):
+def isPrime( number ):
     '''
     Checks if the given number is a prime number
     '''
@@ -61,7 +61,7 @@ def IsPrime( number ):
         return False
 
 
-def IsSquare( number ):
+def isSquare( number ):
     '''
     Checks if the given number is a pure square number
     '''
@@ -74,7 +74,7 @@ def IsSquare( number ):
         return False
 
 
-def LeastComMult( *args ):
+def leastComMult( *args ):
     '''
     Calculates the least common multiple of a set of numbers
     '''
@@ -84,7 +84,7 @@ def LeastComMult( *args ):
     return cnt
 
 
-def NearestSquare( number ):
+def nearestSquare( number ):
     '''
     Calculates the nearest perfect square number to the one given
     '''
@@ -97,7 +97,7 @@ def NearestSquare( number ):
         return round( upsqrt )
 
 
-def SumQuad( *values ):
+def sumQuad( *values ):
     '''
     Sum the input values in quadrature
     '''

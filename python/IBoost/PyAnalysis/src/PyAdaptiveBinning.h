@@ -40,7 +40,7 @@ namespace AdBin {
   //
   py::list GetBinList( const Isis::AdaptiveBinning &adbin ) {
   
-    return IBoost::StdVecToBoostList( adbin.GetBinList() );
+    return IBoost::stdVecToBoostList( adbin.GetBinList() );
   }
 
   //_______________________________________________________________________________
@@ -65,8 +65,8 @@ namespace AdBin1D {
 							  py::list values,
 							  py::list weights ) {
   
-    auto vec_values  = IBoost::BoostListToStdVec<double>( values );
-    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
+    auto vec_values  = IBoost::boostListToStdVec<double>( values );
+    auto vec_weights = IBoost::boostListToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning1D(occ, vmin, vmax,
 						   vec_values, vec_weights);
   
@@ -107,9 +107,9 @@ namespace AdBin2D {
 							  py::list yvalues,
 							  py::list weights ) {
   
-    auto vec_xvalues = IBoost::BoostListToStdVec<double>( xvalues );
-    auto vec_yvalues = IBoost::BoostListToStdVec<double>( yvalues );
-    auto vec_weights = IBoost::BoostListToStdVec<double>( weights );
+    auto vec_xvalues = IBoost::boostListToStdVec<double>( xvalues );
+    auto vec_yvalues = IBoost::boostListToStdVec<double>( yvalues );
+    auto vec_weights = IBoost::boostListToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning2D(occ,
 						   xmin, xmax,
 						   ymin, ymax,

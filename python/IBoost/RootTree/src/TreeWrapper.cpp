@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -69,17 +69,17 @@ IBoost::BuffVarWriter::BuffVarWriter( Isis::BufferVariable *var, py::list lst ) 
 // Destructor
 IBoost::BuffVarWriter::~BuffVarWriter() {  }
 // Appends the current value stored in the BufferVariable object to the python list
-inline void IBoost::BuffVarWriter::AutoAppend() {
-  List.append( IBoost::BoostObjectFromBufferVariable( *Var ) );
+inline void IBoost::BuffVarWriter::autoAppend() {
+  List.append( IBoost::buffVarToBoostObj( *Var ) );
 }
 
 //_______________________________________________________________________________
 // Store in a dictionary the lists with the values for each of the given
 // variables stored in a Root tree. A set of cuts can be specified.
-py::dict IBoost::BoostDictFromTree( const char *fpath,
-				    const char *tpath,
-				    py::object &vars,
-				    const char *cuts ) {
+py::dict IBoost::treeToBoostDict( const char *fpath,
+				  const char *tpath,
+				  py::object &vars,
+				  const char *cuts ) {
   
   TFile *ifile = TFile::Open( fpath );
   TTree *itree = static_cast<TTree*>(Isis::GetSafeObject( ifile, tpath ));
@@ -95,7 +95,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
   std::map<const char*, IBoost::BuffVarWriter*> outmap;
   for ( py::ssize_t i = 0; i < nvars; ++i ) {
 
-    auto var = IBoost::ExtractFromIndex<const char*>(vars, i);
+    auto var = IBoost::extractFromIndex<const char*>(vars, i);
 
     // Get the variables from the given expressions
     Isis::Strings brnames;
@@ -120,7 +120,7 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
     itree->GetEntry( tievt );
     
     for ( auto it = outmap.begin(); it != outmap.end(); ++it )
-      it->second->AutoAppend();
+      it->second->autoAppend();
   }
 
   // Build the output dictionary
@@ -141,12 +141,12 @@ py::dict IBoost::BoostDictFromTree( const char *fpath,
 // Write a python dictionary to a Root tree. Since in python there are only four
 // numeric types: bool, int, long and float; only the associated c++ types
 // are used.
-py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
+py::object IBoost::boostDictToTree( py::tuple args, py::dict kwargs ) {
 
-  IBoost::CheckArgs(args, 1);
-  IBoost::CheckKwargs(kwargs, {"name", "tree", "variables"});
+  IBoost::checkArgs(args, 1);
+  IBoost::checkKwargs(kwargs, {"name", "tree", "variables"});
   
-  py::dict vardict = IBoost::ExtractFromIndex<py::dict>(args, 0);
+  py::dict vardict = IBoost::extractFromIndex<py::dict>(args, 0);
   py::list varkeys = vardict.keys();
 
   // Get the tree name or the given tree
@@ -180,7 +180,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   // track of the types for each variable.
   Isis::TreeBuffer buffer( tree );
 
-  auto vars = IBoost::BoostListToStdVec<std::string>( varkeys );
+  auto vars = IBoost::boostListToStdVec<std::string>( varkeys );
 
   std::map<const char*, IBoost::BuffVarWriter*> varmap;
   
@@ -188,13 +188,13 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   for ( py::ssize_t i = 0; i < nexps; ++i ) {
 
     // Get the variables from the given expressions
-    const char *exp = IBoost::ExtractFromIndex<const char*>(variables, i);
+    const char *exp = IBoost::extractFromIndex<const char*>(variables, i);
     Isis::Strings brnames;
     Isis::StringVectorFilter(brnames, vars, exp);
 
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
       const char *var = it->c_str();
-      char type = IBoost::PyTypeFromObject( vardict[ var ][ 0 ] );
+      char type = IBoost::pyTypeFromObject( vardict[ var ][ 0 ] );
       Isis::BufferVariable *buffvar = buffer.CreateVariable( var, type );
       varmap[ var ] =
 	new IBoost::BuffVarWriter( buffvar,
@@ -203,7 +203,7 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
   }
   
   // Loop over all the events in the dictionary
-  py::ssize_t nvals = IBoost::BoostDictListSize( vardict );
+  py::ssize_t nvals = IBoost::boostDictListSize( vardict );
   for ( py::ssize_t ievt = 0; ievt < nvals; ++ievt ) {
 
     // Loop over all the variables in the dictionary
@@ -242,37 +242,37 @@ py::object IBoost::BoostDictToTree( py::tuple args, py::dict kwargs ) {
 
 //_______________________________________________________________________________
 // Store in a list the values for a variable present in a Root tree
-py::list IBoost::BoostListFromTree( const char *fpath,
-				    const char *tpath,
-				    const char *var,
-				    const char *cuts ) {
+py::list IBoost::treeToBoostList( const char *fpath,
+				  const char *tpath,
+				  const char *var,
+				  const char *cuts ) {
   py::list varlist;
   varlist.append( var );
-  py::dict dict = IBoost::BoostDictFromTree(fpath, tpath, varlist, cuts);
+  py::dict dict = IBoost::treeToBoostDict(fpath, tpath, varlist, cuts);
   return py::extract<py::list>( dict[ var ] );
 }
 
 //_______________________________________________________________________________
 // Create/update a Root tree adding a variable with the given list of values. To
 // see the possible < kwargs > arguments see < BoostDictToTree >.
-py::object IBoost::BoostListToTree( py::tuple args, py::dict kwargs ) {
+py::object IBoost::boostListToTree( py::tuple args, py::dict kwargs ) {
 
-  IBoost::CheckArgs(args, 2);
+  IBoost::checkArgs(args, 2);
   // The check on the kwargs is already made by BoostDictToTree
   
-  const char *var = IBoost::ExtractFromIndex<const char*>(args, 0);
-  py::list values = IBoost::ExtractFromIndex<py::list>(args, 1);
+  const char *var = IBoost::extractFromIndex<const char*>(args, 0);
+  py::list values = IBoost::extractFromIndex<py::list>(args, 1);
 
   py::dict dict;
   dict[ var ] = values;
   
-  return IBoost::BoostDictToTree( py::make_tuple( dict ), kwargs );
+  return IBoost::boostDictToTree( py::make_tuple( dict ), kwargs );
 }
 
 //_______________________________________________________________________________
 // Returns the character corresponding to the python type associated with the
 // given object
-char IBoost::PyTypeFromObject( py::object object ) {
+char IBoost::pyTypeFromObject( py::object object ) {
 
   const PyObject *po = object.ptr();
   

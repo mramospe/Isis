@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/11/2016
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -34,18 +34,18 @@ namespace ib = IBoost;
 
 //_______________________________________________________________________________
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(BoostDictFromTree_Overloads,
-				ib::BoostDictFromTree, 3, 4);
+BOOST_PYTHON_FUNCTION_OVERLOADS(treeToBoostDict_Overloads,
+				ib::treeToBoostDict, 3, 4);
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(BoostListFromTree_Overloads,
-				ib::BoostListFromTree, 3, 4);
+BOOST_PYTHON_FUNCTION_OVERLOADS(treeToBoostList_Overloads,
+				ib::treeToBoostList, 3, 4);
 
 // Definition of the python module
 BOOST_PYTHON_MODULE( RootTree ) {
-
-  py::def("DictFromTree", ib::BoostDictFromTree, BoostDictFromTree_Overloads());
-  py::def("TreeFromDict", py::raw_function(ib::BoostDictToTree, 2));
-  py::def("ListFromTree", ib::BoostListFromTree, BoostListFromTree_Overloads());
-  py::def("TreeFromList", py::raw_function(ib::BoostListToTree, 2));
+  
+  py::def("treeToDict", ib::treeToBoostDict, treeToBoostDict_Overloads());
+  py::def("dictToTree", py::raw_function(ib::boostDictToTree, 2));
+  py::def("treeToList", ib::treeToBoostList, treeToBoostList_Overloads());
+  py::def("listToTree", py::raw_function(ib::boostListToTree, 2));
   
 }

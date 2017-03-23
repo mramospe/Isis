@@ -20,10 +20,10 @@
 #////////////////////////////////////////////////////////////////
 
 
-from Isis.Efficiencies import CalcEfficiency
-from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
-from Isis.MathExt import NearestSquare
-from Isis.Utils import CalcMinDist, FormatEvalExpr
+from Isis.Efficiencies import calcEfficiency
+from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
+from Isis.MathExt import nearestSquare
+from Isis.Utils import formatEvalExpr
 
 import ROOT as rt
 
@@ -48,14 +48,14 @@ class FormatListIter:
         self.MarkSt = markst
         self.FillSt = fillst
 
-    def GetStyles( self ):
+    def getStyles( self ):
         '''
         Returns the members of this class in a tuple
         '''
         return tuple( el for el in ( self.Color, self.LineSt, self.MarkSt, self.FillSt )
                       if el != None )
         
-    def ApplyFormat( self, obj, lw = 2 ):
+    def applyFormat( self, obj, lw = 2 ):
         '''
         Apply the format stored to a Root object. By default the line width is also
         set to < 2 >.
@@ -115,7 +115,7 @@ class FormatList:
                                           self.MarkSt, self.FillSt )
                   if isinstance( lst, list ) ]
         if len( set( lgths ) ) != 1:
-            SendErrorMsg('Lists passed to FormatList instance have different lengths')
+            sendErrorMsg('Lists passed to FormatList instance have different lengths')
 
     def __getitem__( self, idx ):
         ''' Gets the format for the given index '''
@@ -166,7 +166,7 @@ class FormatList:
             return
 
 
-def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '', ytitle = '' ):
+def divideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '', ytitle = '' ):
     '''
     Divide two histograms < hK/hN >. By default, asymmetric errors are
     considered. Returns a TGraphAsymmErrors instance.
@@ -185,7 +185,7 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '',
     seff_up = []
 
     for nn, nk in zip(nN, nK):
-        p, s_sy, s_lw, s_up = CalcEfficiency(nn, nk)
+        p, s_sy, s_lw, s_up = calcEfficiency(nn, nk)
         eff.append(p)
         seff.append(s_sy)
         seff_lw.append(s_lw)
@@ -209,12 +209,12 @@ def DivideHistograms( hN, hK, asym = True, name = '', title = None, xtitle = '',
                                  swidth, swidth,
                                  seff_lw, seff_up)
     
-    FormatPlottable2D(graph, name, title, xtitle, ytitle)
+    formatPlottable2D(graph, name, title, xtitle, ytitle)
     
     return graph
 
 
-def DrawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
+def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     '''
     Draws the given list of histograms. If the variable < norm > is set to True,
     then the histograms will be normalized. It returns the histogram used to give
@@ -256,7 +256,7 @@ def DrawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
     return outhlst
 
 
-def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
+def extractHistPoints( varlst, nbins, vmin = None, vmax = None ):
     '''
     This function extracts the points of the given array of data which are
     supposed to be used to make a histogram
@@ -269,7 +269,7 @@ def ExtractHistPoints( varlst, nbins, vmin = None, vmax = None ):
     return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
 
 
-def FormatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
+def formatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
     '''
     Set name, main title and titles for each axis of a 2D object
     '''
@@ -284,12 +284,12 @@ def FormatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
         obj.GetYaxis().SetTitle(ytitle)
 
 
-def HistFromType( tp, dim = 1 ):
+def histFromType( tp, dim = 1 ):
     '''
     Returns the histogram constructor given the type as a string
     '''
     if tp not in ( 'float', 'double', 'int' ):
-        SendErrorMsg('Histogram type < %s > not known' %tp)
+        sendErrorMsg('Histogram type < %s > not known' %tp)
         return
     if dim == 1:
         if tp == 'float':
@@ -306,10 +306,10 @@ def HistFromType( tp, dim = 1 ):
         else:
             return rt.TH2I
     else:
-        SendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
+        sendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
 
 
-def ImportRootPlotClasses():
+def importRootPlotClasses():
     '''
     This function imports different plotting classes from Root
     '''
@@ -333,7 +333,7 @@ def ImportRootPlotClasses():
         glob[ el ] = __import__( 'ROOT.' + el, glob, loc, [ '*' ] )
 
 
-def MakeAdaptiveBinnedHist( name, minocc, values,
+def makeAdaptiveBinnedHist( name, minocc, values,
                             htype   = 'double',
                             title   = None,
                             weights = False,
@@ -343,7 +343,7 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     This function creates a 1-D adaptive binning histogram given a name, the
     minimum occupancy value and a list. Adding a list of weights is also possible.
     '''
-    histcall = HistFromType( htype, 1 )
+    histcall = histFromType( htype, 1 )
     
     ''' Calculates the array of weights '''
     length = len( values )
@@ -355,13 +355,13 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
         sw      = float( length )
         nbins   = length/minocc
     
-    idxs   = ExtractHistPoints( values, nbins )
+    idxs   = extractHistPoints( values, nbins )
     values = [ values[ i ] for i in idxs ]
     vmax   = max( values )
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
-        SendErrorMsg('Occupancy requested is too big: %i' %iminocc)
+        sendErrorMsg('Occupancy requested is too big: %i' %iminocc)
     
     '''
     Creates a list with the values and the weights joint and sorts it by the values
@@ -396,12 +396,12 @@ def MakeAdaptiveBinnedHist( name, minocc, values,
     
     hist = histcall('', '', nbins, bins)
 
-    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+    formatPlottable2D(hist, name, title, xtitle, ytitle)
     
     return hist
 
 
-def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
+def makeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     '''
     Creates a correlation histogram given a list of lists. By default it is drawn
     in color, without palette, and with the contents written inside each bin. No
@@ -411,7 +411,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     lv = len( vartitles )
     if vartitles != []:
         if lm != lv:
-            SendWarningMsg('Number of titles is not the same as that of the matrix; '\
+            sendWarningMsg('Number of titles is not the same as that of the matrix; '\
                            'new variables will have names < Variables_# >')
             for i in xrange( lv + 1, lm ):
                 vartitles.append( 'Variable_' + str( i ) )
@@ -428,7 +428,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
         hist.GetXaxis().SetBinLabel( i + 1, tit )
         hist.GetYaxis().SetBinLabel( i + 1, tit )
 
-    FormatPlottable2D(hist, name, title, '', '')
+    formatPlottable2D(hist, name, title, '', '')
     
     hist.GetXaxis().SetTickLength( 0 )
     hist.GetYaxis().SetTickLength( 0 )
@@ -438,7 +438,7 @@ def MakeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     return hist
 
 
-def MakeCumulative( hist, name = '', norm = False, title = None ):
+def makeCumulative( hist, name = '', norm = False, title = None ):
     '''
     Returns a histogram containing the cumulative distribution of that given. If
     the option < norm > is given, the histogram will be scaled in such a way that
@@ -452,11 +452,11 @@ def MakeCumulative( hist, name = '', norm = False, title = None ):
         chist.SetBinError( i, sqrt( cumulative ) )
     if norm:
         chist.Scale( 1./chist.GetMaximum() )
-    FormatPlottable2D(hist, name, title)
+    formatPlottable2D(hist, name, title)
     return chist
 
 
-def MakeHistogram( var,
+def makeHistogram( var,
                    name   = '',
                    nbins  = 100,
                    htype  = 'double',
@@ -471,9 +471,9 @@ def MakeHistogram( var,
     drawn, but it can be set with the < ytitle > option. For values of type int,
     the histogram will be of type double.
     '''
-    histcall = HistFromType( htype, 1 )
+    histcall = histFromType( htype, 1 )
 
-    idxs  = ExtractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
+    idxs  = extractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
     varin = [ var[ i ] for i in idxs ]
     vmin  = min( v for v in varin + [ vmin ] if v != None )
     vmax  = max( v for v in varin + [ vmax ] if v != None )
@@ -487,12 +487,12 @@ def MakeHistogram( var,
         for el in var:
             hist.Fill( el )
     
-    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+    formatPlottable2D(hist, name, title, xtitle, ytitle)
             
     return hist
 
 
-def MakeHistogram2D( xvar, yvar,
+def makeHistogram2D( xvar, yvar,
                      name   = '',
                      htype  = 'double',
                      title  = None,
@@ -508,10 +508,10 @@ def MakeHistogram2D( xvar, yvar,
     '''
     Creates a 2-dimensional histogram given two lists
     '''
-    histcall = HistFromType( htype, 2 )
+    histcall = histFromType( htype, 2 )
     
-    xidxs = ExtractHistPoints( xvar, xbins, vmin = xmin, vmax = xmax )
-    yidxs = ExtractHistPoints( yvar, ybins, vmin = ymin, vmax = ymax )
+    xidxs = extractHistPoints( xvar, xbins, vmin = xmin, vmax = xmax )
+    yidxs = extractHistPoints( yvar, ybins, vmin = ymin, vmax = ymax )
 
     ''' The values used are the intersection between the two lists '''
     idxs = set( xidxs ) & set( yidxs )
@@ -533,7 +533,7 @@ def MakeHistogram2D( xvar, yvar,
         for x, y in zip( xvar, yvar ):
             hist.Fill( x, y )
 
-    FormatPlottable2D(hist, name, title, xtitle, ytitle)
+    formatPlottable2D(hist, name, title, xtitle, ytitle)
 
     return hist
 
@@ -561,7 +561,7 @@ class _GraphInConfig:
                 self.Sym = True
                 
                 if errlo or errup:
-                    SendWarningMsg('Specified both sym. and asym. errors; only sym. '\
+                    sendWarningMsg('Specified both sym. and asym. errors; only sym. '\
                                    'will be considered')
                 
                 self.Errors = np.array(err, dtype = float)
@@ -583,7 +583,7 @@ class _GraphInConfig:
                 self.Errors = np.zeros(len(self.ErrLo), dtype = float)
                     
 
-    def BuildAsym( self ):
+    def buildAsym( self ):
         '''
         If this class has symmetric errors attached, generates a duplicate
         '''
@@ -591,7 +591,7 @@ class _GraphInConfig:
             self.ErrLo = self.ErrUp = self.Errors
 
 
-def MakeScatterPlot( xvar, yvar,
+def makeScatterPlot( xvar, yvar,
                      xerr   = False,
                      xerrlo = False,
                      xerrup = False,
@@ -636,12 +636,12 @@ def MakeScatterPlot( xvar, yvar,
 
             graph = rt.TGraphAsymmErrors(npoints, xvar, yvar, xerrlo, xerrup, yerrlo, yerrup)
             
-    FormatPlottable2D(graph, name, title, xtitle, ytitle)
+    formatPlottable2D(graph, name, title, xtitle, ytitle)
     
     return graph
 
 
-def MultiPlot( mgrs, variables,
+def multiPlot( mgrs, variables,
                cuts   = False,
                errors = False,
                flist  = FormatList(),
@@ -665,13 +665,13 @@ def MultiPlot( mgrs, variables,
     results = {}
 
     ''' Get the true variables associated with the given expressions '''
-    truevars = [ FormatEvalExpr( var )[ 1 ] for var in variables ]
+    truevars = [ formatEvalExpr( var )[ 1 ] for var in variables ]
     truevars = list( itertools.chain.from_iterable( truevars ) )
     
     if all( var in mgr for mgr in mgrs for var in truevars ):
         
         ''' Generates and divides the canvas '''
-        nyvars, nxvars = OptCanvasDivision( nvars )
+        nyvars, nxvars = optCanvasDivision( nvars )
         canvas = rt.TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
         
@@ -679,7 +679,7 @@ def MultiPlot( mgrs, variables,
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
             for i, mgr in enumerate( mgrs ):
-                mgr, mgr.Name = mgr.SubSample( cuts = cuts ), mgr.Name
+                mgr, mgr.Name = mgr.subSample( cuts = cuts ), mgr.Name
         
         ''' Disables the stat box of the histograms '''
         rt.gStyle.SetOptStat( 0 )
@@ -702,7 +702,7 @@ def MultiPlot( mgrs, variables,
             canvas.cd( iv + 1 )
 
             ''' This is done to reduce disk usage '''
-            totlst = [ mgr.VarEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
+            totlst = [ mgr.varEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
 
 
             ''' Extract the ranges for each variable (if any) '''
@@ -715,7 +715,7 @@ def MultiPlot( mgrs, variables,
             hists  = []
             for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
                 hname = mgr.Name + '_' + var
-                h = MakeHistogram( vals,
+                h = makeHistogram( vals,
                                    name  = hname,
                                    title = var,
                                    nbins = nbins,
@@ -725,7 +725,7 @@ def MultiPlot( mgrs, variables,
                 if norm:
                     h.Scale( float( norm )/h.GetSumOfWeights() )
 
-                flist[ im ].ApplyFormat( h )
+                flist[ im ].applyFormat( h )
                     
                 if legend and iv == 0:
                     ''' In the first iteration adds the entries to the legend '''
@@ -751,15 +751,15 @@ def MultiPlot( mgrs, variables,
         results[ name ] = canvas
         return results
     else:
-        SendErrorMsg('Any of the managers does not have access to some of the variables')
+        sendErrorMsg('Any of the managers does not have access to some of the variables')
         return
 
 
-def OptCanvasDivision( nvars ):
+def optCanvasDivision( nvars ):
     '''
     Create the optimal canvas division for a given number of pads
     '''
-    nstsq = NearestSquare( nvars )
+    nstsq = nearestSquare( nvars )
     nstrt = int( sqrt( nvars ) )
     
     if nstsq >= nvars:

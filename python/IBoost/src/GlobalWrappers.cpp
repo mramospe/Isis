@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 15/11/2016
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -33,7 +33,7 @@ namespace py = boost::python;
 //_______________________________________________________________________________
 // Get the size of the lists inside the dictionary. A check is done to see that
 // they match.
-py::ssize_t IBoost::BoostDictListSize( py::dict dict ) {
+py::ssize_t IBoost::boostDictListSize( py::dict dict ) {
 
   py::list keys  = dict.keys();
   py::ssize_t nk = py::len( keys );
@@ -52,9 +52,9 @@ py::ssize_t IBoost::BoostDictListSize( py::dict dict ) {
 
 //_______________________________________________________________________________
 // Check number of arguments foor a function/method
-void IBoost::CheckArgs( boost::python::tuple &args,
+void IBoost::checkArgs( py::tuple &args,
 			const unsigned int &nargs ) {
-  boost::python::ssize_t n = boost::python::len( args );
+  py::ssize_t n = py::len( args );
   if ( n != nargs )
     std::cerr << "ERROR: Incorrect number of arguments " << n
 	      << " (" << nargs << ")" << std::endl;
@@ -62,16 +62,15 @@ void IBoost::CheckArgs( boost::python::tuple &args,
 
 //_______________________________________________________________________________
 // Check the keyword arguments for a function/method
-void IBoost::CheckKwargs( boost::python::dict &kwargs,
+void IBoost::checkKwargs( py::dict &kwargs,
 			  const std::vector<const char*> &lst ) {
   
-  boost::python::object keys = kwargs.keys();
-  for ( int i = 0; i < boost::python::len( keys ); ++i ) {
+  py::object keys = kwargs.keys();
+  for ( int i = 0; i < py::len( keys ); ++i ) {
 
-    boost::python::object arg =
-      IBoost::ExtractFromIndex<boost::python::object>(keys, i);
+    py::object arg = IBoost::extractFromIndex<py::object>(keys, i);
     
-    const char *name = boost::python::extract<const char*>( arg );
+    const char *name = py::extract<const char*>( arg );
     
     if ( std::find(lst.begin(), lst.end(), name) != lst.end() )
       std::cout << "WARNING: Unknown input keyword argument < "

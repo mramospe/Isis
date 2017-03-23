@@ -22,9 +22,9 @@
 
 import ROOT as rt
 
-from Isis.Decorators import DecoInputArgs
-from Isis.IBoost.PyGeneral import SendWarningMsg
-from Isis.RootUtils import ExtractHistValues
+from Isis.Decorators import decoInputArgs
+from Isis.IBoost.PyGeneral import sendWarningMsg
+from Isis.RootUtils import extractHistValues
 
 from math import sqrt
 import numpy as np
@@ -33,8 +33,8 @@ from scipy.special import betainc
 from scipy.stats import beta
 
 
-@DecoInputArgs(float, kvars = ['cl', 'prec'])
-def BinomialUncert( N, k, cl = 0.683, prec = 0.01 ):
+@decoInputArgs(float, kvars = ['cl', 'prec'])
+def binomialUncert( N, k, cl = 0.683, prec = 0.01 ):
     '''
     Calculate the frequentist uncertainties associated with an observation of < k >
     events in < N >. The confidence level and precision for the results may be
@@ -85,9 +85,9 @@ class IntegralTransformer:
         if isinstance( arg, rt.TH1 ):
 
             if weights:
-                SendWarningMsg('Using a TH1 object; input weights ignored')
+                sendWarningMsg('Using a TH1 object; input weights ignored')
             
-            centers, values, widths = ExtractHistValues(arg)
+            centers, values, widths = extractHistValues(arg)
 
             self.__init__(centers, values)
             
@@ -100,21 +100,21 @@ class IntegralTransformer:
             self.Values = np.array(values)
             self.Cltve  = np.cumsum(weights)*1./sum(weights)
     
-    def Transform( self, arg ):
+    def transform( self, arg ):
         '''
         Return the integral transformated value(s)
         '''
         return np.interp(arg, self.Values, self.Cltve)
 
-    def DeTransform( self, arg ):
+    def deTransform( self, arg ):
         '''
         Return the de-transformated value(s)
         '''
         return np.interp(arg, self.Cltve, self.Values)
 
 
-@DecoInputArgs(float, slc = [], kvars = ['cl', 'prec'])
-def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
+@decoInputArgs(float, slc = [], kvars = ['cl', 'prec'])
+def poissonUncert( mean, cl = 0.683, prec = 0.01 ):
     '''
     Calculate the frequentist poisson uncertainties for a given integer value. The
     confidence level may be provided. Also the precision required in the outcoming
@@ -122,7 +122,7 @@ def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
     '''
     if not isinstance(mean, numbers.Integral):
         mean = int(round(mean))
-        SendWarningMsg('Calculating poisson uncertainty of a non-integer value; '\
+        sendWarningMsg('Calculating poisson uncertainty of a non-integer value; '\
                        'returning values for closest integer < %i >' %mean)
 
     s_sy = sqrt(mean)
@@ -153,4 +153,3 @@ def PoissonUncert( mean, cl = 0.683, prec = 0.01 ):
     s_up = mean_up - mean
     
     return s_sy, s_lw, s_up
-

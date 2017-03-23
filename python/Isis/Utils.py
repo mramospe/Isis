@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/02/2017
+#//  Last update: 23/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -21,11 +21,10 @@
 
 import os, fcntl, math, struct, termios, sys
 import __builtin__
-from Isis.IBoost.PyGeneral import SendErrorMsg, SendWarningMsg
-from Isis.Algebra import Matrix, SolveLU
+from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
 
 
-def CalcMinDist( lst, allow_zero = True ):
+def calcMinDist( lst, allow_zero = True ):
     '''
     Calculates the minimum distance between values in an iterable object. With the
     input parameter < allow_zero > one can prevent the function to take into
@@ -39,7 +38,7 @@ def CalcMinDist( lst, allow_zero = True ):
     return min( lst )
 
 
-def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
+def checkDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
     '''
     Check if the given value is more far from its expectation than the given
     number of allowed std. dev. (set by < sens >).
@@ -53,14 +52,14 @@ def CheckDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
         if verbose:
             part = 'is away from its expectation by %.2f std. dev.' % nsigma
             if name:
-                SendWarningMsg('Parameter < %s > %s' %(name, part))
+                sendWarningMsg('Parameter < %s > %s' %(name, part))
             else:
-                SendWarningMsg('Input parameter ' + part)
+                sendWarningMsg('Input parameter ' + part)
 
     return status
 
 
-def CombinedRange( *args ):
+def combinedRange( *args ):
     '''
     Returns the minimum and maximum values for the combined range for all the
     given lists
@@ -70,7 +69,7 @@ def CombinedRange( *args ):
     return minlst, maxlst
 
 
-def ConvertArgs( conv, args, slc = slice(0, None) ):
+def convertArgs( conv, args, slc = slice(0, None) ):
     '''
     Return a new list with the arguments at position < slc > converted to floats
     '''
@@ -87,7 +86,7 @@ def ConvertArgs( conv, args, slc = slice(0, None) ):
     return new_args
 
 
-def DLtoLD( dic ):
+def dl2ld( dic ):
     '''
     Given a dictionary of lists, it returns a list of dictionaries
     '''
@@ -97,7 +96,7 @@ def DLtoLD( dic ):
              for i in xrange( length ) ]
 
 
-def FormatTime( itime ):
+def formatTime( itime ):
     '''
     Displays the given time in the format [ w, d, h, min, s ]. If one of the
     quantities is zero, it is not displayed.
@@ -119,13 +118,13 @@ def FormatTime( itime ):
         return '0s'
 
 
-def FormatEvalExpr( expr, mathmod = math ):
+def formatEvalExpr( expr, mathmod = math ):
     '''
     This function allows to format a given expression in such a way that takes
     into account the mathematical functions and the logical operators. The module
     containing the mathematical functions can be specified.
     '''
-    expr = TranslateCExpr( expr )
+    expr = translateCExpr( expr )
     variables = expr
     for el in ( '==', '!=', '<=', '>=', '>', '<',
                 'and', 'or', 'not', '(', ')',
@@ -177,7 +176,7 @@ def FormatEvalExpr( expr, mathmod = math ):
                 try:
                     float( left )
                     if right:
-                        SendErrorMsg('Unable to parse expression < %s >' %el)
+                        sendErrorMsg('Unable to parse expression < %s >' %el)
                         return
                     else:
                         try:
@@ -186,7 +185,7 @@ def FormatEvalExpr( expr, mathmod = math ):
                             '''
                             float( variables[ idx + 1 ] + '0' )
                         except:
-                            SendErrorMsg('Unable to parse expression; error in '\
+                            sendErrorMsg('Unable to parse expression; error in '\
                                          'floating constant')
                             return
                     isfloat = True
@@ -200,7 +199,7 @@ def FormatEvalExpr( expr, mathmod = math ):
             except:
                 it = el[ 0 ]
                 if it.isdigit() or it == '.':
-                    SendErrorMsg('Unable to parse expression < %s >' %el)
+                    sendErrorMsg('Unable to parse expression < %s >' %el)
                     return
                 else:
                     isfloat = False
@@ -233,66 +232,7 @@ def FormatEvalExpr( expr, mathmod = math ):
     return expr, truevars
 
 
-def InferValue( x, y, x0, nord = False ):
-    '''
-    Given two lists < x > and < y >, performs the inter(extra)polation of the
-    < y > value in the given point < x0 > using a polynomial of order < nord >.
-    If no order is providen it will use all the points to perform the calculation.
-    '''
-    srtlst = sorted( zip( x, y ) )
-    x = [ el[ 0 ] for el in srtlst ]
-    y = [ el[ 1 ] for el in srtlst ]
-
-    '''
-    If no order is specified, it will be taken as the number of points. If it is greater
-    than the number of points it is set to this number, and a warning message is sent.
-    '''
-    lp = len( x )
-    if nord:
-        if nord < lp:
-            nord += 1
-        else:
-            nord = lp
-            SendWarningMsg('Order greater than the number of points. '\
-                           'Value set to < %i >' %lp)
-    else:
-        nord = lp
-
-    ''' Gets the index whose element is the first greater than the given point '''
-    for i, xi in enumerate( x ):
-        if xi >= x0: break
-
-    ''' Stablishes the points to use for the interpolation '''
-    if   i + nord/2 >= lp:
-        imax = lp; imin = imax - nord
-    elif i - nord/2 <= 0:
-        imin = 0; imax = nord
-    else:
-        imin = i - nord/2; imax = imin + nord
-
-    xsol = Matrix( [ x[ imin : imax ] ] )
-    ysol = Matrix( [ y[ imin : imax ] ] )
-
-    '''
-    Because of the degrees of freedom, the polinomial order is one unit smaller than the
-    number of points
-    '''
-    nord -= 1
-
-    ''' Generates the matrix of equations '''
-    X = Matrix( [ [ el**n for n in xrange( nord, -1, -1 ) ] for el in xsol[ 0 ] ] )
-
-    ''' Solves the lineal equation problem '''
-    a = reversed( SolveLU( X, ysol.Transpose() ).Transpose()[ 0 ] )
-
-    ''' Evaluates the polinomial at the point given '''
-    y0 = 0.
-    for n, el in enumerate( a ):
-        y0 += el * x0**n
-    return y0
-
-
-def JoinDicts( *args ):
+def joinDicts( *args ):
     '''
     Joins dictionaries with different keys into one. If some of them have the
     same key, this one is not considered and not added to the final dictionary.
@@ -302,13 +242,13 @@ def JoinDicts( *args ):
         for key in dic:
             if key in rdict:
                 del rdict[ key ]
-                SendWarningMsg('Key < %s > already in dictionary. Not considered.' %key)
+                sendWarningMsg('Key < %s > already in dictionary. Not considered.' %key)
             else:
                 rdict[ key ] = dic[ key ]
     return rdict
 
 
-def LargestString( lstdic ):
+def largestString( lstdic ):
     '''
     If the input is a list, it gets the length of the maximum string located
     inside it. If it is a dictionary, it gets the maximum value of the strings
@@ -328,7 +268,7 @@ def LargestString( lstdic ):
     return maxlen
 
 
-def LDtoDL( lst ):
+def ld2dl( lst ):
     '''
     Given a list of dictionaries, it returns a dictionary of lists
     '''
@@ -336,7 +276,7 @@ def LDtoDL( lst ):
     return { kw: [ el[ kw ] for el in lst ] for kw in keys }
 
 
-def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
+def makeSubList( lst, vmin = None, vmax = None, **kwargs ):
     '''
     This function generates a sublist from that given, with its values between
     < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
@@ -375,7 +315,7 @@ def MakeSubList( lst, vmin = None, vmax = None, **kwargs ):
         return cplst.__class__( lst[ el ] for el in order )
 
 
-def MergeDicts( *args ):
+def mergeDicts( *args ):
     '''
     This function merges the values from various dictionaries into one. Only the
     variables that appear in all the dictionaries are considered.
@@ -385,7 +325,7 @@ def MergeDicts( *args ):
         keys = dic.keys()
         for key in kvars:
             if key not in keys:
-                SendWarningMsg('Key < %s > does not appear in all dictionaries; '\
+                sendWarningMsg('Key < %s > does not appear in all dictionaries; '\
                                'not merged' %key)
                 kvars.remove( key )
     rdic = {}
@@ -441,7 +381,7 @@ class PythonEnvMgr:
             outstr += '\t' + kw + whtsp + ' = ' + str( dic[ kw ] ) + '\n'
         return outstr
     
-    def ReadEnv( self, name, **kwargs ):
+    def readEnv( self, name, **kwargs ):
         '''
         Reads the asigned file. By default the class is returned, but it can
         be given as a dictionary if specified in **kwargs.
@@ -464,7 +404,7 @@ class PythonEnvMgr:
         else:
             return mod
 
-    def SaveEnv( self, name, **kwargs ):
+    def saveEnv( self, name, **kwargs ):
         '''
         Method to save a set of values inside a class called < name > in the file attached
         to this class.
@@ -477,12 +417,12 @@ class PythonEnvMgr:
         clname = 'class ' + name + ':\n'
 
         if any( line.startswith( name ) for line in lines ):
-            SendWarningMsg('Overwriting in < %s >; a variable called < %s > '\
+            sendWarningMsg('Overwriting in < %s >; a variable called < %s > '\
                            'already exists' %(ofile.name, name))
 
         if clname in lines:
 
-            SendWarningMsg('Replacing existing environment < %s > in '\
+            sendWarningMsg('Replacing existing environment < %s > in '\
                            'file < %s >' %(name, ofile.name))
         
             ofile.truncate()
@@ -508,7 +448,7 @@ class PythonEnvMgr:
         ofile.close()
 
 
-def SharedRange( *args ):
+def sharedRange( *args ):
     '''
     Returns the minimum and maximum values for the shared range among lists. If
     there is no shared range < False > is returned.
@@ -521,7 +461,7 @@ def SharedRange( *args ):
         return False
 
 
-def StringListFilter( lst, pattern ):
+def stringListFilter( lst, pattern ):
     '''
     Given a list and a pattern ( with elements separated by '*' symbols ) it
     returns another list with those that satisfy it.
@@ -569,9 +509,9 @@ class StrNumGenerator:
         if not end:
             start, end = 0, start
         elif end < start:
-            SendErrorMsg('The starting number has to be greater than the ending')
+            sendErrorMsg('The starting number has to be greater than the ending')
         if end < 0 or start < 0:
-            SendErrorMsg('Input parameters have to be both positive')
+            sendErrorMsg('Input parameters have to be both positive')
         self.CurrIter  = start
         self.MaxIter   = end
         self.MaxStrLen = len( str( end ) )
@@ -591,7 +531,7 @@ class StrNumGenerator:
             return ( self.MaxStrLen - lciter )*'0' + citer
 
 
-def TerminalSize():
+def terminalSize():
     '''
     Returns the values of the height and width of the terminal
     '''
@@ -614,7 +554,7 @@ def TerminalSize():
     return int( cr[ 0 ] ), int( cr[ 1 ] )
 
 
-def TranslateCExpr( expr ):
+def translateCExpr( expr ):
     '''
     Translates a C expression into a python expression
     '''

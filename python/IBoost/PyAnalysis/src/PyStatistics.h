@@ -45,7 +45,7 @@ namespace CLsFact {
   //
   Isis::CLsResult CalculateFromArray( const Isis::CLsFactory &factory, py::list array ) {
 
-    auto vector = IBoost::BoostListToStdVec<double>( array );
+    auto vector = IBoost::boostListToStdVec<double>( array );
 
     return factory.Calculate( vector );
   }
@@ -73,7 +73,7 @@ namespace CLsFact {
   //
   double TestStat( const Isis::CLsFactory &factory, py::list values ) {
 
-    auto vector = IBoost::BoostListToStdVec<double>( values );
+    auto vector = IBoost::boostListToStdVec<double>( values );
 
     return factory.TestStat( vector );
   }
@@ -101,7 +101,7 @@ namespace CLsHyp {
 	       Isis::CLsFluctuator *fluct,
 	       Isis::CLsPrior *prior ) {
 
-    auto array = IBoost::BoostListToStdVec<double>( lst );
+    auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct, prior);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -113,7 +113,7 @@ namespace CLsHyp {
   Constructor_NoPrior( py::list lst,
 		       Isis::CLsFluctuator *fluct ) {
 
-    auto array = IBoost::BoostListToStdVec<double>( lst );
+    auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -124,7 +124,7 @@ namespace CLsHyp {
   boost::shared_ptr<Isis::CLsHypothesis>
   Constructor_NoFluctNoPrior( py::list lst ) {
 
-    auto array = IBoost::BoostListToStdVec<double>( lst );
+    auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -136,14 +136,14 @@ namespace CLsHyp {
 
     auto vec = hyp.GetHyp();
 
-    return IBoost::StdVecToBoostList( vec );
+    return IBoost::stdVecToBoostList( vec );
   }
 
   //_______________________________________________________________________________
   //
   double PoissonProb( const Isis::CLsHypothesis &hyp, py::list values ) {
 
-    auto vec = IBoost::BoostListToStdVec<double>( values );
+    auto vec = IBoost::boostListToStdVec<double>( values );
 
     return hyp.PoissonProb( vec );
   }
@@ -154,7 +154,7 @@ namespace CLsHyp {
 
     auto vec = hyp.GetTSVals();
 
-    return IBoost::StdVecToBoostList( vec );
+    return IBoost::stdVecToBoostList( vec );
   }
 
   //_______________________________________________________________________________
@@ -164,7 +164,7 @@ namespace CLsHyp {
 	       Isis::CLsFluctuator *fluct = 0,
 	       Isis::CLsPrior *prior = 0 ) {
 
-    auto vec = IBoost::BoostListToStdVec<double>( lst );
+    auto vec = IBoost::boostListToStdVec<double>( lst );
 
     hyp.SetHyp(vec, fluct, prior);
   }
