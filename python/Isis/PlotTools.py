@@ -33,6 +33,22 @@ import numpy as np
 import sys
 
 
+class CanvasStorer:
+    '''
+    Simple struct with three attributes to store a canvas and two lists:
+    one with data objects (histograms, graphs, ...) and the other one
+    focused adding information to the plot (legend, lines, ...)
+    '''
+    def __init__( self, canvas = None, data_objs = [], info_objs = [] ):
+        '''
+        Constructor given the canvas and the lists of data objects and
+        information objects
+        '''
+        self.Canvas   = canvas
+        self.DataObjs = data_objs
+        self.InfoObjs = info_objs
+
+
 class FormatListIter:
     '''
     Output class for an iteration over a < FormatList > instance. This class
@@ -219,7 +235,8 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
     Draws the given list of histograms. If the variable < norm > is set to True,
     then the histograms will be normalized. It returns the histogram used to give
     format to the plot, and the list of input histograms or the normalized clones.
-    The draw options are set using the < drawopt > keyword.
+    The draw options are set using the < drawopt > keyword. The titles of the axes
+    are taken from the first histogram in the list.
     '''
     if norm:
         imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
@@ -233,7 +250,11 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
     offset  = ( imax + imin )/10.
     vmin    = min( h.GetXaxis().GetXmin() for h in hlst )
     vmax    = max( h.GetXaxis().GetXmax() for h in hlst )
-    hformat = hlst[ 0 ].__class__( '', title, 1, vmin, vmax )
+    hformat = hlst[0].__class__( '', title, 1, vmin, vmax )
+
+    for get_ax in (rt.TH1.GetXaxis, rt.TH1.GetYaxis):
+        tit = get_ax(hlst[0]).GetTitle()
+        get_ax(hformat).SetTitle(tit)
     
     hformat.SetBinContent( 1, imin )
     hformat.GetYaxis().SetRangeUser( imin, imax + offset )
@@ -307,30 +328,6 @@ def histFromType( tp, dim = 1 ):
             return rt.TH2I
     else:
         sendErrorMsg('Histogram dimension < %i >, not allowed' %dim)
-
-
-def importRootPlotClasses():
-    '''
-    This function imports different plotting classes from Root
-    '''
-    glob = sys._getframe( 1 ).f_globals
-    loc  = sys._getframe( 1 ).f_locals
-    modlist = [ 'gROOT', 'TBrowser', 
-                'TDirectory', 'TDirectoryFile', 'gDirectory', 'TFile',
-                'TTree', 'TBranch', 'TLeaf',
-                'TCanvas', 'TPave', 'TPaveText', 'TLegend',
-                'TH1D', 'TH1F', 'TH1I',
-                'TH2D', 'TH2F', 'TH2I',
-                'TGraph', 'TGraphErrors', 'TGraphAsymmErrors',
-                'TF1', 'TF2', 'TLine',
-                'TColor',
-                'kBlue', 'kViolet', 'kMagenta', 'kPink',
-                'kRed', 'kOrange', 'kYellow',
-                'kSpring', 'kGreen', 'kTeal', 'kCyan', 'kAzure',
-                'kWhite', 'kBlack', 'kGray' ]
-    glob[ 'ROOT' ] = __import__( 'ROOT' )
-    for el in modlist:
-        glob[ el ] = __import__( 'ROOT.' + el, glob, loc, [ '*' ] )
 
 
 def makeAdaptiveBinnedHist( name, minocc, values,
@@ -661,8 +658,7 @@ def multiPlot( mgrs, variables,
     if title == None:
         title = name
     
-    nvars   = len( variables ) + 1
-    results = {}
+    nvars = len( variables ) + 1
 
     ''' Get the true variables associated with the given expressions '''
     truevars = [ formatEvalExpr( var )[ 1 ] for var in variables ]
@@ -674,6 +670,8 @@ def multiPlot( mgrs, variables,
         nyvars, nxvars = optCanvasDivision( nvars )
         canvas = rt.TCanvas( name, title, 300*nyvars, 300*nxvars )
         canvas.Divide( nyvars, nxvars )
+
+        canvas_info = CanvasStorer(canvas)
         
         nmgrs = len( mgrs )
         ''' If cuts are specified it calculates the true managers '''
@@ -686,24 +684,31 @@ def multiPlot( mgrs, variables,
         
         ''' Constructs the legend and the information panel if specified '''
         if legend:
-            rlegend = rt.TLegend( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
+            
+            pave_dim  = (0.1, 0.8 - nmgrs*0.05, 0.9, 0.9)
+            text_size = 0.075
+            
+            rlegend = rt.TLegend(*pave_dim)
             rlegend.SetHeader( '#bf{-- Legend --}' )
             rlegend.SetTextAlign( 22 )
-            rlegend.SetTextSize( 0.075 )
+            rlegend.SetTextSize(text_size)
             rlegend.SetFillColor( 15 )
-            rtxtinf = rt.TPaveText( 0.1, 0.8 - nmgrs*0.05, 0.9, 0.9 )
+            
+            rtxtinf = rt.TPaveText(*pave_dim)
             rtxtinf.AddText( '-- Number of entries --' )
-            rtxtinf.SetTextSize( 0.075 )
+            rtxtinf.SetTextSize(text_size)
             rtxtinf.SetFillColor( 42 )
             rtxtinf.SetShadowColor( 0 )
+
+            canvas_info.InfoObjs += [rlegend, rtxtinf]
         
         ''' Generates and draws the histograms '''
         for iv, var in enumerate( variables ):
+            
             canvas.cd( iv + 1 )
 
             ''' This is done to reduce disk usage '''
             totlst = [ mgr.varEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
-
 
             ''' Extract the ranges for each variable (if any) '''
             if var in ranges.keys():
@@ -711,8 +716,9 @@ def multiPlot( mgrs, variables,
             else:
                 vmax = max( el for lst in totlst for el in lst )
                 vmin = min( el for lst in totlst for el in lst )
-            
-            hists  = []
+
+            entries = []
+            hists   = []
             for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
                 hname = mgr.Name + '_' + var
                 h = makeHistogram( vals,
@@ -721,35 +727,34 @@ def multiPlot( mgrs, variables,
                                    nbins = nbins,
                                    vmin  = vmin,
                                    vmax  = vmax )
+                
+                entries.append(h.GetEntries())
                 hists.append( h )
-                if norm:
-                    h.Scale( float( norm )/h.GetSumOfWeights() )
-
+                
                 flist[ im ].applyFormat( h )
-                    
-                if legend and iv == 0:
-                    ''' In the first iteration adds the entries to the legend '''
+
+                h.GetXaxis().SetTitle(var)
+                
+            ''' Draw histograms, with error bars if specified '''
+            hists = drawHistograms(hists, drawopt = errors*'E', norm = norm, title = '')
+
+            if legend and iv == 0:
+                ''' In the first iteration add the entries to the legend '''
+                for mgr, h, sw in zip(mgrs, hists[1:], entries):
                     rlegend.AddEntry( h, '#bf{' + mgr.Name + '}', 'L' )
-                    rtxtinf.AddText( mgr.Name + ': %i' % h.GetEntries() )
-                results[ hname ] = h
-            '''
-            The maximum of the y-axis in the pad is set to the 110% of the maximum
-            value for all the histograms to be drawn
-            '''
-            hists[ 0 ].SetMaximum( 1.1*max( h.GetMaximum() for h in hists ) )
-            for h in hists:
-                if errors: h.Draw( 'SAMEE' )
-                else:      h.Draw( 'SAME'  )
+                    rtxtinf.AddText( mgr.Name + ': %i' % sw )
+                    
+            canvas_info.DataObjs += hists
+            
         if legend:
             pad = canvas.cd( nvars )
             pad.Divide( 2, 1 )
             pad.cd( 1 ); rlegend.Draw()
             pad.cd( 2 ); rtxtinf.Draw()
-            results[ 'legend' ] = rlegend
-            results[ 'info' ]   = rtxtinf
+            
         canvas.Update()
-        results[ name ] = canvas
-        return results
+        
+        return canvas_info
     else:
         sendErrorMsg('Any of the managers does not have access to some of the variables')
         return
