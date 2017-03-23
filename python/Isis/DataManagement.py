@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/03/2017
+#//  Last update: 23/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -173,21 +173,6 @@ class DataManager( dict ):
             return tuple( [ self[ var ][ ievt ] for var in args ] )
         else:
             return tuple( [ values[ ievt ] for var, values in self.iteritems() ] )
-
-    def GetMatrix( self, variables = '*', trans = True ):
-        '''
-        Returns a list with the values from < variables > for each event. If < trans >
-        is set to true, then it returns a list of lists with the values for each
-        variable.
-        '''
-        if variables == '*':
-            variables = self.keys()
-            variables.sort()
-        matrix = Matrix( [ self[ var ] for var in variables ] )
-        if trans:
-            return matrix.Transpose()
-        else:
-            return matrix
 
     def GetNvars( self ):
         '''
