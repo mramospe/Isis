@@ -2,16 +2,16 @@
 # Script to display the cuts booked in a file using the CutManager class
 # ----------------------------------------------------------------------
 
-from Isis.IBoost.PyGeneral import CutManager, SendErrorMsg
+from Isis.IBoost.PyGeneral import CutManager, sendErrorMsg
 
 import sys
 
 # Check the input arguments
 nargs = len(sys.argv)
 if nargs < 2:
-    SendErrorMsg('The input parameters are: < file name > < cut1 > < cut2 >...')
+    sendErrorMsg('The input parameters are: < file name > < cut1 > < cut2 >...')
 elif nargs == 2:
-    SendErrorMsg('At least one cut name must be provided')
+    sendErrorMsg('At least one cut name must be provided')
 else:
     fname = sys.argv[1]
     print 'Reading cuts from:', fname
@@ -26,5 +26,5 @@ else:
     # Read the cuts and display them
     cutmgr = CutManager(fname)
     for c, n in zip(cuts, nwhitesp):
-        ctstr = cutmgr.GetCut(c)
+        ctstr = cutmgr.getCut(c)
         print ' - %s' %c, n*' ', '=>', ctstr

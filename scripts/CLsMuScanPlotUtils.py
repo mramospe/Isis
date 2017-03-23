@@ -5,7 +5,7 @@
 # email:  miguel.ramos.pernas@cern.ch
 #
 
-from Isis.PlotTools import DrawHistograms, MakeHistogram, MakeScatterPlot
+from Isis.PlotTools import drawHistograms, makeHistogram, makeScatterPlot
 
 import numpy as np
 import ROOT as rt
@@ -48,7 +48,7 @@ def makeCLsPlot( mu_vals, cls_vals,
     if vmax == None:
         vmax = max(mu_vals)
     
-    gr = MakeScatterPlot(mu_vals, cls_vals.cls_med, name = 'Median')
+    gr = makeScatterPlot(mu_vals, cls_vals.cls_med, name = 'Median')
     gr.GetYaxis().SetRangeUser(0, 1)
     gr.GetXaxis().SetRangeUser(vmin, vmax)
     
@@ -68,7 +68,7 @@ def makeCLsPlot( mu_vals, cls_vals,
     if cls_obs[0] != None:
         ''' Get lines for 90% and 95% CL '''
         
-        gr_obs = MakeScatterPlot(mu_vals, cls_obs, name = 'Observation')
+        gr_obs = makeScatterPlot(mu_vals, cls_obs, name = 'Observation')
         gr_obs.SetLineColor(rt.kBlack)
         
         scls_obs, smu_vals = zip(*sorted(zip(cls_obs, mu_vals)))
@@ -140,10 +140,10 @@ def makeSnapShot( name, idx, mu_value, bkg_hyp, sig_hyp, tstat, nbins = 100 ):
     vmin = mean - rg
     vmax = mean + rg
 
-    hbkg = MakeHistogram(bkg, nbins = nbins, vmin = vmin, vmax = vmax,
+    hbkg = makeHistogram(bkg, nbins = nbins, vmin = vmin, vmax = vmax,
                          name  = 'NullHyp_' + str(idx),
                          title = 'Null hypothesis #mu = {:.2f}'.format(mu_value))
-    hsig = MakeHistogram(sig, nbins = nbins, vmin = vmin, vmax = vmax,
+    hsig = makeHistogram(sig, nbins = nbins, vmin = vmin, vmax = vmax,
                          name  = 'SigHyp_' + str(idx),
                          title = 'Signal hypothesis #mu = {:.2f}'.format(mu_value))
 
@@ -159,7 +159,7 @@ def makeSnapShot( name, idx, mu_value, bkg_hyp, sig_hyp, tstat, nbins = 100 ):
 
     title  = 'Test statistics ( #mu = {:.2f} )'.format(mu_value)
     canvas = rt.TCanvas(name, title)
-    output = DrawHistograms([hbkg, hsig], title = title, norm = False)
+    output = drawHistograms([hbkg, hsig], title = title, norm = False)
     line.Draw('SAME')
     output.append(line)
     

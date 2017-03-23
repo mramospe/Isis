@@ -72,7 +72,7 @@ class AsymmFluct(CLsFluctuator):
 
         self.rndm = rt.TRandom3()
 
-    def Fluctuate( self, pos, mean ):
+    def fluctuate( self, pos, mean ):
         '''
         Override abstract class method. In this case, "mean" could not be used.
         '''
@@ -92,7 +92,7 @@ class FlatPrior(CLsPrior):
         '''
         CLsPrior.__init__( self )
 
-    def Evaluate( self, pos, mean, value ):
+    def evaluate( self, pos, mean, value ):
         '''
         Return the identity
         '''
@@ -111,13 +111,13 @@ muValues  = []
 
 # Build the background fluctuators and prior for each bin
 bkgFluct = AsymmFluct(Config.bkgEff)
-bkgHyp.SetFluctuator(bkgFluct)
+bkgHyp.setFluctuator(bkgFluct)
 bkgPrior = FlatPrior()
-bkgHyp.SetPrior(bkgPrior)
+bkgHyp.setPrior(bkgPrior)
 
 # Set the signal prior
 sigPrior = FlatPrior()
-sigHyp.SetPrior(sigPrior)
+sigHyp.setPrior(sigPrior)
 
 # Do the scan and save snapshots in folder
 folder = Config.output.mkdir('SnapShots')
@@ -129,15 +129,15 @@ for i, mu in enumerate(np.linspace(Config.mumax, Config.mumin, Config.npoints, e
     print '-- Signal strength: %f' %mu
     
     sig = [b + mu*s for b, s in zip(Config.bkgEff, Config.sigEff)]
-    sigHyp.SetHyp(sig)
+    sigHyp.setHyp(sig)
 
     sigFluct = AsymmFluct(sig)
-    sigHyp.SetFluctuator(sigFluct)
+    sigHyp.setFluctuator(sigFluct)
     
-    print '-- Expected sig/bkg: %s / %s' %(sigHyp.GetHyp(), bkgHyp.GetHyp())
+    print '-- Expected sig/bkg: %s / %s' %(sigHyp.getHyp(), bkgHyp.getHyp())
 
     print '-- Generating events'
-    factory.Generate(Config.ngen)
+    factory.generate(Config.ngen)
 
     print '-- Calculating CLs'
     res_med = factory.Calculate(bkgHyp.TestStatFromProb(0.5))

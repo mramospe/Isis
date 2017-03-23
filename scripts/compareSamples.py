@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------
 
 from Isis.DataManagement import DataMgr
-from Isis.PlotTools import MultiPlot
+from Isis.PlotTools import multiPlot
 
 # List of variables to plot
 varlst = ['var0', 'var1', 'var2']
@@ -30,7 +30,7 @@ for mgrname, inputs in paths.iteritems():
     mgrs[mgrname] = DataMgr(mgrname, fpath, tpath, variables = varlst)
 
 # Make the canvas
-output = MultiPlot([mgr for mgr in mgrs.itervalues()], varlst,
+output = multiPlot([mgr for mgr in mgrs.itervalues()], varlst,
                    cuts   = False,
                    norm   = True,
                    name   = 'canvas',
