@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   OutputTable::OutputTable() : fNlines( 0 ), fStrLength( 2 ) {
+    
     fBuffer.precision( 5 );
   }
 
@@ -37,6 +38,7 @@ namespace Isis {
   OutputTable::OutputTable( const unsigned short int &prec,
 			    const unsigned short int len )
     : fNlines( 0 ), fStrLength( len ) {
+    
     fBuffer.precision( prec );
   }
 
@@ -46,19 +48,22 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  std::string OutputTable::GetLine() {
+  std::string OutputTable::getLine() {
+    
     std::string str, var;
     for ( auto it = fSizes.begin(); it != fSizes.end(); it++ ) {
       fBuffer >> var;
-      str += CenterString( var, *it );
+      str += centerString( var, *it );
     }
+    
     return str;
   }
 
   //_______________________________________________________________________________
   //
-  void OutputTable::Print( const char &chdeco ) {
-    std::string var, fSeparator = this->Start();
+  void OutputTable::display( const char &chdeco ) {
+    
+    std::string var, fSeparator = this->start();
     for ( unsigned short int iline = 0; iline < fNlines; iline++ ) {
       std::cout << "| ";
       auto its = fSizes.begin(), itp = fPrecisions.begin();
@@ -77,17 +82,21 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void OutputTable::SetFormat( const char *format, const Strings &titles ) {
+  void OutputTable::setFormat( const char *format, const Strings &titles ) {
+    
     fIvar = 0;
     if ( fSizes.size() )
       fSizes.clear();
+    
     // Adding 1 because of the sign
     size_t
-      short_size = CalcIntLength( std::numeric_limits<short int>::max() + 1 ),
-      int_size   = CalcIntLength( std::numeric_limits<int>::max() + 1 ),
+      short_size = calcIntLength( std::numeric_limits<short int>::max() + 1 ),
+      int_size   = calcIntLength( std::numeric_limits<int>::max() + 1 ),
       size;
+    
     const char* num;
     auto it = titles.begin();
+    
     while ( *format != '\0' ) {
       fTitles.push_back( *it++ );
       fSizes.push_back( fTitles.back().size() );
@@ -100,7 +109,9 @@ namespace Isis {
 	if ( *format == 'b' ) {
 	  size = 1;
 	  fPrecisions.back() = 0;
-	  IWarning << "Precision specification not allowed for boolean numbers" << IEndMsg;
+	  IWarning <<
+	    "Precision specification not allowed for boolean numbers"
+		   << IEndMsg;
 	}
 	else if ( *format == 'i' )
 	  fPrecisions.back() = 0;
@@ -149,21 +160,26 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void OutputTable::SetFormat( const char *format ... ) {
+  void OutputTable::setFormat( const char *format ... ) {
+    
     Strings titles;
     va_list args;
+    
     va_start( args, format );
     const char *cptr = format;
+    
     while ( *cptr != '\0' ) {
       titles.push_back( va_arg( args, const char* ) );
       cptr++;
     }
-    this->SetFormat( format, titles );
+    
+    this->setFormat( format, titles );
   }
 
   //_______________________________________________________________________________
   //
-  std::string OutputTable::Start( const char &chdeco ) {
+  std::string OutputTable::start( const char &chdeco ) {
+    
     // Displays the title
     fDecoChar = chdeco;
     if ( fBuffer.tellg() )
@@ -174,12 +190,13 @@ namespace Isis {
     fSeparator = std::string( lsize, chdeco );
     std::cout << fSeparator << std::endl;
     std::cout << std::right << "| ";
+    
     // Displays the elements of the table
     auto itt = fTitles.begin();
     auto its = fSizes.begin();
 
     while( its != fSizes.end() )
-      std::cout << CenterString( *itt++, *its++ ) << " |";
+      std::cout << centerString( *itt++, *its++ ) << " |";
     std::cout << '\n' << fSeparator << std::endl;
     return fSeparator;
   }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -56,13 +56,13 @@ namespace Isis {
     ~AdaptiveBinning1D();
 
     // Return an empty histogram with the adaptive binning structure
-    TH1D* GetStruct( const char *name = "", const char *title = "" ) const;
+    TH1D* getStruct( const char *name = "", const char *title = "" ) const;
 
     // Returns the maximum value for the histogram range
-    inline const double GetMax() const;
+    inline const double getMax() const;
 
     // Returns the minimum value for the histogram range
-    inline const double GetMin() const;
+    inline const double getMin() const;
 
   protected:
 
@@ -76,11 +76,11 @@ namespace Isis {
 
   //______________________________________________________________________________
   //  
-  inline const double AdaptiveBinning1D::GetMax() const { return fMax; }
+  inline const double AdaptiveBinning1D::getMax() const { return fMax; }
   
   //______________________________________________________________________________
   //
-  inline const double AdaptiveBinning1D::GetMin() const { return fMin; }
+  inline const double AdaptiveBinning1D::getMin() const { return fMin; }
 }
 
 #endif

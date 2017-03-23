@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -56,10 +56,10 @@ namespace Isis {
     // each cluster. Since for the calculation of the variance more than one point
     // is needed, it collects the minimal number of closest points that are necessary
     // to avoid this quantity from being zero.
-    void BuildCentersOfMass();
+    void buildCentersOfMass();
 
     // Main function that calculates the clusters
-    void CalculateClusters();
+    void calculateClusters();
 
     // Configure the current factory with the options given. The different options
     // are the following:
@@ -85,30 +85,30 @@ namespace Isis {
     //                        performed to look for convergence.
     //  - Verbose          => Controls the display of the messages of the class.
     //
-    void Configure( const std::string &opts );
+    void configure( const std::string &opts );
 
     // Displays the current centers of mass of the clusters
-    void PrintCentersOfMass( std::string title = std::string() );
+    void printCentersOfMass( std::string title = std::string() );
 
     // Displays the distances among the different clusters
-    void PrintDistances( std::string title = std::string() );
+    void printDistances( std::string title = std::string() );
   
     // Add a new variable, attaching also its weight
-    inline void AddVariable( const std::string &name, const double &wgt = 1 );
+    inline void addVariable( const std::string &name, const double &wgt = 1 );
 
     // Gets the cluster at position < icl >
-    inline Cluster* GetCluster( const size_t &icl );
+    inline Cluster* getCluster( const size_t &icl );
 
     // Returns the vector of clusters
-    inline std::vector<Cluster>& GetClusters();
+    inline std::vector<Cluster>& getClusters();
 
     // Returns the current number of clusters
-    inline size_t GetNClusters() const;
+    inline size_t getNClusters() const;
 
     // Sets the weights for a given cluster. This weights are only taken into account
     // if the class does not manage the number of clusters. If < index > is negative,
     // the weights will be applied to all clusters (included the factory).
-    inline void SetClusterWeights( const int &index, const Doubles &wgts );
+    inline void setClusterWeights( const int &index, const Doubles &wgts );
 
   protected:
 
@@ -164,58 +164,59 @@ namespace Isis {
     
     // This method resets the all the clusters stored in the factory. The infomation
     // about the center of mass and the points to avoid is also lost.
-    void Reset();
+    void reset();
 
     // Funcion used to display the information inside the different methods. Here the
     // clusters are normalized if required.
-    void Display( void (ClusterFactory::*funcptr)( std::string title ),
+    void display( void (ClusterFactory::*funcptr)( std::string title ),
 		  const std::string &title = std::string() );
   
     // Method to calculate the initial centers of mass of the clusters taking into
     // account the minimum position allowed between clusters.
-    void DistanceCentersOfMass();
+    void distanceCentersOfMass();
 
     // Method to calculate the initial centers of mass in a random way
-    void RandomCentersOfMass();
+    void randomCentersOfMass();
 
     // Clustering method that constantly reconstructs the clusters till the variation
     // of the centers of mass is negligible, or the maximum number of iterations is
     // reached
-    bool ConvergenceMethod();
+    bool convergenceMethod();
 
     // Clustering method that reconstructs the clusters till the maximum number of
     // iterations is reached
-    bool IterativeMethod();
+    bool iterativeMethod();
 
     // Main clustering method that calculates the distances between the different
     // points and the clusters and attaches them using this quantity
-    void DistanceMerging();
+    void distanceMerging();
 
     // Function used when the class is able to add or substract clusters. It returns
     // the decision of whether a cluster must be removed or not.
-    bool ManageClusters();
+    bool manageClusters();
   };
   
   //_______________________________________________________________________________
   //
-  void ClusterFactory::AddVariable( const std::string &name, const double &wgt ) {
+  void ClusterFactory::addVariable( const std::string &name, const double &wgt ) {
+    
     fVarNorm.push_back( 0 );
     fVarOrder.push_back( name );
     fWeights.push_back( wgt );
-    fCenterOfMass.AddDimension();
+    fCenterOfMass.addDimension();
   }
 
   //_______________________________________________________________________________
   //
-  Cluster* ClusterFactory::GetCluster( const size_t &icl ) { return &fClusters[ icl ]; }
+  Cluster* ClusterFactory::getCluster( const size_t &icl ) { return &fClusters[ icl ]; }
 
   //_______________________________________________________________________________
   //
-  std::vector<Cluster>& ClusterFactory::GetClusters() { return fClusters; }
+  std::vector<Cluster>& ClusterFactory::getClusters() { return fClusters; }
 
   //_______________________________________________________________________________
   //
-  size_t ClusterFactory::GetNClusters() const { return fClusters.size(); }
+  size_t ClusterFactory::getNClusters() const { return fClusters.size(); }
 
 }
 

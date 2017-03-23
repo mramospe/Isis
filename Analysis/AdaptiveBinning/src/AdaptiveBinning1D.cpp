@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ namespace Isis {
     // Calculates the sum of weights
     double sw = 0;
     for ( auto it = data.begin(); it != data.end(); ++it )
-      sw += it -> second;
+      sw += it->second;
 
     // Calculates the number of bins
     size_t nbins = size_t( sw )/occ;
@@ -96,20 +96,19 @@ namespace Isis {
     size_t binsout = 0;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ++ib ) {
       swpb = auxsw/( nbins - binsout++ );
-      while ( (*ib) -> GetSumOfWeights() < swpb && id != data.end() ) {
-	static_cast<Bin1D*>( *ib ) -> Fill( id -> first, id -> second );
+      while ( (*ib)->getSumOfWeights() < swpb && id != data.end() ) {
+	static_cast<Bin1D*>( *ib )->fill( id->first, id->second );
 	++id;
       }
-      auxsw -= (*ib) -> GetSumOfWeights();
+      auxsw -= (*ib)->getSumOfWeights();
     }
     // If the end of the data has not been reached, it fills the last bin
     // with the rest of the events
     while ( id != data.end() )
-      static_cast<Bin1D*>( fBinList.back() )
-	-> Fill( id -> first, id++ -> second );
+      static_cast<Bin1D*>( fBinList.back() )->fill( id->first, id++->second );
   
     // Sets the different bin limits
-    static_cast<Bin1D*>( fBinList.front() ) -> fMin = fMin;
+    static_cast<Bin1D*>( fBinList.front() )->fMin = fMin;
   }
 
   //______________________________________________________________________________
@@ -118,13 +117,17 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  TH1D* AdaptiveBinning1D::GetStruct( const char *name, const char *title ) const {
+  TH1D* AdaptiveBinning1D::getStruct( const char *name, const char *title ) const {
+    
     double *bins = new double[ fBinList.size() + 1 ];
     for ( size_t i = 0; i < fBinList.size(); ++i )
-      bins[ i ] = static_cast<Bin1D*>( fBinList[ i ] ) -> fMin;
+      bins[ i ] = static_cast<Bin1D*>( fBinList[ i ] )->fMin;
     bins[ fBinList.size() ] = fMax;
+    
     TH1D *hist = new TH1D( name, title, fBinList.size(), bins );
+    
     delete[] bins;
+    
     return hist;
   }
 

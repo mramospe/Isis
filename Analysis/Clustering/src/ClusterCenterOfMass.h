@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -45,29 +45,29 @@ namespace Isis {
     ~ClusterCenterOfMass();
 
     // Looks if does exist any variance which could lead to infinites
-    bool AnyNullSigma() const;
+    bool anyNullSigma() const;
 
     // Recalculates the center of mass when adding a new point
-    void AttachPoint( const ClusterPoint &point );
+    void attachPoint( const ClusterPoint &point );
 
     // Normalizes the position of this center of mass
-    void Normalize( const Doubles &norm );
+    void normalize( const Doubles &norm );
 
     // Sets the position of the center of mass
-    void SetValues( const Doubles &values );
+    void setValues( const Doubles &values );
 
     // Adds one dimension to the center of mass
-    inline void AddDimension();
+    inline void addDimension();
 
     // Returns the vector to the mean of squares
-    inline const Doubles& GetMeanOfSquares() const;
+    inline const Doubles& getMeanOfSquares() const;
 
     // Initializes the class setting the internal weight to zero and defining
     // the position
-    inline void InitPosition( const ClusterPoint &com );
+    inline void initPosition( const ClusterPoint &com );
 
     // Reset the weight for this center of mass
-    inline void ResetWeight();
+    inline void resetWeight();
 
     // Set this class from another center of pass
     inline void operator = ( const ClusterCenterOfMass &point );
@@ -84,34 +84,39 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline void ClusterCenterOfMass::AddDimension() {
+  inline void ClusterCenterOfMass::addDimension() {
+    
     fValues.push_back( 0. );
     fMeanOfSquares.push_back( 0. );
   }
 
   //_______________________________________________________________________________
   //
-  inline const Doubles& ClusterCenterOfMass::GetMeanOfSquares() const {
+  inline const Doubles& ClusterCenterOfMass::getMeanOfSquares() const {
+    
     return fMeanOfSquares;
   }
 
   //_______________________________________________________________________________
   //
-  inline void ClusterCenterOfMass::InitPosition( const ClusterPoint &point ) {
-    fValues        = point.GetValues();
+  inline void ClusterCenterOfMass::initPosition( const ClusterPoint &point ) {
+    
+    fValues        = point.getValues();
     fMeanOfSquares = fValues;
     fWeight        = 0;
+    
     for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
       *it *= (*it); 
   }
 
   //_______________________________________________________________________________
   //
-  inline void ClusterCenterOfMass::ResetWeight() { fWeight = 0; }
+  inline void ClusterCenterOfMass::resetWeight() { fWeight = 0; }
 
   //_______________________________________________________________________________
   //
   inline void ClusterCenterOfMass::operator = ( const ClusterCenterOfMass &point ) {
+    
     fValues        = point.fValues;
     fMeanOfSquares = point.fMeanOfSquares;
     fWeight        = point.fWeight;
@@ -120,8 +125,9 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   inline void ClusterCenterOfMass::operator = ( const ClusterPoint &point ) {
-    this -> InitPosition( point );
-    fWeight = point.GetWeight();
+    
+    this->initPosition( point );
+    fWeight = point.getWeight();
   }
 
 }

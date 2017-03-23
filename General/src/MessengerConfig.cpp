@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  bool ApplyColor( const std::ostream &os ) {
+  bool applyColor( const std::ostream &os ) {
 
     if ( &os == &std::cout )
       return ANSIFormat::ColoredStdOut;
@@ -44,9 +44,9 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  std::ostream& EndMsgLine( std::ostream &os ) {
+  std::ostream& endMsgLine( std::ostream &os ) {
 
-    switch( ApplyColor(os) ) {
+    switch( applyColor(os) ) {
     case true:
       os << "\033[0m";
     default:

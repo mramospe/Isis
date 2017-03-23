@@ -32,7 +32,7 @@ namespace Isis {
     fOStream( &os ) {
 
     // Check if color must be applied
-    switch ( ApplyColor(os) ) {
+    switch ( applyColor(os) ) {
     
     case true:
     

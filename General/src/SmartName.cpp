@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -36,10 +36,10 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  bool SmartName::Find( const std::string &other ) const {
+  bool SmartName::find( const std::string &other ) const {
   
     Strings vec;
-    SplitString( vec, fName, std::string( 1, fSep ) );
+    splitString( vec, fName, std::string( 1, fSep ) );
   
     return std::find( vec.begin(), vec.end(), other ) != vec.end();
   }

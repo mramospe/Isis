@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -40,61 +40,61 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
 
   // Wrapper from AdaptiveBinning.h
   py::class_<Isis::AdaptiveBinning>("AdaptiveBinning", py::init<>())
-    .def("GetStruct" , &AdBin::GetStruct)
-    .def("GetBinList", &AdBin::GetBinList)
-    .def("GetNbins"  , &Isis::AdaptiveBinning::GetNbins)
+    .def("getStruct" , &AdBin::getStruct)
+    .def("getBinList", &AdBin::getBinList)
+    .def("getNbins"  , &Isis::AdaptiveBinning::getNbins)
     ;
 
   // Wrapper from AdaptiveBinning1D.h
   py::class_<Isis::AdaptiveBinning1D, py::bases<Isis::AdaptiveBinning> >
     ("AdaptiveBinning1D", py::no_init)
-    .def("__init__"     , py::make_constructor(&AdBin1D::Constructor))
-    .def("__init__"     , py::make_constructor(&AdBin1D::Constructor_NoWgts))
-    .def_readonly("Max" , &Isis::AdaptiveBinning1D::GetMax)
-    .def_readonly("Min" , &Isis::AdaptiveBinning1D::GetMin)
-    .def("GetStruct"    , &AdBin1D::GetStruct, AdBin1D::GetStruct_Overloads())
+    .def("__init__"     , py::make_constructor(&AdBin1D::constructor))
+    .def("__init__"     , py::make_constructor(&AdBin1D::constructor_NoWgts))
+    .def_readonly("Max" , &Isis::AdaptiveBinning1D::getMax)
+    .def_readonly("Min" , &Isis::AdaptiveBinning1D::getMin)
+    .def("getStruct"    , &AdBin1D::getStruct, AdBin1D::getStruct_Overloads())
     ;
 
   // Wrapper from AdaptiveBinning2D.h
   py::class_<Isis::AdaptiveBinning2D, py::bases<Isis::AdaptiveBinning> >
     ("AdaptiveBinning2D", py::no_init)
-    .def("__init__"     , py::make_constructor(&AdBin2D::Constructor))
-    .def("__init__"     , py::make_constructor(&AdBin2D::Constructor_NoWgts))
-    .def("GetAdjStruct" , &AdBin2D::GetAdjStruct, AdBin2D::GetAdjStruct_Overloads())
-    .def("GetStruct"    , &AdBin2D::GetStruct, AdBin2D::GetStruct_Overloads())
-    .def_readonly("Xmax", &Isis::AdaptiveBinning2D::GetXmax)
-    .def_readonly("Xmin", &Isis::AdaptiveBinning2D::GetXmin)
-    .def_readonly("Ymax", &Isis::AdaptiveBinning2D::GetYmax)
-    .def_readonly("Ymin", &Isis::AdaptiveBinning2D::GetYmin)
+    .def("__init__"     , py::make_constructor(&AdBin2D::constructor))
+    .def("__init__"     , py::make_constructor(&AdBin2D::constructor_NoWgts))
+    .def("getAdjStruct" , &AdBin2D::getAdjStruct, AdBin2D::getAdjStruct_Overloads())
+    .def("getStruct"    , &AdBin2D::getStruct, AdBin2D::getStruct_Overloads())
+    .def_readonly("Xmax", &Isis::AdaptiveBinning2D::getXmax)
+    .def_readonly("Xmin", &Isis::AdaptiveBinning2D::getXmin)
+    .def_readonly("Ymax", &Isis::AdaptiveBinning2D::getYmax)
+    .def_readonly("Ymin", &Isis::AdaptiveBinning2D::getYmin)
     ;
 
   // Wrapper from Bin.h. This class is meant to be used in read-only mode.
   py::class_<Isis::Bin>("Bin", py::no_init)
-    .def("GetEntries"     , &Isis::Bin::GetEntries)
-    .def("GetSumOfWeights", &Isis::Bin::GetSumOfWeights)
+    .def("getEntries"     , &Isis::Bin::getEntries)
+    .def("getSumOfWeights", &Isis::Bin::getSumOfWeights)
     ;
 
   // Wrapper from Bin1D.h. This class is meant to be used in read-only mode.
   py::class_<Isis::Bin1D, py::bases<Isis::Bin> >("Bin1D", py::no_init)
-    .def_readonly("Min", &Isis::Bin1D::GetMin)
+    .def_readonly("Min", &Isis::Bin1D::getMin)
     ;
 
   // Wrapper from Bin2D.h. This class is meant to be used in read-only mode.
   py::class_<Isis::Bin2D, py::bases<Isis::Bin> >("Bin2D", py::no_init)
-    .def_readonly("Xmax", &Isis::Bin2D::GetXmax)
-    .def_readonly("Xmin", &Isis::Bin2D::GetXmin)
-    .def_readonly("Ymax", &Isis::Bin2D::GetYmax)
-    .def_readonly("Ymin", &Isis::Bin2D::GetYmin)
+    .def_readonly("Xmax", &Isis::Bin2D::getXmax)
+    .def_readonly("Xmin", &Isis::Bin2D::getXmin)
+    .def_readonly("Ymax", &Isis::Bin2D::getYmax)
+    .def_readonly("Ymin", &Isis::Bin2D::getYmin)
     ;
 
   // Wrapper from CLsFluctuator
   py::class_<CLsFluct::CLsFluctWrap, boost::noncopyable>("CLsFluctuator")
-    .def("Fluctuate", py::pure_virtual(&CLsFluct::CLsFluctWrap::Fluctuate))
+    .def("fluctuate", py::pure_virtual(&CLsFluct::CLsFluctWrap::fluctuate))
     ;
 
   // Wrapper from CLsPrior
   py::class_<CLsPrior::CLsPriorWrap, boost::noncopyable>("CLsPrior")
-    .def("Evaluate", py::pure_virtual(&CLsPrior::CLsPriorWrap::Evaluate))
+    .def("evaluate", py::pure_virtual(&CLsPrior::CLsPriorWrap::evaluate))
     ;
 
   // Wrapper from CLsResult
@@ -105,33 +105,33 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
 			      const double&,
 			      const double&,
 			      const double&>())
-    .def_readonly("Alpha"       , &Isis::CLsResult::Alpha)
-    .def_readonly("Beta"        , &Isis::CLsResult::Beta)
+    .def_readonly("Alpha"       , &Isis::CLsResult::alpha)
+    .def_readonly("Beta"        , &Isis::CLsResult::beta)
     .def_readonly("CLb"         , &Isis::CLsResult::CLb)
     .def_readonly("CLs"         , &Isis::CLsResult::CLs)
     .def_readonly("CLsb"        , &Isis::CLsResult::CLsb)
-    .def_readonly("TestStat"    , &Isis::CLsResult::TestStat)
-    .def_readonly("Significance", &Isis::CLsResult::Significance)
-    .def("GaussSigPos"          , &Isis::CLsResult::GaussSigPos)
-    .def("IsDiscovery"          , &Isis::CLsResult::IsDiscovery)
-    .def("IsEvidence"           , &Isis::CLsResult::IsEvidence)
+    .def_readonly("TestStat"    , &Isis::CLsResult::testStat)
+    .def_readonly("Significance", &Isis::CLsResult::significance)
+    .def("gaussSigPos"          , &Isis::CLsResult::gaussSigPos)
+    .def("isDiscovery"          , &Isis::CLsResult::isDiscovery)
+    .def("isEvidence"           , &Isis::CLsResult::isEvidence)
     ;
     
   // Wrapper from CLsHypothesis
   py::class_<Isis::CLsHypothesis>("CLsHypothesis", py::init<>())
-    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor))
-    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor_NoPrior))
-    .def("__init__"        , py::make_constructor(&CLsHyp::Constructor_NoFluctNoPrior))
-    .def("PValue"          , &Isis::CLsHypothesis::PValue)
-    .def("GetTSVals"       , &CLsHyp::GetTSVals)
-    .def("GetHyp"          , &CLsHyp::GetHyp)
-    .def("Generate"        , &Isis::CLsHypothesis::Generate)
-    .def("PoissonProb"     , &CLsHyp::PoissonProb)
-    .def("SetFactory"      , &Isis::CLsHypothesis::SetFactory)
-    .def("SetFluctuator"   , &Isis::CLsHypothesis::SetFluctuator)
-    .def("SetHyp"          , &CLsHyp::SetHyp, CLsHyp::SetHyp_Overloads())
-    .def("SetPrior"        , &Isis::CLsHypothesis::SetPrior)
-    .def("TestStatFromProb", &Isis::CLsHypothesis::TestStatFromProb)
+    .def("__init__"        , py::make_constructor(&CLsHyp::constructor))
+    .def("__init__"        , py::make_constructor(&CLsHyp::constructor_NoPrior))
+    .def("__init__"        , py::make_constructor(&CLsHyp::constructor_NoFluctNoPrior))
+    .def("pValue"          , &Isis::CLsHypothesis::pValue)
+    .def("getTSVals"       , &CLsHyp::getTSVals)
+    .def("getHyp"          , &CLsHyp::getHyp)
+    .def("generate"        , &Isis::CLsHypothesis::generate)
+    .def("poissonProb"     , &CLsHyp::poissonProb)
+    .def("setFactory"      , &Isis::CLsHypothesis::setFactory)
+    .def("setFluctuator"   , &Isis::CLsHypothesis::setFluctuator)
+    .def("setHyp"          , &CLsHyp::setHyp, CLsHyp::setHyp_Overloads())
+    .def("setPrior"        , &Isis::CLsHypothesis::setPrior)
+    .def("testStatFromProb", &Isis::CLsHypothesis::testStatFromProb)
     ;
 
   py::enum_<Isis::CLsHypTypes>("CLsHypTypes")
@@ -143,19 +143,19 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
   // Wrapper from CLsFactory
   py::class_<Isis::CLsFactory>("CLsFactory", py::init<>())
     .def(py::init<Isis::CLsHypothesis&, Isis::CLsHypothesis&>())
-    .def("Alpha"           , &Isis::CLsFactory::Alpha)
-    .def("Beta"            , &Isis::CLsFactory::Beta)
-    .def("Calculate"       , &CLsFact::CalculateFromArray)
-    .def("Calculate"       , CLsFact::CalculateFromDouble)
+    .def("alpha"           , &Isis::CLsFactory::alpha)
+    .def("beta"            , &Isis::CLsFactory::beta)
+    .def("calculate"       , &CLsFact::calculateFromArray)
+    .def("calculate"       , CLsFact::calculateFromDouble)
     .def("CLb"             , &Isis::CLsFactory::CLb)
     .def("CLs"             , &Isis::CLsFactory::CLs)
     .def("CLsb"            , &Isis::CLsFactory::CLsb)
-    .def("Generate"        , &Isis::CLsFactory::Generate)
-    .def("TestStat"        , &CLsFact::TestStat)
-    .add_property("NullHyp", &CLsFact::GetNullHyp, &Isis::CLsFactory::SetNullHyp)
-    .add_property("SigHyp" , &CLsFact::GetSigHyp, &Isis::CLsFactory::SetSigHyp)
+    .def("generate"        , &Isis::CLsFactory::generate)
+    .def("testStat"        , &CLsFact::testStat)
+    .add_property("NullHyp", &CLsFact::getNullHyp, &Isis::CLsFactory::setNullHyp)
+    .add_property("SigHyp" , &CLsFact::getSigHyp, &Isis::CLsFactory::setSigHyp)
     ;
   
   // Wrappers from RootUtils
-  py::def("GetSafeObject", &RootUtils::GetSafeObject);
+  py::def("getSafeObject", &RootUtils::getSafeObject);
 }

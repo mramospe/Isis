@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -34,7 +34,7 @@ namespace Isis {
 
   // Get a pointer to an object in a TFile and send an error message if the operation
   // fails
-  TObject* GetSafeObject( TFile *ifile, const std::string &path );
+  TObject* getSafeObject( TFile *ifile, const std::string &path );
 
 }
 

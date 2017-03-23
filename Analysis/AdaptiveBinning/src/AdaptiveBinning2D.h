@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -60,25 +60,25 @@ namespace Isis {
     ~AdaptiveBinning2D();
 
     // Makes an adjusted adaptive binned histogram
-    TH2Poly* GetAdjStruct( const char *name = "", const char *title = "" ) const;
+    TH2Poly* getAdjStruct( const char *name = "", const char *title = "" ) const;
 
     // Makes an adaptive binned histogram
-    TH2Poly* GetStruct( const char *name = "", const char *title = "" ) const;
+    TH2Poly* getStruct( const char *name = "", const char *title = "" ) const;
 
     // Return a list with the adjusted bins
-    inline const std::vector<Bin2D*>& GetAdjBinList() const;
+    inline const std::vector<Bin2D*>& getAdjBinList() const;
 
     // Return the maximum value in the X direction
-    inline double GetXmax() const;
+    inline double getXmax() const;
 
     // Return the minimum value in the X direction
-    inline double GetXmin() const;
+    inline double getXmin() const;
 
     // Return the maximum value in the Y direction
-    inline double GetYmax() const;
+    inline double getYmax() const;
 
     // Return the minimum value in the Y direction
-    inline double GetYmin() const;
+    inline double getYmin() const;
 
   protected:
     
@@ -101,25 +101,26 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  inline const std::vector<Bin2D*>& AdaptiveBinning2D::GetAdjBinList() const {
+  inline const std::vector<Bin2D*>& AdaptiveBinning2D::getAdjBinList() const {
+    
     return fAdjBinList;
   }
 
   //______________________________________________________________________________
   //
-  inline double AdaptiveBinning2D::GetXmax() const { return fXmax; }
+  inline double AdaptiveBinning2D::getXmax() const { return fXmax; }
 
   //______________________________________________________________________________
   //
-  inline double AdaptiveBinning2D::GetXmin() const { return fXmin; }
+  inline double AdaptiveBinning2D::getXmin() const { return fXmin; }
 
   //______________________________________________________________________________
   //
-  inline double AdaptiveBinning2D::GetYmax() const { return fYmax; }
+  inline double AdaptiveBinning2D::getYmax() const { return fYmax; }
 
   //______________________________________________________________________________
   //
-  inline double AdaptiveBinning2D::GetYmin() const { return fYmin; }
+  inline double AdaptiveBinning2D::getYmin() const { return fYmin; }
   
 }
 

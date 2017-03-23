@@ -47,22 +47,22 @@ namespace Isis {
     ~BufferVariable();
 
     // Converts this class to a string
-    std::string ToString() const;
+    std::string toString() const;
 
     // Sets the given variable as the value stored in the class
-    template<typename type> inline void ExtractValue( type &value ) const;
+    template<typename type> inline void extractValue( type &value ) const;
 
     // Returns the type of the class
-    inline const char& GetType() const;
+    inline const char& getType() const;
 
     // Returns the void pointer to the value stored by this class
-    inline void* PathToValue();
+    inline void* pathToValue();
 
     // Sets the type of this variable. The information stored in it is lost.
-    inline void SetType( const char &type );
+    inline void setType( const char &type );
 
     // Sets the value stored in the class as that of the given variable
-    template<typename type> inline void SetValue( const type &value );
+    template<typename type> inline void setValue( const type &value );
 
     // Convert to string and add it to the stream
     std::ostream& operator << ( std::ostream &os );
@@ -78,17 +78,17 @@ namespace Isis {
   private:
     
     // Method to construct this class, given the type
-    void Construct();
+    void construct();
 
     // Method to delete the value stored
-    void Delete();
+    void clear();
 
   };
 
   //_______________________________________________________________________________
   //
   template<typename type>
-  void BufferVariable::ExtractValue( type &value ) const {
+  void BufferVariable::extractValue( type &value ) const {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_GET_PTR_VALUE,
 			  
@@ -99,25 +99,25 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline const char& BufferVariable::GetType() const { return fType; }
+  inline const char& BufferVariable::getType() const { return fType; }
 
   //_______________________________________________________________________________
   //
-  inline void* BufferVariable::PathToValue() { return fPath; }
+  inline void* BufferVariable::pathToValue() { return fPath; }
 
   //_______________________________________________________________________________
   //
-  inline void BufferVariable::SetType( const char &type ) {
+  inline void BufferVariable::setType( const char &type ) {
     
-    this->Delete();
+    this->clear();
     fType = type;
-    this->Construct();
+    this->construct();
   }
 
   //_______________________________________________________________________________
   //
   template<typename type>
-  void BufferVariable::SetValue( const type &value ) {
+  void BufferVariable::setValue( const type &value ) {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_SET_PTR_VALUE,
 			  
@@ -130,7 +130,7 @@ namespace Isis {
   //
   inline std::ostream& BufferVariable::operator << ( std::ostream &os ) {
     
-    os << this->ToString();
+    os << this->toString();
     return os;
   }
 

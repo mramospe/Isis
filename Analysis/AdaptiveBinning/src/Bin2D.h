@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -49,29 +49,29 @@ namespace Isis {
     ~Bin2D();
 
     // If the bin is in a border of the histogram, adjusts it to the data
-    void AdjustBin( const double &xmin,
+    void adjustBin( const double &xmin,
 		    const double &xmax,
 		    const double &ymin,
 		    const double &ymax,
 		    const double &delta );
 
     // Fills the bin if the point is inside it
-    void Fill( const double &x, const double &y, const double &w );
+    void fill( const double &x, const double &y, const double &w );
 
     // Return number of points in the bin
-    inline const double GetNpoints() const;
+    inline const double getNpoints() const;
 
     // Get the maximum value in the X direction
-    inline const double GetXmax() const;
+    inline const double getXmax() const;
 
     // Get the minimum value in the X direction
-    inline const double GetXmin() const;
+    inline const double getXmin() const;
 
     // Get the maximum value in the Y direction
-    inline const double GetYmax() const;
+    inline const double getYmax() const;
 
     // Get the minimum value in the Y direction
-    inline const double GetYmin() const;
+    inline const double getYmin() const;
 
   protected:
     
@@ -117,37 +117,37 @@ namespace Isis {
   protected:
 
     // Divides the bin in two, given the range of the X and Y axis
-    Bin2D* Divide( const double &xrange, const double &yrange );
+    Bin2D* divide( const double &xrange, const double &yrange );
     
   private:
 
     // If the bin is in a border of the histogram, adjusts it to the data
-    void CalcMedians();
+    void calcMedians();
     
     // Clears the content of the bin but the limits
-    void Clear();
+    void clear();
     
     // Sorts the data and the weights and returns the sorted vector of weights for
     // that data sample
-    Doubles Sort( Doubles &dvector, Doubles &wvector );
+    Doubles sort( Doubles &dvector, Doubles &wvector );
 
   };
 
   //______________________________________________________________________________
   //
-  inline const double Bin2D::GetXmax() const { return fXmax; }
+  inline const double Bin2D::getXmax() const { return fXmax; }
 
   //______________________________________________________________________________
   //
-  inline const double Bin2D::GetXmin() const { return fXmin; }
+  inline const double Bin2D::getXmin() const { return fXmin; }
 
   //______________________________________________________________________________
   //
-  inline const double Bin2D::GetYmax() const { return fYmax; }
+  inline const double Bin2D::getYmax() const { return fYmax; }
 
   //______________________________________________________________________________
   //
-  inline const double Bin2D::GetYmin() const { return fYmin; }
+  inline const double Bin2D::getYmin() const { return fYmin; }
 
 }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void Bin2D::AdjustBin( const double &xmin,
+  void Bin2D::adjustBin( const double &xmin,
 			 const double &xmax,
 			 const double &ymin,
 			 const double &ymax,
@@ -54,7 +54,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void Bin2D::Fill( const double &x, const double &y, const double &w ) {
+  void Bin2D::fill( const double &x, const double &y, const double &w ) {
 
     if ( x > fXmin && x < fXmax && y > fYmin && y < fYmax ) {
       fXpoints.push_back( x );
@@ -83,32 +83,34 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  Bin2D* Bin2D::Divide( const double &xrange, const double &yrange ) {
+  Bin2D* Bin2D::divide( const double &xrange, const double &yrange ) {
+    
     double tmp;
-    this->CalcMedians();
+    this->calcMedians();
+    
     if ( std::min( fXmedian - fXmin, fXmax - fXmedian )/xrange > 
 	 std::min( fYmedian - fYmin, fYmax - fYmedian )/yrange ) {
       tmp   = fXmax;
       fXmax = fXmedian;
-      this->Clear();
+      this->clear();
       return new Bin2D( fXmedian, tmp, fYmin, fYmax );
     }
     else {
       tmp   = fYmax;
       fYmax = fYmedian;
-      this->Clear();
+      this->clear();
       return new Bin2D( fXmin, fXmax, fYmedian, tmp );
     }
   }
 
   //______________________________________________________________________________
   //
-  void Bin2D::CalcMedians() {
+  void Bin2D::calcMedians() {
   
     // Sorts the data ( with the weights )
     Doubles
-      xw_sorted( this->Sort( fXpoints, fWpoints ) ),
-      yw_sorted( this->Sort( fYpoints, fWpoints ) );
+      xw_sorted( this->sort( fXpoints, fWpoints ) ),
+      yw_sorted( this->sort( fYpoints, fWpoints ) );
 
     // Calculates the median
     double sw_max, sw;
@@ -134,7 +136,8 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void Bin2D::Clear() {
+  void Bin2D::clear() {
+    
     fXpoints.clear();
     fYpoints.clear();
     fWpoints.clear();
@@ -143,7 +146,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  Doubles Bin2D::Sort( Doubles &dvector, Doubles &wvector ) {
+  Doubles Bin2D::sort( Doubles &dvector, Doubles &wvector ) {
     
     std::vector< std::pair<double, double> > order( dvector.size() );
     for ( size_t i = 0; i < order.size(); i++ )
@@ -156,6 +159,7 @@ namespace Isis {
       dvector [ i ] = order[ i ].first;
       swvector[ i ] = order[ i ].second;
     }
+    
     return swvector;
   }
 

@@ -63,31 +63,31 @@ namespace Isis {
     virtual ~BufferArray();
 
     // Adds a new variable to the buffer, given the name and the type
-    BufferVariable* AddVariable( const std::string &name, const char &type );
+    BufferVariable* addVariable( const std::string &name, const char &type );
     
     // Appends to the new vector the names of the current array
-    void ExtractNames( Strings &vector );
+    void extractNames( Strings &vector );
 
     // Converts the values stored in this array to a string
-    std::string ToString() const;
+    std::string toString() const;
     
     // Removes the variables booked in this class
-    inline void Clear();
+    inline void clear();
 
     // Checks whether the given variable is already booked  
-    inline bool Contains( const std::string &name ) const;
+    inline bool contains( const std::string &name ) const;
 
     // Returns the variable related to the name given
-    inline const BuffVar& Get( const std::string &name ) const;
+    inline const BuffVar& get( const std::string &name ) const;
 
     // Returns the map containing all the variables
-    inline const BuffVarMap& GetMap() const;
+    inline const BuffVarMap& getMap() const;
 
     // Returns the size of the map
-    inline size_t GetSize() const;
+    inline size_t getSize() const;
 
     // Reconstructs the map following the given sort function    
-    inline void Sort( SortFunc func );
+    inline void sort( SortFunc func );
     
     // Operator to get a variable by index
     inline BuffVar& operator [] ( const std::string &name );
@@ -101,7 +101,7 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline void BufferArray::Clear() {
+  inline void BufferArray::clear() {
     for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
       delete it->second;
     fVarMap.clear();
@@ -109,29 +109,29 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline bool BufferArray::Contains( const std::string &name ) const {
+  inline bool BufferArray::contains( const std::string &name ) const {
     return fVarMap.count( name );
   }
 
   //_______________________________________________________________________________
   //
-  inline const BufferArray::BuffVar& BufferArray::Get( const std::string &name ) const {
+  inline const BufferArray::BuffVar& BufferArray::get( const std::string &name ) const {
     return *(fVarMap.at( name ));
   }
 
   //_______________________________________________________________________________
   //
-  inline const BufferArray::BuffVarMap& BufferArray::GetMap() const {
+  inline const BufferArray::BuffVarMap& BufferArray::getMap() const {
     return fVarMap;
   }
 
   //_______________________________________________________________________________
   //
-  inline size_t BufferArray::GetSize() const { return fVarMap.size(); }
+  inline size_t BufferArray::getSize() const { return fVarMap.size(); }
 
   //_______________________________________________________________________________
   //
-  inline void BufferArray::Sort( SortFunc func ) {
+  inline void BufferArray::sort( SortFunc func ) {
     fVarMap = BufferArray::BuffVarMap( fVarMap.begin(), fVarMap.end(), func );
   }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -33,11 +33,11 @@ namespace RootUtils {
 
   //_______________________________________________________________________________
   //
-  PyObject* GetSafeObject( PyObject *ifile_obj, const std::string &path ) {
+  PyObject* getSafeObject( PyObject *ifile_obj, const std::string &path ) {
 
     TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
     
-    return TPython::ObjectProxy_FromVoidPtr( Isis::GetSafeObject(ifile, path),
+    return TPython::ObjectProxy_FromVoidPtr( Isis::getSafeObject(ifile, path),
 					     "TObject",
 					     false );
   }

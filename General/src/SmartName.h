@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -44,19 +44,19 @@ namespace Isis {
     ~SmartName();
 
     // Looks in the name for the given pattern, and returns the result of the search
-    bool Find( const std::string &other ) const;
+    bool find( const std::string &other ) const;
 
     // Builds the complete path to a file, given the type of the file (without the dot)
-    inline std::string BuildFilePath( const std::string &ext );
+    inline std::string buildFilePath( const std::string &ext );
     
     // Returns the current name of the class
-    inline const std::string& GetName() const;
+    inline const std::string& getName() const;
 
     // Add a string
-    inline SmartName operator +  ( const std::string &str ) const;
+    inline SmartName operator + ( const std::string &str ) const;
 
     // Add another SmartName
-    inline SmartName operator +  ( const SmartName &str ) const;
+    inline SmartName operator + ( const SmartName &str ) const;
 
     // Add string to this class
     inline void operator += ( const std::string &str );
@@ -65,10 +65,10 @@ namespace Isis {
     inline void operator += ( const SmartName &str );
 
     // Set this class from a SmartName
-    inline void operator =  ( const SmartName &str );
+    inline void operator = ( const SmartName &str );
 
     // Set this class from a string
-    inline void operator =  ( const std::string &str );
+    inline void operator = ( const std::string &str );
 
     // Compare this name to another SmartName
     inline bool operator == ( const SmartName &other ) const;
@@ -97,23 +97,25 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline std::string SmartName::BuildFilePath( const std::string &ext ) {
+  inline std::string SmartName::buildFilePath( const std::string &ext ) {
     return fName + "." + ext;
   }
 
   //_______________________________________________________________________________
   //
-  inline const std::string& SmartName::GetName() const { return fName; }
+  inline const std::string& SmartName::getName() const { return fName; }
   
   //_______________________________________________________________________________
   //
   inline SmartName SmartName::operator + ( const std::string &str ) const {
+
     return SmartName( fName + fSep + str, fSep );
   }
   
   //_______________________________________________________________________________
   //
   inline SmartName SmartName::operator + ( const SmartName &str ) const {
+    
     return SmartName( fName + fSep + str.fName, str.fSep );
   }
 
@@ -124,6 +126,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   inline void SmartName::operator += ( const SmartName &str ) {
+    
     fName += fSep + str.fName;
     fSep   = str.fSep;
   }
@@ -131,6 +134,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   inline void SmartName::operator =  ( const std::string &str ) {
+    
     fName = str;
     fSep  = '_';
   }
@@ -138,6 +142,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   inline void SmartName::operator =  ( const SmartName &str ) {
+    
     fName = str.fName;
     fSep  = str.fSep;
   }
@@ -145,30 +150,35 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   inline bool SmartName::operator == ( const std::string &other ) const {
+    
     return fName == other;
   }
 
   //_______________________________________________________________________________
   //
   inline bool SmartName::operator == ( const SmartName &other ) const {
+    
     return fName == other.fName;
   }
 
   //_______________________________________________________________________________
   //
   inline bool SmartName::operator != ( const std::string &other ) const {
+    
     return fName != other;
   }
 
   //_______________________________________________________________________________
   //
   inline bool SmartName::operator != ( const SmartName &other ) const {
+    
     return fName != other.fName;
   }
 
   //_______________________________________________________________________________
   //
   inline std::ostream& SmartName::operator << ( std::ostream &os ) const {
+    
     os << fName;
     return os;
   }

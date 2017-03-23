@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ----------------------------------------------------------------
 //
@@ -69,16 +69,16 @@ namespace Isis {
     ~ProgressBar();
 
     // Ends the display of the progress
-    void End();
+    void end();
 
     // If the required percentage of the loop is achieved, it prints the progress
-    void Print( const size_t &entry );
+    void display( const size_t &entry );
 
     // Sets the colors of the different display options
-    void SetColor( const char *opts );
+    void setColor( const char *opts );
 
     // Starts the progress display
-    void Start( size_t nentries );
+    void start( size_t nentries );
 
   protected:
 
@@ -106,14 +106,14 @@ namespace Isis {
   private:
 
     // Gets the date depending on the configuration option specified
-    inline std::string GetDate();
+    inline std::string getDate();
 
     // Gets the option for one of the possible selections
-    inline std::string GetOption( std::string &str, const char *opt );
+    inline std::string getOption( std::string &str, const char *opt );
 
     // Gets the time elapsed in format ( days, hours, minutes, seconds ). There are
     // only displayed those magnitudes wich have reached a value greater than 0.
-    inline std::string GetTime();
+    inline std::string getTime();
   };
 
 }

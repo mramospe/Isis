@@ -19,12 +19,12 @@
 void WriteForCluster( Isis::ClusterFactory &factory, const size_t &icl ) {
   
   std::cout << "Accesing cluster " << icl << std::endl;
-  Isis::Cluster *cl = factory.GetCluster( icl );
+  Isis::Cluster *cl = factory.getCluster( icl );
 
   // Fills the vectors with the information of the cluster points
   Isis::Doubles vec, vx, vy, vg, vh;
-  for ( auto it = cl -> GetPoints().begin(); it != cl -> GetPoints().end(); ++it ) {
-    vec = it -> GetValues();
+  for ( auto it = cl -> getPoints().begin(); it != cl -> getPoints().end(); ++it ) {
+    vec = it -> getValues();
     vx.push_back( vec[ 0 ] );
     vy.push_back( vec[ 1 ] );
     vg.push_back( vec[ 3 ] );
@@ -73,10 +73,10 @@ int main() {
 
   // Creates the cluster factory parsing the corresponding options
   Isis::ClusterFactory factory( "nClusters=7:nIter=10:ClusteringMethod=Convergence:ComDefMethod=Distance:Verbose:ManageClusters:MaxComVar=0.1:nComStdDev=1" );
-  factory.AddVariable( "x" );
-  factory.AddVariable( "y" );
-  factory.AddVariable( "g" );
-  factory.AddVariable( "h" );
+  factory.addVariable( "x" );
+  factory.addVariable( "y" );
+  factory.addVariable( "g" );
+  factory.addVariable( "h" );
 
   // Generates the data. Four different variables are defined
   TRandom3 rndm;
@@ -121,14 +121,14 @@ int main() {
     value[ 1 ] = VY.back();
     value[ 3 ] = VG.back();
     value[ 2 ] = VH.back();
-    factory.AddPoint( value );
+    factory.addPoint( value );
   }
 
   // Calls the main method
-  factory.CalculateClusters();
+  factory.calculateClusters();
 
   // Generates the scatter plots and histograms for each cluster and writes them
-  for ( size_t i = 0; i < factory.GetNClusters(); ++i ) {
+  for ( size_t i = 0; i < factory.getNClusters(); ++i ) {
     of -> cd();
     WriteForCluster( factory, i );
   }

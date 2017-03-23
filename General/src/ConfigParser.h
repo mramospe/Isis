@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -45,7 +45,7 @@ namespace Isis {
 
     // Definition of types used by this class
     typedef std::pair<std::string, Strings> ConfigOptPair;
-    typedef std::map<std::string, ConfigOptPair>               ConfigMap;
+    typedef std::map<std::string, ConfigOptPair> ConfigMap;
     typedef std::vector< std::pair<std::string, const char> >  TypeVec;
 
   public:
@@ -57,17 +57,17 @@ namespace Isis {
     ~ConfigParser();
 
     // Books a new variable, storing also its type
-    void BookConfigOpt( const std::string &name,
+    void bookConfigOpt( const std::string &name,
 			const char &type,
 			const Strings &poss = {} );
 
     // Parses the options given to the main function. Both input variables must be
     // those passed to the executable.
-    void ParseArgs( const int &nargs, const char *argv[] );
+    void parseArgs( const int &nargs, const char *argv[] );
 
     // Extracts the value for the given variable
     template <typename type>
-    void Extract( const std::string &name, type &value );
+    void extract( const std::string &name, type &value );
     
   protected:
     
@@ -88,7 +88,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   template <typename type>
-  void ConfigParser::Extract( const std::string &name, type &value ) {
+  void ConfigParser::extract( const std::string &name, type &value ) {
     if ( !fParsed )
       IError << "No arguments have been parsed yet; unable to extract value" << IEndMsg;
     fParser << fArgs[ name ].first;

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -40,7 +40,7 @@ namespace Isis {
     virtual ~CLsFluctuator() { };
 
     // Given the position and the value, fluctuate it using an user-defined function
-    virtual double Fluctuate( const size_t &pos, const double &value ) = 0;
+    virtual double fluctuate( const size_t &pos, const double &value ) = 0;
 
   };
   

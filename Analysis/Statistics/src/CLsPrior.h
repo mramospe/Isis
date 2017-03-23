@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -41,7 +41,7 @@ namespace Isis {
 
     // Evaluate the prior given the position, the mean and the given value from the
     // observation
-    virtual double Evaluate( const size_t &pos,
+    virtual double evaluate( const size_t &pos,
 			     const double &mean,
 			     const double &value ) = 0;
 

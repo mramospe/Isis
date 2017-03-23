@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ConfigParser::BookConfigOpt( const std::string &name,
+  void ConfigParser::bookConfigOpt( const std::string &name,
 				    const char &type,
 				    const Strings &poss ) {
     
@@ -59,7 +59,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ConfigParser::ParseArgs( const int &nargs, const char *argv[] ) {
+  void ConfigParser::parseArgs( const int &nargs, const char *argv[] ) {
 
     // Allows the class to extract values
     fParsed = true;
@@ -87,10 +87,10 @@ namespace Isis {
     
       switch ( type ) {
       case 'D':
-	status *= CheckStringType<float>( arg );
+	status *= checkStringType<float>( arg );
 	break;
       case 'I':
-	status *= CheckStringType<int>( arg );
+	status *= checkStringType<int>( arg );
 	break;
       case 'S':
 	break;
@@ -99,7 +99,8 @@ namespace Isis {
       auto def = fArgs[ name ].second;
       if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
 	IError << "Input for < " << name <<
-	  " > does not match any of the possibilities: " << VectorToString( def ) << IEndMsg;
+	  " > does not match any of the possibilities: " << vectorToString( def )
+	       << IEndMsg;
 	return;
       }
       else

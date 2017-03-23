@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -34,7 +34,8 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  TObject* AdaptiveBinning::GetStruct( const char *name, const char *title ) const {
+  TObject* AdaptiveBinning::getStruct( const char *name, const char *title ) const {
+    
     return 0;
   }
 

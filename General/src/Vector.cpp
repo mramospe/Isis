@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -40,71 +40,84 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  Vector Vector::GetLong( const Vector &vec ) const {
-    Vector u( this->Unitary() );
-    return ( u.Dot( vec ) )*u;
+  Vector Vector::getLong( const Vector &vec ) const {
+    
+    Vector u( this->unitary() );
+    return ( u.dot( vec ) )*u;
   }
 
   //_______________________________________________________________________________
   //
-  Vector Vector::GetTran( const Vector &vec ) const {
-    Vector u( this->Unitary() );
-    return ( vec - ( u.Dot( vec ) )*u );
+  Vector Vector::getTran( const Vector &vec ) const {
+    
+    Vector u( this->unitary() );
+    return ( vec - ( u.dot( vec ) )*u );
   }
 
   //_______________________________________________________________________________
   //
-  double Vector::Phi() const {
-    double phi = std::atan2( this->SinPhi(), this->CosPhi() );
+  double Vector::phi() const {
+    
+    double phi = std::atan2( this->sinPhi(), this->cosPhi() );
     return phi > 0 ? phi : phi + 2*M_PI;
   }
 
   //_______________________________________________________________________________
   //
-  void Vector::RotateX( const double &angle ) {
+  void Vector::rotateX( const double &angle ) {
+    
     double
       s( std::sin( angle ) ),
       c( std::cos( angle ) ),
       y( fY );
+    
     fY = c*y - s*fZ;
     fZ = s*y + c*fZ;
   }
 
   //_______________________________________________________________________________
   //
-  void Vector::RotateY( const double &angle ) {
+  void Vector::rotateY( const double &angle ) {
+    
     double
       s( std::sin( angle ) ),
       c( std::cos( angle ) ),
       z( fZ );
+    
     fZ = c*z - s*fX;
     fX = s*z + c*fX;
   }
 
   //_______________________________________________________________________________
   //
-  void Vector::RotateZ( const double &angle ) {
+  void Vector::rotateZ( const double &angle ) {
+    
     double
       s( std::sin( angle ) ),
       c( std::cos( angle ) ),
       x( fX );
+    
     fX = c*x - s*fY;
     fY = s*x + c*fY;
   }
 
   //_______________________________________________________________________________
   //
-  double Vector::Theta() const {
-    double theta( std::atan2( this->SinTheta(), this->CosTheta() ) );
+  double Vector::theta() const {
+    
+    double theta( std::atan2( this->sinTheta(), this->cosTheta() ) );
+    
     return theta > 0 ? theta : theta + 2*M_PI;
   }
 
   //_______________________________________________________________________________
   //
-  Vector Vector::Unitary() const {
+  Vector Vector::unitary() const {
+    
     double
-      m2( this->Mod2() ),
+      m2( this->mod2() ),
       m( m2 > 0 ? std::sqrt( m2 ) : 1 );
+    
     return Vector( fX/m, fY/m, fZ/m );
   }
 

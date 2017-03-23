@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -43,39 +43,39 @@ namespace CLsFact {
   
   //_______________________________________________________________________________
   //
-  Isis::CLsResult CalculateFromArray( const Isis::CLsFactory &factory, py::list array ) {
+  Isis::CLsResult calculateFromArray( const Isis::CLsFactory &factory, py::list array ) {
 
     auto vector = IBoost::boostListToStdVec<double>( array );
 
-    return factory.Calculate( vector );
+    return factory.calculate( vector );
   }
 
   //_______________________________________________________________________________
   //
-  Isis::CLsResult (Isis::CLsFactory::*CalculateFromDouble)( const double &tstat ) const =
-    &Isis::CLsFactory::Calculate;
+  Isis::CLsResult (Isis::CLsFactory::*calculateFromDouble)( const double &tstat ) const =
+    &Isis::CLsFactory::calculate;
 
   //_______________________________________________________________________________
   //
-  Isis::CLsHypothesis GetNullHyp( Isis::CLsFactory &factory ) {
+  Isis::CLsHypothesis getNullHyp( Isis::CLsFactory &factory ) {
 
-    return *(factory.GetNullHyp());
+    return *(factory.getNullHyp());
   }
 
   //_______________________________________________________________________________
   //
-  Isis::CLsHypothesis GetSigHyp( Isis::CLsFactory &factory ) {
+  Isis::CLsHypothesis getSigHyp( Isis::CLsFactory &factory ) {
 
-    return *(factory.GetSigHyp());
+    return *(factory.getSigHyp());
   }
 
   //_______________________________________________________________________________
   //
-  double TestStat( const Isis::CLsFactory &factory, py::list values ) {
+  double testStat( const Isis::CLsFactory &factory, py::list values ) {
 
     auto vector = IBoost::boostListToStdVec<double>( values );
 
-    return factory.TestStat( vector );
+    return factory.testStat( vector );
   }
 }
 
@@ -84,9 +84,9 @@ namespace CLsFluct {
 
   struct CLsFluctWrap : Isis::CLsFluctuator, py::wrapper<Isis::CLsFluctuator> {
     
-    double Fluctuate( const size_t &pos, const double &value ) {
+    double fluctuate( const size_t &pos, const double &value ) {
 
-      return this->get_override("Fluctuate")(pos, value);
+      return this->get_override("fluctuate")(pos, value);
     }
   };
 }
@@ -97,7 +97,7 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<Isis::CLsHypothesis>
-  Constructor( py::list lst,
+  constructor( py::list lst,
 	       Isis::CLsFluctuator *fluct,
 	       Isis::CLsPrior *prior ) {
 
@@ -110,7 +110,7 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<Isis::CLsHypothesis>
-  Constructor_NoPrior( py::list lst,
+  constructor_NoPrior( py::list lst,
 		       Isis::CLsFluctuator *fluct ) {
 
     auto array = IBoost::boostListToStdVec<double>( lst );
@@ -122,7 +122,7 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   boost::shared_ptr<Isis::CLsHypothesis>
-  Constructor_NoFluctNoPrior( py::list lst ) {
+  constructor_NoFluctNoPrior( py::list lst ) {
 
     auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array);
@@ -132,44 +132,44 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  py::list GetHyp( const Isis::CLsHypothesis &hyp ) {
+  py::list getHyp( const Isis::CLsHypothesis &hyp ) {
 
-    auto vec = hyp.GetHyp();
+    auto vec = hyp.getHyp();
 
     return IBoost::stdVecToBoostList( vec );
   }
 
   //_______________________________________________________________________________
   //
-  double PoissonProb( const Isis::CLsHypothesis &hyp, py::list values ) {
+  double poissonProb( const Isis::CLsHypothesis &hyp, py::list values ) {
 
     auto vec = IBoost::boostListToStdVec<double>( values );
 
-    return hyp.PoissonProb( vec );
+    return hyp.poissonProb( vec );
   }
 
   //_______________________________________________________________________________
   //
-  py::list GetTSVals( const Isis::CLsHypothesis &hyp ) {
+  py::list getTSVals( const Isis::CLsHypothesis &hyp ) {
 
-    auto vec = hyp.GetTSVals();
+    auto vec = hyp.getTSVals();
 
     return IBoost::stdVecToBoostList( vec );
   }
 
   //_______________________________________________________________________________
   //
-  void SetHyp( Isis::CLsHypothesis &hyp,
+  void setHyp( Isis::CLsHypothesis &hyp,
 	       py::list lst,
 	       Isis::CLsFluctuator *fluct = 0,
 	       Isis::CLsPrior *prior = 0 ) {
 
     auto vec = IBoost::boostListToStdVec<double>( lst );
 
-    hyp.SetHyp(vec, fluct, prior);
+    hyp.setHyp(vec, fluct, prior);
   }
 
-  BOOST_PYTHON_FUNCTION_OVERLOADS(SetHyp_Overloads, SetHyp, 2, 4);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(setHyp_Overloads, setHyp, 2, 4);
 }
 
 // Wrappers for the class CLsPrior
@@ -177,9 +177,9 @@ namespace CLsPrior {
 
   struct CLsPriorWrap : Isis::CLsPrior, py::wrapper<Isis::CLsPrior> {
 
-    double Evaluate( const size_t &pos, const double &mean, const double &value ) {
+    double evaluate( const size_t &pos, const double &mean, const double &value ) {
 
-      return this->get_override("Evaluate")(pos, mean, value);
+      return this->get_override("evaluate")(pos, mean, value);
     }
   };
 }

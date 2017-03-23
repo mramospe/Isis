@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -39,9 +39,9 @@ namespace Isis {
   CLsFactory::CLsFactory( CLsHypothesis &h0,
 			  CLsHypothesis &h1 ) {
 
-    this->SetNullHyp(h0);
+    this->setNullHyp(h0);
     
-    this->SetSigHyp(h1);
+    this->setSigHyp(h1);
   }
 
   //_______________________________________________________________________________
@@ -50,10 +50,10 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  CLsResult CLsFactory::Calculate( const double &tstat ) const {
+  CLsResult CLsFactory::calculate( const double &tstat ) const {
 
-    double alpha = this->Alpha(tstat);
-    double beta  = this->Beta(tstat);
+    double alpha = this->alpha(tstat);
+    double beta  = this->beta(tstat);
     double CLb   = this->CLb(tstat);
     double CLs   = this->CLs(tstat);
     
@@ -62,23 +62,23 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void CLsFactory::Generate( const size_t &n ) {
+  void CLsFactory::generate( const size_t &n ) {
 
-    if ( fNullHyp->GetHyp().size() != fSigHyp->GetHyp().size() )
+    if ( fNullHyp->getHyp().size() != fSigHyp->getHyp().size() )
       IError << "Input hypotheses do not have the same sizes" << IEndMsg;
     
-    fNullHyp->Generate(n);
+    fNullHyp->generate(n);
 
-    fSigHyp->Generate(n);
+    fSigHyp->generate(n);
   }
 
   //_______________________________________________________________________________
   //
-  double CLsFactory::TestStat( const Doubles &values ) const {
+  double CLsFactory::testStat( const Doubles &values ) const {
 
-    double t0 = fNullHyp->PoissonProb(values);
+    double t0 = fNullHyp->poissonProb(values);
 
-    double t1 = fSigHyp->PoissonProb(values);
+    double t1 = fSigHyp->poissonProb(values);
 
     return -2.*std::log(t0/t1);
   }

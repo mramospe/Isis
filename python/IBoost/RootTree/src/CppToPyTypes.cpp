@@ -31,76 +31,76 @@ namespace py = boost::python;
 // Return a boost object from a given BufferVariable containing its value
 py::object IBoost::buffVarToBoostObj( const Isis::BufferVariable &var ) {
 
-  switch (var.GetType()) {
+  switch (var.getType()) {
   case 'B':
     {
       char value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'b':
     {
       unsigned char value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'S':
     {
       short int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 's':
     {
       unsigned short int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'I':
     {
       int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'i':
     {
       unsigned int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'F':
     {
       float value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'D':
     {
       double value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'L':
     {
       long long int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'l':
     {
       unsigned long long int value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   case 'O':
     {
       bool value;
-      var.ExtractValue(value);
+      var.extractValue(value);
       return py::object(value);
     }
   default:
     std::cerr <<
-      "ERROR: Unknown variable type < " << var.GetType() << " >"
+      "ERROR: Unknown variable type < " << var.getType() << " >"
 					<< std::endl;
     return py::object();
   }

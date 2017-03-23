@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -55,34 +55,34 @@ namespace Isis {
     
     // Attaches a tree to this class. All the variables stored in this class are
     // removed.
-    void AttachTree( TTree *tree );
+    void attachTree( TTree *tree );
 
     // Creates a new variable in the attached tree given the name and its type
-    BufferVariable* CreateVariable( const std::string &name, const char &type );
+    BufferVariable* createVariable( const std::string &name, const char &type );
 
     // Loads the variables satisfying the requirements in the given expression
-    void Load( const std::string &expr );
+    void load( const std::string &expr );
 
     // Loads a variable from the attached tree. Automatically determines the type of
     // the variable and constructs a BufferVariable class to set the branch
     // address to.
-    BufferVariable* LoadVariable( const std::string &name );
+    BufferVariable* loadVariable( const std::string &name );
 
     // Changes the status of the branches in the attached tree to that given to the
     // function
-    void SetBranchStatus( const bool &dec );
+    void setBranchStatus( const bool &dec );
 
     // Fills the attached tree
-    inline void Fill();
+    inline void fill();
 
     // Fills the branches stored in the class
-    inline void FillBranches();
+    inline void fillBranches();
 
     // Returns the vector with the branches attached to this class
-    inline BranchVector& GetBranchVector();
+    inline BranchVector& getBranchVector();
 
     // Returns the attached tree
-    inline TTree* GetTree();
+    inline TTree* getTree();
     
   protected:
     
@@ -96,24 +96,25 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void TreeBuffer::Fill() { fTree->Fill(); }
+  inline void TreeBuffer::fill() { fTree->Fill(); }
 
   //_______________________________________________________________________________
   //
-  inline void TreeBuffer::FillBranches() {
+  inline void TreeBuffer::fillBranches() {
+    
     for ( auto it = fBranchVector.begin(); it != fBranchVector.end(); ++it )
       (*it)->Fill();
   }
 
   //_______________________________________________________________________________
   //
-  inline TreeBuffer::BranchVector& TreeBuffer::GetBranchVector() {
+  inline TreeBuffer::BranchVector& TreeBuffer::getBranchVector() {
     return fBranchVector;
   }
 
   //_______________________________________________________________________________
   //
-  inline TTree* TreeBuffer::GetTree() { return fTree; }
+  inline TTree* TreeBuffer::getTree() { return fTree; }
   
 }
 

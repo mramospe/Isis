@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -38,10 +38,10 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void TreeBuffer::AttachTree( TTree *tree ) {
+  void TreeBuffer::attachTree( TTree *tree ) {
 
     for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it )
-      delete it -> second;
+      delete it->second;
   
     fVarMap.clear();
 
@@ -50,48 +50,54 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  BufferVariable* TreeBuffer::CreateVariable( const std::string &name, const char &type ) {
+  BufferVariable* TreeBuffer::createVariable( const std::string &name, const char &type ) {
 
-    BufferVariable *var = this -> AddVariable( name, type );
-    void *path      = var -> PathToValue();
-    TBranch *branch = fTree -> Branch( name.c_str(), path, (name + '/' + type).c_str() );
+    BufferVariable *var = this->addVariable( name, type );
+    void *path      = var->pathToValue();
+    TBranch *branch = fTree->Branch( name.c_str(), path, (name + '/' + type).c_str() );
     fBranchVector.push_back( branch );
+    
     return var;
   }
 
   //_______________________________________________________________________________
   //
-  void TreeBuffer::Load( const std::string &expr ) {
+  void TreeBuffer::load( const std::string &expr ) {
   
     Strings variables;
-    GetBranchNames( variables, fTree, expr );
+    getBranchNames( variables, fTree, expr );
 
     for ( auto it = variables.begin(); it != variables.end(); ++it )
-      this -> LoadVariable( *it );
+      this->loadVariable( *it );
   }
 
   //_______________________________________________________________________________
   //
-  BufferVariable* TreeBuffer::LoadVariable( const std::string &name ) {
+  BufferVariable* TreeBuffer::loadVariable( const std::string &name ) {
 
     BufferVariable *var = this ->
-      AddVariable( name, GetVarType( fTree, name ) );
-    void *path = var -> PathToValue();
-    fTree -> SetBranchAddress( name.c_str(), path );
+      addVariable( name, getVarType( fTree, name ) );
+    void *path = var->pathToValue();
+    fTree->SetBranchAddress( name.c_str(), path );
+    
     return var;
   }
 
   //_______________________________________________________________________________
   //
-  void TreeBuffer::SetBranchStatus( const bool &dec ) {
+  void TreeBuffer::setBranchStatus( const bool &dec ) {
+    
     if ( dec )
-      fTree -> SetBranchStatus( "*", dec );
+      fTree->SetBranchStatus( "*", dec );
     else {
-      fTree -> SetBranchStatus( "*", false );
+      fTree->SetBranchStatus( "*", false );
+      
       for ( auto it = fVarMap.begin(); it != fVarMap.end(); ++it ) {
-	const char *name = it -> first.c_str();
-	if ( fTree -> GetLeaf( name ) )
-	  fTree -> SetBranchStatus( name, true );
+	
+	const char *name = it->first.c_str();
+	
+	if ( fTree->GetLeaf( name ) )
+	  fTree->SetBranchStatus( name, true );
       }
     }
   }

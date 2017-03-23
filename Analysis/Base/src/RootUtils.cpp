@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  TObject* GetSafeObject( TFile *ifile, const std::string &path ) {
+  TObject* getSafeObject( TFile *ifile, const std::string &path ) {
 
     TObject *obj = ifile->Get(path.c_str());
 

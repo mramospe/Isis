@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +29,7 @@ namespace Isis {
   //
   ClusterCenterOfMass::ClusterCenterOfMass( const ClusterPoint &point ) :
     ClusterPoint( point ), fMeanOfSquares( fValues ) {
+    
     for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
       *it *= (*it);
   }
@@ -39,7 +40,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  bool ClusterCenterOfMass::AnyNullSigma() const {
+  bool ClusterCenterOfMass::anyNullSigma() const {
 
     auto
       itm = fValues.cbegin(),
@@ -59,11 +60,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterCenterOfMass::AttachPoint( const ClusterPoint &point ) {
+  void ClusterCenterOfMass::attachPoint( const ClusterPoint &point ) {
   
     double
       wgtCoM = fWeight,
-      wgtPnt = point.GetWeight();
+      wgtPnt = point.getWeight();
   
     fWeight = wgtCoM + wgtPnt;
   
@@ -71,7 +72,7 @@ namespace Isis {
       itCoM = fValues.begin(),
       itSqM = fMeanOfSquares.begin();
   
-    auto itPnt = point.GetValues().begin();
+    auto itPnt = point.getValues().begin();
   
     while ( itCoM != fValues.end() ) {
     
@@ -92,9 +93,9 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterCenterOfMass::Normalize( const Doubles &norm ) {
+  void ClusterCenterOfMass::normalize( const Doubles &norm ) {
 
-    ClusterPoint::Normalize( norm );
+    ClusterPoint::normalize( norm );
 
     auto itv = fMeanOfSquares.begin();
     auto itn = norm.begin();
@@ -109,9 +110,9 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterCenterOfMass::SetValues( const Doubles &values ) {
+  void ClusterCenterOfMass::setValues( const Doubles &values ) {
     
-    ClusterPoint::SetValues( values );
+    ClusterPoint::setValues( values );
     fMeanOfSquares = values;
     for ( auto it = fMeanOfSquares.begin(); it != fMeanOfSquares.end(); ++it )
       *it *= (*it);

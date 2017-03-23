@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -30,9 +30,11 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void Bin1D::Fill( const double &pos, const double &weight ) {
+  void Bin1D::fill( const double &pos, const double &weight ) {
+    
     if ( pos < fMin )
       fMin = pos;
+    
     fEntries++;
     fSumOfWeights += weight;
   }

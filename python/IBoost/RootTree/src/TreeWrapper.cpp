@@ -82,7 +82,7 @@ py::dict IBoost::treeToBoostDict( const char *fpath,
 				  const char *cuts ) {
   
   TFile *ifile = TFile::Open( fpath );
-  TTree *itree = static_cast<TTree*>(Isis::GetSafeObject( ifile, tpath ));
+  TTree *itree = static_cast<TTree*>(Isis::getSafeObject( ifile, tpath ));
 
   // Extracts the list of events to be used
   itree->Draw(">>evtlist", cuts);
@@ -99,7 +99,7 @@ py::dict IBoost::treeToBoostDict( const char *fpath,
 
     // Get the variables from the given expressions
     Isis::Strings brnames;
-    size_t nadded = Isis::GetBranchNames(brnames, itree, var);
+    size_t nadded = Isis::getBranchNames(brnames, itree, var);
     if ( !nadded )
       IWarning << "No variables have been found following expression < "
 	       << var << " >" << IEndMsg;
@@ -108,7 +108,7 @@ py::dict IBoost::treeToBoostDict( const char *fpath,
     // variable is enabled
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
       itree->SetBranchStatus(it->c_str(), 1);
-      Isis::BufferVariable *bvar = buffer.LoadVariable( *it );
+      Isis::BufferVariable *bvar = buffer.loadVariable( *it );
       outmap[ it->c_str() ] = new IBoost::BuffVarWriter( bvar );
     }
   }
@@ -190,12 +190,12 @@ py::object IBoost::boostDictToTree( py::tuple args, py::dict kwargs ) {
     // Get the variables from the given expressions
     const char *exp = IBoost::extractFromIndex<const char*>(variables, i);
     Isis::Strings brnames;
-    Isis::StringVectorFilter(brnames, vars, exp);
+    Isis::stringVectorFilter(brnames, vars, exp);
 
     for ( auto it = brnames.cbegin(); it != brnames.cend(); ++it ) {
       const char *var = it->c_str();
       char type = IBoost::pyTypeFromObject( vardict[ var ][ 0 ] );
-      Isis::BufferVariable *buffvar = buffer.CreateVariable( var, type );
+      Isis::BufferVariable *buffvar = buffer.createVariable( var, type );
       varmap[ var ] =
 	new IBoost::BuffVarWriter( buffvar,
 				   py::extract<py::list>( vardict[ var ] ) );
@@ -210,20 +210,20 @@ py::object IBoost::boostDictToTree( py::tuple args, py::dict kwargs ) {
     for ( auto it = varmap.begin(); it != varmap.end(); ++it ) {
 
       py::object value = it->second->List[ ievt ];
-      char type = it->second->Var->GetType();
+      char type = it->second->Var->getType();
     
       switch ( type ) {
       case 'D':
-	it->second->Var->SetValue( py::extract<double>( value ) );
+	it->second->Var->setValue( py::extract<double>( value ) );
 	break;
       case 'L':
-	it->second->Var->SetValue( py::extract<long long int>( value ) );
+	it->second->Var->setValue( py::extract<long long int>( value ) );
 	break;
       case 'I':
-	it->second->Var->SetValue( py::extract<int>( value ) );
+	it->second->Var->setValue( py::extract<int>( value ) );
 	break;
       case 'O':
-	it->second->Var->SetValue( py::extract<bool>( value ) );
+	it->second->Var->setValue( py::extract<bool>( value ) );
 	break;
       }
     }

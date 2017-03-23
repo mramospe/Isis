@@ -45,7 +45,7 @@ namespace Isis {
   LoopArray::LoopArray( const size_t &size,
 			const size_t &min,
 			const size_t &max ) :
-    fNloops( IPow( max - min, size ) ),
+    fNloops( ipow( max - min, size ) ),
     fPos( 0 ),
     fVector( std::vector<LoopArrayIndex> ( size, LoopArrayIndex( min, max ) ) ) { }
 
@@ -56,6 +56,7 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   LoopArray& LoopArray::operator ++ () {
+    
     fVector.back().Index++;
     auto it = fVector.rbegin();
     while ( it->Index == it->Max ) {
@@ -64,6 +65,7 @@ namespace Isis {
 	( ++it )->Index++;
     }
     ++fPos;
+    
     return *this;
   }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::AddVariable( const std::string &name,
+  void VarWeighter::addVariable( const std::string &name,
 				 const size_t      &nbins,
 				 const double      &min,
 				 const double      &max,
@@ -69,27 +69,27 @@ namespace Isis {
       fVariables[ name ] = "";
     std::vector<VarBin> vbvector, appvector;
     for ( auto it = fBinVector.begin(); it != fBinVector.end(); it++ ) {
-      vbvector = it->Split( name, nbins, min, max );
+      vbvector = it->split( name, nbins, min, max );
       appvector.insert( appvector.end(), vbvector.begin(), vbvector.end() );
     }
 
     // Makes the setup of the trees
     std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
     std::map<std::string, double> valuesmap;
-    this->SetupTrees( refleafmap, wgtleafmap, valuesmap );
+    this->setupTrees( refleafmap, wgtleafmap, valuesmap );
   
     // Fills the bins with the reference data and removes the blank ones
-    this->FillBinVector( fRefTree, refleafmap, valuesmap, appvector );
+    this->fillBinVector( fRefTree, refleafmap, valuesmap, appvector );
     for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
-      if ( itb->GetEntries() == 0 )
+      if ( itb->getEntries() == 0 )
 	appvector.erase( itb-- );
     for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
       itb->fNentries = 0;
 
     // Fills the bins with the data to be weighted and removes the blank ones
-    this->FillBinVector( fWgtTree, wgtleafmap, valuesmap, appvector );
+    this->fillBinVector( fWgtTree, wgtleafmap, valuesmap, appvector );
     for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
-      if ( itb->GetEntries() == 0 )
+      if ( itb->getEntries() == 0 )
 	appvector.erase( itb-- );
     for ( auto itb = appvector.begin(); itb != appvector.end(); itb++ )
       itb->fNentries = 0;
@@ -102,7 +102,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::ApplyWeights( TTree             *tree,
+  void VarWeighter::applyWeights( TTree             *tree,
 				  const std::string &wvname,
 				  const std::string &svname,
 				  const char        &type ) {
@@ -147,9 +147,9 @@ namespace Isis {
     // Fills the output branches
     std::cout << "Filling the output branch" << std::endl;
     if ( type == 'D' )
-      this->Fill<double*>( tree, wbranch, waddress, sbranch, saddress, valuesmap, newleafmap );
+      this->fill<double*>( tree, wbranch, waddress, sbranch, saddress, valuesmap, newleafmap );
     else
-      this->Fill<float*>( tree, wbranch, waddress, sbranch, saddress, valuesmap, newleafmap );
+      this->fill<float*>( tree, wbranch, waddress, sbranch, saddress, valuesmap, newleafmap );
     tree->SetBranchStatus( "*", true );
 
     // Writes the output tree
@@ -172,7 +172,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::CalculateWeights( const double &maxrelerr,
+  void VarWeighter::calculateWeights( const double &maxrelerr,
 				      const size_t &prec ) {
   
     std::cout << "***************************" << std::endl;
@@ -191,13 +191,13 @@ namespace Isis {
     std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
     std::map<std::string, double> valuesmap;
     std::cout << "Making maps of leaves from the input trees" << std::endl;
-    this->SetupTrees( refleafmap, wgtleafmap, valuesmap );
+    this->setupTrees( refleafmap, wgtleafmap, valuesmap );
   
     // Fills the bins for both the reference bins and the bins to be weighted
     std::cout << "Filling the reference bins" << std::endl;
-    this->FillBinVector( fRefTree, refleafmap, valuesmap, refvector );
+    this->fillBinVector( fRefTree, refleafmap, valuesmap, refvector );
     std::cout << "Filling the bins to be weighted" << std::endl;
-    this->FillBinVector( fWgtTree, wgtleafmap, valuesmap, fBinVector );
+    this->fillBinVector( fWgtTree, wgtleafmap, valuesmap, fBinVector );
 
     // Calculates the weight for each bin. If the number of entries in the bin is
     // null, that region will be set with null weight.
@@ -205,11 +205,11 @@ namespace Isis {
     size_t nowb = 0, nweights = 0, nwentries = 0, nrentries = 0;
     auto itr = refvector.begin(), itw = fBinVector.begin();
     while ( itr != refvector.end() ) {
-      itw->SetWeight( itr->GetEntries(), ratio, sratio, maxrelerr );
-      if ( itw->GetWeight() > 0. ) {
-	nweights  += itw->GetWeight();
-	nwentries += itw->GetEntries();
-	nrentries += itr->GetEntries();
+      itw->setWeight( itr->getEntries(), ratio, sratio, maxrelerr );
+      if ( itw->getWeight() > 0. ) {
+	nweights  += itw->getWeight();
+	nwentries += itw->getEntries();
+	nrentries += itr->getEntries();
       }
       else
 	nowb++;
@@ -230,7 +230,7 @@ namespace Isis {
 
     // If a precision is specified, it displays the map of bins
     if ( prec )
-      this->Print( prec );
+      this->display( prec );
 
     std::cout << "**************************" << std::endl;
     std::cout << "*** Weights calculated ***" << std::endl;
@@ -239,7 +239,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  TList* VarWeighter::MakeHistograms( std::string   variable,
+  TList* VarWeighter::makeHistograms( std::string   variable,
 				      const size_t &nbins,
 				      const double &vmin,
 				      const double &vmax ) {
@@ -260,7 +260,7 @@ namespace Isis {
     // Makes the setup of the trees
     std::map<std::string, TLeaf*> refleafmap, wgtleafmap;
     std::map<std::string, double> valuesmap;
-    this->SetupTrees( refleafmap, wgtleafmap, valuesmap );
+    this->setupTrees( refleafmap, wgtleafmap, valuesmap );
   
     Strings variables;
     TLeaf *leaf;
@@ -283,10 +283,10 @@ namespace Isis {
 	it->second = wgtleafmap[ it->first ]->GetValue();
       hrw->Fill( leaf->GetValue() );
       itb = fBinVector.begin();
-      while( itb != fBinVector.end() && itb->IsOutside( valuesmap ) )
+      while( itb != fBinVector.end() && itb->isOutside( valuesmap ) )
 	itb++;
-      if ( itb != fBinVector.end() && itb->GetWeight() )
-	hfw->Fill( leaf->GetValue(), itb->GetWeight() );
+      if ( itb != fBinVector.end() && itb->getWeight() )
+	hfw->Fill( leaf->GetValue(), itb->getWeight() );
     }
   
     // Fills the histograms from the reference tree
@@ -297,9 +297,9 @@ namespace Isis {
 	it->second = refleafmap[ it->first ]->GetValue();
       hrr->Fill( leaf->GetValue() );
       itb = fBinVector.begin();
-      while( itb != fBinVector.end() && itb->IsOutside( valuesmap ) )
+      while( itb != fBinVector.end() && itb->isOutside( valuesmap ) )
 	itb++;
-      if ( itb != fBinVector.end() && itb->GetWeight() > 0 )
+      if ( itb != fBinVector.end() && itb->getWeight() > 0 )
 	hfr->Fill( leaf->GetValue() );
     }
 
@@ -319,7 +319,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::Print( const size_t &prec ) {
+  void VarWeighter::display( const size_t &prec ) {
 
     size_t
       n = 0,
@@ -340,44 +340,46 @@ namespace Isis {
 
     // Displays the names of the variables
     std::cout << separator << std::setprecision( prec ) << std::endl;
-    std::cout << std::right << "| " << CenterString( "No", maxnsize ) << " |";
-    std::cout << CenterString( "Weight", ( maxvsize + 1 ) /2 ) << " |";
-    std::cout << CenterString( "Error", ( maxvsize + 1 ) /2 ) << " |";
+    std::cout << std::right << "| " << centerString( "No", maxnsize ) << " |";
+    std::cout << centerString( "Weight", ( maxvsize + 1 ) /2 ) << " |";
+    std::cout << centerString( "Error", ( maxvsize + 1 ) /2 ) << " |";
     for ( auto it = fVariables.begin(); it != fVariables.end(); it++ )
-      std::cout << CenterString( it->second, maxvsize ) << " |";
+      std::cout << centerString( it->second, maxvsize ) << " |";
     std::cout << std::endl;
     std::cout << separator << std::endl;
 
     // Displays the information of each bin
     for ( auto itb = fBinVector.begin(); itb != fBinVector.end(); itb++ ) {
       std::cout << "| " << std::setw( maxnsize ) << n++ << " |";
-      std::cout << std::setw( maxesize ) << itb->GetWeight() << " |";
-      std::cout << std::setw( maxesize ) << itb->GetError() << " |";
-      itb->Print( maxesize );
+      std::cout << std::setw( maxesize ) << itb->getWeight() << " |";
+      std::cout << std::setw( maxesize ) << itb->getError() << " |";
+      itb->display( maxesize );
     }
     std::cout << separator << std::endl;
   }
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::FillBinVector( TTree *tree,
+  void VarWeighter::fillBinVector( TTree *tree,
 				   std::map<std::string, TLeaf*> &leafmap,
 				   std::map<std::string, double> &valuesmap,
 				   std::vector<VarBin> &binvector ) {
+    
     for ( Long64_t ievt = 0; ievt < tree->GetEntries(); ievt++ ) {
       tree->GetEntry( ievt );
       for ( auto it = valuesmap.begin(); it != valuesmap.end(); it++ )
 	it->second = leafmap[ it->first ]->GetValue();
       for ( auto itb = binvector.begin(); itb != binvector.end(); itb++ )
-	itb->IfInsideAdd( valuesmap );
+	itb->ifInsideAdd( valuesmap );
     }  
   }
 
   //_______________________________________________________________________________
   //
-  void VarWeighter::SetupTrees( std::map<std::string, TLeaf*> &refleafmap,
+  void VarWeighter::setupTrees( std::map<std::string, TLeaf*> &refleafmap,
 				std::map<std::string, TLeaf*> &wgtleafmap,
 				std::map<std::string, double> &valuesmap ) {
+    
     fRefTree->SetBranchStatus( "*", false );
     fWgtTree->SetBranchStatus( "*", false );
     for ( auto it = fVariables.begin(); it != fVariables.end(); it++ ) {

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -50,36 +50,36 @@ namespace Isis {
 
     // Increases the number of entries in one unit for this bin if the values given
     // are inside its limits
-    void IfInsideAdd( const std::map<std::string, double> &values );
+    void ifInsideAdd( const std::map<std::string, double> &values );
 
     // Checks if the value for the variable given is inside this bin
-    bool IsOutside( const std::map<std::string, double> &values );
+    bool isOutside( const std::map<std::string, double> &values );
 
     // Sets the weight for this bin. The input parameters are the number of entries
     // for the reference bin, the ratio between the entries for each tree and its
     // error. Both the weight and the error are computed in this method.
-    void SetWeight( const size_t &rentries,
+    void setWeight( const size_t &rentries,
 		    const double &ratio,
 		    const double &sratio,
 		    const double &maxrelerr );
 
     // Displays the information of this bin, where the width of the columns is
     // specified as an input
-    void Print( const size_t &width );
+    void display( const size_t &width );
 
     // Returns the number of entries in the bin
-    inline const size_t GetEntries() const;
+    inline const size_t getEntries() const;
     
     // Returns the error associated to the bin
-    inline const double GetError() const;
+    inline const double getError() const;
     
     // Returns the weight associated to the bin
-    inline const double GetWeight() const;
+    inline const double getWeight() const;
 
   protected:
 
     // Divides this bin using the information given
-    std::vector<VarBin> Split( const std::string &name,
+    std::vector<VarBin> split( const std::string &name,
 			       const size_t      &nbins,
 			       const double      &min,
 			       const double      &max );
@@ -102,21 +102,21 @@ namespace Isis {
   private:
 
     // Checks if the values given are inside this bin
-    bool IsOutside( const std::string &vname, const double &value );
+    bool isOutside( const std::string &vname, const double &value );
 
   };
 
   //_______________________________________________________________________________
   //
-  inline const size_t VarBin::GetEntries() const { return fNentries; }
+  inline const size_t VarBin::getEntries() const { return fNentries; }
 
   //_______________________________________________________________________________
   //
-  inline const double VarBin::GetError() const { return fError; }
+  inline const double VarBin::getError() const { return fError; }
 
   //_______________________________________________________________________________
   //
-  inline const double VarBin::GetWeight() const { return fWeight; }
+  inline const double VarBin::getWeight() const { return fWeight; }
 
 }
 

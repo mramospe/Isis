@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -26,7 +26,8 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  size_t CalcIntLength( long int integer ) {
+  size_t calcIntLength( long int integer ) {
+    
     size_t size = 0;
     if ( integer > 0 )
       while( integer >= 1 ) {
@@ -38,33 +39,36 @@ namespace Isis {
 	integer /= 10;
 	size++;
       }
+    
     return size;
   }
 
   //_______________________________________________________________________________
   //
-  std::string CenterString( const std::string &str,
+  std::string centerString( const std::string &str,
 			    const size_t      &size,
 			    const char        &ch ) {
+    
     unsigned short int
       rst = size - str.size(),
       coc = rst / 2;
     std::string output( coc + rst % 2, ch );
     output += str;
     output += std::string( coc, ch );
+    
     return output;
   }
 
   //_______________________________________________________________________________
   //
-  void CheckParseOpts( const std::string &str, const Strings &lst ) {
+  void checkParseOpts( const std::string &str, const Strings &lst ) {
 
     std::string name, opt;
     size_t pos;
 
     // Splits the string to get the different options
     Strings splt;  
-    SplitString( splt, str, ":" );
+    splitString( splt, str, ":" );
 
     // Performs the loop over the splitted options to verify that they are
     // correctly written
@@ -72,13 +76,13 @@ namespace Isis {
       if ( ( pos = it -> find( '=' ) ) != std::string::npos ) {
 	name = it -> substr( 0, pos );
 	opt  = it -> substr( pos + 1 );
-	TrimString( name );
-	TrimString( opt );
+	trimString( name );
+	trimString( opt );
       }
       else {
 	name = *it;
 	opt  = std::string();
-	TrimString( name );
+	trimString( name );
 	while ( name.front() == '!' )
 	  name.erase( name.begin() );
       }
@@ -99,7 +103,8 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ReplaceNames( Strings &vector, std::string istr, std::string ostr ) {
+  void replaceNames( Strings &vector, std::string istr, std::string ostr ) {
+    
     size_t pos;
     for ( Strings::iterator it = vector.begin();
 	  it != vector.end();
@@ -112,9 +117,8 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void SplitString( Strings &output,
-		    const std::string &str,
-		    const std::string &expr ) {
+  void splitString( Strings &output, const std::string &str, const std::string &expr ) {
+    
     size_t strpos, pos = 0;
     while ( ( strpos = str.find( expr, pos ) ) != std::string::npos ) {
       output.push_back( str.substr( pos, strpos - pos ) );
@@ -125,16 +129,16 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void StringVectorFilter( Strings &output,
+  void stringVectorFilter( Strings &output,
 			   const Strings &input,
 			   const std::string &expr ) {
 
     // Splits the input string using the character < * >
     Strings splitVec;
-    SplitString( splitVec, expr, "*" );
+    splitString( splitVec, expr, "*" );
 
-    // Defines two boolean variables that determine if the first or the last word provided
-    // in the expression must be checked
+    // Defines two boolean variables that determine if the first or the last word
+    // provided in the expression must be checked
     bool
       checkstart = true,
       checkend   = true;
@@ -186,7 +190,8 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void TrimString( std::string &str, const std::string &trexpr ) {
+  void trimString( std::string &str, const std::string &trexpr ) {
+    
     size_t pos = str.find_first_not_of( trexpr );
     str.erase( 0, pos );
     pos = str.find_last_not_of( trexpr ) + 1;

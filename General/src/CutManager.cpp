@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace Isis {
   CutManager::CutManager( const std::string &file_path ) :
     fFile( new std::ifstream ), fOptions( { {"and", "&&"}, {"or", "||"} } ) {
     if ( file_path.size() )
-      this->Open( file_path );
+      this->open( file_path );
   }
 
   //_______________________________________________________________________________
@@ -55,12 +55,12 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  std::string CutManager::BookCut( const std::string &key, const bool &print ) {
+  std::string CutManager::bookCut( const std::string &key, const bool &print ) {
     if ( fCuts.find( key ) != fCuts.end() ) {
       IWarning << "Cut with name < " << key << " > already booked" << IEndMsg;
       return "";
     }
-    std::string cut = this->GetCut( key );
+    std::string cut = this->getCut( key );
     if ( cut.size() ) {
       fCuts.insert( std::make_pair( key, cut ) );
       if ( print )
@@ -69,9 +69,9 @@ namespace Isis {
     return cut;
   }
 
-  //_______________________________________________________________________________       
+  //_______________________________________________________________________________
   //
-  std::string CutManager::GetCut( const std::string &key ) {
+  std::string CutManager::getCut( const std::string &key ) {
 
     // Each time a cut is obtained the pointer to the file is set to its start
     (*fFile).clear();
@@ -95,8 +95,8 @@ namespace Isis {
 
 	  while ( cuts[ 0 ] == ' ' ) cuts.erase( 0, 1 );
 
-	  // If another cut is found it is replaced by its content. The position at the file
-	  // is saved and retrieved, in order to properly scan the file.
+	  // If another cut is found it is replaced by its content. The position at
+	  // the file is saved and retrieved, in order to properly scan the file.
 	  while ( ( ifirst = cuts.find( '$' ) ) != std::string::npos ) {
 
 	    mismatch = false;
@@ -121,7 +121,7 @@ namespace Isis {
 
 	    // Replaces the cut name by its value
 	    fpos  = (*fFile).tellg();
-	    newcut = this->GetCut( sstr );	  
+	    newcut = this->getCut( sstr );	  
 	    cuts.replace( ifirst, ilast + 1 - ifirst, newcut );
 	    (*fFile).seekg( fpos );
 	  }
@@ -146,7 +146,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  std::string CutManager::MakeMergedCut( std::string joinop ) {
+  std::string CutManager::makeMergedCut( std::string joinop ) {
     joinop = ' ' + joinop + ' ';
     auto it = fCuts.begin();
     std::string gcut( it->second );
@@ -157,7 +157,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void CutManager::Open( const std::string &file_path ) {
+  void CutManager::open( const std::string &file_path ) {
     if ( fFile.use_count() == 1 && (*fFile).is_open() )
       (*fFile).close();
     (*fFile).open( file_path.c_str() );
@@ -189,7 +189,8 @@ namespace Isis {
 	    while ( ( pos = line.find( '$', ++pos ) ) != std::string::npos ) {
 	      newpos = line.find( '$', ++pos );
 	      str    = line.substr( pos, newpos - pos );
-	      if ( newpos == std::string::npos || str.find( ' ' ) != std::string::npos ) {
+	      if ( newpos == std::string::npos ||
+		   str.find( ' ' ) != std::string::npos ) {
 		IError << "Mismatched < $ > symbol in line < " << nl << " >" << IEndMsg;
 		return;
 	      }
@@ -205,9 +206,9 @@ namespace Isis {
     (*fFile).seekg( 0 );
   }
 
-  //_______________________________________________________________________________       
+  //_______________________________________________________________________________
   //
-  void CutManager::Print() const {
+  void CutManager::display() const {
     size_t maxsize = std::max_element( fCuts.begin(),
 				       fCuts.end(),
 				       [] ( const std::pair<std::string, std::string> &p1,

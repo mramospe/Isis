@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -111,10 +111,10 @@ namespace Isis {
 	for ( size_t ievt = 1; ievt < wData->size(); ++ievt ) {
 	
 	  bin = static_cast<Bin2D*>( fBinList[ ibin ] );
-	  bin->Fill( xvalues.at( ievt ), yvalues.at( ievt ), wData->at( ievt ) );
+	  bin->fill( xvalues.at( ievt ), yvalues.at( ievt ), wData->at( ievt ) );
 	}
       
-	fBinList.push_back( bin->Divide( xrange, yrange ) );
+	fBinList.push_back( bin->divide( xrange, yrange ) );
       }
       // Sets the new number of bins
       nbins *= 2;
@@ -123,7 +123,7 @@ namespace Isis {
     // Fills the data for the last time to get the limits of the bins
     for ( auto itbin = fBinList.begin(); itbin != fBinList.end(); ++itbin )
       for ( size_t ievt = 0; ievt < wData->size(); ++ievt )
-	static_cast<Bin2D*>( *itbin )->Fill( xvalues.at( ievt ),
+	static_cast<Bin2D*>( *itbin )->fill( xvalues.at( ievt ),
 					     yvalues.at( ievt ),
 					     wData->at( ievt ) );
 
@@ -138,7 +138,7 @@ namespace Isis {
     }
 
     for ( auto itbin = fAdjBinList.begin(); itbin != fAdjBinList.end(); ++itbin )
-      (*itbin)->AdjustBin( fXmin, fXmax, fYmin, fYmax, delta );
+      (*itbin)->adjustBin( fXmin, fXmax, fYmin, fYmax, delta );
   
     // If the vector of weights has been allocated, it is destroyed
     if ( !weights.size() )
@@ -155,11 +155,11 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  TH2Poly* AdaptiveBinning2D::GetAdjStruct( const char *name,
+  TH2Poly* AdaptiveBinning2D::getAdjStruct( const char *name,
 					    const char *title ) const {
   
     TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );
-    for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end();	++it ) {
+    for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end(); ++it ) {
     
       Bin2D *bin = static_cast<Bin2D*>( *it );
     
@@ -170,7 +170,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  TH2Poly* AdaptiveBinning2D::GetStruct( const char *name,
+  TH2Poly* AdaptiveBinning2D::getStruct( const char *name,
 					 const char *title ) const {
   
     TH2Poly *hist = new TH2Poly( name, title, fXmin, fXmax, fYmin, fYmax );

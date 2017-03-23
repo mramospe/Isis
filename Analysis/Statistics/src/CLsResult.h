@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -55,10 +55,10 @@ namespace Isis {
     ~CLsResult();
 
     // Return the p-value of the null hypothesis
-    double Alpha() const;
+    double alpha() const;
 
     // Return the p-value of the signal hypothesis
-    double Beta() const;
+    double beta() const;
     
     // Return the CLb
     double CLb() const;
@@ -71,21 +71,21 @@ namespace Isis {
     
     // Return the possition on a gaussian of mean = 0 and sigma = 1 for the result. If
     // it is greater than 0, it is equivalent to the significance.
-    double GaussSigPos() const;
+    double gaussSigPos() const;
 
     // Return whether the result establishes a discovery or not in the two-sided
     // definition of the significance
-    bool IsDiscovery() const;
+    bool isDiscovery() const;
     
     // Return whether the result establishes an evidence or not in the two-sided
     // definition of the significance
-    bool IsEvidence() const;
+    bool isEvidence() const;
 
     // Return the value for the test statistics
-    double TestStat() const;
+    double testStat() const;
     
     // Return the significance
-    double Significance() const;
+    double significance() const;
 
   protected:
 
@@ -111,14 +111,14 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline double CLsResult::Alpha() const {
+  inline double CLsResult::alpha() const {
 
     return fAlpha;
   }
 
   //_______________________________________________________________________________
   //
-  inline double CLsResult::Beta() const {
+  inline double CLsResult::beta() const {
 
     return fBeta;
   }
@@ -146,35 +146,35 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double CLsResult::GaussSigPos() const {
+  inline double CLsResult::gaussSigPos() const {
     
     return ROOT::Math::normal_quantile_c(fAlpha, 1);
   }
 
   //_______________________________________________________________________________
   //
-  inline bool CLsResult::IsDiscovery() const {
+  inline bool CLsResult::isDiscovery() const {
 
     return fSig >= DiscoveryStdPVal;
   }
 
   //_______________________________________________________________________________
   //
-  inline bool CLsResult::IsEvidence() const {
+  inline bool CLsResult::isEvidence() const {
 
     return fSig >= EvidenceStdPVal;
   }
 
   //_______________________________________________________________________________
   //
-  inline double CLsResult::TestStat() const {
+  inline double CLsResult::testStat() const {
 
     return fTestStat;
   }
 
   //_______________________________________________________________________________
   //
-  inline double CLsResult::Significance() const {
+  inline double CLsResult::significance() const {
 
     return fSig;
   }

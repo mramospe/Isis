@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -48,19 +48,19 @@ namespace Isis {
     virtual ~ClusterPoint();
     
     // Returns the value for the variable at position < index >
-    inline const double GetValue( const size_t &index ) const;
+    inline const double getValue( const size_t &index ) const;
 
     // Returns the vector with the values and the weights
-    inline const Doubles& GetValues() const;
+    inline const Doubles& getValues() const;
 
     // Returns the global weight of the point
-    inline const double GetWeight() const;
+    inline const double getWeight() const;
 
     // Normalizes the point given the normalization factors for each variable
-    inline void Normalize( const Doubles &norm );
+    inline void normalize( const Doubles &norm );
 
     // Sets the values for this point
-    inline void SetValues( const Doubles &values, const double  &wgt = 1 );
+    inline void setValues( const Doubles &values, const double  &wgt = 1 );
 
   protected:
   
@@ -74,21 +74,21 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  const double ClusterPoint::GetValue( const size_t &index ) const {
+  const double ClusterPoint::getValue( const size_t &index ) const {
     return fValues[ index ];
   }
 
   //_______________________________________________________________________________
   //
-  const Doubles& ClusterPoint::GetValues() const { return fValues; }
+  const Doubles& ClusterPoint::getValues() const { return fValues; }
 
   //_______________________________________________________________________________
   //
-  const double ClusterPoint::GetWeight() const { return fWeight; }
+  const double ClusterPoint::getWeight() const { return fWeight; }
 
   //_______________________________________________________________________________
   //
-  void ClusterPoint::Normalize( const Doubles &norm ) {
+  void ClusterPoint::normalize( const Doubles &norm ) {
     auto itv = fValues.begin();
     auto itm = norm.begin();
     while ( itv != fValues.end() )
@@ -97,7 +97,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterPoint::SetValues( const Doubles &values, const double &wgt ) {
+  void ClusterPoint::setValues( const Doubles &values, const double &wgt ) {
     fValues = values;
     fWeight = wgt;
   }

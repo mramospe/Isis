@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -33,8 +33,8 @@ namespace Isis {
   //
   ClusterFactory::ClusterFactory( const std::string &opts ) :
     Cluster(),
-    fClusteringMethod( &ClusterFactory::ConvergenceMethod ),
-    fComDefMethod( &ClusterFactory::DistanceCentersOfMass ),
+    fClusteringMethod( &ClusterFactory::convergenceMethod ),
+    fComDefMethod( &ClusterFactory::distanceCentersOfMass ),
     fManageClusters( false ),
     fMaxComVar( 1 ),
     fMinNpoints( 100 ),
@@ -43,7 +43,7 @@ namespace Isis {
     fNiter( 10 ),
     fVerbose( true ) {
   
-    this->Configure( opts );
+    this->configure( opts );
   }
 
   //_______________________________________________________________________________
@@ -52,11 +52,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::BuildCentersOfMass() {
+  void ClusterFactory::buildCentersOfMass() {
   
     // Removes the points stored in the clusters
     std::cout << "Removing points in clusters" << std::endl;
-    this->Reset();
+    this->reset();
 
     std::cout << "Building centers of mass" << std::endl;
   
@@ -75,7 +75,7 @@ namespace Isis {
 	if ( std::find( fPointsToAvoid.begin(), fPointsToAvoid.end(), itp ) ==
 	     fPointsToAvoid.end() ) {
 	  itd->first  = itp;
-	  itd->second = this->DistanceBetweenPoints( itc->GetCenterOfMass(), *itp );
+	  itd->second = this->distanceBetweenPoints( itc->getCenterOfMass(), *itp );
 	  ++itd;
 	}
       
@@ -93,14 +93,14 @@ namespace Isis {
       // Points are added till no null variances are found
       itd = distances.begin();
       do {
-	itc->AddPoint( *(itd->first) );
+	itc->addPoint( *(itd->first) );
 	fPointsToAvoid.push_back( itd->first );
 	++itd;
-      } while ( itc->GetCenterOfMass().AnyNullSigma() );
+      } while ( itc->getCenterOfMass().anyNullSigma() );
 
       size_t icluster = itc - fClusters.begin();
       std::cout <<
-	"Cluster < " << icluster << " > built with < " << itc->GetPoints().size() << " > points"
+	"Cluster < " << icluster << " > built with < " << itc->getPoints().size() << " > points"
 		     << std::endl;
     }
 
@@ -109,7 +109,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::CalculateClusters() {
+  void ClusterFactory::calculateClusters() {
 
     // Displays the initial message and the configuration values
     std::cout << "*************************************" << std::endl;
@@ -138,15 +138,15 @@ namespace Isis {
 	mean2 = 0;
     
       for ( auto itp = fPoints.cbegin(); itp != fPoints.cend(); ++itp ) {
-	double val = itp->GetValue( inr );
+	double val = itp->getValue( inr );
 	mean  += val;
 	mean2 += val*val;
       }
       fVarNorm[ inr ] = std::sqrt( mean2/npoints - mean/( npoints*npoints ) );
     }
     for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
-      it->Normalize( fVarNorm );
-    fCenterOfMass.Normalize( fVarNorm );
+      it->normalize( fVarNorm );
+    fCenterOfMass.normalize( fVarNorm );
   
     // Defines the initial centers of mass. If this function manages the number of clusters, all of
     // them will have the same set of weights, equal to those of the factory.
@@ -176,7 +176,7 @@ namespace Isis {
     }
     (this->*fComDefMethod)();
     if ( fVerbose )
-      this->Display( &ClusterFactory::PrintCentersOfMass, "Initial centers of mass" );
+      this->display( &ClusterFactory::printCentersOfMass, "Initial centers of mass" );
   
   
     // Calls the center of mass definition algorithm as well as the clustering algorithm. If the
@@ -192,7 +192,7 @@ namespace Isis {
       // Defines the clusters for the first time to determine the satus
       bool
 	dec       = true,
-	oldstatus = this->ManageClusters();
+	oldstatus = this->manageClusters();
     
       // The convergence process adding and substracting clusters starts here
       size_t counter = 0;
@@ -209,7 +209,7 @@ namespace Isis {
 	// Calls again the two clustering methods to get the new status
 	(this->*fComDefMethod)();
 	(this->*fClusteringMethod)();
-	bool newstatus = this->ManageClusters();
+	bool newstatus = this->manageClusters();
       
 	// If the status changes it exits the loop
 	if ( newstatus != oldstatus ) {
@@ -233,7 +233,7 @@ namespace Isis {
     
     // Displays the final results
     if ( fVerbose )
-      this->Display( &ClusterFactory::PrintCentersOfMass, "Final centers of mass" );
+      this->display( &ClusterFactory::printCentersOfMass, "Final centers of mass" );
 
   
     // Renormalizes the values in the different clusters, so the points now will have the true
@@ -242,9 +242,9 @@ namespace Isis {
     for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
       *it = 1/(*it);
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
-      it->Normalize( invnorm );
+      it->normalize( invnorm );
     }
-    this->Normalize( invnorm );
+    this->normalize( invnorm );
 
     std::cout << "***************************************" << std::endl;
     std::cout << "*** Generation of clusters finished ***" << std::endl;
@@ -253,11 +253,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::Configure( const std::string &opts ) {
+  void ClusterFactory::configure( const std::string &opts ) {
 
     // Checks that the given string is correctly written
     if ( opts.size() )
-      CheckParseOpts( opts,
+      checkParseOpts( opts,
 		      {   "ComDefMethod",
 			  "ClusteringMethod",
 			  "ManageClusters",
@@ -271,63 +271,63 @@ namespace Isis {
     // Parses the options referring to the center of mass definition
     if ( opts.find( "ComDefMethod" ) != std::string::npos ) {
       std::string method;
-      ParseOpt( opts, "ComDefMethod", method );
+      parseOpt( opts, "ComDefMethod", method );
       if ( method == "Random" )
-	fComDefMethod = &ClusterFactory::RandomCentersOfMass;
+	fComDefMethod = &ClusterFactory::randomCentersOfMass;
       else if ( method == "Distance" )
-	fComDefMethod = &ClusterFactory::DistanceCentersOfMass;
+	fComDefMethod = &ClusterFactory::distanceCentersOfMass;
       else {
 	IWarning << "Input method < " << method << " > not known; set to default" << IEndMsg;
-	fComDefMethod = &ClusterFactory::RandomCentersOfMass;
+	fComDefMethod = &ClusterFactory::randomCentersOfMass;
       }
     }
 
     // Parses the option refering to the clustering method
     if ( opts.find( "ClusteringMethod" ) != std::string::npos ) {
       std::string method;
-      ParseOpt( opts, "ClusteringMethod", method );
+      parseOpt( opts, "ClusteringMethod", method );
       if ( method == "Iterative" )
-	fClusteringMethod = &ClusterFactory::IterativeMethod;
+	fClusteringMethod = &ClusterFactory::iterativeMethod;
       else if ( method == "Convergence" )
-	fClusteringMethod = &ClusterFactory::ConvergenceMethod;
+	fClusteringMethod = &ClusterFactory::convergenceMethod;
       else {
 	IWarning << "Input method < " << method << " > not known; set to default" << IEndMsg;
-	fClusteringMethod = &ClusterFactory::IterativeMethod;
+	fClusteringMethod = &ClusterFactory::iterativeMethod;
       }
     }
 
     // Allows the class to add or remove clusters if necessary
     if ( opts.find( "ManageClusters" ) != std::string::npos )
-      ParseOpt( opts, "ManageClusters", fManageClusters );
+      parseOpt( opts, "ManageClusters", fManageClusters );
 
     // Maximum distance allowed in the convergence method
     if ( opts.find( "MaxComVar" ) != std::string::npos )
-      ParseOpt( opts, "MaxComVar", fMaxComVar );
+      parseOpt( opts, "MaxComVar", fMaxComVar );
 
     // Minimum number of points allowed per cluster
     if ( opts.find( "MinNpoints" ) != std::string::npos )
-      ParseOpt( opts, "MinNpoints", fMinNpoints );
+      parseOpt( opts, "MinNpoints", fMinNpoints );
 
     // Number of standard deviations between clusters
     if ( opts.find( "nComStdDev" ) != std::string::npos )
-      ParseOpt( opts, "nComStdDev", fNcomStdDev );
+      parseOpt( opts, "nComStdDev", fNcomStdDev );
 
     // Number of initial clusters to look for
     if ( opts.find( "nClusters" ) != std::string::npos )
-      ParseOpt( opts, "nClusters", fNclusters );
+      parseOpt( opts, "nClusters", fNclusters );
 
     // Maximum number of iterations in both the iterative and the convergence methods
     if ( opts.find( "nIter" ) != std::string::npos )
-      ParseOpt( opts, "nIter"  , fNiter   );
+      parseOpt( opts, "nIter"  , fNiter   );
 
     // Verbose level
     if ( opts.find( "Verbose" ) != std::string::npos )
-      ParseOpt( opts, "Verbose", fVerbose );
+      parseOpt( opts, "Verbose", fVerbose );
   }
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::PrintCentersOfMass( std::string title ) {
+  void ClusterFactory::printCentersOfMass( std::string title ) {
   
     // If the number of clusters or the maximum size of the names of the variables is smaller than
     // the default value, it is set to it
@@ -364,9 +364,9 @@ namespace Isis {
     }
   
     // Displays the titles of the magnitudes used
-    std::cout << '|' << CenterString( "Cluster", nclsize + 1 );
+    std::cout << '|' << centerString( "Cluster", nclsize + 1 );
     for ( auto itv = fVarOrder.begin(); itv != fVarOrder.end(); ++itv )
-      std::cout << '|' << CenterString( *itv, maxvarsize ) << ' ';
+      std::cout << '|' << centerString( *itv, maxvarsize ) << ' ';
     std::cout << "|\n" << decorator << std::endl;
     std::cout << std::right;
     std::cout.precision( 4 );
@@ -375,8 +375,8 @@ namespace Isis {
     size_t icluster = 0;
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++icluster ) {
       std::cout << '|' << std::setw( nclsize ) << icluster << ' ';
-      for ( auto itv = it->GetCenterOfMass().GetValues().begin();
-	    itv != it->GetCenterOfMass().GetValues().end(); ++itv ) {
+      for ( auto itv = it->getCenterOfMass().getValues().begin();
+	    itv != it->getCenterOfMass().getValues().end(); ++itv ) {
 	std::cout << '|' << std::setw( maxvarsize ) << *itv << ' ';
       }
       std::cout << '|' << std::endl;
@@ -385,8 +385,8 @@ namespace Isis {
 
     // Prints the information of the main cluster
     std::cout << '|' << std::setw( nclsize + 1 ) << "Main ";
-    for ( auto itv = fCenterOfMass.GetValues().begin();
-	  itv != fCenterOfMass.GetValues().end(); ++itv ) {
+    for ( auto itv = fCenterOfMass.getValues().begin();
+	  itv != fCenterOfMass.getValues().end(); ++itv ) {
       std::cout << '|' << std::setw( maxvarsize ) << *itv << ' ';
     }
     std::cout << "|\n" << decorator << std::endl;
@@ -394,7 +394,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::PrintDistances( std::string title ) {
+  void ClusterFactory::printDistances( std::string title ) {
   
     // If the size given the number of clusters is small, the size for the numbers is set to
     // the limit
@@ -421,7 +421,7 @@ namespace Isis {
       std::cout << decorator << std::endl;
     std::cout << std::setfill( ' ' ) << std::right << "| " << std::setw( clsize ) << "Cluster" << " |";
     for ( size_t icl = 0; icl < fClusters.size(); ++icl )
-      std::cout << CenterString( std::to_string( icl ), numsize );
+      std::cout << centerString( std::to_string( icl ), numsize );
     std::cout << " |" << std::endl;
     std::cout << decorator << std::endl;
   
@@ -433,7 +433,7 @@ namespace Isis {
 	if ( itcr == itcc )
 	  std::cout << std::setw( numsize ) << 0;
 	else
-	  std::cout << std::setw( numsize ) <<  itcr->DistanceToCluster( itcc->GetCenterOfMass() );
+	  std::cout << std::setw( numsize ) <<  itcr->distanceToCluster( itcc->getCenterOfMass() );
       }
       std::cout << " |" << std::endl;
     }
@@ -442,16 +442,18 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::SetClusterWeights( const int &index,
+  void ClusterFactory::setClusterWeights( const int &index,
 					  const Doubles &wgts ) {
+    
     if ( wgts.size() != fVarNorm.size() ) {
       IError << "The length of the weights must match the number of variables" << IEndMsg;
       return;
     }
+    
     if ( index > 0 )
       fClusterWeights[ index ] = wgts;
     else {
-      this->SetWeights( wgts );
+      this->setWeights( wgts );
       for ( size_t i = 0; i < fClusters.size(); ++i )
 	fClusterWeights[ i ] = wgts;
     }
@@ -459,21 +461,21 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void ClusterFactory::Reset() {
+  inline void ClusterFactory::reset() {
 
     for ( auto itc = fClusters.begin(); itc != fClusters.end(); ++itc ) {
-      itc->ResetCenterOfMassWeight();
-      itc->RemovePoints();}
+      itc->resetCenterOfMassWeight();
+      itc->removePoints();}
 
     fPointsToAvoid.clear();
   }
 
   //_______________________________________________________________________________
   //
-  inline void ClusterFactory::Display( void (ClusterFactory::*funcptr)( std::string ),
+  inline void ClusterFactory::display( void (ClusterFactory::*funcptr)( std::string ),
 				       const std::string &title ) {
   
-    bool dec = funcptr == &ClusterFactory::PrintCentersOfMass;
+    bool dec = funcptr == &ClusterFactory::printCentersOfMass;
 
     if ( dec ) {
       // Removes the normalization from the clusters
@@ -481,8 +483,8 @@ namespace Isis {
       for ( auto it = invnorm.begin(); it != invnorm.end(); ++it )
 	*it = 1./(*it);
       for ( auto it = fClusters.begin(); it != fClusters.end(); ++it )
-	it->NormalizeCenterOfMass( invnorm );
-      fCenterOfMass.Normalize( invnorm );
+	it->normalizeCenterOfMass( invnorm );
+      fCenterOfMass.normalize( invnorm );
     }
 
     // Calls the function
@@ -491,14 +493,14 @@ namespace Isis {
     if ( dec ) {
       // Renormalizes the clusters back to the previous status
       for ( auto it = fClusters.begin(); it != fClusters.end(); ++it )
-	it->NormalizeCenterOfMass( fVarNorm );
-      fCenterOfMass.Normalize( fVarNorm );
+	it->normalizeCenterOfMass( fVarNorm );
+      fCenterOfMass.normalize( fVarNorm );
     }
   }
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::DistanceCentersOfMass() {
+  void ClusterFactory::distanceCentersOfMass() {
   
     // First calculates the distances from the points to the center of mass of the main cluster
     std::cout << "Calculating distance from points to the main center of mass" << std::endl;
@@ -506,7 +508,7 @@ namespace Isis {
     auto itd = distances.begin();
     for ( auto itp = fPoints.begin(); itp != fPoints.end(); ++itp, ++itd ) {
       itd->first  = itp;
-      itd->second = this->DistanceToCluster( *itp );
+      itd->second = this->distanceToCluster( *itp );
     }
   
     // Sorts the points to select the maximums
@@ -523,15 +525,15 @@ namespace Isis {
     itd = distances.begin();
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it ) {
     
-      it->InitCenterOfMass( *(itd++->first) );
+      it->initCenterOfMass( *(itd++->first) );
     
       for ( auto itc = fClusters.begin(); itc != it; ++itc ) {
       
-	const ClusterCenterOfMass &currctr = itc->GetCenterOfMass();
+	const ClusterCenterOfMass &currctr = itc->getCenterOfMass();
       
-	while ( this->DistanceBetweenPoints( it->GetCenterOfMass(), currctr ) < mindist &&
+	while ( this->distanceBetweenPoints( it->getCenterOfMass(), currctr ) < mindist &&
 		itd != distances.end() )
-	  it->InitCenterOfMass( *(itd++->first) );
+	  it->initCenterOfMass( *(itd++->first) );
       }
     
       if ( itd == distances.end() ) {
@@ -546,12 +548,12 @@ namespace Isis {
     }
 
     // Adds as many points as needed in such a way that the dispersion is different from zero
-    this->BuildCentersOfMass();
+    this->buildCentersOfMass();
   }
 
   //_______________________________________________________________________________
   //
-  void ClusterFactory::RandomCentersOfMass() {
+  void ClusterFactory::randomCentersOfMass() {
   
     // Generates a random vector with the position associated with each center of mass
     Sizes positions( fClusters.size() );
@@ -567,15 +569,15 @@ namespace Isis {
     std::vector<Cluster>::iterator it;
     Sizes::iterator itp;
     for ( it = fClusters.begin(), itp = positions.begin(); it != fClusters.end(); ++it, ++itp )
-      it->InitCenterOfMass( fPoints[ *itp ] );
+      it->initCenterOfMass( fPoints[ *itp ] );
 
     // Adds as many points as needed in such a way that the dispersion is different from zero
-    this->BuildCentersOfMass();
+    this->buildCentersOfMass();
   }
 
   //_______________________________________________________________________________
   //
-  bool ClusterFactory::ConvergenceMethod() {
+  bool ClusterFactory::convergenceMethod() {
     
     // Loops till the maximum variation on the center of mass is smaller than that required
     // or till the maximum number of iterations is satisfied.
@@ -589,17 +591,17 @@ namespace Isis {
       // Gets the position of the centers of mass to calculate the variation of their position
       auto itc = fClusters.begin();
       for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-	*nitc = itc->GetCenterOfMass();
+	*nitc = itc->getCenterOfMass();
 
       // Call to the main method to define the clusters
-      this->DistanceMerging();
+      this->distanceMerging();
     
       auto itd = comdists.begin();
       auto itp = centersOfMass.begin();
       itc = fClusters.begin();
     
       while ( itc != fClusters.end() )
-	*itd++ = itc++->DistanceToCluster( *itp++ );
+	*itd++ = itc++->distanceToCluster( *itp++ );
         
     } while ( *std::max_element( comdists.begin(), comdists.end() ) > maxdst && ++iiter < fNiter );
 
@@ -612,11 +614,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void ClusterFactory::DistanceMerging() {
+  inline void ClusterFactory::distanceMerging() {
 
     // Removes the points stored in the clusters
     std::cout << "Removing points in clusters" << std::endl;
-    this->Reset();
+    this->reset();
   
     // Generates the clusters taking into account the distances from the points to them
     std::cout << "Merging process started" << std::endl;
@@ -629,21 +631,21 @@ namespace Isis {
 	auto itc = fClusters.begin();
       
 	while ( itc != fClusters.end() )
-	  *itd++ = itc++->DistanceToCluster( *itp );
+	  *itd++ = itc++->distanceToCluster( *itp );
     
 	itd = std::min_element( distances.begin(), distances.end() );
-	fClusters[ itd - distances.begin() ].AddPoint( *itp );
+	fClusters[ itd - distances.begin() ].addPoint( *itp );
       }
     }
     std::cout << "Generated new set of clusters" << std::endl;
   
     if ( fVerbose )
-      this->Display( &ClusterFactory::PrintDistances, "Normalized distances" );
+      this->display( &ClusterFactory::printDistances, "Normalized distances" );
   }
 
   //_______________________________________________________________________________
   //
-  bool ClusterFactory::IterativeMethod() {
+  bool ClusterFactory::iterativeMethod() {
   
     // Process flag
     bool converged = false;
@@ -656,7 +658,7 @@ namespace Isis {
     PointArray centersOfMass( fClusters.size() );
     auto itc = fClusters.begin();
     for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-      *nitc = itc->GetCenterOfMass();
+      *nitc = itc->getCenterOfMass();
   
     // Loops < fNiter > times to generate the clusters
     for ( size_t iiter = 0; iiter < fNiter; ++iiter ) {
@@ -665,14 +667,14 @@ namespace Isis {
       std::cout << "-- Iteration number " << iiter + 1 << " -- " << std::endl;
     
       // Call to the main method to define the clusters
-      this->DistanceMerging();
+      this->distanceMerging();
 
       auto itd = comdists.begin();
       auto itp = centersOfMass.begin();
       auto itc = fClusters.begin();
     
       while ( itc != fClusters.end() )
-	*itd++ = itc++->DistanceToCluster( *itp++ );
+	*itd++ = itc++->distanceToCluster( *itp++ );
 
       if ( *std::max_element( comdists.begin(), comdists.end() ) > maxdst ) {
 	std::cout << "The method has not converged yet" << std::endl;
@@ -683,7 +685,7 @@ namespace Isis {
     
       itc = fClusters.begin();
       for ( auto nitc = centersOfMass.begin(); nitc != centersOfMass.end(); ++nitc, ++itc )
-	*nitc = itc->GetCenterOfMass();
+	*nitc = itc->getCenterOfMass();
     }
   
     return converged;
@@ -691,14 +693,14 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  bool ClusterFactory::ManageClusters() {
+  bool ClusterFactory::manageClusters() {
   
     // Calculates the dispersions of the clusters to get the selection decision
     std::cout << "Calculating dispersions of clusters" << std::endl;
     Doubles dispersions( fClusters.size() );
     auto itdr = dispersions.begin();
     for ( auto it = fClusters.begin(); it != fClusters.end(); ++it, ++itdr )
-      *itdr = it->Dispersion();
+      *itdr = it->dispersion();
   
     // Iterates over the clusters to apply the decision
     double nstddev2 = fNcomStdDev*fNcomStdDev;
@@ -709,12 +711,12 @@ namespace Isis {
       auto itdc = itdr + 1;
     
       while ( itcc != fClusters.end() ) {
-	double dist = itcr->DistanceToCluster( itcc->GetCenterOfMass() );
+	double dist = itcr->distanceToCluster( itcc->getCenterOfMass() );
 	if ( dist < nstddev2*( (*itdr) + (*itdc) ) ) {
 	  std::cout << "Removing cluster: two clusters are too close" << std::endl;
 	  return false;
 	}
-	else if ( itcr->GetPoints().size() < fMinNpoints ) {
+	else if ( itcr->getPoints().size() < fMinNpoints ) {
 	  std::cout << "Removing cluster: number of points in cluster too small" << std::endl;
 	  return false;
 	}

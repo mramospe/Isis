@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -42,10 +42,10 @@ namespace Isis {
     virtual ~Bin();
     
     // Return the number of entries stored in the bin
-    inline const size_t GetEntries() const;
+    inline const size_t getEntries() const;
 
     // Return the sum of the weights of the entries in the bin
-    inline const size_t GetSumOfWeights() const;
+    inline const size_t getSumOfWeights() const;
 
   protected:
 
@@ -59,11 +59,11 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  inline const size_t Bin::GetEntries() const { return fEntries; }
+  inline const size_t Bin::getEntries() const { return fEntries; }
 
   //______________________________________________________________________________
   //
-  inline const size_t Bin::GetSumOfWeights() const { return fSumOfWeights; }
+  inline const size_t Bin::getSumOfWeights() const { return fSumOfWeights; }
 
 }
 

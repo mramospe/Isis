@@ -37,9 +37,9 @@ int main() {
   // Makes the adaptive binning histograms
   Isis::AdaptiveBinning2D AB( 40, -200, 200, 0, 1000, xVar, yVar );
 
-  TH2Poly *hStr    = AB.GetStruct( "hStr", "hStr" );
-  TH2Poly *hAdj    = AB.GetAdjStruct( "hAdj", "hAdj" );
-  TH2Poly *hAdjStr = AB.GetAdjStruct( "hAdjStr", "hAdjStr" );
+  TH2Poly *hStr    = AB.getStruct( "hStr", "hStr" );
+  TH2Poly *hAdj    = AB.getAdjStruct( "hAdj", "hAdj" );
+  TH2Poly *hAdjStr = AB.getAdjStruct( "hAdjStr", "hAdjStr" );
 
   for ( size_t ievt = 0; ievt < xVar.size(); ++ievt )
     hAdj -> Fill( xVar[ ievt ], yVar[ ievt ] );

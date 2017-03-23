@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
@@ -34,34 +34,41 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarBin::IfInsideAdd( const std::map<std::string, double> &values ) {
+  void VarBin::ifInsideAdd( const std::map<std::string, double> &values ) {
+    
     for ( auto it = values.begin(); it != values.end(); it++ )
-      if ( this -> IsOutside( it -> first, it -> second ) )
+      if ( this->isOutside( it -> first, it -> second ) )
 	return;
+    
     fNentries++;
   }
 
   //_______________________________________________________________________________
   //
-  bool VarBin::IsOutside( const std::string &vname, const double &value ) {
+  bool VarBin::isOutside( const std::string &vname, const double &value ) {
+    
     std::pair<double, double> *range = &fVarRanges[ vname ];
     if ( value < range -> first || value >= range -> second )
       return true;
+    
     return false;
   }
 
   //_______________________________________________________________________________
   //
-  bool VarBin::IsOutside( const std::map<std::string, double> &values ) {
+  bool VarBin::isOutside( const std::map<std::string, double> &values ) {
+    
     for ( auto it = values.begin(); it != values.end(); it++ )
-      if ( this -> IsOutside( it -> first, it -> second ) )
+      if ( this->isOutside( it -> first, it -> second ) )
 	return true;
+    
     return false;
   }
 
   //_______________________________________________________________________________
   //
-  void VarBin::Print( const size_t &width ) {
+  void VarBin::display( const size_t &width ) {
+    
     std::pair<double, double> *pair;
     for ( auto itm = fVarRanges.begin(); itm != fVarRanges.end(); itm++ ) {
       pair = &itm -> second;
@@ -73,10 +80,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void VarBin::SetWeight( const size_t &rentries,
+  void VarBin::setWeight( const size_t &rentries,
 			  const double &ratio,
 			  const double &sratio,
 			  const double &maxrelerr ) {
+    
     if ( rentries && fNentries ) {
       double
 	rw = rentries*1./fNentries,
@@ -97,10 +105,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  std::vector<VarBin> VarBin::Split( const std::string &name,
+  std::vector<VarBin> VarBin::split( const std::string &name,
 				     const size_t      &nbins,
 				     const double      &min,
 				     const double      &max ) {
+    
     double step = ( max - min )/nbins;
     std::vector<VarBin> outvector( nbins, *this );
     for ( size_t i = 0; i < nbins; i++ )

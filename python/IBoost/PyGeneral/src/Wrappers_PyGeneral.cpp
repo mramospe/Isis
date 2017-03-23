@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -40,12 +40,12 @@ namespace py = boost::python;
 // Wrappers for the class CutManager
 namespace CutMgr {
   
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(BookCut_Overloads,
-					 Isis::CutManager::BookCut,
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(bookCut_Overloads,
+					 Isis::CutManager::bookCut,
 					 1, 2);
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MakeMergedCut_Overloads,
-					 Isis::CutManager::MakeMergedCut,
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(makeMergedCut_Overloads,
+					 Isis::CutManager::makeMergedCut,
 					 0, 1);
 }
 
@@ -82,14 +82,14 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
   // Wrappers from CutManager.h
   py::class_<Isis::CutManager>("CutManager", py::init<const std::string&>())
     .def(py::init<const Isis::CutManager&>())
-    .def("BookCut"      , &Isis::CutManager::BookCut, CutMgr::BookCut_Overloads())
-    .def("Clear"        , &Isis::CutManager::Clear)
-    .def("Close"        , &Isis::CutManager::Close)
-    .def("GetCut"       , &Isis::CutManager::GetCut)
-    .def("MakeMergedCut", &Isis::CutManager::MakeMergedCut, CutMgr::MakeMergedCut_Overloads())
-    .def("Open"         , &Isis::CutManager::Open)
-    .def("Print"        , &Isis::CutManager::Print)
-    .def("Remove"       , &Isis::CutManager::Remove)
+    .def("bookCut"      , &Isis::CutManager::bookCut, CutMgr::bookCut_Overloads())
+    .def("clear"        , &Isis::CutManager::clear)
+    .def("close"        , &Isis::CutManager::close)
+    .def("getCut"       , &Isis::CutManager::getCut)
+    .def("makeMergedCut", &Isis::CutManager::makeMergedCut, CutMgr::makeMergedCut_Overloads())
+    .def("open"         , &Isis::CutManager::open)
+    .def("display"      , &Isis::CutManager::display)
+    .def("remove"       , &Isis::CutManager::remove)
     .def("__getitem__"  , &Isis::CutManager::operator[])
     ;
 
@@ -136,21 +136,21 @@ BOOST_PYTHON_MODULE( PyGeneral ) {
   py::class_<Isis::LoopArray>("LoopArray", py::init<>())
     .def(py::init<const size_t&, const size_t&, const size_t&>())
     .def(py::init<const Isis::LoopArray&>())
-    .def("AddIndex"   , &Isis::LoopArray::AddIndex)
-    .def("GetNindices", &Isis::LoopArray::GetNindices)
-    .def("GetNloops"  , &Isis::LoopArray::GetNloops)
-    .def("GetPos"     , &Isis::LoopArray::GetPos)
-    .def("Next"       , &Isis::LoopArray::Next)
-    .def("Start"      , &Isis::LoopArray::Start)
-    .def("Status"     , &Isis::LoopArray::Status)
+    .def("addIndex"   , &Isis::LoopArray::addIndex)
+    .def("getNindices", &Isis::LoopArray::getNindices)
+    .def("getNloops"  , &Isis::LoopArray::getNloops)
+    .def("getPos"     , &Isis::LoopArray::getPos)
+    .def("next"       , &Isis::LoopArray::next)
+    .def("start"      , &Isis::LoopArray::start)
+    .def("status"     , &Isis::LoopArray::status)
     .def("__getitem__", &Isis::LoopArray::operator[])
     ;
   
   // Wrappers from ProgessBar.h
   py::class_<Isis::ProgressBar>("ProgressBar", py::init<const char*>())
-    .def("End"     , &Isis::ProgressBar::End)
-    .def("Print"   , &Isis::ProgressBar::Print)
-    .def("SetColor", &Isis::ProgressBar::SetColor)
-    .def("Start"   , &Isis::ProgressBar::Start)
+    .def("end"     , &Isis::ProgressBar::end)
+    .def("display" , &Isis::ProgressBar::display)
+    .def("setColor", &Isis::ProgressBar::setColor)
+    .def("start"   , &Isis::ProgressBar::start)
     ;
 }

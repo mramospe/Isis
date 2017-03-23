@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/03/2017
+//  Last update: 23/03/2017
 //
 // -----------------------------------------------------------------------------
 //
@@ -47,33 +47,33 @@ namespace Isis {
     virtual ~Bounds() { }
 
     // Return the lower bound
-    inline const type& GetMin() const;
+    inline const type& getMin() const;
 
     // Return the upper bound
-    inline const type& GetMax() const;
+    inline const type& getMax() const;
 
     // Return whether the given value is inside the bounds or not
     template<class vtype>
-    inline bool IsInside( const vtype &value ) const;
+    inline bool isInside( const vtype &value ) const;
 
     // Set the upper bound
     template<class vtype>
-    inline void SetMax( const vtype &value );
+    inline void setMax( const vtype &value );
 
     // Set the lower bound
     template<class vtype>
-    inline void SetMin( const vtype &value );
+    inline void setMin( const vtype &value );
 
     // Set both upper and lower bounds
     template<class vtype>
-    inline void SetMinMax( const vtype &min, const vtype &max );
+    inline void setMinMax( const vtype &min, const vtype &max );
 
     // Assignment operator
     template<class vtype>
     inline Bounds<type>& operator = ( const Bounds<vtype> &other ) {
       
-      fMin = other.GetMin();
-      fMax = other.GetMax();
+      fMin = other.getMin();
+      fMax = other.getMax();
 
       return *this;
     }
@@ -91,34 +91,34 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   template<class type>
-  inline const type& Bounds<type>::GetMin() const { return fMin; }
+  inline const type& Bounds<type>::getMin() const { return fMin; }
 
   //_______________________________________________________________________________
   //
   template<class type>
-  inline const type& Bounds<type>::GetMax() const { return fMax; }
+  inline const type& Bounds<type>::getMax() const { return fMax; }
 
   //_______________________________________________________________________________
   //
   template<class type> template<class vtype>
-  inline void Bounds<type>::SetMax( const vtype &value ) { fMax = value; }
+  inline void Bounds<type>::setMax( const vtype &value ) { fMax = value; }
 
   //_______________________________________________________________________________
   //
   template<class type> template<class vtype>
-  inline void Bounds<type>::SetMin( const vtype &value ) { fMin = value; }
+  inline void Bounds<type>::setMin( const vtype &value ) { fMin = value; }
 
   template<class type> template<class vtype>
-  inline void Bounds<type>::SetMinMax( const vtype &min, const vtype &max ) {
+  inline void Bounds<type>::setMinMax( const vtype &min, const vtype &max ) {
 
-    this->SetMin(min);
-    this->SetMax(max);
+    this->setMin(min);
+    this->setMax(max);
   }
   
   //_______________________________________________________________________________
   //
   template<class type> template<class vtype>
-  inline bool Bounds<type>::IsInside( const vtype &value ) const {
+  inline bool Bounds<type>::isInside( const vtype &value ) const {
 
     return (value >= fMin && value < fMax);
   }

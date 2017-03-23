@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -69,40 +69,40 @@ namespace Isis {
     ~LoopArray();
 
     // Adds a new index variable to the array
-    inline void         AddIndex( const size_t &min, const size_t &max );
+    inline void addIndex( const size_t &min, const size_t &max );
 
     // Gets the number of indices stored in the array
-    inline const size_t GetNindices() const;
+    inline const size_t getNindices() const;
 
     // Gets the number of loops that would be made using this array
-    inline const size_t GetNloops() const;
+    inline const size_t getNloops() const;
 
     // Returns the current position of the array
-    inline const size_t GetPos() const;
+    inline const size_t getPos() const;
 
     // This method is set to enable the pythonization of the class
-    inline void Next();
+    inline void next();
 
     // Resets the values of the array to their minimums to start a new iteration
-    inline void Start();
+    inline void start();
 
     // Return the status of the iteration
-    inline bool Status() const;
+    inline bool status() const;
 
     // Returns the position to the first element of the vector of indices
-    inline std::vector<LoopArrayIndex>::const_iterator cBegin();
+    inline std::vector<LoopArrayIndex>::const_iterator cbegin();
 
     // Returns the position to the next-to-last element of the vector of indices
-    inline std::vector<LoopArrayIndex>::const_iterator cEnd();
+    inline std::vector<LoopArrayIndex>::const_iterator cend();
 
     //  Moves one element forward in the array. This implies to add one unit to the
     // last index stored. If it reaches the associated maximum value it is reset,
     // and a unit is added to the next index ( doing this recursively ).
-    LoopArray&  operator ++ ();
+    LoopArray& operator ++ ();
 
     // Creates a copy of this class and adds a new unit to the current one. The old
     // class is returned.
-    LoopArray   operator ++ ( int );
+    LoopArray operator ++ ( int );
 
     // Returns the value of the index at position < index >
     const size_t operator [] ( size_t index ) const;
@@ -121,38 +121,38 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void LoopArray::AddIndex( const size_t &min, const size_t &max ) {
+  inline void LoopArray::addIndex( const size_t &min, const size_t &max ) {
     fVector.push_back( LoopArrayIndex( min, max ) );
     fNloops *= ( max - min );
   }
 
   //_______________________________________________________________________________
   //
-  inline const size_t LoopArray::GetNindices() const {
+  inline const size_t LoopArray::getNindices() const {
     return fVector.size();
   }
 
   //_______________________________________________________________________________
   //
-  inline const size_t LoopArray::GetPos() const {
+  inline const size_t LoopArray::getPos() const {
     return fPos;
   }
 
   //_______________________________________________________________________________
   //
-  inline void LoopArray::Next() {
+  inline void LoopArray::next() {
     this->operator ++ ();
   }
 
   //_______________________________________________________________________________
   //
-  inline const size_t LoopArray::GetNloops() const {
+  inline const size_t LoopArray::getNloops() const {
     return fNloops;
   }
 
   //_______________________________________________________________________________
   //
-  inline void LoopArray::Start() {
+  inline void LoopArray::start() {
     fPos = 0;
     for ( auto it = fVector.begin(); it != fVector.end(); ++it )
       it->Index = it->Min;    
@@ -160,19 +160,19 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline bool LoopArray::Status() const {
+  inline bool LoopArray::status() const {
     return ( fPos < fNloops );
   }
 
   //_______________________________________________________________________________
   //
-  inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cBegin() {
+  inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cbegin() {
     return fVector.cbegin();
   }
 
   //_______________________________________________________________________________
   //
-  inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cEnd() {
+  inline std::vector<LoopArray::LoopArrayIndex>::const_iterator LoopArray::cend() {
     return fVector.cend();
   }
 

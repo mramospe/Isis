@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------
 //
@@ -59,10 +59,10 @@ namespace Isis {
   }
 
   // Function to check whether color must be applied or not
-  bool ApplyColor( const std::ostream &os );
+  bool applyColor( const std::ostream &os );
 
   // Function to replace < endl > for the class Isis::Messenger
-  std::ostream& EndMsgLine( std::ostream &os );
+  std::ostream& endMsgLine( std::ostream &os );
 }
 
 //_______________________________________________________________________________
@@ -71,6 +71,6 @@ namespace Isis {
 #define IError   Isis::Messenger("ERROR: "  , std::cerr, Isis::ANSIFormat::ErrorColor)
 #define IInfo    Isis::Messenger("INFO: "   , std::cout, Isis::ANSIFormat::InfoColor)
 #define IWarning Isis::Messenger("WARNING: ", std::cout, Isis::ANSIFormat::WarningColor)
-#define IEndMsg  Isis::EndMsgLine
+#define IEndMsg  Isis::endMsgLine
 
 #endif

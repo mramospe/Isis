@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // ----------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////
@@ -39,17 +39,17 @@ namespace Isis {
       std::string str( opts );
 
       if ( str.find( "Bar" ) != std::string::npos )
-	fBarWidth = std::atoi( this->GetOption( str, "Bar" ).c_str() );
+	fBarWidth = std::atoi( this->getOption( str, "Bar" ).c_str() );
 
       if ( str.find( "Percentage" ) != std::string::npos )
-	fPercentage = std::atoi( this->GetOption( str, "Percentage" ).c_str() );
+	fPercentage = std::atoi( this->getOption( str, "Percentage" ).c_str() );
 
       if ( str.find( "Time" ) != std::string::npos )
 	fUse[ "Time" ] = true;
     
       if ( str.find( "Date" ) != std::string::npos ) {
 
-	std::string opt( this->GetOption( str, "Date" ) );
+	std::string opt( this->getOption( str, "Date" ) );
 
 	if ( opt.find( "Start" ) != std::string::npos )
 	  fUse[ "StartDate" ] = true;
@@ -69,7 +69,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void ProgressBar::End() {
+  void ProgressBar::end() {
 
     if ( fBarWidth ) {
 
@@ -86,7 +86,7 @@ namespace Isis {
 
     if ( fUse[ "Time" ] )
       std::cout << " \033[" << fColors[ "Time" ] <<
-	"m( Time elapsed: " << this->GetTime() << " )\033[m";
+	"m( Time elapsed: " << this->getTime() << " )\033[m";
 
     if ( fUse[ "StartDate" ] )
       std::cout << " \033[" << fColors[ "StartDate" ] <<
@@ -94,14 +94,14 @@ namespace Isis {
 
     if ( fUse[ "EndDate" ] )
       std::cout << " \033[" << fColors[ "EndDate" ] <<
-	"m( Finished: " << this->GetDate() << " )\033[m";
+	"m( Finished: " << this->getDate() << " )\033[m";
 
     std::cout << std::endl;
   }
 
   //______________________________________________________________________________
   //
-  void ProgressBar::Print( const size_t &entry ) {
+  void ProgressBar::display( const size_t &entry ) {
 
     if ( entry % ( fNentries*fPercentage/100 ) == 0 ) {
     
@@ -124,7 +124,7 @@ namespace Isis {
 
       if ( fUse[ "Time" ] )
 	std::cout << " \033[" << fColors[ "Time" ] <<
-	  "m( Time elapsed: " << this->GetTime() << " )\033[m";
+	  "m( Time elapsed: " << this->getTime() << " )\033[m";
 
       if ( fUse[ "StartDate" ] )
 	std::cout << " \033[" << fColors[ "StartDate" ] <<
@@ -136,7 +136,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  void ProgressBar::SetColor( const char *opts ) {
+  void ProgressBar::setColor( const char *opts ) {
 
     std::string str( opts );
 
@@ -148,26 +148,26 @@ namespace Isis {
 
     for ( unsigned short int i = 0; i < 5; i++ )
       if ( str.find( pars[ i ] ) != std::string::npos )
-	fColors[ pars[ i ] ] = this->GetOption( str, pars[ i ] );
+	fColors[ pars[ i ] ] = this->getOption( str, pars[ i ] );
       else
 	fColors[ pars[ i ] ] = "";
   }
 
   //______________________________________________________________________________
   //
-  void ProgressBar::Start( size_t nentries ) {
+  void ProgressBar::start( size_t nentries ) {
   
     fNentries = nentries;
 
     if ( fUse[ "Time" ] )
       fStart = clock();
     if ( fUse[ "StartDate" ] )
-      fStartDate = this->GetDate();
+      fStartDate = this->getDate();
   }
 
   //______________________________________________________________________________
   //
-  inline std::string ProgressBar::GetDate() {
+  inline std::string ProgressBar::getDate() {
 
     time_t  actual_time = time( 0 );
     tm     *time_struct;
@@ -186,7 +186,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  inline std::string ProgressBar::GetOption( std::string &str, const char *opt ) {
+  inline std::string ProgressBar::getOption( std::string &str, const char *opt ) {
 
     std::string res;
     std::string::iterator it( str.begin() + str.find( opt ) );
@@ -202,7 +202,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  inline std::string ProgressBar::GetTime() {
+  inline std::string ProgressBar::getTime() {
 
     float total_sec( ( ( float ) clock() - fStart ) / CLOCKS_PER_SEC );
   

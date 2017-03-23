@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void CLsHypothesis::Generate( const size_t &n ) {
+  void CLsHypothesis::generate( const size_t &n ) {
 
     if ( fFactory ) {
 
@@ -66,12 +66,12 @@ namespace Isis {
 	  
 	  // Fluctuate the values
 	  if ( fFluct )
-	    mean = fFluct->Fluctuate(it - vec.begin(), mean);
+	    mean = fFluct->fluctuate(it - vec.begin(), mean);
 
 	  *it = fRndm.Poisson(mean);
 	}
 
-	double tst = fFactory->TestStat(vec);
+	double tst = fFactory->testStat(vec);
 
 	fTSVals.push_back(tst);
       }
@@ -86,7 +86,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  double CLsHypothesis::PoissonProb( const Doubles &values ) const {
+  double CLsHypothesis::poissonProb( const Doubles &values ) const {
 
     double prob = 1.;
 
@@ -102,7 +102,7 @@ namespace Isis {
 
 	size_t pos = itt - fHyp.cbegin();
 
-	prob *= fPrior->Evaluate(pos, *itt, *itv);
+	prob *= fPrior->evaluate(pos, *itt, *itv);
       }
     }
   
@@ -111,7 +111,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  double CLsHypothesis::PValue( const double &t ) const {
+  double CLsHypothesis::pValue( const double &t ) const {
     
     double n;
 
@@ -145,7 +145,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  double CLsHypothesis::TestStatFromProb( const double &prob ) {
+  double CLsHypothesis::testStatFromProb( const double &prob ) {
 
     size_t np  = fTSVals.size();
     size_t pos = prob*np;

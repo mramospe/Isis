@@ -63,29 +63,29 @@ namespace Isis {
     ~CutManager();
 
     // Almacenates a new cut from the cuts-file
-    std::string BookCut( const std::string &key, const bool &print = true );
+    std::string bookCut( const std::string &key, const bool &print = true );
 
     // Clears the data storaged in the class
-    inline void Clear();
+    inline void clear();
 
     // Closes the file related to this class
-    inline void Close();
+    inline void close();
 
     // Functions that gets a cut from the cuts-file
-    std::string GetCut( const std::string &key );
+    std::string getCut( const std::string &key );
 
     // Appends all the cuts in the same string using the given statement (< && > by
     // default)
-    std::string MakeMergedCut( std::string joinop = "&&" );
+    std::string makeMergedCut( std::string joinop = "&&" );
 
     // Opens the file in the given path. The old file will be closed first
-    void Open( const std::string &file_path );
+    void open( const std::string &file_path );
 
     // Prints the cuts attached to this class
-    void Print() const;
+    void display() const;
 
     // Removes the cut booked as < key >. If "*" is provided all will be removed.
-    inline void Remove( const std::string &key );
+    inline void remove( const std::string &key );
 
     // Gets the location of the begin of the map of cuts
     inline StrMap::iterator begin();
@@ -111,11 +111,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void CutManager::Clear() { fCuts.clear(); }
+  inline void CutManager::clear() { fCuts.clear(); }
 
   //_______________________________________________________________________________
   //
-  inline void CutManager::Close() {
+  inline void CutManager::close() {
     if ( fFile.use_count() == 1 )
       (*fFile).close();
     else
@@ -138,7 +138,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void CutManager::Remove( const std::string &key ) {
+  inline void CutManager::remove( const std::string &key ) {
     if ( key == "*" )
       fCuts.erase( key );
     else

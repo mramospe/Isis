@@ -26,16 +26,16 @@ namespace Isis {
   //_______________________________________________________________________________
   //
   BufferVariable::BufferVariable( const char &type ) : fType( type ) {
-    this->Construct();
+    this->construct();
   }
 
   //_______________________________________________________________________________
   //
-  BufferVariable::~BufferVariable() { this->Delete(); }
+  BufferVariable::~BufferVariable() { this->clear(); }
 
   //_______________________________________________________________________________
   //
-  std::string BufferVariable::ToString() const {
+  std::string BufferVariable::toString() const {
   
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_TO_STRING_PTR,
 			
@@ -47,7 +47,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void BufferVariable::Construct() {
+  void BufferVariable::construct() {
 
     if ( fType != '\0' )
       I_SWITCH_BY_DATA_TYPE(fType, fPath, I_NEW_INSTANCE,
@@ -59,7 +59,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  void BufferVariable::Delete() {
+  void BufferVariable::clear() {
 
     if ( fType != '\0' )
       I_SWITCH_BY_DATA_TYPE(fType, fPath, I_DELETE_PTR, NOOP);

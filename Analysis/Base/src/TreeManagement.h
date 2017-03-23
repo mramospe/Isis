@@ -37,29 +37,29 @@ namespace Isis {
 
   // Appends to the given vector all the names of the branches in a tree. Returns
   // the number of branches appended.
-  size_t GetBranchNames( Strings &vector,
+  size_t getBranchNames( Strings &vector,
 			 TTree *inputTree,
 			 const std::string &expr = "" );
 
   // Appends to the given vector all the titles of the branches in a tree. Returns
   // the number of branches appended.
-  size_t GetBranchTitles( Strings &vector,
+  size_t getBranchTitles( Strings &vector,
 			  TTree *inputTree,
 			  const std::string &expr = "" );
 
   // Gets the number of variables in a tree whose name contains a given keyword
-  size_t GetNvarsWithExpr( TTree *inputTree, const std::string &expr );
+  size_t getNvarsWithExpr( TTree *inputTree, const std::string &expr );
 
   // Returns the number of variables of a given type
-  size_t GetNvarsWithType( TTree *inputTree, const char &type );
+  size_t getNvarsWithType( TTree *inputTree, const char &type );
 
   // Returns the number of variables of a certain type in a given vector and tree
-  size_t GetNvarsWithTypeIn( TTree *inputTree,
+  size_t getNvarsWithTypeIn( TTree *inputTree,
 			     const char &type,
 			     const Strings &vector );
 
   // Gets the type of a variable in a tree
-  char GetVarType( TTree *inputTree, const std::string &var );
+  char getVarType( TTree *inputTree, const std::string &var );
 
 }
 

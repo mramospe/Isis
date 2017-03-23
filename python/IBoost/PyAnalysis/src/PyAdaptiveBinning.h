@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -38,17 +38,17 @@ namespace AdBin {
 
   //_______________________________________________________________________________
   //
-  py::list GetBinList( const Isis::AdaptiveBinning &adbin ) {
+  py::list getBinList( const Isis::AdaptiveBinning &adbin ) {
   
-    return IBoost::stdVecToBoostList( adbin.GetBinList() );
+    return IBoost::stdVecToBoostList( adbin.getBinList() );
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const Isis::AdaptiveBinning &adbin,
+  PyObject* getStruct( const Isis::AdaptiveBinning &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
+    return TPython::ObjectProxy_FromVoidPtr( adbin.getStruct(name, title),
 					     "TObject",
 					     false );
   }  
@@ -59,7 +59,7 @@ namespace AdBin1D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<Isis::AdaptiveBinning1D> Constructor( size_t occ,
+  boost::shared_ptr<Isis::AdaptiveBinning1D> constructor( size_t occ,
 							  double vmin,
 							  double vmax,
 							  py::list values,
@@ -75,24 +75,24 @@ namespace AdBin1D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<Isis::AdaptiveBinning1D> Constructor_NoWgts( size_t occ,
+  boost::shared_ptr<Isis::AdaptiveBinning1D> constructor_NoWgts( size_t occ,
 								 double vmin,
 								 double vmax,
 								 py::list values ) {
-    return Constructor(occ, vmin, vmax, values, py::list());
+    return constructor(occ, vmin, vmax, values, py::list());
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const Isis::AdaptiveBinning1D &adbin,
+  PyObject* getStruct( const Isis::AdaptiveBinning1D &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
+    return TPython::ObjectProxy_FromVoidPtr( adbin.getStruct(name, title),
 					     "TH1D",
 					     false );
   }
 
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetStruct_Overloads, GetStruct, 1, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getStruct_Overloads, getStruct, 1, 3);
 }
 
 // Wrappers for the class AdaptiveBinning2D
@@ -100,7 +100,7 @@ namespace AdBin2D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<Isis::AdaptiveBinning2D> Constructor( size_t occ,
+  boost::shared_ptr<Isis::AdaptiveBinning2D> constructor( size_t occ,
 							  double xmin, double xmax,
 							  double ymin, double ymax,
 							  py::list xvalues,
@@ -121,7 +121,7 @@ namespace AdBin2D {
 
   //_______________________________________________________________________________
   //
-  boost::shared_ptr<Isis::AdaptiveBinning2D> Constructor_NoWgts( size_t occ,
+  boost::shared_ptr<Isis::AdaptiveBinning2D> constructor_NoWgts( size_t occ,
 								 double xmin,
 								 double xmax,
 								 double ymin,
@@ -129,30 +129,30 @@ namespace AdBin2D {
 								 py::list xvalues,
 								 py::list yvalues ) {
   
-    return Constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
+    return constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
   }
 
   //_______________________________________________________________________________
   //
-  PyObject* GetAdjStruct( const Isis::AdaptiveBinning2D &adbin,
+  PyObject* getAdjStruct( const Isis::AdaptiveBinning2D &adbin,
 			  const char *name = "",
 			  const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetAdjStruct(name, title),
+    return TPython::ObjectProxy_FromVoidPtr( adbin.getAdjStruct(name, title),
 					     "TH2Poly",
 					     false );
   }
 
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetAdjStruct_Overloads, GetAdjStruct, 1, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getAdjStruct_Overloads, getAdjStruct, 1, 3);
 
   //_______________________________________________________________________________
   //
-  PyObject* GetStruct( const Isis::AdaptiveBinning2D &adbin,
+  PyObject* getStruct( const Isis::AdaptiveBinning2D &adbin,
 		       const char *name = "",
 		       const char *title = "" ) {
-    return TPython::ObjectProxy_FromVoidPtr( adbin.GetStruct(name, title),
+    return TPython::ObjectProxy_FromVoidPtr( adbin.getStruct(name, title),
 					     "TH2Poly",
 					     false );
   }
 
-  BOOST_PYTHON_FUNCTION_OVERLOADS(GetStruct_Overloads, GetStruct, 1, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getStruct_Overloads, getStruct, 1, 3);
 }

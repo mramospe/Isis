@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 17/02/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -52,160 +52,160 @@ namespace Isis {
     ~LorentzVector();
 
     // Gets the angle between two vectors
-    inline double Angle( const LorentzVector &vec ) const;
+    inline double angle( const LorentzVector &vec ) const;
 
     // Gets the Armenteros-Podolanski parameter alpha
-    double ArmAlpha( const LorentzVector &vec1, const LorentzVector &vec2 ) const;
+    double armAlpha( const LorentzVector &vec1, const LorentzVector &vec2 ) const;
 
     // Gets the Armenteros-Podolanski transverse momentum
-    double ArmPt( const LorentzVector &vec ) const;
+    double armPt( const LorentzVector &vec ) const;
 
     // Gets the Armenteros-Podolanski longitudinal momentum
-    double ArmPl( const LorentzVector &vec ) const;
+    double armPl( const LorentzVector &vec ) const;
 
     // Gets the value of beta for the particle
-    inline double Beta() const;
+    inline double beta() const;
 
     // Gets the vector concerning the parameter beta
-    inline Vector VBeta() const;
+    inline Vector vbeta() const;
 
     // Gets the cosine of the angle between two LorentzVectors
-    inline double CosAngle( const LorentzVector &vec ) const;
+    inline double cosAngle( const LorentzVector &vec ) const;
 
     // Gets the cosine of the angle respect to a 3D vector
-    inline double CosAngle( const Vector &vec ) const;
+    inline double cosAngle( const Vector &vec ) const;
 
     // Calculates the value of the cosine of the helicity angle of the particle
     // given by <vec> in the direction <dir>
-    double CosHelAngle( const LorentzVector &vec, const Vector &dir ) const;
+    double cosHelAngle( const LorentzVector &vec, const Vector &dir ) const;
 
     // Gets the value of the cosine of the helicity angle of the particle <vec>
     // in the direction <dir>
-    inline double CosHelAngle( const LorentzVector &vec, const LorentzVector &dir ) const;
+    inline double cosHelAngle( const LorentzVector &vec, const LorentzVector &dir ) const;
     
     // Gets the phi angle in the x, y, z coordinate system
-    inline double CosPhi() const;
+    inline double cosPhi() const;
 
     // Gets the theta angle in the x, y, z coordinate system
-    inline double CosTheta() const;
+    inline double cosTheta() const;
 
     // Gets the value of gamma for the particle
-    inline double Gamma() const;
+    inline double gamma() const;
 
     // Gets the longitudinal component of the given LorentzVector regarding to this one
-    inline Vector GetLong( const LorentzVector &vec ) const;
+    inline Vector getLong( const LorentzVector &vec ) const;
 
     // Gets the longitudinal component of the given 3D vector regarding to this one
-    inline Vector GetLong( const Vector &vec ) const;
+    inline Vector getLong( const Vector &vec ) const;
 
     // Gets the transversal component of the given LorentzVector regarding to this one
-    inline Vector GetTran( const LorentzVector &vec ) const;
+    inline Vector getTran( const LorentzVector &vec ) const;
 
     // Gets the transversal component of the given 3D vector regarding to this one
-    inline Vector GetTran( const Vector &vec ) const;
+    inline Vector getTran( const Vector &vec ) const;
 
     // Gets the value of the helicity angle of the particle <vec> in the direction <dir>
-    inline double HelAngle( const LorentzVector &vec, const Vector &dir ) const;
+    inline double helAngle( const LorentzVector &vec, const Vector &dir ) const;
 
     // Gets the value of the helicity angle of the particle <vec> in the direction in <dir>
-    inline double HelAngle( const LorentzVector &vec, const LorentzVector &dir ) const;
+    inline double helAngle( const LorentzVector &vec, const LorentzVector &dir ) const;
 
     // Gets the transformed vector of the particle in the reference frame of the
     // class vector
-    LorentzVector LorentzTransf( const LorentzVector &vec ) const;
+    LorentzVector lorentzTransf( const LorentzVector &vec ) const;
 
     // Gets the mass of the particle
-    inline double Mass() const;
+    inline double mass() const;
 
     // Gets the squared mass of the particle
-    inline double Mass2() const;
+    inline double mass2() const;
 
     // Gets the value of the phi angle in the x, y, z coordinate system
-    inline double Phi() const;
+    inline double phi() const;
 
     // Gets the module of the momentum
     inline double P() const;
 
     // Gets the pseudorapidity of the particle
-    double PseudoRapidity() const;
+    double pseudoRapidity() const;
 
     // Gets the value of the transverse momentum
     inline double Pt() const;
 
     // Gets the rapidity of the particle
-    inline double Rapidity() const;
+    inline double rapidity() const;
 
     // Methods to rotate this vector a given angle respect to the X axis
-    void RotateX( const double &angle );
+    void rotateX( const double &angle );
 
     // Methods to rotate this vector a given angle respect to the Y axis
-    void RotateY( const double &angle );
+    void rotateY( const double &angle );
 
     // Methods to rotate this vector a given angle respect to the Z axis
-    void RotateZ( const double &angle );
+    void rotateZ( const double &angle );
 
     // Set the mass
-    inline void SetM( const double &val );
+    inline void setM( const double &val );
 
     // Set the momentum on the X direction
-    inline void SetPx( const double &val );
+    inline void setPx( const double &val );
 
     // Set the momentum on the Y direction
-    inline void SetPy( const double &val );
+    inline void setPy( const double &val );
 
     // Set the momentum on the Y direction
-    inline void SetPz( const double &val );
+    inline void setPz( const double &val );
 
     // Set the energy
-    inline void SetE( const double &val );
+    inline void setE( const double &val );
 
     // Set the four coordinates of this vector
-    inline void SetPxPyPzE( const double &px,
+    inline void setPxPyPzE( const double &px,
 			    const double &py,
 			    const double &pz,
 			    const double &pe );
 
     // Set the three spatial coordinates and the energy using the mass
-    inline void SetPxPyPzM( const double &px,
+    inline void setPxPyPzM( const double &px,
 			    const double &py,
 			    const double &pz,
 			    const double &m );
 
     // Gets the value of the theta angle in the x, y, z coordinate system
-    inline double Theta() const;
+    inline double theta() const;
 
     // Gets the unitary vector
-    inline Vector Unitary() const;
+    inline Vector unitary() const;
 
     // Get the momentum on the X direction
     inline double Px() const;
 
     // Get path of the momentum on the X direction
-    inline double* PathToPx();
+    inline double* pathToPx();
 
     // Get the momentum on the Y direction
     inline double Py() const;
 
     // Get path of the momentum on the Y direction
-    inline double* PathToPy();
+    inline double* pathToPy();
 
     // Get the momentum on the Z direction
     inline double Pz() const;
 
     // Get path of the momentum on the Z direction
-    inline double* PathToPz();
+    inline double* pathToPz();
 
     // Get the energy
     inline double E() const;
 
     // Get path of the energy
-    inline double* PathToE();
+    inline double* pathToE();
 
     // Get the vector associated with the momentum
-    inline Vector Momentum() const;
+    inline Vector momentum() const;
 
     // Get path to the vector associated with the momentum
-    inline Vector* PathToMomentum();
+    inline Vector* pathToMomentum();
 
     // Directly add the values from another vector
     inline LorentzVector& operator += ( const LorentzVector &vec );
@@ -214,10 +214,10 @@ namespace Isis {
     inline LorentzVector& operator -= ( const LorentzVector &vec );
 
     // Add two vectors
-    inline LorentzVector operator +  ( const LorentzVector &vec ) const;
+    inline LorentzVector operator + ( const LorentzVector &vec ) const;
 
     // Substract two vectors
-    inline LorentzVector operator -  ( const LorentzVector &vec ) const;
+    inline LorentzVector operator - ( const LorentzVector &vec ) const;
 
     // Represent this vector as a stream
     std::ostream& operator << ( std::ostream &os ) const;
@@ -234,157 +234,177 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Angle( const LorentzVector &vec ) const { return fP.Angle( vec.fP ); }
+  inline double LorentzVector::angle( const LorentzVector &vec ) const {
 
-  //_______________________________________________________________________________
-  //
-  inline double LorentzVector::Beta() const { return fP.Mod()/fE; }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector LorentzVector::VBeta() const { return fP/fE; }
-
-  //_______________________________________________________________________________
-  //
-  inline double LorentzVector::CosAngle( const LorentzVector &vec ) const {
-    return fP.CosAngle( vec.fP );
+    return fP.angle( vec.fP );
   }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::CosAngle( const Vector &vec ) const { return fP.CosAngle( vec ); }
+  inline double LorentzVector::beta() const { return fP.mod()/fE; }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::CosHelAngle( const LorentzVector &vec,
+  inline Vector LorentzVector::vbeta() const { return fP/fE; }
+
+  //_______________________________________________________________________________
+  //
+  inline double LorentzVector::cosAngle( const LorentzVector &vec ) const {
+    
+    return fP.cosAngle( vec.fP );
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline double LorentzVector::cosAngle( const Vector &vec ) const {
+
+    return fP.cosAngle( vec );
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline double LorentzVector::cosHelAngle( const LorentzVector &vec,
 					    const LorentzVector &dir ) const {
-    return this -> CosHelAngle( vec, dir.Momentum() );
+    return this->cosHelAngle( vec, dir.momentum() );
   }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::CosPhi() const { return fP.CosPhi(); }
+  inline double LorentzVector::cosPhi() const { return fP.cosPhi(); }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::CosTheta() const { return fP.CosTheta(); }
+  inline double LorentzVector::cosTheta() const { return fP.cosTheta(); }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Gamma() const { return fE/std::sqrt( fE*fE - fP.Mod2() ); }
+  inline double LorentzVector::gamma() const {
 
-  //_______________________________________________________________________________
-  //
-  inline Vector LorentzVector::GetLong( const LorentzVector &vec ) const {
-    return fP.GetLong( vec.fP );
+    return fE/std::sqrt( fE*fE - fP.mod2() );
   }
 
   //_______________________________________________________________________________
   //
-  inline Vector LorentzVector::GetLong( const Vector &vec ) const { return fP.GetLong( vec ); }
+  inline Vector LorentzVector::getLong( const LorentzVector &vec ) const {
 
-  //_______________________________________________________________________________
-  //
-  inline Vector LorentzVector::GetTran( const LorentzVector &vec ) const {
-    return fP.GetTran( vec.fP );
+    return fP.getLong( vec.fP );
   }
 
   //_______________________________________________________________________________
   //
-  inline Vector LorentzVector::GetTran( const Vector &vec ) const {
-    return fP.GetTran( vec );
+  inline Vector LorentzVector::getLong( const Vector &vec ) const {
+
+    return fP.getLong( vec );
   }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::HelAngle( const LorentzVector &vec, const Vector &dir ) const {
-    return std::acos( this -> CosHelAngle( vec, dir ) );
+  inline Vector LorentzVector::getTran( const LorentzVector &vec ) const {
+    
+    return fP.getTran( vec.fP );
   }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::HelAngle( const LorentzVector &vec, const LorentzVector &dir ) const {
-    return std::acos( this -> CosHelAngle( vec, dir ) ); }
+  inline Vector LorentzVector::getTran( const Vector &vec ) const {
+    
+    return fP.getTran( vec );
+  }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Mass() const { return std::sqrt( fE*fE - fP.Mod2() ); }
+  inline double LorentzVector::helAngle( const LorentzVector &vec, const Vector &dir ) const {
+    
+    return std::acos( this -> cosHelAngle( vec, dir ) );
+  }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Mass2() const { return fE*fE - fP.Mod2(); }
+  inline double LorentzVector::helAngle( const LorentzVector &vec, const LorentzVector &dir ) const {
+    
+    return std::acos( this -> cosHelAngle( vec, dir ) );
+  }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Phi() const { return fP.Phi(); }
+  inline double LorentzVector::mass() const { return std::sqrt( fE*fE - fP.mod2() ); }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Pt() const { return fP.ModT(); }
+  inline double LorentzVector::mass2() const { return fE*fE - fP.mod2(); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::RotateX( const double &angle ) { fP.RotateX( angle ); }
+  inline double LorentzVector::phi() const { return fP.phi(); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::RotateY( const double &angle ) { fP.RotateY( angle ); }
+  inline double LorentzVector::Pt() const { return fP.modT(); }
+
+  //_______________________________________________________________________________
+  //
+  inline void LorentzVector::rotateX( const double &angle ) { fP.rotateX( angle ); }
+
+  //_______________________________________________________________________________
+  //
+  inline void LorentzVector::rotateY( const double &angle ) { fP.rotateY( angle ); }
   
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::RotateZ( const double &angle ) { fP.RotateZ( angle ); }
+  inline void LorentzVector::rotateZ( const double &angle ) { fP.rotateZ( angle ); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetM( const double &val ) {
-    fE = std::sqrt( fP.Mod2() + val*val );
+  inline void LorentzVector::setM( const double &val ) {
+    
+    fE = std::sqrt( fP.mod2() + val*val );
   }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetPx( const double &val ) { fP.SetX( val ); }
+  inline void LorentzVector::setPx( const double &val ) { fP.setX( val ); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetPy( const double &val ) { fP.SetY( val ); }
+  inline void LorentzVector::setPy( const double &val ) { fP.setY( val ); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetPz( const double &val ) { fP.SetZ( val ); }
+  inline void LorentzVector::setPz( const double &val ) { fP.setZ( val ); }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetE( const double &val ) { fE = val; }
+  inline void LorentzVector::setE( const double &val ) { fE = val; }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetPxPyPzE( const double &px,
+  inline void LorentzVector::setPxPyPzE( const double &px,
 					 const double &py,
 					 const double &pz,
 					 const double &pe ) {
-    fP.SetXYZ( px, py, pz ); fE = pe;
+    fP.setXYZ( px, py, pz ); fE = pe;
   }
 
   //_______________________________________________________________________________
   //
-  inline void LorentzVector::SetPxPyPzM( const double &px,
+  inline void LorentzVector::setPxPyPzM( const double &px,
 					 const double &py,
 					 const double &pz,
 					 const double &m ) {
-    fP.SetXYZ( px, py, pz ); fE = std::sqrt( fP.Mod2() + m*m );
+    fP.setXYZ( px, py, pz ); fE = std::sqrt( fP.mod2() + m*m );
   }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::Theta() const { return fP.Theta(); }
+  inline double LorentzVector::theta() const { return fP.theta(); }
 
   //_______________________________________________________________________________
   //
-  inline Vector LorentzVector::Unitary() const { return fP.Unitary(); }
+  inline Vector LorentzVector::unitary() const { return fP.unitary(); }
 
   //_______________________________________________________________________________
   //
-  inline double LorentzVector::P() const { return fP.Mod(); }
+  inline double LorentzVector::P() const { return fP.mod(); }
 
   //_______________________________________________________________________________
   //
@@ -392,7 +412,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double* LorentzVector::PathToPx() { return fP.PathToX(); }
+  inline double* LorentzVector::pathToPx() { return fP.pathToX(); }
 
   //_______________________________________________________________________________
   //
@@ -400,7 +420,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double* LorentzVector::PathToPy() { return fP.PathToY(); }
+  inline double* LorentzVector::pathToPy() { return fP.pathToY(); }
 
   //_______________________________________________________________________________
   //
@@ -408,7 +428,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double* LorentzVector::PathToPz() { return fP.PathToZ(); }
+  inline double* LorentzVector::pathToPz() { return fP.pathToZ(); }
 
   //_______________________________________________________________________________
   //
@@ -416,19 +436,19 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline double* LorentzVector::PathToE() { return &fE; }
+  inline double* LorentzVector::pathToE() { return &fE; }
 
   //_______________________________________________________________________________
   //
-  inline Vector LorentzVector::Momentum() const { return fP; }
+  inline Vector LorentzVector::momentum() const { return fP; }
 
   //_______________________________________________________________________________
   //
-  inline Vector* LorentzVector::PathToMomentum() { return &fP; }
+  inline Vector* LorentzVector::pathToMomentum() { return &fP; }
 
   //_______________________________________________________________________________
   //
-  inline double   LorentzVector::Rapidity() const {
+  inline double   LorentzVector::rapidity() const {
     return fE - fP.Z() != 0 ?
       0.5*std::log( ( fE + fP.Z() ) / ( fE - fP.Z() ) ) :
       std::numeric_limits<double>::max();

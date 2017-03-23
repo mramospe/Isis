@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------
 //
@@ -45,10 +45,10 @@ namespace Isis {
     ~Bin1D();
 
     // Fill the bin if the point given is inside the considered range
-    void Fill( const double &pos, const double &weight = 1 );
+    void fill( const double &pos, const double &weight = 1 );
 
     // Inline methods
-    inline const double GetMin() const;
+    inline const double getMin() const;
 
   protected:
 
@@ -56,17 +56,17 @@ namespace Isis {
     double fMin;
 
     // Set the minimum value of the bin
-    inline void SetMin( const double &vmin );
+    inline void setMin( const double &vmin );
 
   };
 
   //______________________________________________________________________________
   //
-  inline const double Bin1D::GetMin() const { return fMin; }
+  inline const double Bin1D::getMin() const { return fMin; }
   
   //______________________________________________________________________________
   //
-  inline void Bin1D::SetMin( const double &vmin ) { fMin = vmin; }
+  inline void Bin1D::setMin( const double &vmin ) { fMin = vmin; }
 
 }
 

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -46,16 +46,16 @@ namespace Isis {
     ~CLsFactory();
     
     // Return the p-value of the null hypothesis
-    inline double Alpha( const double &t ) const;
+    inline double alpha( const double &t ) const;
 
     // Return the p-value of the signal hypothesis
-    inline double Beta( const double &t ) const;
+    inline double beta( const double &t ) const;
 
     // Return information concerning the CLs method given the test statistics value
-    CLsResult Calculate( const double &tstat ) const;
+    CLsResult calculate( const double &tstat ) const;
     
     // Return information concerning the CLs method given an array
-    inline CLsResult Calculate( const Doubles &array ) const;
+    inline CLsResult calculate( const Doubles &array ) const;
 
     // Calculate CLb
     inline double CLb( const double &t ) const;
@@ -67,22 +67,22 @@ namespace Isis {
     inline double CLsb( const double &t ) const;
 
     // Generate < n > events for each of the hypotheses
-    void Generate( const size_t &n = 10000 );
+    void generate( const size_t &n = 10000 );
     
     // Return the null hypothesis
-    inline CLsHypothesis* GetNullHyp();
+    inline CLsHypothesis* getNullHyp();
     
     // Return the signal hypothesis
-    inline CLsHypothesis* GetSigHyp();
+    inline CLsHypothesis* getSigHyp();
 
     // Set the null hypothesis
-    inline void SetNullHyp( CLsHypothesis &hyp );
+    inline void setNullHyp( CLsHypothesis &hyp );
 
     // Set the signal hypothesis
-    inline void SetSigHyp( CLsHypothesis &hyp );
+    inline void setSigHyp( CLsHypothesis &hyp );
 
     // Return the test statistics for a given array of values
-    double TestStat( const Doubles &values ) const;
+    double testStat( const Doubles &values ) const;
 
   protected:
 
@@ -96,32 +96,32 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline double CLsFactory::Alpha( const double &t ) const {
+  inline double CLsFactory::alpha( const double &t ) const {
     
-    return fNullHyp->PValue(t);
+    return fNullHyp->pValue(t);
   }
 
   //_______________________________________________________________________________
   //
-  inline double CLsFactory::Beta( const double &t ) const {
+  inline double CLsFactory::beta( const double &t ) const {
 
-    return fSigHyp->PValue(t);
+    return fSigHyp->pValue(t);
   }
 
   //_______________________________________________________________________________
   //
-  inline CLsResult CLsFactory::Calculate( const Doubles &array ) const {
+  inline CLsResult CLsFactory::calculate( const Doubles &array ) const {
 
-    double t = this->TestStat(array);
+    double t = this->testStat(array);
 
-    return this->Calculate(t);
+    return this->calculate(t);
   }
 
   //_______________________________________________________________________________
   //
   inline double CLsFactory::CLb( const double &t ) const {
 
-    return 1. - this->Alpha(t);
+    return 1. - this->alpha(t);
   }
 
   //_______________________________________________________________________________
@@ -135,41 +135,41 @@ namespace Isis {
   //
   inline double CLsFactory::CLsb( const double &t ) const {
 
-    return this->Beta(t);
+    return this->beta(t);
   }
 
   //_______________________________________________________________________________
   //
-  inline CLsHypothesis* CLsFactory::GetNullHyp() {
+  inline CLsHypothesis* CLsFactory::getNullHyp() {
 
     return fNullHyp;
   }
 
   //_______________________________________________________________________________
   //
-  inline CLsHypothesis* CLsFactory::GetSigHyp() {
+  inline CLsHypothesis* CLsFactory::getSigHyp() {
 
     return fSigHyp;
   }
 
   //_______________________________________________________________________________
   //
-  inline void CLsFactory::SetNullHyp( CLsHypothesis &hyp ) {
+  inline void CLsFactory::setNullHyp( CLsHypothesis &hyp ) {
 
     fNullHyp = &hyp;
 
-    fNullHyp->SetFactory(this);
-    fNullHyp->SetType(CLsHypTypes::aNull);
+    fNullHyp->setFactory(this);
+    fNullHyp->setType(CLsHypTypes::aNull);
   }
   
   //_______________________________________________________________________________
   //
-  inline void CLsFactory::SetSigHyp( CLsHypothesis &hyp ) {
+  inline void CLsFactory::setSigHyp( CLsHypothesis &hyp ) {
 
     fSigHyp = &hyp;
 
-    fSigHyp->SetFactory(this);
-    fSigHyp->SetType(CLsHypTypes::aSignal);
+    fSigHyp->setFactory(this);
+    fSigHyp->setType(CLsHypTypes::aSignal);
   }
 }
 

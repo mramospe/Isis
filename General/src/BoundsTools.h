@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/03/2017
+//  Last update: 23/03/2017
 //
 // -----------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@ namespace Isis {
   // Get the position in the vector of bounds where "value" would be inside. The
   // positions "0" and "1" refer to underflow and overflow values.
   template<class vtype, class btype>
-  inline size_t BoundedPos( const vtype &value, const std::vector<btype> &bounds ) {
+  inline size_t boundedPos( const vtype &value, const std::vector<btype> &bounds ) {
 
     size_t pos = 0;
     for ( auto b : bounds )
@@ -53,18 +53,18 @@ namespace Isis {
   // Return a vector with the "n + 1" bounds generated from "bounds". The last one
   // corresponds to the upper bound.
   template<class vtype>
-  inline std::vector<vtype> BoundsVector( const Bounds<vtype> &bounds,
+  inline std::vector<vtype> boundsVector( const Bounds<vtype> &bounds,
 					  const size_t &n ) {
 
-    Doubles values(n + 1, bounds.GetMin());
+    Doubles values(n + 1, bounds.getMin());
     
-    double step = (bounds.GetMax() - bounds.GetMin())/n;
+    double step = (bounds.getMax() - bounds.getMin())/n;
 
     // No need to set first, and last value is set afterwards
     size_t i = 0;
     std::generate(values.begin() + 1, values.end() - 1,
 		  [&i, step] () { return (++i)*step; });
-    values.back() = bounds.GetMax();
+    values.back() = bounds.getMax();
     
     return values;
   }
@@ -72,7 +72,7 @@ namespace Isis {
   //_______________________________________________________________________________
   // Return a vector of "n" Bounds generated from "bounds"
   template<class vtype>
-  inline std::vector<Bounds<vtype> > VectorOfBounds( const Bounds<vtype> &bounds,
+  inline std::vector<Bounds<vtype> > vectorOfBounds( const Bounds<vtype> &bounds,
 						     const size_t &n ) {
 
     Doubles vbounds = BoundsVector(bounds, n);
@@ -84,7 +84,7 @@ namespace Isis {
 
     while ( itbr != out.end() ) {
 
-      itbr->SetMinMax(*itbd, *(itbd + 1));
+      itbr->setMinMax(*itbd, *(itbd + 1));
       
       ++itbr;
       ++itbd;
@@ -97,7 +97,7 @@ namespace Isis {
   // Fill a vector with the occurrences inside each bound when filling it with values
   // from "first" to "last"
   template<class InputIterator, class btype>
-  inline Sizes BoundedFillVec( InputIterator first, InputIterator last,
+  inline Sizes boundedFillVec( InputIterator first, InputIterator last,
 					     const std::vector<btype> &bounds ) {
 
     Sizes out(bounds.size() + 1, 0);
@@ -111,7 +111,7 @@ namespace Isis {
   // Same as "BoundedFillVec" but using weights. The user must check that "wgtit" is
   // able to move forward as many times as "last - first".
   template<class InputIterator, class btype, class WgtIterator>
-  inline Doubles BoundedWgtFillVec( InputIterator first, InputIterator last,
+  inline Doubles boundedWgtFillVec( InputIterator first, InputIterator last,
 				    const std::vector<btype> &bounds,
 				    WgtIterator wgtit ) {
 

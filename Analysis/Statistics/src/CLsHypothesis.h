@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -54,39 +54,39 @@ namespace Isis {
     ~CLsHypothesis();
 
     // Return the vector containing the test-statistics values
-    const Doubles& GetTSVals() const;
+    const Doubles& getTSVals() const;
 
     // Return the vector defining this hypothesis
-    const Doubles& GetHyp() const;
+    const Doubles& getHyp() const;
 
     // Return the p-value for the given test-statistics value
-    double PValue( const double &t ) const;
+    double pValue( const double &t ) const;
 
     // Generate < n > events
-    void Generate( const size_t &n );
+    void generate( const size_t &n );
 
     // Return the poisson probability
-    double PoissonProb( const Doubles &values ) const;
+    double poissonProb( const Doubles &values ) const;
 
     // Set the CLs factory class pointer
-    inline void SetFactory( const CLsFactory *factory );
+    inline void setFactory( const CLsFactory *factory );
 
     // Set the fluctuator class
-    inline void SetFluctuator( CLsFluctuator *fluct );
+    inline void setFluctuator( CLsFluctuator *fluct );
 
     // Set the vector defining this hypothesis
-    inline void SetHyp( const Doubles &array,
+    inline void setHyp( const Doubles &array,
 			CLsFluctuator *fluct = 0,
 			CLsPrior *prior = 0 );
 
     // Set the prior
-    inline void SetPrior( CLsPrior *prior );
+    inline void setPrior( CLsPrior *prior );
 
     // Set the type
-    inline void SetType( const int &type );
+    inline void setType( const int &type );
 
     // Get the test-statistics value associated to the given probability
-    double TestStatFromProb( const double &prob );
+    double testStatFromProb( const double &prob );
     
   protected:
 
@@ -114,20 +114,34 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetFactory( const CLsFactory *factory ) {
+  inline const Doubles& CLsHypothesis::getHyp() const {
+
+    return fHyp;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline const Doubles& CLsHypothesis::getTSVals() const {
+    
+    return fTSVals;
+  }
+
+  //_______________________________________________________________________________
+  //
+  inline void CLsHypothesis::setFactory( const CLsFactory *factory ) {
 
     fFactory = factory;
   }
   
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetFluctuator( CLsFluctuator *fluct ) {
+  inline void CLsHypothesis::setFluctuator( CLsFluctuator *fluct ) {
     fFluct = fluct;
   }
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetHyp( const Doubles &array,
+  inline void CLsHypothesis::setHyp( const Doubles &array,
 				     CLsFluctuator *fluct,
 				     CLsPrior *prior ) {
     
@@ -139,30 +153,16 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetPrior( CLsPrior *prior ) {
+  inline void CLsHypothesis::setPrior( CLsPrior *prior ) {
 
     fPrior = prior;
   }
 
   //_______________________________________________________________________________
   //
-  inline void CLsHypothesis::SetType( const int &type ) {
+  inline void CLsHypothesis::setType( const int &type ) {
 
     fType = type;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline const Doubles& CLsHypothesis::GetHyp() const {
-
-    return fHyp;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline const Doubles& CLsHypothesis::GetTSVals() const {
-    
-    return fTSVals;
   }
   
 }

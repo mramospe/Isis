@@ -7,7 +7,7 @@
 //  AUTHOR : Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last Update: 21/03/2017
+//  Last Update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -24,20 +24,20 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  double CTAU( LorentzVector vec,
+  double ctau( LorentzVector vec,
 	       Vector        OwnPV,
 	       Vector        EndV ) {
 
     double
       beta2( vec.E()*vec.E()/( vec.P()*vec.P() ) ),
-      distance( ( OwnPV - EndV ).Mod() );
+      distance( ( OwnPV - EndV ).mod() );
 
     return distance*std::sqrt( beta2 - 1 );
   }
 
   //______________________________________________________________________________
   //
-  double Det( Vector vec1,
+  double det( Vector vec1,
 	      Vector vec2,
 	      Vector vec3 ) {
    
@@ -49,7 +49,7 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  double Det( LorentzVector vec1,
+  double det( LorentzVector vec1,
 	      LorentzVector vec2,
 	      LorentzVector vec3 ) {
    
@@ -61,31 +61,31 @@ namespace Isis {
 
   //______________________________________________________________________________
   //
-  double IP( Vector vec,
+  double ip( Vector vec,
 	     Vector pv,
 	     Vector sv ) {
 
     Vector
-      u( vec.Unitary() ),
+      u( vec.unitary() ),
       ipvec( pv - sv );
 
-    return ( ipvec - u.Dot( ipvec )*u ).Mod();
+    return ( ipvec - u.dot( ipvec )*u ).mod();
   }
 
   //______________________________________________________________________________
   //
-  double DOCA( LorentzVector vec1,
+  double doca( LorentzVector vec1,
 	       Vector        EndV1,
 	       LorentzVector vec2,
 	       Vector        EndV2 ) {
 
     Vector
-      u1( vec1.Unitary() ),
-      u2( vec2.Unitary() );
+      u1( vec1.unitary() ),
+      u2( vec2.unitary() );
 
-    double Vol( std::abs( Det( EndV1 - EndV2, u1, u2 ) ) );
+    double vol = std::abs( det( EndV1 - EndV2, u1, u2 ) );
 
-    return Vol/( u1.Cross( u2 ) ).Mod();
+    return vol/( u1.cross( u2 ) ).mod();
   }
 
 }

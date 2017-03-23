@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 23/03/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -36,8 +36,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  Cluster::Cluster( const Doubles &weights ) :
-    fWeights( weights ) { }
+  Cluster::Cluster( const Doubles &weights ) : fWeights( weights ) { }
 
   //_______________________________________________________________________________
   //
@@ -45,11 +44,11 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  double Cluster::Dispersion() const {
+  double Cluster::dispersion() const {
   
     auto
-      &mean  = fCenterOfMass.GetValues(),
-      &mean2 = fCenterOfMass.GetMeanOfSquares();
+      &mean  = fCenterOfMass.getValues(),
+      &mean2 = fCenterOfMass.getMeanOfSquares();
     auto
       itm = mean.cbegin(),
       it2 = mean2.cbegin();
@@ -68,15 +67,15 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  double Cluster::DistanceBetweenPoints( const ClusterPoint &pointA,
+  double Cluster::distanceBetweenPoints( const ClusterPoint &pointA,
 					 const ClusterPoint &pointB ) const {
     auto
-      itc = pointA.GetValues().cbegin(),
-      itv = pointB.GetValues().cbegin(),
+      itc = pointA.getValues().cbegin(),
+      itv = pointB.getValues().cbegin(),
       itw = fWeights.cbegin();
   
     double dist2 = 0;
-    while ( itc != pointA.GetValues().end() ) {
+    while ( itc != pointA.getValues().end() ) {
       double
 	pnt = (*itv++),
 	ctr = (*itc++),
@@ -91,7 +90,7 @@ namespace Isis {
 
   //_______________________________________________________________________________
   //
-  Cluster Cluster::MergeClusters( const Cluster &clusterA,
+  Cluster Cluster::mergeClusters( const Cluster &clusterA,
 				  const Cluster &clusterB ) {
 
     Cluster cluster( clusterA );
@@ -109,17 +108,19 @@ namespace Isis {
 
     Cluster::PointArray &array = cluster.fPoints;
     array.insert( array.end(), clusterB.fPoints.cbegin(), array.cend() );
-    cluster.fCenterOfMass.AttachPoint( clusterB.fCenterOfMass );
+    cluster.fCenterOfMass.attachPoint( clusterB.fCenterOfMass );
   
     return cluster;
   }
 
   //_______________________________________________________________________________
   //
-  void Cluster::Normalize( const Doubles &values ) {
+  void Cluster::normalize( const Doubles &values ) {
+    
     for ( auto it = fPoints.begin(); it != fPoints.end(); ++it )
-      it->Normalize( values );
-    fCenterOfMass.Normalize( values );
+      it->normalize( values );
+    
+    fCenterOfMass.normalize( values );
   }
 
 }

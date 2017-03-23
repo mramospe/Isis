@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 22/03/2017
+//  Last update: 23/03/2017
 //
 // ---------------------------------------------------------------------------------
 //
@@ -57,50 +57,50 @@ namespace Isis {
     ~OutputTable();
 
     // Returns a new line from the buffer
-    std::string GetLine();
+    std::string getLine();
 
     // Displays the whole table, including the title and the elements. If this method
     // is used no < Start > has to be called before.
-    void Print( const char &chdeco = '*' );
+    void display( const char &chdeco = '*' );
 
     // Sets the format for the current table. To know which imput parameters are
     // allowed to be introduced see the < SetFormat( const char *format ... ) > method.
-    void SetFormat( const char *format, const Strings &titles );
+    void setFormat( const char *format, const Strings &titles );
 
     // Sets the format of the elements displayed in the table. There can be displayed
     // values of any kind: boolean (b), short integers (i), integers (I), floats (f),
     // doubles (d) and strings (s). As second, third, ... arguments the title of the
     // variables have to be specified.
-    void SetFormat( const char *format ... );
+    void setFormat( const char *format ... );
 
     // Prints the title and initializes the table. If the pointer of the buffer is
     // not located at the start it is moved to it. Returns the string used to
     // separate the title from the elements.
-    std::string Start( const char &chdeco = '*' );
+    std::string start( const char &chdeco = '*' );
 
     // Finishes the display of the table showing the separator
-    inline void End();
+    inline void end();
 
     // Returns the number of lines in the table
-    inline size_t GetNlines();
+    inline size_t getNlines();
 
     // Displays another line from the buffer
-    inline void PrintLine();
+    inline void printLine();
 
     // Rewinds the buffer
-    inline void Rewind();
+    inline void rewind();
 
     // Sets the number of numbers that will be displayed for float and double types
-    inline void SetPrecision( const unsigned short int &prec );
+    inline void setPrecision( const unsigned short int &prec );
 
     // Sets the length of the strings displayed in the table
-    inline void SetStrLength( const unsigned short int &len );
+    inline void setStrLength( const unsigned short int &len );
 
     // Appends a new element to the current buffer, separating it by a tabulation
     // when it corresponds to the same row and by a newline symbol when moving to
     // another column
     template<class type>
-    inline void AppendStream( type &str );
+    inline void appendStream( type &str );
 
     // Returns an element from the buffer
     template<class type>
@@ -144,41 +144,43 @@ namespace Isis {
   
   //_______________________________________________________________________________
   //
-  inline void OutputTable::End() {
-    std::cout << fSeparator << std::endl;
-  }
+  inline void OutputTable::end() { std::cout << fSeparator << std::endl; }
 
   //_______________________________________________________________________________
   //
-  inline size_t OutputTable::GetNlines() { return fNlines; }
+  inline size_t OutputTable::getNlines() { return fNlines; }
 
   //_______________________________________________________________________________
   //
-  void OutputTable::PrintLine() { std::cout << this->GetLine() << std::endl; }
+  void OutputTable::printLine() { std::cout << this->getLine() << std::endl; }
 
   //_______________________________________________________________________________
   //
-  inline void OutputTable::Rewind() { fBuffer.seekg( 0 ); }
+  inline void OutputTable::rewind() { fBuffer.seekg( 0 ); }
 
   //_______________________________________________________________________________
   //
-  inline void OutputTable::SetPrecision( const unsigned short int &prec ) {
+  inline void OutputTable::setPrecision( const unsigned short int &prec ) {
+    
     fBuffer.precision( prec );
   }
 
   //_______________________________________________________________________________
   //
-  inline void OutputTable::SetStrLength( const unsigned short int &len ) {
+  inline void OutputTable::setStrLength( const unsigned short int &len ) {
+    
     fStrLength = len;
   }
 
   //_______________________________________________________________________________
   //
   template<class type>
-  inline void OutputTable::AppendStream( type &str ) {
+  inline void OutputTable::appendStream( type &str ) {
+    
     if ( fPrecisions[ fIvar ] )
       fBuffer.precision( fPrecisions[ fIvar ] );
     fBuffer << str;
+    
     if ( ++fIvar != fSizes.size() )
       fBuffer << '\t';
     else {
@@ -192,6 +194,7 @@ namespace Isis {
   //
   template<class type>
   inline OutputTable& operator >> ( OutputTable &table, type &str ) {
+    
     table.fBuffer >> str;
     return table;
   }
@@ -200,7 +203,8 @@ namespace Isis {
   //
   template<class type>
   inline OutputTable& operator << ( OutputTable &table, const type &str ) {
-    table.AppendStream( str );
+    
+    table.appendStream( str );
     return table;
   }
 }
