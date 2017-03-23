@@ -31,7 +31,7 @@ from Isis.Algebra import LongVector, Matrix
 from Isis.Utils import FormatEvalExpr, JoinDicts, MergeDicts, StringListFilter
 
 
-class DataManager( dict ):
+class DataMgr( dict ):
     '''
     Class to manage data, specially designed to work together with Root files
     and trees
@@ -79,7 +79,7 @@ class DataManager( dict ):
         '''
         Allows merging two objects of this class
         '''
-        mgr = DataManager( self.Name + '__' + other.Name )
+        mgr = DataMgr( self.Name + '__' + other.Name )
         true_vars = [ var for var in self.keys() if var in other ]
         for var in true_vars:
             mgr[ var ] = self[ var ] + other[ var ]
@@ -128,7 +128,7 @@ class DataManager( dict ):
         '''
         if not name:
             name = self.Name + '_copy'
-        return DataManager( name, self )
+        return DataMgr( name, self )
     
     def GetCutList( self, cut, mathmod = math ):
         '''
@@ -419,7 +419,7 @@ class DataManager( dict ):
         else:
             evtlst = evts
             
-        cmgr = DataManager( name )
+        cmgr = DataMgr( name )
         for kw in varset:
             vlist = self[ kw ]
             cmgr[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]

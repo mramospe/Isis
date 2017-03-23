@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/03/2017
+#//  Last update: 23/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -653,10 +653,10 @@ def MultiPlot( mgrs, variables,
                title  = None ):
     '''
     This function plots in the same canvas the distributions of the given
-    variables from different DataManager classes. Different options can
-    also been provided to modify the canvas and the information displayed.
-    If < ranges > is provided, it must contain the same name of the
-    variables passed in < variables > (this applies also to formulas).
+    variables from different "DataMgr" classes. Different options can also
+    been provided to modify the canvas and the information displayed. If
+    < ranges > is provided, it must contain the same name of the variables
+    passed in < variables > (this applies also to formulas).
     '''
     if title == None:
         title = name

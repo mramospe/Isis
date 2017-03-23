@@ -2,7 +2,7 @@
 # Script to plot a list of variables shared by different Root samples
 # -------------------------------------------------------------------
 
-from Isis.DataManagement import DataManager
+from Isis.DataManagement import DataMgr
 from Isis.PlotTools import MultiPlot
 
 # List of variables to plot
@@ -27,7 +27,7 @@ for mgrname, inputs in paths.iteritems():
 
     fpath, tpath = inputs
     
-    mgrs[mgrname] = DataManager(mgrname, fpath, tpath, variables = varlst)
+    mgrs[mgrname] = DataMgr(mgrname, fpath, tpath, variables = varlst)
 
 # Make the canvas
 output = MultiPlot([mgr for mgr in mgrs.itervalues()], varlst,
