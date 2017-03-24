@@ -48,11 +48,13 @@ class decoEffInput( decoArgBase ):
         decoArgBase.__init__(self, func)
 
     @decoClassMethod
-    @decoInputArgs(float, slc = slice(1, 3), kvars = ['cl'])
+    @decoInputArgs(float, slc = slice(1, 3), kvars = None)
     def __call__( self, N, k, *args, **kwargs ):
         '''
         Check the input numbers and call the stored function
         '''
+        kvars = kvars or ['cl']
+        
         if k > N:
             sendErrorMsg('Calculating efficiency with a final number of '\
                          'events greater than the initial')

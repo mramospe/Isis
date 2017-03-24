@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 24/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -35,7 +35,7 @@ class DataMgr( dict ):
     Class to manage data, specially designed to work together with Root files
     and trees
     '''
-    def __init__( self, name = '', path = {}, tree = 'DecayTree', variables = [ '*' ], colid = [], ftype = 'root' ):
+    def __init__( self, name = '', path = None, tree = 'DecayTree', variables = None, colid = None, ftype = 'root' ):
         '''
         The constructor provides the possibility of loading data from root or
         txt files, or from dictionary-like classes:
@@ -51,6 +51,9 @@ class DataMgr( dict ):
         All the constructors finally call the constructor given a
         dictionary-like class.
         '''
+        path = path or {}
+        variables = variables or ['*']
+        colid = None or []
         
         if isinstance( path, str ):
             if ftype:
@@ -252,7 +255,7 @@ class DataMgr( dict ):
         for key, values in self.iteritems():
             values.append( dic[ key ] )
 
-    def display( self, variables = [], cuts = '', mathmod = math, evts = -1, prec = 3 ):
+    def display( self, variables = None, cuts = '', mathmod = math, evts = -1, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -260,6 +263,7 @@ class DataMgr( dict ):
         showed the events that statisfy the given cut. If < prec > is given, the
         number of decimal points it sets to this value.
         '''
+        variables = variables or []
         
         if not self:
             sendErrorMsg('%s => No variables booked in this manager' %self.name)
@@ -360,7 +364,7 @@ class DataMgr( dict ):
 
         return points
     
-    def save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
+    def save( self, name = '', tree_name = False, ftype = 'root', variables = None, close = True ):
         '''
         Saves the given class values in a TTree. If < name > is not provided, the
         tree will be written in the external directory (to be constructed and
@@ -371,8 +375,7 @@ class DataMgr( dict ):
         variables to be stored can be specified using the keyword < variables >,
         providing a list with them.
         '''
-        if variables == []:
-            variables = self.keys()
+        variables = variables or self.keys()
         if ftype in ( 'root', 'Root', 'ROOT' ):
             if name != '':
                 ofile = rt.TFile.Open( name, 'RECREATE' )
@@ -431,7 +434,7 @@ class DataMgr( dict ):
         return cmgr
 
 
-def txtToDict( fname, tnames = [], colid = [] ):
+def txtToDict( fname, tnames = None, colid = None ):
     '''
     Creates a new dictionary containing the values of the variables stored on
     a txt file. The file path is specified in < fname >, while the names of the
@@ -441,6 +444,9 @@ def txtToDict( fname, tnames = [], colid = [] ):
     preference over the < colid > variable. In the case where the first row
     does not have the names, < tnames > and < colid > must match.
     '''
+    tnames = tnames or []
+    colid  = colid or []
+    
     ifile   = open( fname, 'rt' )
     line    = ifile.readline().split()
     if colid == []:
@@ -483,11 +489,13 @@ def txtToDict( fname, tnames = [], colid = [] ):
     return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
 
 
-def varsInRootTree( tree = None, fname = '', tpath = '', regexps = [] ):
+def varsInRootTree( tree = None, fname = '', tpath = '', regexps = None ):
     '''
     Return variables in a tree. If < regexps > are provided, only variables
     matching it will be returned.
     '''
+    regexps = regexps or []
+    
     if not tree:
         rfile = rt.TFile.Open( fname )
         tree  = rfile.Get( tpath )

@@ -39,14 +39,14 @@ class CanvasStorer:
     one with data objects (histograms, graphs, ...) and the other one
     focused adding information to the plot (legend, lines, ...)
     '''
-    def __init__( self, canvas = None, data_objs = [], info_objs = [] ):
+    def __init__( self, canvas, data_objs = None, info_objs = None ):
         '''
         Constructor given the canvas and the lists of data objects and
         information objects
         '''
         self.canvas   = canvas
-        self.dataObjs = data_objs
-        self.infoObjs = info_objs
+        self.dataObjs = data_objs or []
+        self.infoObjs = info_objs or []
 
 
 class FormatListIter:
@@ -398,7 +398,7 @@ def makeAdaptiveBinnedHist( name, minocc, values,
     return hist
 
 
-def makeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
+def makeCorrelationHist( matrix, name = '', title = None, vartitles = None ):
     '''
     Creates a correlation histogram given a list of lists. By default it is drawn
     in color, without palette, and with the contents written inside each bin. No
@@ -406,6 +406,8 @@ def makeCorrelationHist( matrix, name = '', title = None, vartitles = [] ):
     '''
     lm = len( matrix )
     lv = len( vartitles )
+
+    vartitles = vartitles or []
     if vartitles != []:
         if lm != lv:
             sendWarningMsg('Number of titles is not the same as that of the matrix; '\
@@ -641,12 +643,12 @@ def makeScatterPlot( xvar, yvar,
 def multiPlot( mgrs, variables,
                cuts   = False,
                errors = False,
-               flist  = FormatList(),
+               flist  = None,
                legend = True,
                name   = 'canvas',
                nbins  = 100,
                norm   = True,
-               ranges = {},
+               ranges = None,
                title  = None ):
     '''
     This function plots in the same canvas the distributions of the given
@@ -655,6 +657,9 @@ def multiPlot( mgrs, variables,
     < ranges > is provided, it must contain the same name of the variables
     passed in < variables > (this applies also to formulas).
     '''
+    ranges = ranges or {}
+    flist  = flist or FormatList()
+    
     if title == None:
         title = name
     

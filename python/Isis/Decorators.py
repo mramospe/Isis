@@ -81,11 +81,13 @@ class _decoInputArgs( decoArgBase ):
         return self.func(*func_args, **kwargs)
 
 
-def decoInputArgs( conv, slc = slice(0, None), kvars = [] ):
+def decoInputArgs( conv, slc = slice(0, None), kvars = None ):
     '''
     Function to extend the functionality of the class < _decoInputArgs > as a
     decorator
     '''
+    kvars = kvars or []
+    
     def wrapper( func ):
         return _decoInputArgs(conv, func, slc, kvars)
         
