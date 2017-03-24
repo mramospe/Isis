@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 24/03/2017
 //
 // ---------------------------------------------------------
 //
@@ -43,10 +43,10 @@ namespace Isis {
     enum Styles { aNormal, aBold, aFaint, aItalic, aUnderline, aNoStyle };
 
     // GLOBAL variable storing whether the error output can be printed in color
-    const bool ColoredStdErr = isatty( STDERR_FILENO );
-
+    extern const bool ColoredStdErr;
+    
     // GLOBAL variable storing whether the usual output can be printed in color
-    const bool ColoredStdOut = isatty( STDOUT_FILENO );
+    extern const bool ColoredStdOut;
 
     // GLOBAL color for the error messages
     extern int ErrorColor;

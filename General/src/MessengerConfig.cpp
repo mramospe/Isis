@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 24/03/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -24,6 +24,11 @@
 
 namespace Isis {
 
+  //_______________________________________________________________________________
+  //
+  extern const bool ANSIFormat::ColoredStdErr = isatty( STDERR_FILENO );
+  extern const bool ANSIFormat::ColoredStdOut = isatty( STDOUT_FILENO );
+  
   //_______________________________________________________________________________
   //
   int ANSIFormat::ErrorColor   = aRed;
@@ -46,12 +51,8 @@ namespace Isis {
   //
   std::ostream& endMsgLine( std::ostream &os ) {
 
-    switch( applyColor(os) ) {
-    case true:
+    if ( applyColor(os) )
       os << "\033[0m";
-    default:
-      NOOP;
-    }
     
     os << std::endl;
   

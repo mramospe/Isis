@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 25/03/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -32,9 +32,7 @@ namespace Isis {
     fOStream( &os ) {
 
     // Check if color must be applied
-    switch ( applyColor(os) ) {
-    
-    case true:
+    if ( applyColor(os) ) {
     
       *fOStream << "\033[";
 
@@ -65,9 +63,6 @@ namespace Isis {
       }
       
       *fOStream << "m";
-    
-    default:
-      NOOP;
     }
 
     *fOStream << start;
