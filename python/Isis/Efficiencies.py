@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 24/03/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -58,7 +58,7 @@ class decoEffInput( decoArgBase ):
                          'events greater than the initial')
             return
         
-        return self.Func(N, k, *args, **kwargs)
+        return self.func(N, k, *args, **kwargs)
             
 
 @decoEffInput
@@ -248,11 +248,11 @@ def rocValues( var, sig, bkg,
     < calcEfficiency > and < calcRejection > methods.
     '''
 
-    nS = sig.RunCutEntries(var, sense, npoints, vmin, vmax, endpoint)
-    nB = bkg.RunCutEntries(var, sense, npoints, vmin, vmax, endpoint)
+    nS = sig.runCutEntries(var, sense, npoints, vmin, vmax, endpoint)
+    nB = bkg.runCutEntries(var, sense, npoints, vmin, vmax, endpoint)
     
-    nS_glob = sig.GetEntries()
-    nB_glob = bkg.GetEntries()
+    nS_glob = sig.getEntries()
+    nB_glob = bkg.getEntries()
     
     eff = map(lambda x: CalcEfficiency(nS_glob, x), nS)
     rej = map(lambda x: CalcRejection(nB_glob, x), nB)

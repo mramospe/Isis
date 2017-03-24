@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 24/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -50,9 +50,9 @@ BOOST_PYTHON_MODULE( PyAnalysis ) {
     ("AdaptiveBinning1D", py::no_init)
     .def("__init__"     , py::make_constructor(&AdBin1D::constructor))
     .def("__init__"     , py::make_constructor(&AdBin1D::constructor_NoWgts))
-    .def_readonly("Max" , &Isis::AdaptiveBinning1D::getMax)
-    .def_readonly("Min" , &Isis::AdaptiveBinning1D::getMin)
     .def("getStruct"    , &AdBin1D::getStruct, AdBin1D::getStruct_Overloads())
+    .def_readonly("Max", &Isis::AdaptiveBinning1D::getMax)
+    .def_readonly("Min", &Isis::AdaptiveBinning1D::getMin)
     ;
 
   // Wrapper from AdaptiveBinning2D.h

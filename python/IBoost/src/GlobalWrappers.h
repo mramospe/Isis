@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 24/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -43,18 +43,18 @@ namespace IBoost {
   // FUNCTIONS
   boost::python::ssize_t boostDictListSize( boost::python::dict dict );
   void checkArgs( boost::python::tuple &args, const unsigned int &nargs );
-  void checkKwargs( boost::python::dict &kwargs,
-		    const std::vector<const char*> &lst );
+  void checkKwargs( boost::python::dict &kwargs, const std::vector<const char*> &lst );
 
   // __________________
   // TEMPLATE FUNCTIONS
 
   // Extract the converted value from a python container at the given index
   template<class type, class idxtype>
-  inline type extractFromIndex( boost::python::object &obj,
-			 idxtype index ) {
+  inline type extractFromIndex( boost::python::object &obj, idxtype index ) {
+    
     boost::python::api::object_item elem = obj[ index ];
     type output = boost::python::extract<type>( elem );
+    
     return output;
   }
 
@@ -66,7 +66,7 @@ namespace IBoost {
     std::vector<type> res( lgth );
 
     size_t i = 0;
-    for (auto it = res.begin(); it != res.end(); ++it, ++i)
+    for ( auto it = res.begin(); it != res.end(); ++it, ++i )
       (*it) = extractFromIndex<type>(lst, i);
 
     return res;
@@ -75,9 +75,11 @@ namespace IBoost {
   // Transform a standard vector into a python list
   template<class type>
   inline boost::python::list stdVecToBoostList( const std::vector<type> &vector ) {
+    
     boost::python::list list;
-    for ( auto it = vector.begin(); it != vector.end(); ++it )
-      list.append( *it );
+    for ( const auto &v : vector )
+      list.append(v);
+    
     return list;
   }
 }

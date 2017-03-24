@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 24/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -53,10 +53,10 @@ namespace CutMgr {
 namespace Msg {
 
   // Function to send a formatted message
-  void sendFormattedMsg( const std::string &msg,
-			 const int &fgcol = Isis::ANSIFormat::aNoColor,
-			 const int &bgcol = Isis::ANSIFormat::aNoColor,
-			 const int &sty = Isis::ANSIFormat::aNoStyle ) {
+  inline void sendFormattedMsg( const std::string &msg,
+				const int &fgcol = Isis::ANSIFormat::aNoColor,
+				const int &bgcol = Isis::ANSIFormat::aNoColor,
+				const int &sty = Isis::ANSIFormat::aNoStyle ) {
 
     Isis::Messenger("", std::cout, fgcol, bgcol, sty) << msg << IEndMsg;
   }
@@ -65,16 +65,16 @@ namespace Msg {
 				  1, 4);
 
   // Function to send an usual message
-  void sendMsg( const std::string &msg ) { IBegMsg << msg << IEndMsg; }
+  inline void sendMsg( const std::string &msg ) { IBegMsg << msg << IEndMsg; }
 
   // Function to send an error message
-  void sendErrorMsg( const std::string &msg ) { IError << msg << IEndMsg; }
+  inline void sendErrorMsg( const std::string &msg ) { IError << msg << IEndMsg; }
 
   // Function to send an information message
-  void sendInfoMsg( const std::string &msg ) { IInfo << msg << IEndMsg; }
+  inline void sendInfoMsg( const std::string &msg ) { IInfo << msg << IEndMsg; }
 
   // Function to send a warning message
-  void sendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
+  inline void sendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
 }
 
 BOOST_PYTHON_MODULE( PyGeneral ) {

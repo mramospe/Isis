@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 24/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -96,6 +96,127 @@ def dl2ld( dic ):
              for i in xrange( length ) ]
 
 
+class EnvTracker:
+    '''
+    Class to keep track of the variables that change in a environment. Differences
+    are considered with respect to the moment when the method "changes" is called.
+    Call "update" to update the variables stored withing this class. At this point
+    the objects stored in the "EnvVar" classes are destroyed if no other variable
+    points to them.
+    '''
+    def __init__( self, env, title ):
+        '''
+        Takes the environment as a dictionary and its title
+        '''
+        self._env  = env
+        self.title = title
+        self.update()
+
+    def _filterKeys( self ):
+        '''
+        Defines the keys that are considered to be tracked
+        '''
+        lst = self._env.keys()
+        
+        fltr = lambda s: all(not s.startswith(el) and
+                             not s.endswith(el) for el in ('_', '__'))
+        
+        return filter(fltr, lst)
+
+    def changes( self ):
+        '''
+        Return the variables added, removed and with a different assignment
+        '''
+        new_env_vars = [EnvVar(kw, self._env[kw]) for kw in self._filterKeys()]
+
+        added, removed, reas_keys, reas_objs = self._envVars[0].check(new_env_vars)
+
+        for var in self._envVars[1:]:
+            add, rm, rkeys, robjs = var.check(new_env_vars)
+            
+            added      = set(added).intersection(add)
+            removed   += rm
+            reas_keys += rkeys
+            reas_objs += robjs
+
+        added = list(added)
+        
+        return added, removed, reas_keys, reas_objs
+    
+    def display( self ):
+        '''
+        Display the changes in the environment
+        '''
+        chgs = self.changes()
+
+        msgs = [
+            '* Variables added to the %s scope' %self.title,
+            '* Variables removed from the %s scope' %self.title,
+            '* Variables taking ownership of those removed in the %s scope' %self.title,
+            '* Variables which have changed their value in the %s scope' %self.title
+        ]
+        
+        for out, lst in zip(msgs, chgs):
+            if lst:
+                print len(out)*'*'
+                print out
+
+                lst = sorted(lst, key=lambda var: var.name)
+
+                sizes   = map(lambda s: len(s.name), lst)
+                maxsize = max(sizes)
+        
+                for i, (sz, var) in enumerate(zip(sizes, lst)):
+                    print '* %s %s=> %s' %(var.name, (maxsize - sz)*' ', var.obj)
+                print
+            
+    def update( self ):
+        '''
+        Update the keys of the environment
+        '''
+        self._envVars = [EnvVar(kw, self._env[kw]) for kw in self._filterKeys()]
+
+
+class EnvVar:
+    '''
+    Class meant to be used with "EnvTracker", storing the name of the variable and
+    the object it points to
+    '''
+    def __init__( self, name, obj ):
+        '''
+        Takes the name of the variable and the object
+        '''
+        self.name = name
+        self.obj  = obj
+
+    def check( self, lst ):
+        '''
+        Check the changes on this variable with respect to a new scope, with
+        variables stored in "lst"
+        '''
+        pos = filter(lambda x: x.name == self.name, lst)
+        
+        reas_obj = []
+        removed = []
+        if pos:
+            if pos[0].obj != self.obj:
+                reas_obj = [pos[0]]
+        else:
+            removed = [self]
+
+        reas_keys = []
+        added = []
+        for el in lst:
+            if el.name != self.name:
+                added.append(el)
+                if el.obj == self.obj:
+                    if removed:
+                        reas_keys.append(el)
+                        continue
+
+        return added, removed, reas_keys, reas_obj
+
+        
 def formatTime( itime ):
     '''
     Displays the given time in the format [ w, d, h, min, s ]. If one of the
@@ -117,7 +238,7 @@ def formatTime( itime ):
     else:
         return '0s'
 
-
+    
 def formatEvalExpr( expr, mathmod = math ):
     '''
     This function allows to format a given expression in such a way that takes
@@ -140,8 +261,8 @@ def formatEvalExpr( expr, mathmod = math ):
 
     '''
     Iterates over the expression to find the variables and the constants in it. The use
-    of a < while > loop becomes necessary to avoid replacing multiple times the same function
-    by < module.function >.
+    of a < while > loop becomes necessary to avoid replacing multiple times the same
+    function by < module.function >.
     '''
     
     truevars = []
@@ -248,26 +369,6 @@ def joinDicts( *args ):
     return rdict
 
 
-def largestString( lstdic ):
-    '''
-    If the input is a list, it gets the length of the maximum string located
-    inside it. If it is a dictionary, it gets the maximum value of the strings
-    associated to the keys of it ( it has to be a dictionary of strings ).
-    '''
-    maxlen = 0
-    if isinstance( lstdic, list ):
-        for el in lstdic:
-            newlen = len( el )
-            if newlen > maxlen: maxlen = newlen
-    elif isinstance( lstdic, dict ):
-        for kw in lstdic:
-            newlen = len( lstdic[ kw ] )
-            if newlen > maxlen: maxlen = newlen
-    else:
-        print 'The input parameter is not a list nor a dictionary, returned 0'
-    return maxlen
-
-
 def ld2dl( lst ):
     '''
     Given a list of dictionaries, it returns a dictionary of lists
@@ -354,12 +455,12 @@ class PythonEnvMgr:
         addbot = kwargs.get( 'addbot', True )
         ovrwrt = kwargs.get( 'overwrite', False )
 
-        self.File = filename
+        self.ifile = filename
         
         if addbot:
-            self.Mode = 'at+'
+            self.mode = 'at+'
         else:
-            self.Mode = 'wt+'
+            self.mode = 'wt+'
 
         if ovrwrt or not os.path.isfile( filename ):
             f = open( filename, 'wt' )
@@ -389,11 +490,11 @@ class PythonEnvMgr:
         removepath = kwargs.get( 'rmpath', True )
         returndict = kwargs.get( 'retdict', False )
 
-        pathtofile = self.File.name().split( '/' )[ :-1 ]
+        pathtofile = self.ifile.name().split( '/' )[ :-1 ]
         if pathtofile not in sys.path:
             sys.path.append( pathtofile )
 
-        mod = getattr( __import__( self.File.name ), name )
+        mod = getattr( __import__( self.ifile.name ), name )
 
         if removepath:
             del sys.path[ -1 ]
@@ -406,10 +507,10 @@ class PythonEnvMgr:
 
     def saveEnv( self, name, **kwargs ):
         '''
-        Method to save a set of values inside a class called < name > in the file attached
-        to this class.
+        Method to save a set of values inside a class called < name > in the file
+        attached to this class.
         '''
-        ofile = open( self.File, self.Mode )
+        ofile = open( self.ifile, self.mode )
         
         ofile.seek( 0 )
         lines = ofile.readlines()
@@ -509,12 +610,13 @@ class StrNumGenerator:
         if not end:
             start, end = 0, start
         elif end < start:
-            sendErrorMsg('The starting number has to be greater than the ending')
+            sendErrorMsg('The starting number must be greater than the ending')
         if end < 0 or start < 0:
-            sendErrorMsg('Input parameters have to be both positive')
-        self.CurrIter  = start
-        self.MaxIter   = end
-        self.MaxStrLen = len( str( end ) )
+            sendErrorMsg('Input parameters must be both positive')
+            
+        self._iter     = start
+        self._maxIter  = end
+        self._maxStrLen = len( str( end ) )
 
     def __iter__( self ):
         ''' On the iterations it returns itself '''
@@ -522,13 +624,13 @@ class StrNumGenerator:
 
     def next( self ):
         ''' Moves one position forward the iterator '''
-        if self.CurrIter == self.MaxIter:
+        if self._iter == self._maxIter:
             raise StopIteration
         else:
-            citer  = str( self.CurrIter )
+            citer  = str( self._iter )
             lciter = len( citer ) + 1
-            self.CurrIter += 1
-            return ( self.MaxStrLen - lciter )*'0' + citer
+            self._iter += 1
+            return ( self._maxStrLen - lciter )*'0' + citer
 
 
 def terminalSize():

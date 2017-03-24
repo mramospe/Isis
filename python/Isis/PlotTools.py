@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 24/03/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -44,9 +44,9 @@ class CanvasStorer:
         Constructor given the canvas and the lists of data objects and
         information objects
         '''
-        self.Canvas   = canvas
-        self.DataObjs = data_objs
-        self.InfoObjs = info_objs
+        self.canvas   = canvas
+        self.dataObjs = data_objs
+        self.infoObjs = info_objs
 
 
 class FormatListIter:
@@ -59,16 +59,16 @@ class FormatListIter:
         '''
         The color and the line, marker and fill styles are passed to the class
         '''
-        self.Color  = color
-        self.LineSt = linest
-        self.MarkSt = markst
-        self.FillSt = fillst
+        self.color  = color
+        self.lineSt = linest
+        self.markSt = markst
+        self.fillSt = fillst
 
     def getStyles( self ):
         '''
         Returns the members of this class in a tuple
         '''
-        return tuple( el for el in ( self.Color, self.LineSt, self.MarkSt, self.FillSt )
+        return tuple( el for el in ( self.color, self.lineSt, self.markSt, self.fillSt )
                       if el != None )
         
     def applyFormat( self, obj, lw = 2 ):
@@ -77,15 +77,15 @@ class FormatListIter:
         set to < 2 >.
         '''
         obj.SetLineWidth( lw )
-        obj.SetLineColor( self.Color )
-        obj.SetMarkerColor( self.Color )
-        obj.SetLineColor( self.Color )
-        obj.SetMarkerStyle( self.MarkSt )
-        if self.LineSt != None:
-            obj.SetLineStyle( self.LineSt )
-        if self.FillSt != None:
-            obj.SetFillColor( self.Color )
-            obj.SetFillStyle( self.FillSt )
+        obj.SetLineColor( self.color )
+        obj.SetMarkerColor( self.color )
+        obj.SetLineColor( self.color )
+        obj.SetMarkerStyle( self.markSt )
+        if self.lineSt != None:
+            obj.SetLineStyle( self.lineSt )
+        if self.fillSt != None:
+            obj.SetFillColor( self.color )
+            obj.SetFillStyle( self.fillSt )
 
 
 class FormatList:
@@ -107,56 +107,56 @@ class FormatList:
         arguments). If only one value is specified, all the objects using these formats
         will have the same value of that quantity too.
         '''
-        self.Iter = 0
+        self._iter = 0
         if colors != None:
-            self.Colors = colors
+            self.colors = colors
         else:
-            self.Colors = [ rt.kBlue, rt.kRed, rt.kOrange,
+            self.colors = [ rt.kBlue, rt.kRed, rt.kOrange,
                             rt.kGreen, rt.kMagenta, rt.kCyan ]
         if linest != None:
-            self.LineSt = linest
+            self.lineSt = linest
         else:
-            self.LineSt = range( 1, 7 )
+            self.lineSt = range( 1, 7 )
         if markst != None:
-            self.MarkSt = markst
+            self.markSt = markst
         else:
-            self.MarkSt = range( 20, 26 )
+            self.markSt = range( 20, 26 )
         if fillst != None:
-            self.FillSt = fillst
+            self.fillSt = fillst
         else:
-            self.FillSt = range( 3000, 3006 )
+            self.fillSt = range( 3000, 3006 )
             
         ''' Check that all the lists given have the same length '''
-        lgths = [ len( lst ) for lst in ( self.Colors, self.LineSt,
-                                          self.MarkSt, self.FillSt )
+        lgths = [ len( lst ) for lst in ( self.colors, self.lineSt,
+                                          self.markSt, self.fillSt )
                   if isinstance( lst, list ) ]
         if len( set( lgths ) ) != 1:
             sendErrorMsg('Lists passed to FormatList instance have different lengths')
 
     def __getitem__( self, idx ):
         ''' Gets the format for the given index '''
-        if isinstance( self.Colors, list ):
-            lst = self.Colors
-        elif isinstance( self.LineSt, list ):
-            lst = self.LineSt
-        elif isinstance( self.MarkSt, list ):
-            lst = self.MarkSt
-        elif isinstance( self.FillSt, list ):
-            lst = self.FillSt
+        if isinstance( self.colors, list ):
+            lst = self.colors
+        elif isinstance( self.lineSt, list ):
+            lst = self.lineSt
+        elif isinstance( self.markSt, list ):
+            lst = self.markSt
+        elif isinstance( self.fillSt, list ):
+            lst = self.fillSt
         else:
             lst = [ 0 ]
         n     = len( lst )
         nloop = idx / n
         niter = idx % n
-        col   = self._getit( self.Colors, niter, nloop )
-        lst   = self._getit( self.LineSt, niter )
-        mst   = self._getit( self.MarkSt, niter )
-        fst   = self._getit( self.FillSt, niter )
+        col   = self._getit( self.colors, niter, nloop )
+        lst   = self._getit( self.lineSt, niter )
+        mst   = self._getit( self.markSt, niter )
+        fst   = self._getit( self.fillSt, niter )
         return FormatListIter( col, lst, mst, fst )
 
     def __iter__( self ):
         ''' Definition of the iterator '''
-        self.Iter = 0
+        self._iter = 0
         return self
 
     def next( self ):
@@ -165,8 +165,8 @@ class FormatList:
         iterative mode, another iterable object has to be the one that raises the
         exception to stop the iteration.
         '''
-        frmt = self.__getitem__( self.Iter )
-        self.Iter += 1
+        frmt = self.__getitem__(self._iter)
+        self._iter += 1
         return frmt
 
     def _getit( self, lst, idx, nloop = False ):
@@ -544,48 +544,48 @@ class _GraphInConfig:
         '''
         Values, symmetric and asymmetric errors must be provided
         '''
-        self.Values = np.array(values, dtype = float)
+        self.values = np.array(values, dtype = float)
 
-        self.Err = False
-        self.Sym = None
+        self.err = False
+        self.sym = None
         
         if any((el is not False) for el in (err, errlo, errup)):
 
-            self.Err = True
+            self.err = True
             
             if err:
 
-                self.Sym = True
+                self.sym = True
                 
                 if errlo or errup:
                     sendWarningMsg('Specified both sym. and asym. errors; only sym. '\
                                    'will be considered')
                 
-                self.Errors = np.array(err, dtype = float)
+                self.errors = np.array(err, dtype = float)
 
             else:
 
-                self.Sym = False
+                self.sym = False
 
                 if errlo:
-                    self.ErrLo = np.array(errlo, dtype = float)
+                    self.errLo = np.array(errlo, dtype = float)
                 else:
-                    self.ErrLo = np.zeros(len(errup), dtype = float)
+                    self.errLo = np.zeros(len(errup), dtype = float)
 
                 if errup:
-                    self.ErrUp = np.array(errup, dtype = float)
+                    self.errUp = np.array(errup, dtype = float)
                 else:
-                    self.ErrUp = np.zeros(len(errlo), dtype = float)
+                    self.errUp = np.zeros(len(errlo), dtype = float)
 
-                self.Errors = np.zeros(len(self.ErrLo), dtype = float)
+                self.errors = np.zeros(len(self.errLo), dtype = float)
                     
 
     def buildAsym( self ):
         '''
         If this class has symmetric errors attached, generates a duplicate
         '''
-        if self.Sym:
-            self.ErrLo = self.ErrUp = self.Errors
+        if self.sym:
+            self.errLo = self.errUp = self.errors
 
 
 def makeScatterPlot( xvar, yvar,
@@ -606,30 +606,30 @@ def makeScatterPlot( xvar, yvar,
     xconfig = _GraphInConfig(xvar, xerr, xerrlo, xerrup)
     yconfig = _GraphInConfig(yvar, yerr, yerrlo, yerrup)
 
-    npoints = len(xconfig.Values)
-    xvar    = xconfig.Values
-    yvar    = yconfig.Values
+    npoints = len(xconfig.values)
+    xvar    = xconfig.values
+    yvar    = yconfig.values
     
-    if not xconfig.Err and not yconfig.Err:
+    if not xconfig.err and not yconfig.err:
         
         graph = rt.TGraph(npoints, xvar, yvar)
         
     else:
         
-        if xconfig.Sym and yconfig.Sym:
+        if xconfig.sym and yconfig.sym:
 
-            xerr = xconfig.Errors
-            yerr = yconfig.Errors
+            xerr = xconfig.errors
+            yerr = yconfig.errors
             
             graph = rt.TGraphErrors(npoints, xvar, yvar, xerr, yerr)
 
         else:
             
             for cfg in (xconfig, yconfig):
-                cfg.BuildAsym()
+                cfg.buildAsym()
 
-            xerrlo, xerrup = xconfig.ErrLo, xconfig.ErrUp
-            yerrlo, yerrup = yconfig.ErrLo, yconfig.ErrUp
+            xerrlo, xerrup = xconfig.errLo, xconfig.errUp
+            yerrlo, yerrup = yconfig.errLo, yconfig.errUp
 
             graph = rt.TGraphAsymmErrors(npoints, xvar, yvar, xerrlo, xerrup, yerrlo, yerrup)
             
@@ -677,7 +677,7 @@ def multiPlot( mgrs, variables,
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
             for i, mgr in enumerate( mgrs ):
-                mgr, mgr.Name = mgr.subSample( cuts = cuts ), mgr.Name
+                mgr, mgr.name = mgr.subSample( cuts = cuts ), mgr.name
         
         ''' Disables the stat box of the histograms '''
         rt.gStyle.SetOptStat( 0 )
@@ -700,7 +700,7 @@ def multiPlot( mgrs, variables,
             rtxtinf.SetFillColor( 42 )
             rtxtinf.SetShadowColor( 0 )
 
-            canvas_info.InfoObjs += [rlegend, rtxtinf]
+            canvas_info.infoObjs += [rlegend, rtxtinf]
         
         ''' Generates and draws the histograms '''
         for iv, var in enumerate( variables ):
@@ -720,7 +720,7 @@ def multiPlot( mgrs, variables,
             entries = []
             hists   = []
             for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
-                hname = mgr.Name + '_' + var
+                hname = mgr.name + '_' + var
                 h = makeHistogram( vals,
                                    name  = hname,
                                    title = var,
@@ -741,10 +741,10 @@ def multiPlot( mgrs, variables,
             if legend and iv == 0:
                 ''' In the first iteration add the entries to the legend '''
                 for mgr, h, sw in zip(mgrs, hists[1:], entries):
-                    rlegend.AddEntry( h, '#bf{' + mgr.Name + '}', 'L' )
-                    rtxtinf.AddText( mgr.Name + ': %i' % sw )
+                    rlegend.AddEntry( h, '#bf{' + mgr.name + '}', 'L' )
+                    rtxtinf.AddText( mgr.name + ': %i' % sw )
                     
-            canvas_info.DataObjs += hists
+            canvas_info.dataObjs += hists
             
         if legend:
             pad = canvas.cd( nvars )

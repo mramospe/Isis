@@ -65,27 +65,30 @@ class DataMgr( dict ):
         else:
             for kw, lst in path.iteritems():
                 self[ kw ] = list( lst )
-
-            self.Iterator = 0
-            self.Name     = name
+                
+            self._iter = 0
+            self.name  = name
         
             wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
             if wrong:
                 sendErrorMsg('%s => The lists stored in the manager '\
-                             'have different lengths' %self.Name)
+                             'have different lengths' %self.name)
 
     def __add__( self, other ):
         '''
         Allows merging two objects of this class
         '''
-        mgr = DataMgr( self.Name + '__' + other.Name )
-        true_vars = [ var for var in self.keys() if var in other ]
+        mgr = DataMgr( self.name + '__' + other.name )
+        
+        true_vars = set(self.keys()).intersection(other.keys())
         for var in true_vars:
             mgr[ var ] = self[ var ] + other[ var ]
-        no_booked = set( self.keys() + other.keys() ).difference( true_vars )
+        
+        no_booked = set(self.keys() + other.keys()).difference( true_vars )
         if no_booked:
             sendWarningMsg('%s => The following variables are not '\
-                           'booked: %s' %(mgr.Name, no_booked))
+                           'booked: %s' %(mgr.name, no_booked))
+        
         return mgr
 
     def __iadd__( self, other ):
@@ -95,13 +98,13 @@ class DataMgr( dict ):
         if len( self ):
             return self + other
         else:
-            self = other.Copy()
+            self = other.copy()
 
     def __iter__( self ):
         '''
         Definition of the iterator
         '''
-        self.Iterator = 0
+        self._iter = 0
         return self
 
     def __len__( self ):
@@ -115,18 +118,18 @@ class DataMgr( dict ):
         Sets the new value for the iteration. If it reaches the limit the exception
         is raised.
         '''
-        if self.Iterator == len( self ):
+        if self._iter == len( self ):
             raise StopIteration
         else:
-            self.Iterator += 1
-            return self.getEventDict( self.Iterator - 1 )
+            self._iter += 1
+            return self.getEventDict( self._iter - 1 )
             
     def copy( self, name = '' ):
         '''
         Returns a copy of this class
         '''
         if not name:
-            name = self.Name + '_copy'
+            name = self.name + '_copy'
         return DataMgr( name, self )
     
     def getCutList( self, cut, mathmod = math ):
@@ -215,6 +218,7 @@ class DataMgr( dict ):
         cmd = 'output[ 0 ]'
         for i in xrange( 1, len( output ) ):
             cmd += ', output[ %i ]' %i
+        
         return eval( cmd )
 
     def makeVariable( self, varname, arg, function = False ):
@@ -258,7 +262,7 @@ class DataMgr( dict ):
         '''
         
         if not self:
-            sendErrorMsg('%s => No variables booked in this manager' %self.Name)
+            sendErrorMsg('%s => No variables booked in this manager' %self.name)
             return
         
         form = '%.' + str( prec ) + 'e'
@@ -271,9 +275,9 @@ class DataMgr( dict ):
             variables.sort()
         
         ''' Prints the name of the manager '''
-        if self.Name:
-            lname = 3*len( self.Name )
-            print '\n' + lname*'*' + '\n' + self.Name.center( lname ) + '\n' + lname*'*'
+        if self.name:
+            lname = 3*len( self.name )
+            print '\n' + lname*'*' + '\n' + self.name.center( lname ) + '\n' + lname*'*'
         
         '''
         Prints the variables. The variable < maxsize > is the maximum size of the
@@ -355,7 +359,7 @@ class DataMgr( dict ):
             points.append(self.getEntries(ct))
 
         return points
-                
+    
     def save( self, name = '', tree_name = False, ftype = 'root', variables = [], close = True ):
         '''
         Saves the given class values in a TTree. If < name > is not provided, the
@@ -375,16 +379,16 @@ class DataMgr( dict ):
             else:
                 ofile = False
                 name  = rt.gDirectory.GetName()
-            print self.Name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
+            print self.name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
             dictToTree( self, name = tree_name, variables = variables )
-            print self.Name, '=> Written', len( self ), 'entries'
+            print self.name, '=> Written', len( self ), 'entries'
             if ofile and close:
                 ofile.Close()
             else:
                 return ofile
         elif ftype in ( 'txt', 'TXT' ):
             ofile = open( name, 'wt' )
-            print self.Name, '=> Saving txt data in file <', name, '>'
+            print self.name, '=> Saving txt data in file <', name, '>'
             varvalues = [ self[ var ] for var in variables ]
             out = ''
             for var in variables:
@@ -412,7 +416,7 @@ class DataMgr( dict ):
         if varset == '*':
             varset = self.keys()
         if name == '':
-            name = self.Name + '_SubSample'
+            name = self.name + '_SubSample'
         if 'cuts' != '':
             evtlst = self.getCutList( cuts, mathmod )
         else:

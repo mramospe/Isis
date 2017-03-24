@@ -19,6 +19,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Messenger.h"
 #include "GlobalWrappers.h"
 
 #include <boost/python/dict.hpp>
@@ -40,9 +41,11 @@ py::ssize_t IBoost::boostDictListSize( py::dict dict ) {
 
   py::ssize_t length = py::len( dict[ keys[ 0 ] ] );
   for ( ssize_t i = 1; i < nk; ++i ) {
+    
     py::object list  = dict[ keys[ i ] ];
+    
     if ( py::len( list ) != length ) {
-      std::cerr << "ERROR: Lists in dictionary do not have the same length" << std::endl;
+      IError << "Lists in dictionary do not have the same length" << IEndMsg;
       return 0;
     }
   }
@@ -54,10 +57,10 @@ py::ssize_t IBoost::boostDictListSize( py::dict dict ) {
 // Check number of arguments foor a function/method
 void IBoost::checkArgs( py::tuple &args,
 			const unsigned int &nargs ) {
+  
   py::ssize_t n = py::len( args );
   if ( n != nargs )
-    std::cerr << "ERROR: Incorrect number of arguments " << n
-	      << " (" << nargs << ")" << std::endl;
+    IError << "Incorrect number of arguments " << n << " (" << nargs << ")" << IEndMsg;
 }
 
 //_______________________________________________________________________________
@@ -73,7 +76,6 @@ void IBoost::checkKwargs( py::dict &kwargs,
     const char *name = py::extract<const char*>( arg );
     
     if ( std::find(lst.begin(), lst.end(), name) != lst.end() )
-      std::cout << "WARNING: Unknown input keyword argument < "
-		<< name << " >" << std::endl;
+      IWarning << "Unknown input keyword argument < " << name << " >" << IEndMsg;
   }
 }

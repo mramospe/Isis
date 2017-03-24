@@ -97,20 +97,20 @@ class IntegralTransformer:
 
             values, weights = zip(*sorted(zip(arg, weights)))
 
-            self.Values = np.array(values)
-            self.Cltve  = np.cumsum(weights)*1./sum(weights)
+            self._values = np.array(values)
+            self._cltve  = np.cumsum(weights)*1./sum(weights)
     
     def transform( self, arg ):
         '''
         Return the integral transformated value(s)
         '''
-        return np.interp(arg, self.Values, self.Cltve)
+        return np.interp(arg, self._values, self._cltve)
 
     def deTransform( self, arg ):
         '''
         Return the de-transformated value(s)
         '''
-        return np.interp(arg, self.Cltve, self.Values)
+        return np.interp(arg, self._cltve, self._values)
 
 
 @decoInputArgs(float, slc = [], kvars = ['cl', 'prec'])

@@ -14,10 +14,9 @@ def initialize():
     '''
     
     ''' Store the current global variables '''
-    glb   = globals()
-    kfltr = lambda s: not s.startswith('__') and not s.endswith('__')
-    glbks = filter(kfltr, glb.keys())
-
+    from Isis.Utils import EnvTracker
+    tracker = EnvTracker(globals(), "global")
+    
     args = parse_arguments()
 
     ''' Load the specified files '''
@@ -28,21 +27,12 @@ def initialize():
     
     ''' Execute the script provided '''
     if args.executable:
-        execfile(args.executable, glb)
+        execfile(args.executable, globals())
         
     if args.show_globals:
         ''' Print the new global variables added to the shell '''
-
-        new_glbks = sorted(set(filter(kfltr, globals().keys())).difference(glbks))
-        if new_glbks:
-            print '**********************'
-            print '* New global variables'
-            sizes   = map(lambda s: len(s), new_glbks)
-            maxsize = max(sizes)
-            for i, (sz, kw) in enumerate(zip(sizes, new_glbks)):
-                print '* %s %s => %s' %(kw, (maxsize - sz)*' ', glb[kw])
-            print
-
+        tracker.display()
+        
 
 def load_files( files ):
     '''

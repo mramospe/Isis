@@ -33,7 +33,7 @@ namespace RootUtils {
 
   //_______________________________________________________________________________
   //
-  PyObject* getSafeObject( PyObject *ifile_obj, const std::string &path ) {
+  inline PyObject* getSafeObject( PyObject *ifile_obj, const std::string &path ) {
 
     TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
     

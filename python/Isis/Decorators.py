@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 24/03/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -32,13 +32,13 @@ class decoArgBase:
         '''
         The function to be called is parsed
         '''
-        self.Func = func
+        self.func = func
 
     def __call__( self, *args, **kwargs ):
         '''
         Call the function
         '''
-        return self.Func(*args, **kwargs)
+        return self.func(*args, **kwargs)
 
 
 def decoClassMethod( func ):
@@ -61,24 +61,24 @@ class _decoInputArgs( decoArgBase ):
         Call base class and set the number of arguments to convert
         '''
         decoArgBase.__init__(self, func)
-        self.Conv  = conv
-        self.Kvars = kvars
-        self.Slice = slc
+        self.conv  = conv
+        self.kvars = kvars
+        self.scl   = slc
         
     def __call__( self, *args, **kwargs ):
         '''
-        Convert arguments with indices < self.Slice > and call function
+        Convert arguments with indices < self.slc > and call function
         '''
-        func_args = convertArgs(self.Conv, args, self.Slice)
+        func_args = convertArgs(self.conv, args, self.slc)
 
-        if self.Kvars:
-            common = set(self.Kvars).intersection(kwargs.keys())
+        if self.kvars:
+            common = set(self.kvars).intersection(kwargs.keys())
             values = [kwargs[kw] for kw in common]
-            values = convertArgs(self.Conv, values)
-            for kw, v in zip(self.Kvars, values):
+            values = convertArgs(self.conv, values)
+            for kw, v in zip(self.kvars, values):
                 kwargs[kw] = v
 
-        return self.Func(*func_args, **kwargs)
+        return self.func(*func_args, **kwargs)
 
 
 def decoInputArgs( conv, slc = slice(0, None), kvars = [] ):
