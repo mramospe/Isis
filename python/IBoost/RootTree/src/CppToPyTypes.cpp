@@ -20,88 +20,29 @@
 
 
 #include "CppToPyTypes.h"
+#include "ValueTypeDef.h"
 
 #include "Python.h"
 #include <boost/python/object.hpp>
 
-namespace py = boost::python;
-
 
 //_______________________________________________________________________________
-// Return a boost object from a given BufferVariable containing its value
-py::object IBoost::buffVarToBoostObj( const Isis::BufferVariable &var ) {
 
-  switch (var.getType()) {
-  case 'B':
-    {
-      char value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'b':
-    {
-      unsigned char value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'S':
-    {
-      short int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 's':
-    {
-      unsigned short int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'I':
-    {
-      int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'i':
-    {
-      unsigned int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'F':
-    {
-      float value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'D':
-    {
-      double value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'L':
-    {
-      long long int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'l':
-    {
-      unsigned long long int value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  case 'O':
-    {
-      bool value;
-      var.extractValue(value);
-      return py::object(value);
-    }
-  default:
-    std::cerr <<
-      "ERROR: Unknown variable type < " << var.getType() << " >"
-					<< std::endl;
-    return py::object();
+namespace IBoost {
+
+  //_______________________________________________________________________________
+  //
+  py::object buffVarToBoostObj( const Isis::BufferVariable &var ) {
+
+    const char tp = var.getType();
+    
+    I_SWITCH_BY_DATA_TYPE(tp, var, I_BUFFVAR_TO_BOOST_OBJ_ACTION,
+			  
+			  IError <<
+			  "Unknown variable type < " << tp << " >"
+			  << IEndMsg;
+			  return py::object();
+			  );
   }
+
 }

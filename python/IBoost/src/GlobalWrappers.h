@@ -24,6 +24,7 @@
 
 #include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/numpy.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/object.hpp>
@@ -39,30 +40,36 @@
 
 namespace IBoost {
 
-  // _________
-  // FUNCTIONS
-  boost::python::ssize_t boostDictListSize( boost::python::dict dict );
-  void checkArgs( boost::python::tuple &args, const unsigned int &nargs );
-  void checkKwargs( boost::python::dict &kwargs, const std::vector<const char*> &lst );
+  // Abbreviate namespace
+  namespace py = boost::python;
 
-  // __________________
-  // TEMPLATE FUNCTIONS
+  // Get the size of the lists inside the dictionary. A check is done to see that
+  // they match.
+  py::ssize_t boostDictListSize( py::dict dict );
 
+  // Check number of arguments foor a function/method
+  void checkArgs( py::tuple &args, const unsigned int &nargs );
+
+  // Check the keyword arguments for a function/method
+  void checkKwargs( py::dict &kwargs, const std::vector<const char*> &lst );
+
+  //_______________________________________________________________________________
   // Extract the converted value from a python container at the given index
   template<class type, class idxtype>
-  inline type extractFromIndex( boost::python::object &obj, idxtype index ) {
+  inline type extractFromIndex( py::object &obj, idxtype index ) {
     
-    boost::python::api::object_item elem = obj[ index ];
-    type output = boost::python::extract<type>( elem );
+    py::api::object_item elem = obj[ index ];
+    type output = py::extract<type>( elem );
     
     return output;
   }
 
+  //_______________________________________________________________________________
   // Transform a python list into a standard vector
   template<class type>
-  inline std::vector<type> boostListToStdVec( boost::python::list &lst ) {
+  inline std::vector<type> boostListToStdVec( py::list &lst ) {
 
-    size_t lgth = boost::python::len( lst );
+    size_t lgth = py::len( lst );
     std::vector<type> res( lgth );
 
     size_t i = 0;
@@ -72,15 +79,47 @@ namespace IBoost {
     return res;
   }
 
+  //_______________________________________________________________________________
+  // Transform a numpy ndarray object into a standard vector
+  template<class type>
+  inline std::vector<type> numpyArrayToStdVec( py::numpy::ndarray &array ) {
+
+    auto lgth = py::len(array);
+    std::vector<type> result(lgth);
+
+    type *ptr = reinterpret_cast<type*>(array.get_data());
+
+    std::copy(ptr, ptr + lgth, result.begin());
+
+    return result;
+  }
+
+  //_______________________________________________________________________________
   // Transform a standard vector into a python list
   template<class type>
-  inline boost::python::list stdVecToBoostList( const std::vector<type> &vector ) {
+  inline py::list stdVecToBoostList( const std::vector<type> &vector ) {
     
-    boost::python::list list;
+    py::list list;
     for ( const auto &v : vector )
       list.append(v);
     
     return list;
+  }
+
+  //_______________________________________________________________________________
+  // Transform a standard vector to a numpy ndarray
+  template<class type>
+  inline py::numpy::ndarray
+  sdtVecToNumpyArray( const std::vector<type> &vector ) {
+
+    Py_intptr_t shape[1] = {vector.size()};
+
+    py::numpy::ndarray result =
+      py::numpy::zeros(1, shape, py::numpy::dtype::get_builtin<double>());
+    
+    std::copy(vector.begin(), vector.end(), reinterpret_cast<type*>(result.get_data()));
+
+    return result;
   }
 }
 

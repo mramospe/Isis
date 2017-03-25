@@ -23,6 +23,7 @@
 #include "Definitions.h"
 #include "CppToPyTypes.h"
 #include "GlobalWrappers.h"
+#include "Messenger.h"
 #include "TreeWrapper.h"
 
 #include <Python.h>
@@ -174,7 +175,7 @@ py::object IBoost::boostDictToTree( py::tuple args, py::dict kwargs ) {
     tree->AutoSave();
   }
   else if ( tname )
-    std::cout << "WARNING: The given tree name is not being used" << std::endl;
+    IWarning << "The given tree name is not being used" << IEndMsg;
   
   // Prepare the variables to iterate with. The vector keeps
   // track of the types for each variable.
@@ -285,7 +286,7 @@ char IBoost::pyTypeFromObject( py::object object ) {
   else if ( PyBool_Check( po ) )
     return 'O';
   else {
-    std::cerr << "ERROR: Invalid numeric data type" << std::endl;
+    IError << "Invalid numeric data type" << IEndMsg;
     return '\0';
   }
 }

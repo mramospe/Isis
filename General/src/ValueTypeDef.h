@@ -13,8 +13,8 @@
 //
 //  Description:
 //
-//  Definition of instructions for the pre-processor, to be used for those classes
-//  working with value-type calls.
+//  Definition of shortcuts for value types and instructions for the 
+//  pre-processor.
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +23,25 @@
 #ifndef VALUE_TYPE_DEF
 #define VALUE_TYPE_DEF
 
+
+//_______________________________________________________________________________
+
+namespace Isis {
+
+  // Shortcuts to define value types
+  using Char   = char;
+  using uChar  = unsigned char;
+  using sInt   = short int;
+  using usInt  = unsigned short int;
+  using Int    = int;
+  using uInt   = unsigned int;
+  using Float  = float;
+  using Double = double;
+  using llInt  = long long int;
+  using ullInt = unsigned long long int;
+  using Bool   = bool;
+
+}
 
 //_______________________________________________________________________________
 // Performa an action in case < tp > is satisfied
@@ -52,17 +71,18 @@
 // Do a switch as a function of the given data type < tp >
 #define I_SWITCH_BY_DATA_TYPE( tp, ptr, action, default_act )	\
   switch( tp ) {						\
-    I_ACTION_IN_CASE('B', action(char, ptr));			\
-    I_ACTION_IN_CASE('b', action(unsigned char, ptr));		\
-    I_ACTION_IN_CASE('S', action(short int, ptr));		\
-    I_ACTION_IN_CASE('s', action(unsigned short int, ptr));	\
-    I_ACTION_IN_CASE('I', action(int, ptr));			\
-    I_ACTION_IN_CASE('i', action(unsigned int, ptr));		\
-    I_ACTION_IN_CASE('F', action(float, ptr));			\
-    I_ACTION_IN_CASE('D', action(double, ptr));			\
-    I_ACTION_IN_CASE('L', action(long long int, ptr));		\
-    I_ACTION_IN_CASE('l', action(unsigned long long int, ptr)); \
-    I_ACTION_IN_CASE('O', action(bool, ptr));			\
+    using namespace Isis;					\
+    I_ACTION_IN_CASE('B', action(Char, ptr));			\
+    I_ACTION_IN_CASE('b', action(uChar, ptr));			\
+    I_ACTION_IN_CASE('S', action(sInt, ptr));			\
+    I_ACTION_IN_CASE('s', action(usInt, ptr));			\
+    I_ACTION_IN_CASE('I', action(Int, ptr));			\
+    I_ACTION_IN_CASE('i', action(uInt, ptr));			\
+    I_ACTION_IN_CASE('F', action(Float, ptr));			\
+    I_ACTION_IN_CASE('D', action(Double, ptr));			\
+    I_ACTION_IN_CASE('L', action(llInt, ptr));			\
+    I_ACTION_IN_CASE('l', action(ullInt, ptr));			\
+    I_ACTION_IN_CASE('O', action(Bool, ptr));			\
   default:							\
     default_act;						\
     break;							\
