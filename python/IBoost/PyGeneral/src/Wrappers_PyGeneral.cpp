@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 24/03/2017
+//  Last update: 27/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -21,10 +21,12 @@
 
 
 #include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
 #include <boost/python/scope.hpp>
 
 #include "CutManager.h"
 #include "Definitions.h"
+#include "GlobalWrappers.h"
 #include "Messenger.h"
 #include "MessengerConfig.h"
 #include "LoopArray.h"
@@ -79,6 +81,10 @@ namespace Msg {
 
 BOOST_PYTHON_MODULE( PyGeneral ) {
 
+  // Initialize python and numpy (to prevent a segmentation fault)
+  Py_Initialize();
+  py::numpy::initialize();
+  
   // Wrappers from CutManager.h
   py::class_<Isis::CutManager>("CutManager", py::init<const std::string&>())
     .def(py::init<const Isis::CutManager&>())

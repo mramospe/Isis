@@ -67,7 +67,7 @@ class DataMgr( dict ):
                 sendErrorMsg('%s => The input file type must be specified' %name)
         else:
             for kw, lst in path.iteritems():
-                self[ kw ] = list( lst )
+                self[ kw ] = np.array(lst)
                 
             self._iter = 0
             self.name  = name
@@ -245,7 +245,7 @@ class DataMgr( dict ):
                 new_variable[ ievt ] = function( *values )
             self[ varname ] = new_variable
         else:
-            self[ varname ] = self.varEvents( arg )
+            self[ varname ] = self.varEvents([arg])
 
     def newEvent( self, dic ):
         '''

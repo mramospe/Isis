@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 24/03/2017
+//  Last update: 27/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -99,9 +99,7 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline boost::shared_ptr<Isis::CLsHypothesis>
-  constructor( py::list lst,
-	       Isis::CLsFluctuator *fluct,
-	       Isis::CLsPrior *prior ) {
+  constructor( py::list lst, Isis::CLsFluctuator *fluct, Isis::CLsPrior *prior ) {
 
     auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct, prior);
@@ -112,8 +110,7 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline boost::shared_ptr<Isis::CLsHypothesis>
-  constructor_NoPrior( py::list lst,
-		       Isis::CLsFluctuator *fluct ) {
+  constructor_NoPrior( py::list lst, Isis::CLsFluctuator *fluct ) {
 
     auto array = IBoost::boostListToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct);
@@ -162,9 +159,9 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline void setHyp( Isis::CLsHypothesis &hyp,
-	       py::list lst,
-	       Isis::CLsFluctuator *fluct = 0,
-	       Isis::CLsPrior *prior = 0 ) {
+		      py::list lst,
+		      Isis::CLsFluctuator *fluct = 0,
+		      Isis::CLsPrior *prior = 0 ) {
 
     auto vec = IBoost::boostListToStdVec<double>( lst );
 

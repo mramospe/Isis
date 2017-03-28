@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 28/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -27,47 +27,48 @@
 #include <boost/python/list.hpp>
 #include <boost/python/tuple.hpp>
 
+#include "BuffVarWriter.h"
+#include "GlobalWrappers.h"
+
 #include "BufferVariable.h"
+#include "Definitions.h"
+#include "ValueTypeDef.h"
 
 #include "TBranch.h"
 #include "TFile.h"
 #include "TTree.h"
 
+#include <iostream>
+#include <string>
 #include <vector>
 
 
 //_______________________________________________________________________________
 
 namespace IBoost {
-
-  // CLASSES
-  struct BuffVarWriter {
-
-    BuffVarWriter( Isis::BufferVariable *var = 0 );
-    BuffVarWriter( Isis::BufferVariable *var, boost::python::list lst );
-    ~BuffVarWriter();
-
-    void autoAppend();
-
-    Isis::BufferVariable *Var;
-    boost::python::list   List;
-  };
-
+  // Store in a dictionary the lists with the values for each of the given
+  // variables stored in a Root tree. A set of cuts can be specified.
+  py::dict treeToBoostDict( std::string fpath,
+			    std::string tpath,
+			    py::object &vars,
+			    std::string cuts = std::string() );
   
-  // FUNCTIONS
-  boost::python::dict treeToBoostDict( const char *fpath,
-				       const char *tpath,
-				       boost::python::object &vars,
-				       const char *cuts = 0 );
-  boost::python::object boostDictToTree( boost::python::tuple args,
-					 boost::python::dict kwargs );
-  boost::python::list treeToBoostList( const char *fpath,
-				       const char *tpath,
-				       const char *var,
-				       const char *cuts = 0 );
-  boost::python::object boostListToTree( boost::python::tuple args,
-					 boost::python::dict kwargs );
-  char pyTypeFromObject( boost::python::object object );
+  // Write a python dictionary to a Root tree. Since in python there are only four
+  // numeric types: bool, int, long and float; only the associated c++ types
+  // are used.
+  py::object boostDictToTree( py::tuple args,
+			      py::dict kwargs );
+  
+
+  // Store in a list the values for a variable present in a Root tree
+  np::ndarray treeToNumpyArray( std::string fpath,
+				std::string tpath,
+				std::string var,
+				std::string cuts = std::string() );
+  
+  // Create/update a Root tree adding a variable with the given list of values. To
+  // see the possible < kwargs > arguments see < BoostDictToTree >.
+  py::object numpyArrayToTree( py::tuple args, py::dict kwargs );
 
 }
   

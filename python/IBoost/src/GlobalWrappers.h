@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 24/03/2017
+//  Last update: 28/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -42,6 +42,7 @@ namespace IBoost {
 
   // Abbreviate namespace
   namespace py = boost::python;
+  namespace np = boost::python::numpy;
 
   // Get the size of the lists inside the dictionary. A check is done to see that
   // they match.
@@ -78,11 +79,11 @@ namespace IBoost {
 
     return res;
   }
-
+  
   //_______________________________________________________________________________
   // Transform a numpy ndarray object into a standard vector
   template<class type>
-  inline std::vector<type> numpyArrayToStdVec( py::numpy::ndarray &array ) {
+  inline std::vector<type> numpyArrayToStdVec( np::ndarray &array ) {
 
     auto lgth = py::len(array);
     std::vector<type> result(lgth);
@@ -109,13 +110,12 @@ namespace IBoost {
   //_______________________________________________________________________________
   // Transform a standard vector to a numpy ndarray
   template<class type>
-  inline py::numpy::ndarray
-  sdtVecToNumpyArray( const std::vector<type> &vector ) {
+  inline np::ndarray stdVecToNumpyArray( const std::vector<type> &vector ) {
+    
+    long int size = vector.size();
+    Py_intptr_t shape[1] = {size};
 
-    Py_intptr_t shape[1] = {vector.size()};
-
-    py::numpy::ndarray result =
-      py::numpy::zeros(1, shape, py::numpy::dtype::get_builtin<double>());
+    np::ndarray result = np::zeros(1, shape, np::dtype::get_builtin<type>());
     
     std::copy(vector.begin(), vector.end(), reinterpret_cast<type*>(result.get_data()));
 
