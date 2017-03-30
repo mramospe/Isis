@@ -1,8 +1,8 @@
-*** Isis project v3r0 ***
+*** Isis project ***
 
 This set of c++ and python code constitute a tool to perform analysis in High Energy Physics. The environment is built executing the attached script "loadenv.sh".
 
-The different tools have been tested under C++11, Python v2.7.8, ROOT v6.02 and Boost v1.61.
+The different tools have been tested under C++11, Python v2.7.8, ROOT v6.02 and Boost v1.63.
 
 Part of this project depends on the Boost libraries http://www.boost.org/. In special code for c++ implementations to be used in python. It also depends on some python packages like numpy or scipy.
 
