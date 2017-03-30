@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 30/03/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -132,8 +132,12 @@ namespace IBoost {
     // Get the tree name or the given tree
     TTree *tree = 0;
     if ( kwargs.has_key( py::object("tree") ) ) {
+
       py::object el = kwargs["tree"];
-      TObject *treeproxy = (TObject*) TPython::ObjectProxy_AsVoidPtr( el.ptr() );
+
+      TObject *treeproxy =
+	(TObject*) TPython::ObjectProxy_AsVoidPtr( el.ptr() );
+      
       tree = dynamic_cast<TTree*>( treeproxy );
     }
     std::string tname;
@@ -160,26 +164,25 @@ namespace IBoost {
     // track of the types for each variable.
     Isis::TreeBuffer buffer( tree );
 
-    auto vars = boostListToStdVec<std::string>( varkeys );
+    auto vars = boostListToStdVec<std::string>(variables);
+    auto vec_keys = boostListToStdVec<std::string>(varkeys);
 
     std::map<std::string, BuffVarWriter*> varmap;
   
-    py::ssize_t nexps = py::len( variables );
-    for ( py::ssize_t i = 0; i < nexps; ++i ) {
+    for ( const auto &exp : vars ) {
 
       // Get the variables from the given expressions
-      std::string exp = extractFromIndex<std::string>(variables, i);
       Isis::Strings brnames;
-      Isis::stringVectorFilter(brnames, vars, exp);
+      Isis::stringVectorFilter(brnames, vec_keys, exp);
 
       for ( const auto &br : brnames )
 	varmap[br] =
 	  new BuffVarWriter( buffer, br,
 			     py::extract<np::ndarray>(vardict[br]));
     }
-  
+    
     // Loop over all the events in the dictionary
-    py::ssize_t nvals = boostDictListSize( vardict );
+    py::ssize_t nvals = boostDictListSize(vardict);
     for ( py::ssize_t ievt = 0; ievt < nvals; ++ievt ) {
 
       // Loop over all the variables in the dictionary
@@ -205,9 +208,9 @@ namespace IBoost {
 					std::string var,
 					std::string cuts ) {
     py::list varlist;
-    varlist.append( var );
+    varlist.append(var);
     py::dict dict = treeToBoostDict(fpath, tpath, varlist, cuts);
-    return py::extract<np::ndarray>( dict[ var ] );
+    return py::extract<np::ndarray>(dict[var]);
   }
 
   //_______________________________________________________________________________
@@ -221,9 +224,9 @@ namespace IBoost {
     py::list values = extractFromIndex<py::list>(args, 1);
 
     py::dict dict;
-    dict[ var ] = values;
+    dict[var] = values;
   
-    return boostDictToTree( py::make_tuple( dict ), kwargs );
+    return boostDictToTree(py::make_tuple( dict ), kwargs);
   }
 
 }

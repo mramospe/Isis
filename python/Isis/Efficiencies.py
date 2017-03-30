@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 24/03/2017
+#//  Last update: 30/03/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -253,8 +253,8 @@ def rocValues( var, sig, bkg,
     nS = sig.runCutEntries(var, sense, npoints, vmin, vmax, endpoint)
     nB = bkg.runCutEntries(var, sense, npoints, vmin, vmax, endpoint)
     
-    nS_glob = sig.getEntries()
-    nB_glob = bkg.getEntries()
+    nS_glob = sig.entries()
+    nB_glob = bkg.entries()
     
     eff = map(lambda x: CalcEfficiency(nS_glob, x), nS)
     rej = map(lambda x: CalcRejection(nB_glob, x), nB)

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 24/03/2017
+#//  Last update: 30/03/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -27,7 +27,8 @@ import ROOT as rt
 
 from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
 from Isis.IBoost.RootTree import treeToDict, treeToList, dictToTree, listToTree
-from Isis.Utils import formatEvalExpr, joinDicts, mergeDicts, stringListFilter
+from Isis.Utils import joinDicts, mergeDicts, stringListFilter
+from Isis.Expressions import NumpyEvalExpr
 
 
 class DataMgr( dict ):
@@ -85,7 +86,7 @@ class DataMgr( dict ):
         
         true_vars = set(self.keys()).intersection(other.keys())
         for var in true_vars:
-            mgr[ var ] = self[ var ] + other[ var ]
+            mgr[ var ] = np.concatenate(self[ var ], other[ var ])
         
         no_booked = set(self.keys() + other.keys()).difference( true_vars )
         if no_booked:
@@ -134,30 +135,42 @@ class DataMgr( dict ):
         if not name:
             name = self.name + '_copy'
         return DataMgr( name, self )
-    
-    def getCutList( self, cut, mathmod = math ):
+
+    def cutMask( self, cut, mathmod = np ):
         '''
-        This method allows to obtain a list with the events that satisfy the cuts given
+        Return the mask associated with the events passing the given cut
         '''
-        cut, variables = formatEvalExpr( cut, mathmod )
+        eval_expr = NumpyEvalExpr( cut, mathmod )
+        cut       = eval_expr.expr
+        variables = eval_expr.variables
         varstoadd = [ v for v in variables if v not in self ]
+        
         if varstoadd:
             sendErrorMsg('Need to load additional variables to apply the cuts: %s'
                          %varstoadd)
-            return
-        values = [ self[ var ] for var in variables ]
-        for ivar in xrange( len( variables ) ):
-            cut = cut.replace( variables[ ivar ], 'values[ %i ][ ievt ]' %ivar )
-        return eval( '[ ievt for ievt in xrange( len( self ) ) if ' + cut + ' ]' )
+        
+        values = [self[var] for var in variables]
+        
+        for ivar in xrange(len(variables)):
+            cut = cut.replace( variables[ ivar ], 'values[ %i ]' %ivar )
+            
+        return eval(cut)
+    
+    def cutIdxs( self, cut, mathmod = np ):
+        '''
+        This method allows to obtain a list with the events that satisfy the cuts given
+        '''
+        mask = self.cutMask(cut, mathmod)
+        return np.nonzero(mask)[0]
 
-    def getEntries( self, selection = False, mathmod = math ):
+    def entries( self, selection = False, mathmod = np ):
         '''
         Gets the number of entries of the class. If a cut selection is given, it is
         calculated the number of events that satisfy those cuts.
         '''
         if self.keys():
             if selection:
-                return len(self.getCutList(selection, mathmod))
+                return np.count_nonzero(self.cutMask(selection, mathmod))
             else:
                 return len(next(self.itervalues()))
         else:
@@ -167,7 +180,7 @@ class DataMgr( dict ):
         '''
         Returns a dictionary with the values of the variables at the given entry
         '''
-        return dict( ( var, values[ ievt ] ) for var, values in self.iteritems() )
+        return dict((var, values[ ievt ]) for var, values in self.iteritems())
 
     def getEventTuple( self, ievt, *args ):
         '''
@@ -193,9 +206,9 @@ class DataMgr( dict ):
         '''
         
         if cuts:
-            entries = self.getCutList( cuts, mathmod )
+            entries = self.cutMask( cuts, mathmod )
         else:
-            entries = xrange( len( self ) )
+            entries = np.ones(self.entries(), dtype = bool)
         
         fvars    = []
         truevars = []
@@ -203,28 +216,17 @@ class DataMgr( dict ):
             if v in self:
                 fvars.append( v )
             else:
-                v, newv = formatEvalExpr( v, mathmod )
-                fvars += newv 
-            ''' The module is not imported, so the name must change '''
-            truevars.append( v.replace( mathmod.__name__, 'mathmod' ) )
+                sendErrorMsg('Unknown variable < %s >')
         
-        fvars = list( set( fvars ) )
+        fvars = list(set(fvars))
         fvars.sort()
         fvars.reverse()
         
-        values = [ self[ var ] for var in fvars ]
-        output = []
-        for arg in truevars:
-            for jv, var in enumerate( fvars ):
-                arg = arg.replace( var, 'values[ %i ][ ievt ]' %jv )
-            output.append( eval( '[ %s for ievt in entries ]' %arg ) )
-        cmd = 'output[ 0 ]'
-        for i in xrange( 1, len( output ) ):
-            cmd += ', output[ %i ]' %i
+        values = [self[var][entries] for var in fvars]
         
-        return eval( cmd )
+        return values
 
-    def makeVariable( self, varname, arg, function = False ):
+    def makeVariable( self, varname, arg, mathmod = np, function = False ):
         '''
         Makes another variable using those in the class. There are two different
         ways to do it. The first one consists on specifying the new variable name,
@@ -237,15 +239,19 @@ class DataMgr( dict ):
         expression.
         '''
         if function:
-            new_variable = len( self )*[ 0. ]
-            var_tensor   = [ self[ vname ] for vname in arg ]
-            lvars        = xrange( len( arg ) )
-            for ievt in xrange( len( self ) ):
-                values               = [ var_tensor[ ivar ][ ievt ] for ivar in lvars ]
-                new_variable[ ievt ] = function( *values )
-            self[ varname ] = new_variable
+            var_tensor = [self[v] for v in arg ]
+            lvars      = xrange( len( arg ) )
+            new_var    = function(*var_tensor)
+            self[varname] = np.array(new_var)
         else:
-            self[ varname ] = self.varEvents([arg])
+            eval_expr = NumpyEvalExpr(arg, mathmod = mathmod)
+            expr      = eval_expr.expr
+            variables = eval_expr.variables
+
+            for var in variables:
+                expr = expr.replace(var, "self['%s']" %var)
+
+            self[ varname ] = eval(expr)
 
     def newEvent( self, dic ):
         '''
@@ -255,7 +261,7 @@ class DataMgr( dict ):
         for key, values in self.iteritems():
             values.append( dic[ key ] )
 
-    def display( self, variables = None, cuts = '', mathmod = math, evts = -1, prec = 3 ):
+    def display( self, variables = None, cuts = '', mathmod = np, evts = -1, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -305,7 +311,7 @@ class DataMgr( dict ):
         
         ''' Prints the values of the variables '''
         if cuts != '':
-            evtlst = self.getCutList( cuts, mathmod )
+            evtlst = self.cutIdxs( cuts, mathmod )
         else:
             evtlst = xrange( len( self ) )
 
@@ -360,7 +366,7 @@ class DataMgr( dict ):
         points = []
         for ic in cuts:
             ct = var + str(ic)
-            points.append(self.getEntries(ct))
+            points.append(self.entries(ct))
 
         return points
     
@@ -407,7 +413,7 @@ class DataMgr( dict ):
             else:
                 return ofile
     
-    def subSample( self, name = '', cuts = '', mathmod = math, evts = -1, varset = '*' ):
+    def subSample( self, name = '', cuts = '', mathmod = np, evts = -1, varset = '*' ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be
@@ -421,7 +427,7 @@ class DataMgr( dict ):
         if name == '':
             name = self.name + '_SubSample'
         if 'cuts' != '':
-            evtlst = self.getCutList( cuts, mathmod )
+            evtlst = self.cutIdxs( cuts, mathmod )
         else:
             evtlst = evts
             
