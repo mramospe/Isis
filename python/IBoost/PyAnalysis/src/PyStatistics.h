@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 27/03/2017
+//  Last update: 30/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -33,8 +33,6 @@
 
 #include "TPython.h"
 
-namespace py = boost::python;
-
 
 //_______________________________________________________________________________
 
@@ -44,9 +42,9 @@ namespace CLsFact {
   //_______________________________________________________________________________
   //
   inline Isis::CLsResult calculateFromArray( const Isis::CLsFactory &factory,
-					     py::list array ) {
+					     const np::ndarray &array ) {
 
-    auto vector = IBoost::boostListToStdVec<double>( array );
+    auto vector = IBoost::numpyArrayToStdVec<double>( array );
 
     return factory.calculate( vector );
   }
@@ -73,9 +71,10 @@ namespace CLsFact {
 
   //_______________________________________________________________________________
   //
-  inline double testStat( const Isis::CLsFactory &factory, py::list values ) {
+  inline double testStat( const Isis::CLsFactory &factory,
+			  const np::ndarray &values ) {
 
-    auto vector = IBoost::boostListToStdVec<double>( values );
+    auto vector = IBoost::numpyArrayToStdVec<double>( values );
 
     return factory.testStat( vector );
   }
@@ -99,9 +98,11 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline boost::shared_ptr<Isis::CLsHypothesis>
-  constructor( py::list lst, Isis::CLsFluctuator *fluct, Isis::CLsPrior *prior ) {
+  constructor( const np::ndarray &lst,
+	       Isis::CLsFluctuator *fluct,
+	       Isis::CLsPrior *prior ) {
 
-    auto array = IBoost::boostListToStdVec<double>( lst );
+    auto array = IBoost::numpyArrayToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct, prior);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -110,9 +111,9 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline boost::shared_ptr<Isis::CLsHypothesis>
-  constructor_NoPrior( py::list lst, Isis::CLsFluctuator *fluct ) {
+  constructor_NoPrior( const np::ndarray &lst, Isis::CLsFluctuator *fluct ) {
 
-    auto array = IBoost::boostListToStdVec<double>( lst );
+    auto array = IBoost::numpyArrayToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array, fluct);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -121,9 +122,9 @@ namespace CLsHyp {
   //_______________________________________________________________________________
   //
   inline boost::shared_ptr<Isis::CLsHypothesis>
-  constructor_NoFluctNoPrior( py::list lst ) {
+  constructor_NoFluctNoPrior( const np::ndarray &lst ) {
 
-    auto array = IBoost::boostListToStdVec<double>( lst );
+    auto array = IBoost::numpyArrayToStdVec<double>( lst );
     auto hyp   = new Isis::CLsHypothesis(array);
 
     return boost::shared_ptr<Isis::CLsHypothesis>( hyp );
@@ -131,39 +132,40 @@ namespace CLsHyp {
 
   //_______________________________________________________________________________
   //
-  inline py::list getHyp( const Isis::CLsHypothesis &hyp ) {
+  inline np::ndarray getHyp( const Isis::CLsHypothesis &hyp ) {
 
     auto vec = hyp.getHyp();
 
-    return IBoost::stdVecToBoostList( vec );
+    return IBoost::stdVecToNumpyArray( vec );
   }
 
   //_______________________________________________________________________________
   //
-  inline double poissonProb( const Isis::CLsHypothesis &hyp, py::list values ) {
+  inline double poissonProb( const Isis::CLsHypothesis &hyp,
+			     const np::ndarray &values ) {
 
-    auto vec = IBoost::boostListToStdVec<double>( values );
+    auto vec = IBoost::numpyArrayToStdVec<double>( values );
 
     return hyp.poissonProb( vec );
   }
 
   //_______________________________________________________________________________
   //
-  inline py::list getTSVals( const Isis::CLsHypothesis &hyp ) {
+  inline np::ndarray getTSVals( const Isis::CLsHypothesis &hyp ) {
 
     auto vec = hyp.getTSVals();
 
-    return IBoost::stdVecToBoostList( vec );
+    return IBoost::stdVecToNumpyArray( vec );
   }
 
   //_______________________________________________________________________________
   //
   inline void setHyp( Isis::CLsHypothesis &hyp,
-		      py::list lst,
+		      const np::ndarray &lst,
 		      Isis::CLsFluctuator *fluct = 0,
 		      Isis::CLsPrior *prior = 0 ) {
 
-    auto vec = IBoost::boostListToStdVec<double>( lst );
+    auto vec = IBoost::numpyArrayToStdVec<double>( lst );
 
     hyp.setHyp(vec, fluct, prior);
   }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 30/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -83,7 +83,7 @@ namespace IBoost {
   //_______________________________________________________________________________
   // Transform a numpy ndarray object into a standard vector
   template<class type>
-  inline std::vector<type> numpyArrayToStdVec( np::ndarray &array ) {
+  inline std::vector<type> numpyArrayToStdVec( const np::ndarray &array ) {
 
     auto lgth = py::len(array);
     std::vector<type> result(lgth);

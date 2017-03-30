@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 24/03/2017
+//  Last update: 30/03/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -19,6 +19,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#include "GlobalWrappers.h"
+
+#include <boost/python.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/numpy.hpp>
+
 #include "AdaptiveBinning.h"
 #include "AdaptiveBinning1D.h"
 #include "AdaptiveBinning2D.h"
@@ -29,6 +35,7 @@
 #include "TPython.h"
 
 namespace py = boost::python;
+namespace np = boost::python::numpy;
 
 
 //_______________________________________________________________________________
@@ -64,11 +71,11 @@ namespace AdBin1D {
   constructor( size_t occ,
 	       double vmin,
 	       double vmax,
-	       py::list values,
-	       py::list weights ) {
+	       np::ndarray values,
+	       np::ndarray weights ) {
   
-    auto vec_values  = IBoost::boostListToStdVec<double>( values );
-    auto vec_weights = IBoost::boostListToStdVec<double>( weights );
+    auto vec_values  = IBoost::numpyArrayToStdVec<double>( values );
+    auto vec_weights = IBoost::numpyArrayToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning1D(occ, vmin, vmax,
 						   vec_values, vec_weights);
   
@@ -81,9 +88,9 @@ namespace AdBin1D {
   constructor_NoWgts( size_t occ,
 		      double vmin,
 		      double vmax,
-		      py::list values ) {
+		      np::ndarray values ) {
     
-    return constructor(occ, vmin, vmax, values, py::list());
+    return constructor(occ, vmin, vmax, values, np::array(py::list()));
   }
 
   //_______________________________________________________________________________
@@ -109,13 +116,13 @@ namespace AdBin2D {
   constructor( size_t occ,
 	       double xmin, double xmax,
 	       double ymin, double ymax,
-	       py::list xvalues,
-	       py::list yvalues,
-	       py::list weights ) {
+	       np::ndarray xvalues,
+	       np::ndarray yvalues,
+	       np::ndarray weights ) {
   
-    auto vec_xvalues = IBoost::boostListToStdVec<double>( xvalues );
-    auto vec_yvalues = IBoost::boostListToStdVec<double>( yvalues );
-    auto vec_weights = IBoost::boostListToStdVec<double>( weights );
+    auto vec_xvalues = IBoost::numpyArrayToStdVec<double>( xvalues );
+    auto vec_yvalues = IBoost::numpyArrayToStdVec<double>( yvalues );
+    auto vec_weights = IBoost::numpyArrayToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning2D(occ,
 						   xmin, xmax,
 						   ymin, ymax,
@@ -133,10 +140,10 @@ namespace AdBin2D {
 		      double xmax,
 		      double ymin,
 		      double ymax,
-		      py::list xvalues,
-		      py::list yvalues ) {
+		      np::ndarray xvalues,
+		      np::ndarray yvalues ) {
   
-    return constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, py::list());
+    return constructor(occ, xmin, xmax, ymin, ymax, xvalues, yvalues, np::array(py::list()));
   }
 
   //_______________________________________________________________________________
