@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 24/03/2017
+#//  Last update: 03/04/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -63,7 +63,7 @@ class _decoInputArgs( decoArgBase ):
         decoArgBase.__init__(self, func)
         self.conv  = conv
         self.kvars = kvars
-        self.scl   = slc
+        self.slc   = slc
         
     def __call__( self, *args, **kwargs ):
         '''
