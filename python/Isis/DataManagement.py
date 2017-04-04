@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/03/2017
+#//  Last update: 04/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -86,7 +86,7 @@ class DataMgr( dict ):
         
         true_vars = set(self.keys()).intersection(other.keys())
         for var in true_vars:
-            mgr[ var ] = np.concatenate(self[ var ], other[ var ])
+            mgr[ var ] = np.concatenate((self[ var ], other[ var ]))
         
         no_booked = set(self.keys() + other.keys()).difference( true_vars )
         if no_booked:
