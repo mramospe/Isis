@@ -128,11 +128,11 @@ def makeSnapShot( name, idx, mu_value, bkg_hyp, sig_hyp, tstat, nbins = 100 ):
     '''
     Plot the background and signal test statistics
     '''
-    bkg = bkg_hyp.GetTSVals()
-    sig = sig_hyp.GetTSVals()
+    bkg = bkg_hyp.getTSVals()
+    sig = sig_hyp.getTSVals()
 
     ltot = len(bkg) + len(sig)
-    mean = sorted(bkg + sig)[ltot/2]
+    mean = sorted(np.concatenate([bkg, sig]))[ltot/2]
     vmin = min(bkg[0], sig[0])
     vmax = max(bkg[-1], sig[-1])
     rg   = (vmax - vmin)/2.

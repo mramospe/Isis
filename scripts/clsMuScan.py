@@ -26,13 +26,13 @@ rt.gROOT.SetBatch(True)
 class Config:
 
     # Background effect
-    bkgEff = [1.5, 1, 0.5]
+    bkgEff = np.array([1.5, 1, 0.5], dtype = float)
 
     # Signal effect
-    sigEff = [2, 4, 2]
+    sigEff = np.array([2, 4, 2], dtype = float)
 
     # Observation
-    obs = [1, 1, 1]
+    obs = np.array([1, 1, 1], dtype = float)
 
     # Number of points for the scan
     npoints = 25
@@ -128,7 +128,7 @@ for i, mu in enumerate(np.linspace(Config.mumax, Config.mumin, Config.npoints, e
 
     print '-- Signal strength: %f' %mu
     
-    sig = [b + mu*s for b, s in zip(Config.bkgEff, Config.sigEff)]
+    sig = np.array([b + mu*s for b, s in zip(Config.bkgEff, Config.sigEff)], dtype = float)
     sigHyp.setHyp(sig)
 
     sigFluct = AsymmFluct(sig)
@@ -140,21 +140,21 @@ for i, mu in enumerate(np.linspace(Config.mumax, Config.mumin, Config.npoints, e
     factory.generate(Config.ngen)
 
     print '-- Calculating CLs'
-    res_med = factory.Calculate(bkgHyp.TestStatFromProb(0.5))
-    res_1sl = factory.Calculate(bkgHyp.TestStatFromProb(0.317))
-    res_1sr = factory.Calculate(bkgHyp.TestStatFromProb(0.683))
-    res_2sl = factory.Calculate(bkgHyp.TestStatFromProb(0.046))
-    res_2sr = factory.Calculate(bkgHyp.TestStatFromProb(0.954))
+    res_med = factory.calculate(bkgHyp.testStatFromProb(0.5))
+    res_1sl = factory.calculate(bkgHyp.testStatFromProb(0.317))
+    res_1sr = factory.calculate(bkgHyp.testStatFromProb(0.683))
+    res_2sl = factory.calculate(bkgHyp.testStatFromProb(0.046))
+    res_2sr = factory.calculate(bkgHyp.testStatFromProb(0.954))
 
-    if Config.obs:
-        res_obs = factory.Calculate(Config.obs)
+    if len(Config.obs):
+        res_obs = factory.calculate(Config.obs)
     
     print '-- Test Stat.    %f' %res_med.TestStat
     print '-- CLb:          %f' %res_med.CLb
     print '-- CLsb:         %f' %res_med.CLsb
     print '-- CLs:          %f' %res_med.CLs
     print '-- Significance: %s' %res_med.Significance
-    if Config.obs:
+    if len(Config.obs):
         print '-- CLs for obs:  %f' %res_obs.CLs
 
     
@@ -162,7 +162,7 @@ for i, mu in enumerate(np.linspace(Config.mumax, Config.mumin, Config.npoints, e
     snapshots.append(out)
 
     reslst = [res_med, res_1sl, res_1sr, res_2sl, res_2sr]
-    if Config.obs:
+    if len(Config.obs):
         reslst.append(res_obs)
     
     clsValues.append(*[res.CLs for res in reslst])
