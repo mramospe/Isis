@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "GlobalWrappers.h"
+#include "InitModule.h"
 #include "PyAdaptiveBinning.h"
 #include "PyAnalysisBase.h"
 #include "PyStatistics.h"
@@ -32,6 +33,7 @@
 #include <string>
 
 namespace py = boost::python;
+namespace np = boost::python::numpy;
 
 
 //_______________________________________________________________________________
@@ -39,8 +41,7 @@ namespace py = boost::python;
 BOOST_PYTHON_MODULE( analysis ) {
 
   // Initialize python and numpy (to prevent a segmentation fault)
-  Py_Initialize();
-  py::numpy::initialize();
+  I_INIT_MODULE;
 
   // Wrapper from AdaptiveBinning.h
   py::class_<isis::AdaptiveBinning>("AdaptiveBinning", py::init<>())
@@ -55,8 +56,8 @@ BOOST_PYTHON_MODULE( analysis ) {
     .def("__init__"     , py::make_constructor(&AdBin1D::constructor))
     .def("__init__"     , py::make_constructor(&AdBin1D::constructor_NoWgts))
     .def("getStruct"    , &AdBin1D::getStruct, AdBin1D::getStruct_Overloads())
-    .def_readonly("Max", &isis::AdaptiveBinning1D::getMax)
-    .def_readonly("Min", &isis::AdaptiveBinning1D::getMin)
+    .def_readonly("Max" , &isis::AdaptiveBinning1D::getMax)
+    .def_readonly("Min" , &isis::AdaptiveBinning1D::getMin)
     ;
 
   // Wrapper from AdaptiveBinning2D.h

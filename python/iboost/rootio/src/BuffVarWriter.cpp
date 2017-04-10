@@ -18,6 +18,7 @@
 
 #include "BuffVarWriter.h"
 #include "GlobalWrappers.h"
+#include "InitModule.h"
 
 #include "TreeBuffer.h"
 #include "Definitions.h"
@@ -66,7 +67,7 @@ namespace iboost {
 				np::ndarray array ) :
     fArray(array) {
 
-    const char type = DTypeMap.at(fArray.get_dtype());
+    const char type = DTYPE_TO_TYPE.parse(fArray.get_dtype());
     
     fVar = buffer.createVariable(name, type);
   }

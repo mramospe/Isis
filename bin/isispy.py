@@ -14,7 +14,7 @@ def initialize():
     '''
     
     ''' Store the current global variables '''
-    from Isis.Utils import EnvTracker
+    from Isis.utils import EnvTracker
     tracker = EnvTracker(globals(), "global")
     
     args = parse_arguments()
@@ -136,7 +136,7 @@ def parse_arguments():
 if __name__ == '__main__':
 
     ''' Startup message '''
-    from Isis.IBoost.PyGeneral import ISIS_VERSION
+    from Isis.iboost.general import ISIS_VERSION
     start = '* Setting up the Isis environment (v%s) *' %ISIS_VERSION
     print len(start)*'*'
     print start

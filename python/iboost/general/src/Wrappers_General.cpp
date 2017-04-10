@@ -27,6 +27,7 @@
 #include "CutManager.h"
 #include "Definitions.h"
 #include "GlobalWrappers.h"
+#include "InitModule.h"
 #include "Messenger.h"
 #include "MessengerConfig.h"
 #include "LoopArray.h"
@@ -35,6 +36,7 @@
 #include <string>
 
 namespace py = boost::python;
+namespace np = boost::python::numpy;
 
 
 //_______________________________________________________________________________
@@ -82,8 +84,7 @@ namespace Msg {
 BOOST_PYTHON_MODULE( general ) {
 
   // Initialize python and numpy (to prevent a segmentation fault)
-  Py_Initialize();
-  py::numpy::initialize();
+  I_INIT_MODULE;
   
   // Wrappers from CutManager.h
   py::class_<isis::CutManager>("CutManager", py::init<const std::string&>())

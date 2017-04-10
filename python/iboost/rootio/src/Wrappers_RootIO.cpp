@@ -20,15 +20,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#include "GlobalWrappers.h"
+#include "InitModule.h"
 #include "TreeWrapper.h"
 
 #include <boost/python.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/numpy.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/raw_function.hpp>
 
 namespace py = boost::python;
+namespace np = boost::python::numpy;
 namespace ib = iboost;
 
 
@@ -42,6 +46,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(treeToNumpyArray_Overloads,
 
 // Definition of the python module
 BOOST_PYTHON_MODULE( rootio ) {
+
+  // Initialize python and numpy (to prevent a segmentation fault)
+  I_INIT_MODULE;
   
   py::def("treeToDict", ib::treeToBoostDict, treeToBoostDict_Overloads());
   py::def("dictToTree", py::raw_function(ib::boostDictToTree, 2));

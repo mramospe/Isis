@@ -24,7 +24,7 @@ import ROOT as rt
 
 from Isis.iboost.general import sendWarningMsg
 from Isis.decorators import decoInputArgs
-from Isis.rootUtils import extractHistValues
+from Isis.root_utils import extractHistValues
 
 from math import sqrt
 import numpy as np
