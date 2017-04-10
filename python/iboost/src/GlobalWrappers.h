@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -38,7 +38,7 @@
 
 //_______________________________________________________________________________
 
-namespace IBoost {
+namespace iboost {
 
   // Abbreviate namespace
   namespace py = boost::python;

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@
 #include <boost/python/raw_function.hpp>
 
 namespace py = boost::python;
-namespace ib = IBoost;
+namespace ib = iboost;
 
 
 //_______________________________________________________________________________
@@ -41,7 +41,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(treeToNumpyArray_Overloads,
 				ib::treeToNumpyArray, 3, 4);
 
 // Definition of the python module
-BOOST_PYTHON_MODULE( RootTree ) {
+BOOST_PYTHON_MODULE( rootio ) {
   
   py::def("treeToDict", ib::treeToBoostDict, treeToBoostDict_Overloads());
   py::def("dictToTree", py::raw_function(ib::boostDictToTree, 2));

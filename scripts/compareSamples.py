@@ -2,9 +2,9 @@
 # Script to plot a list of variables shared by different Root samples
 # -------------------------------------------------------------------
 
-from Isis.DataManagement import DataMgr
-import Isis.PlotTools as iplt
-import Isis.Utils as utils
+from Isis.data_management import DataMgr
+import Isis.plot_tools as iplt
+import Isis.utils as utils
 import ROOT as rt
 
 # Maximum number of variables displayed per canvas, so "npads = maxVars + 1"

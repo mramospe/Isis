@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 10/04/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -22,9 +22,9 @@
 
 import ROOT as rt
 
-from Isis.Decorators import decoInputArgs
-from Isis.IBoost.PyGeneral import sendWarningMsg
-from Isis.RootUtils import extractHistValues
+from Isis.iboost.general import sendWarningMsg
+from Isis.decorators import decoInputArgs
+from Isis.rootUtils import extractHistValues
 
 from math import sqrt
 import numpy as np

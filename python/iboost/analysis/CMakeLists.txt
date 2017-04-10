@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
 # Compile the specified boost package
-project(PyAnalysis)
+project(analysis)
 build_boost_package(${PROJECT_NAME})
-set(BOOST_TARGETS ${BOOST_TARGETS} PARENT_SCOPE)
+set(IBOOST_TARGETS ${IBOOST_TARGETS} PARENT_SCOPE)

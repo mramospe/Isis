@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 03/04/2017
+#//  Last update: 10/04/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -21,7 +21,7 @@
 
 
 import time
-from Isis.Utils import convertArgs, formatTime, terminalSize
+from Isis.utils import convertArgs, formatTime, terminalSize
 
 
 class decoArgBase:

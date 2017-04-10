@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -63,7 +63,7 @@
 
 //_______________________________________________________________________________
 
-namespace IBoost {
+namespace iboost {
 
   // Map containing the way to translate the numpy ndarray dtype objects
   // into characters

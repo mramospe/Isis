@@ -3,7 +3,7 @@
 ################################################
 
 from ROOT import TCanvas, TFile, gStyle
-from Isis.PlotTools import ColorList
+from Isis.plot_tools import ColorList
 
 gStyle.SetOptTitle( 0 )
 

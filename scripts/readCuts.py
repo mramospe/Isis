@@ -2,7 +2,7 @@
 # Script to display the cuts booked in a file using the CutManager class
 # ----------------------------------------------------------------------
 
-from Isis.IBoost.PyGeneral import CutManager, sendErrorMsg
+from Isis.iboost.general import CutManager, sendErrorMsg
 
 import sys
 

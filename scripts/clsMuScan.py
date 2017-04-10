@@ -5,9 +5,9 @@
 # email:  miguel.ramos.pernas@cern.ch
 #
 
-from Isis.IBoost.PyAnalysis import ( CLsFactory, CLsFluctuator,
-                                     CLsHypothesis, CLsPrior, CLsResult )
-from Isis.Statistics import poissonUncert
+from Isis.iboost.analysis import ( CLsFactory, CLsFluctuator,
+                                   CLsHypothesis, CLsPrior, CLsResult )
+from Isis.statistics import poissonUncert
 
 import numpy as np
 import ROOT as rt

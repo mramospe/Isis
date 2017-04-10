@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 24/03/2017
+#//  Last update: 10/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -20,10 +20,10 @@
 #////////////////////////////////////////////////////////////////
 
 
-from Isis.Efficiencies import calcEfficiency
-from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
-from Isis.MathExt import nearestSquare
-from Isis.Utils import formatEvalExpr
+from Isis.iboost.general import sendErrorMsg, sendWarningMsg
+from Isis.efficiencies import calcEfficiency
+from Isis.math_ext import nearestSquare
+from Isis.utils import formatEvalExpr
 
 import ROOT as rt
 

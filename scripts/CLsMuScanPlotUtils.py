@@ -5,7 +5,7 @@
 # email:  miguel.ramos.pernas@cern.ch
 #
 
-from Isis.PlotTools import drawHistograms, makeHistogram, makeScatterPlot
+from Isis.plot_tools import drawHistograms, makeHistogram, makeScatterPlot
 
 import numpy as np
 import ROOT as rt

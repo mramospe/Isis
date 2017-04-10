@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 04/04/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -36,7 +36,7 @@ namespace py = boost::python;
 
 //_______________________________________________________________________________
 
-BOOST_PYTHON_MODULE( PyAnalysis ) {
+BOOST_PYTHON_MODULE( analysis ) {
 
   // Initialize python and numpy (to prevent a segmentation fault)
   Py_Initialize();

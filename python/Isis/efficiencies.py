@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/03/2017
+#//  Last update: 10/04/2017
 #//
 #// --------------------------------------------------------------
 #//
@@ -19,9 +19,9 @@
 #/////////////////////////////////////////////////////////////////
 
 
-from Isis.IBoost.PyGeneral import sendErrorMsg
-from Isis.Decorators import decoArgBase, decoClassMethod, decoInputArgs
-from Isis.Statistics import binomialUncert
+from Isis.iboost.general import sendErrorMsg
+from Isis.decorators import decoArgBase, decoClassMethod, decoInputArgs
+from Isis.statistics import binomialUncert
 from math import sqrt
 from scipy.optimize import fsolve
 from scipy.special import betainc, binom

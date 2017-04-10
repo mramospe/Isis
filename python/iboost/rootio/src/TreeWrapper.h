@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -45,7 +45,8 @@
 
 //_______________________________________________________________________________
 
-namespace IBoost {
+namespace iboost {
+  
   // Store in a dictionary the lists with the values for each of the given
   // variables stored in a Root tree. A set of cuts can be specified.
   py::dict treeToBoostDict( std::string fpath,

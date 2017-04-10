@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 24/03/2017
+#//  Last update: 10/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -19,9 +19,10 @@
 #/////////////////////////////////////////////////////////////
 
 
+from Isis.iboost.general import sendErrorMsg, sendWarningMsg
+
 import os, fcntl, math, struct, termios, sys
 import __builtin__
-from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
 
 
 def calcMinDist( lst, allow_zero = True ):

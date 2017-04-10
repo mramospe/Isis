@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 27/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -79,7 +79,7 @@ namespace Msg {
   inline void sendWarningMsg( const std::string &msg ) { IWarning << msg << IEndMsg; }
 }
 
-BOOST_PYTHON_MODULE( PyGeneral ) {
+BOOST_PYTHON_MODULE( general ) {
 
   // Initialize python and numpy (to prevent a segmentation fault)
   Py_Initialize();

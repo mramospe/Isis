@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 04/04/2017
+#//  Last update: 10/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -25,10 +25,10 @@ import numpy as np
 
 import ROOT as rt
 
-from Isis.IBoost.PyGeneral import sendErrorMsg, sendWarningMsg
-from Isis.IBoost.RootTree import treeToDict, treeToList, dictToTree, listToTree
-from Isis.Utils import joinDicts, mergeDicts, stringListFilter
-from Isis.Expressions import NumpyEvalExpr
+from Isis.iboost.general import sendErrorMsg, sendWarningMsg
+from Isis.iboost.rootio import treeToDict, treeToList, dictToTree, listToTree
+from Isis.utils import joinDicts, mergeDicts, stringListFilter
+from Isis.expressions import NumpyEvalExpr
 
 
 class DataMgr( dict ):

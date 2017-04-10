@@ -11,9 +11,9 @@ file(MAKE_DIRECTORY ${PYBINARY})
 
 #----------------------------------------------------------------------------
 # Defines the dependencies on the boost implementations to python
-set(BOOST_TARGETS "")
-add_subdirectory(IBoost)
+set(IBOOST_TARGETS "")
+add_subdirectory(iboost)
 
 #----------------------------------------------------------------------------
 # Target for the python source
-add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis ${PYBINARY} DEPENDS ${BOOST_TARGETS})
+add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis ${PYBINARY} DEPENDS ${IBOOST_TARGETS})

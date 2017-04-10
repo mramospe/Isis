@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -47,7 +47,7 @@ namespace AdBin {
   //
   inline py::list getBinList( const Isis::AdaptiveBinning &adbin ) {
   
-    return IBoost::stdVecToBoostList( adbin.getBinList() );
+    return iboost::stdVecToBoostList( adbin.getBinList() );
   }
 
   //_______________________________________________________________________________
@@ -74,8 +74,8 @@ namespace AdBin1D {
 	       np::ndarray values,
 	       np::ndarray weights ) {
   
-    auto vec_values  = IBoost::numpyArrayToStdVec<double>( values );
-    auto vec_weights = IBoost::numpyArrayToStdVec<double>( weights );
+    auto vec_values  = iboost::numpyArrayToStdVec<double>( values );
+    auto vec_weights = iboost::numpyArrayToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning1D(occ, vmin, vmax,
 						   vec_values, vec_weights);
   
@@ -120,9 +120,9 @@ namespace AdBin2D {
 	       np::ndarray yvalues,
 	       np::ndarray weights ) {
   
-    auto vec_xvalues = IBoost::numpyArrayToStdVec<double>( xvalues );
-    auto vec_yvalues = IBoost::numpyArrayToStdVec<double>( yvalues );
-    auto vec_weights = IBoost::numpyArrayToStdVec<double>( weights );
+    auto vec_xvalues = iboost::numpyArrayToStdVec<double>( xvalues );
+    auto vec_yvalues = iboost::numpyArrayToStdVec<double>( yvalues );
+    auto vec_weights = iboost::numpyArrayToStdVec<double>( weights );
     auto adbin       = new Isis::AdaptiveBinning2D(occ,
 						   xmin, xmax,
 						   ymin, ymax,

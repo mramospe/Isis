@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 28/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@
 
 //_______________________________________________________________________________
 
-namespace IBoost {
+namespace iboost {
 
   // Declaration follows "ValueTypeDef.h"
   extern const std::map<np::dtype, const char> DTypeMap = {
