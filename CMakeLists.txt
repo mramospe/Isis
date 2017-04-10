@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 30/03/2017
+#  Last update: 10/04/2017
 #
 #  Description:
 #
@@ -148,8 +148,8 @@ message("-- Output library directory set to: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 # depends on the project libraries, so it must be added after the list is
 # reversed.
 set(PROJECT_LIBRARIES)
-add_subdirectory(General)
-add_subdirectory(Analysis)
+add_subdirectory(general)
+add_subdirectory(analysis)
 list(REVERSE PROJECT_LIBRARIES)
 add_subdirectory(python)
 
