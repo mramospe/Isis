@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/03/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -28,14 +28,14 @@
 
 
 //_______________________________________________________________________________
-// The Isis version, set by cmake at build time
+// The isis version, set by cmake at build time
 #define ISIS_VERSION "${PROJECT_VERSION}"
 
 //_______________________________________________________________________________
 // No-operation statement
 #define NOOP
 
-namespace Isis {
+namespace isis {
   
   //_______________________________________________________________________________
   // Define a vector of doubles

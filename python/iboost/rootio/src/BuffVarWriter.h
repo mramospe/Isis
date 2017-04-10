@@ -72,17 +72,17 @@ namespace iboost {
   //_______________________________________________________________________________
   // Construct a numpy ndarray object given a number of entries
   np::ndarray numpyArrayConstructor( const long int &lgth,
-				     Isis::BufferVariable *var);
+				     isis::BufferVariable *var);
 
   class BuffVarWriter {
 
   public:
     
     // Constructor
-    BuffVarWriter( const size_t &nentries, Isis::BufferVariable *var = 0 );
+    BuffVarWriter( const size_t &nentries, isis::BufferVariable *var = 0 );
 
     // Constructor given the variable and the list to write/read to/from
-    BuffVarWriter( Isis::TreeBuffer &buffer,
+    BuffVarWriter( isis::TreeBuffer &buffer,
 		   const std::string &name,
 		   np::ndarray array );
 
@@ -101,7 +101,7 @@ namespace iboost {
   protected:
     
     // Variable to be used for input/output
-    Isis::BufferVariable *fVar;
+    isis::BufferVariable *fVar;
 
     // Input/output array
     np::ndarray fArray;

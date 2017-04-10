@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 14/02/2017
+//  Last update: 10/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -26,7 +26,7 @@
 
 //_______________________________________________________________________________
 
-namespace Isis {
+namespace isis {
 
   // Shortcuts to define value types
   using Char   = char;
@@ -71,7 +71,7 @@ namespace Isis {
 // Do a switch as a function of the given data type < tp >
 #define I_SWITCH_BY_DATA_TYPE( tp, ptr, action, default_act )	\
   switch( tp ) {						\
-    using namespace Isis;					\
+    using namespace isis;					\
     I_ACTION_IN_CASE('B', action(Char, ptr));			\
     I_ACTION_IN_CASE('b', action(uChar, ptr));			\
     I_ACTION_IN_CASE('S', action(sInt, ptr));			\

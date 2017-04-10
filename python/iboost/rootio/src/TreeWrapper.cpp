@@ -59,7 +59,7 @@ namespace iboost {
 				    std::string cuts ) {
   
     TFile *ifile = TFile::Open( fpath.c_str() );
-    TTree *itree = static_cast<TTree*>(Isis::getSafeObject( ifile, tpath ));
+    TTree *itree = static_cast<TTree*>(isis::getSafeObject( ifile, tpath ));
 
     // Extracts the list of events to be used
     itree->Draw(">>evtlist", cuts.c_str());
@@ -69,7 +69,7 @@ namespace iboost {
   
     itree->SetBranchStatus("*", 0);
   
-    Isis::TreeBuffer buffer( itree );
+    isis::TreeBuffer buffer( itree );
     const py::ssize_t nvars = py::len( vars );
     std::map<std::string, BuffVarWriter*> outmap;
     for ( py::ssize_t i = 0; i < nvars; ++i ) {
@@ -77,8 +77,8 @@ namespace iboost {
       auto var = extractFromIndex<std::string>(vars, i);
 
       // Get the variables from the given expressions
-      Isis::Strings brnames;
-      size_t nadded = Isis::getBranchNames(brnames, itree, var);
+      isis::Strings brnames;
+      size_t nadded = isis::getBranchNames(brnames, itree, var);
       if ( !nadded )
 	IWarning << "No variables have been found following expression < "
 		 << var << " >" << IEndMsg;
@@ -89,7 +89,7 @@ namespace iboost {
       
 	itree->SetBranchStatus(br.c_str(), 1);
       
-	Isis::BufferVariable *bvar = buffer.loadVariable(br);
+	isis::BufferVariable *bvar = buffer.loadVariable(br);
 	outmap[br] = new BuffVarWriter(nentries, bvar);
       }
     }
@@ -162,7 +162,7 @@ namespace iboost {
   
     // Prepare the variables to iterate with. The vector keeps
     // track of the types for each variable.
-    Isis::TreeBuffer buffer( tree );
+    isis::TreeBuffer buffer( tree );
 
     auto vars = boostListToStdVec<std::string>(variables);
     auto vec_keys = boostListToStdVec<std::string>(varkeys);
@@ -172,8 +172,8 @@ namespace iboost {
     for ( const auto &exp : vars ) {
 
       // Get the variables from the given expressions
-      Isis::Strings brnames;
-      Isis::stringVectorFilter(brnames, vec_keys, exp);
+      isis::Strings brnames;
+      isis::stringVectorFilter(brnames, vec_keys, exp);
 
       for ( const auto &br : brnames )
 	varmap[br] =

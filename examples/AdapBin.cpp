@@ -20,7 +20,7 @@ int main() {
   // Creates the input sample
   TFile *ifile = TFile::Open( "files/AdapBin.root", "RECREATE" );
 
-  Isis::Doubles xVar, yVar;
+  isis::Doubles xVar, yVar;
   for ( size_t i = 0; i < 10000; i++ ) {
 
     if ( gRandom -> Uniform() > 0.5 ) {
@@ -35,7 +35,7 @@ int main() {
   std::cout << "Generated input sample" << std::endl;
 
   // Makes the adaptive binning histograms
-  Isis::AdaptiveBinning2D AB( 40, -200, 200, 0, 1000, xVar, yVar );
+  isis::AdaptiveBinning2D AB( 40, -200, 200, 0, 1000, xVar, yVar );
 
   TH2Poly *hStr    = AB.getStruct( "hStr", "hStr" );
   TH2Poly *hAdj    = AB.getAdjStruct( "hAdj", "hAdj" );

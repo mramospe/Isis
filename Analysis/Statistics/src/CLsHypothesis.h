@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 10/04/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
 
 //_______________________________________________________________________________
 
-namespace Isis {
+namespace isis {
 
   // Enum to define the null and signal-type hypothesis
   enum CLsHypTypes { aNone, aNull, aSignal };

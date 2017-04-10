@@ -35,7 +35,7 @@ namespace RootUtils {
 
     TFile *ifile = static_cast<TFile*>(TPython::ObjectProxy_AsVoidPtr( ifile_obj ));
     
-    return TPython::ObjectProxy_FromVoidPtr( Isis::getSafeObject(ifile, path),
+    return TPython::ObjectProxy_FromVoidPtr( isis::getSafeObject(ifile, path),
 					     "TObject",
 					     false );
   }

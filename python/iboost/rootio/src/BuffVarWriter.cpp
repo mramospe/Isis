@@ -32,23 +32,23 @@ namespace iboost {
 
   // Declaration follows "ValueTypeDef.h"
   extern const std::map<np::dtype, const char> DTypeMap = {
-    {np::dtype::get_builtin< Isis::Char   >(), 'B'},
-    {np::dtype::get_builtin< Isis::uChar  >(), 'b'},
-    {np::dtype::get_builtin< Isis::sInt   >(), 'S'},
-    {np::dtype::get_builtin< Isis::usInt  >(), 's'},
-    {np::dtype::get_builtin< Isis::Int    >(), 'I'},
-    {np::dtype::get_builtin< Isis::uInt   >(), 'i'},
-    {np::dtype::get_builtin< Isis::Float  >(), 'F'},
-    {np::dtype::get_builtin< Isis::Double >(), 'D'},
-    {np::dtype::get_builtin< Isis::llInt  >(), 'L'},
-    {np::dtype::get_builtin< Isis::ullInt >(), 'l'},
-    {np::dtype::get_builtin< Isis::Bool   >(), 'O'}
+    {np::dtype::get_builtin< isis::Char   >(), 'B'},
+    {np::dtype::get_builtin< isis::uChar  >(), 'b'},
+    {np::dtype::get_builtin< isis::sInt   >(), 'S'},
+    {np::dtype::get_builtin< isis::usInt  >(), 's'},
+    {np::dtype::get_builtin< isis::Int    >(), 'I'},
+    {np::dtype::get_builtin< isis::uInt   >(), 'i'},
+    {np::dtype::get_builtin< isis::Float  >(), 'F'},
+    {np::dtype::get_builtin< isis::Double >(), 'D'},
+    {np::dtype::get_builtin< isis::llInt  >(), 'L'},
+    {np::dtype::get_builtin< isis::ullInt >(), 'l'},
+    {np::dtype::get_builtin< isis::Bool   >(), 'O'}
   };
 
   //_______________________________________________________________________________
   //
   np::ndarray numpyArrayConstructor( const long int &lgth,
-				     Isis::BufferVariable *var) {
+				     isis::BufferVariable *var) {
     
     Py_intptr_t shape[1] = {lgth};
 
@@ -62,12 +62,12 @@ namespace iboost {
   //_______________________________________________________________________________
   //
   BuffVarWriter::BuffVarWriter( const size_t &nentries,
-				Isis::BufferVariable *var ) :
+				isis::BufferVariable *var ) :
     fVar( var ), fArray(numpyArrayConstructor(nentries, var)) { }
 
   //_______________________________________________________________________________
   //
-  BuffVarWriter::BuffVarWriter( Isis::TreeBuffer &buffer,
+  BuffVarWriter::BuffVarWriter( isis::TreeBuffer &buffer,
 				const std::string &name,
 				np::ndarray array ) :
     fArray(array) {

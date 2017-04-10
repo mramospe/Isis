@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 23/03/2017
+//  Last update: 10/04/2017
 //
 // --------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@
 
 //______________________________________________________________________________
 
-namespace Isis {
+namespace isis {
 
   class Bin {
 

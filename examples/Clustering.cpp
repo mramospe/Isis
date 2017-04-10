@@ -16,13 +16,13 @@
 #include <vector>
 
 // Function to write the objects for a given cluster (histograms and scatter plot) in the output folder
-void WriteForCluster( Isis::ClusterFactory &factory, const size_t &icl ) {
+void WriteForCluster( isis::ClusterFactory &factory, const size_t &icl ) {
   
   std::cout << "Accesing cluster " << icl << std::endl;
-  Isis::Cluster *cl = factory.getCluster( icl );
+  isis::Cluster *cl = factory.getCluster( icl );
 
   // Fills the vectors with the information of the cluster points
-  Isis::Doubles vec, vx, vy, vg, vh;
+  isis::Doubles vec, vx, vy, vg, vh;
   for ( auto it = cl -> getPoints().begin(); it != cl -> getPoints().end(); ++it ) {
     vec = it -> getValues();
     vx.push_back( vec[ 0 ] );
@@ -72,7 +72,7 @@ int main() {
   of -> cd();
 
   // Creates the cluster factory parsing the corresponding options
-  Isis::ClusterFactory factory( "nClusters=7:nIter=10:ClusteringMethod=Convergence:ComDefMethod=Distance:Verbose:ManageClusters:MaxComVar=0.1:nComStdDev=1" );
+  isis::ClusterFactory factory( "nClusters=7:nIter=10:ClusteringMethod=Convergence:ComDefMethod=Distance:Verbose:ManageClusters:MaxComVar=0.1:nComStdDev=1" );
   factory.addVariable( "x" );
   factory.addVariable( "y" );
   factory.addVariable( "g" );
@@ -80,7 +80,7 @@ int main() {
 
   // Generates the data. Four different variables are defined
   TRandom3 rndm;
-  Isis::Doubles VX, VY, VG, VH, value( 4 );
+  isis::Doubles VX, VY, VG, VH, value( 4 );
   bool xdec, ydec;
   double
     sigmaXY = 1.5,
