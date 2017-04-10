@@ -22,6 +22,9 @@
 #ifndef GLOBAL_WRAPPERS
 #define GLOBAL_WRAPPERS
 
+#include "Messenger.h"
+#include "ValueTypeDef.h"
+
 #include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/numpy.hpp>
@@ -33,6 +36,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <iostream>
+#include <map>
 #include <vector>
 
 
@@ -43,6 +47,10 @@ namespace iboost {
   // Abbreviate namespace
   namespace py = boost::python;
   namespace np = boost::python::numpy;
+
+  // Map containing the way to translate the numpy ndarray dtype objects
+  // into characters
+  extern const std::map<np::dtype, const char> DTypeMap;
 
   // Get the size of the lists inside the dictionary. A check is done to see that
   // they match.
@@ -88,11 +96,21 @@ namespace iboost {
     auto lgth = py::len(array);
     std::vector<type> result(lgth);
 
-    type *ptr = reinterpret_cast<type*>(array.get_data());
+#define I_CREATE_STDVEC_FROM_NUMPYARRAY( type, result ) {		\
+    type *type ## _ptr = reinterpret_cast<type*>(array.get_data());	\
+    std::copy(type ## _ptr, type ## _ptr + lgth, result.begin());	\
+  }
+    
+    I_SWITCH_BY_DATA_TYPE(DTypeMap.at(array.get_dtype()), result,
+			  I_CREATE_STDVEC_FROM_NUMPYARRAY,
 
-    std::copy(ptr, ptr + lgth, result.begin());
+			  IError << "Unknown data type" << IEndMsg;
+			  return std::vector<type>();
+			  );
 
     return result;
+
+#undef I_CREATE_STDVEC_FROM_NUMPYARRAY
   }
 
   //_______________________________________________________________________________

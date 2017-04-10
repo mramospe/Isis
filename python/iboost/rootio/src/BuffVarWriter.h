@@ -27,47 +27,14 @@
 #include "TreeBuffer.h"
 
 #include "GlobalWrappers.h"
-#include "ValueTypeDef.h"
 #include "Definitions.h"
 
 #include <iostream>
 
 
 //_______________________________________________________________________________
-// Develop one internal operation in a BufferVarWriter class
-#define I_BUFFVARWRITER_SELFOP( action )		\
-  const char &type = fVar->getType();			\
-  auto ptr = fArray.get_data();				\
-  I_SWITCH_BY_DATA_TYPE(type, ptr, action, NOOP);
-
-//_______________________________________________________________________________
-// Parse a value in the numpy array to the BufferVariable
-#define I_BUFFVARWRITER_GET_ARRAY_VALUE( type, ptr ) {		\
-    type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
-    fVar->setValue(*type ## _ptr);				\
-  }
-
-//_______________________________________________________________________________
-// Append value in the BufferVariable object to the numpy array
-#define I_BUFFVARWRITER_SET_ARRAY_VALUE( type, ptr ) {		\
-    type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
-    type val = 0;						\
-    fVar->extractValue(val);					\
-    *type ## _ptr = val;					\
-  }
-
-//_______________________________________________________________________________
-// Create an array of zeros. "shape"
-#define I_CREATE_ZEROS( type, shape )					\
-  return np::zeros(1, shape, np::dtype::get_builtin<type>());
-
-//_______________________________________________________________________________
 
 namespace iboost {
-
-  // Map containing the way to translate the numpy ndarray dtype objects
-  // into characters
-  extern const std::map<np::dtype, const char> DTypeMap;
   
   //_______________________________________________________________________________
   // Construct a numpy ndarray object given a number of entries

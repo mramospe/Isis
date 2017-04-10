@@ -24,39 +24,33 @@
 #include "ValueTypeDef.h"
 
 #include <iostream>
-#include <map>
 
 //_______________________________________________________________________________
 
 namespace iboost {
 
-  // Declaration follows "ValueTypeDef.h"
-  extern const std::map<np::dtype, const char> DTypeMap = {
-    {np::dtype::get_builtin< isis::Char   >(), 'B'},
-    {np::dtype::get_builtin< isis::uChar  >(), 'b'},
-    {np::dtype::get_builtin< isis::sInt   >(), 'S'},
-    {np::dtype::get_builtin< isis::usInt  >(), 's'},
-    {np::dtype::get_builtin< isis::Int    >(), 'I'},
-    {np::dtype::get_builtin< isis::uInt   >(), 'i'},
-    {np::dtype::get_builtin< isis::Float  >(), 'F'},
-    {np::dtype::get_builtin< isis::Double >(), 'D'},
-    {np::dtype::get_builtin< isis::llInt  >(), 'L'},
-    {np::dtype::get_builtin< isis::ullInt >(), 'l'},
-    {np::dtype::get_builtin< isis::Bool   >(), 'O'}
-  };
+  //_______________________________________________________________________________
+  // Develop one internal operation in a BufferVarWriter class
+#define I_BUFFVARWRITER_SELFOP( action )		\
+  const char &type = fVar->getType();			\
+  auto ptr = fArray.get_data();				\
+  I_SWITCH_BY_DATA_TYPE(type, ptr, action, NOOP);
 
   //_______________________________________________________________________________
   //
-  np::ndarray numpyArrayConstructor( const long int &lgth,
-				     isis::BufferVariable *var) {
+  inline np::ndarray numpyArrayConstructor( const long int &lgth,
+					    isis::BufferVariable *var) {
     
     Py_intptr_t shape[1] = {lgth};
 
+#define I_CREATE_ZEROS( type, shape )				\
+    return np::zeros(1, shape, np::dtype::get_builtin<type>());
+    
     I_SWITCH_BY_DATA_TYPE(var->getType(), shape, I_CREATE_ZEROS,
 			  
 			  return np::array(py::list());
 			  );
-    
+#undef I_CREATE_ZEROS
   }
 
   //_______________________________________________________________________________
@@ -84,15 +78,31 @@ namespace iboost {
   //_______________________________________________________________________________
   //
   void BuffVarWriter::appendToArray(const size_t &idx) {
+
+#define I_BUFFVARWRITER_SET_ARRAY_VALUE( type, ptr ) {		\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
+      type val = 0;						\
+      fVar->extractValue(val);					\
+      *type ## _ptr = val;					\
+    }
     
     I_BUFFVARWRITER_SELFOP(I_BUFFVARWRITER_SET_ARRAY_VALUE);
+
+#undef I_BUFFVARWRITER_SET_ARRAY_VALUE
   }
 
   //_______________________________________________________________________________
   //
   void BuffVarWriter::appendToVar(const size_t &idx) {
 
+#define I_BUFFVARWRITER_GET_ARRAY_VALUE( type, ptr ) {		\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
+      fVar->setValue(*type ## _ptr);				\
+    }
+    
     I_BUFFVARWRITER_SELFOP(I_BUFFVARWRITER_GET_ARRAY_VALUE);
+
+#undef I_BUFFVARWRITER_GET_ARRAY_VALUE
   }
 
 }
