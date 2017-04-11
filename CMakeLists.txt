@@ -44,7 +44,7 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${USER_ROOT_PATH}/etc/cmake)
 set(ROOT_LIB_SET
   Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics
-  MathCore Thread EG Html RooFitCore Minuit RooFit PyROOT)
+  MathCore Thread EG Html Minuit PyROOT)
 find_package(ROOT REQUIRED COMPONENTS ${ROOT_LIB_SET})
 include_directories(${ROOT_INCLUDE_DIR})
 
