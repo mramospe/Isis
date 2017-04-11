@@ -6,13 +6,14 @@ set(PYSOURCE ${PROJECT_SOURCE_DIR})
 set(PYBINARY ${INSTALL_PYTHON_DIR}/Isis)
 
 #----------------------------------------------------------------------------
+# Create python binary directory
+file(MAKE_DIRECTORY ${PYBINARY})
+
+#----------------------------------------------------------------------------
 # Defines the dependencies on the boost implementations to python
 set(IBOOST_TARGETS "")
 add_subdirectory(iboost)
 
 #----------------------------------------------------------------------------
 # Target for the python source
-if( NOT ${PYSOURCE}/Isis STREQUAL ${PYBINARY} )
-  copy_directory(${PYSOURCE}/Isis ${PYBINARY})
-endif()
 add_custom_target(Isis-python ALL python ${PYSOURCE}/compile.py ${PYSOURCE}/Isis ${PYBINARY} DEPENDS ${IBOOST_TARGETS})

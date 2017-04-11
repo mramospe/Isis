@@ -29,6 +29,10 @@ for idir, dirs, files in tree:
         if not ndir.endswith('/'):
             ndir += '/'
         wdir += ndir
+    for d in dirs:
+        if not os.path.exists( wdir + d ):
+            os.system( 'mkdir ' + wdir + d )
+            print 'Created new folder in:', wdir + d
     for f in files:
         if f.endswith('.py'):
             ifile = idir + f
