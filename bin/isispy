@@ -48,9 +48,21 @@ done
 shift $((OPTIND - 1))
 
 
-# If no arguments are specified, run in interactive mode
+# Check if all the arguments are data files. If no arguments are provided
+# the output is also "y"
 
-if [ $# -eq 0 ]; then
+interactive=
+for (( i=1; i <= $#; i++ )) {
+
+	val="${!i}"
+
+	if [ $val == *.py ]; then
+	    interactive="n"
+	    break
+	fi
+}
+
+if [ "$interactive" != "n" ]; then
     pyflags=" -i $pyflags"
 fi
 
