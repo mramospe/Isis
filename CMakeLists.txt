@@ -3,7 +3,7 @@
 #  AUTHOR: Miguel Ramos Pernas
 #  e-mail: miguel.ramos.pernas@cern.ch
 #
-#  Last update: 10/04/2017
+#  Last update: 11/04/2017
 #
 #  Description:
 #
@@ -29,24 +29,12 @@ set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11 -pthread -Wno-unused-local-typedefs")
 set(libsuffix .so)
 
 #----------------------------------------------------------------------------
-# The root directory can be specified via -DUSER_ROOT_PATH=path when running
-# cmake. Otherwise it will be set as the current $ROOTSYS path.
-if(NOT USER_ROOT_PATH)
-  execute_process(
-    COMMAND root-config --prefix
-    OUTPUT_VARIABLE USER_ROOT_PATH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-endif()
-
-#----------------------------------------------------------------------------
-# The path to the FindROOT.cmake file is specified here
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${USER_ROOT_PATH}/etc/cmake)
+# Ask for the Root package, with the given set of libraries
 set(ROOT_LIB_SET
   Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics
   MathCore Thread EG Html Minuit PyROOT)
 find_package(ROOT REQUIRED COMPONENTS ${ROOT_LIB_SET})
-include_directories(${ROOT_INCLUDE_DIR})
+include_directories(${ROOT_INCLUDE_DIRS})
 
 #----------------------------------------------------------------------------
 # Set the installation directories
