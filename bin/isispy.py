@@ -143,6 +143,8 @@ if __name__ == '__main__':
     
     ''' The imports must be written here since otherwise ROOT complains '''
 
+    import Isis
+    
     from Isis import *
     
     print '* Imports to the python shell'

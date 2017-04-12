@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/03/2017
+#//  Last update: 12/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -32,3 +32,6 @@ pfls = filter(lambda f: os.path.isfile(os.path.join(path, f)) and f != __file__,
 mods = [el[:el.rfind('.')] for el in pfls]
 
 __all__ = pkgs + mods
+
+del os, path, flst, pkgs, pfls, mods, el
+
