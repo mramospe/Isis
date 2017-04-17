@@ -55,8 +55,8 @@ interactive=
 for (( i=1; i <= $#; i++ )) {
 
 	val="${!i}"
-
-	if [ $val == *.py ]; then
+	
+	if [[ $val == *.py ]]; then
 	    interactive="n"
 	    break
 	fi
