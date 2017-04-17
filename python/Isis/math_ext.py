@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 23/03/2017
+#//  Last update: 17/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -92,9 +92,9 @@ def nearestSquare( number ):
     lowsqrt = nfloor**2
     upsqrt  = ( nfloor + 1 )**2
     if number - lowsqrt < upsqrt - number:
-        return round( lowsqrt )
+        return int(round(lowsqrt))
     else:
-        return round( upsqrt )
+        return int(round(upsqrt))
 
 
 def sumQuad( *values ):

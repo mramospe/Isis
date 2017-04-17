@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/04/2017
+#//  Last update: 17/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -115,7 +115,7 @@ class DataMgr( dict ):
         '''
         Gets the number of entries in the class
         '''
-        return len( next( self.itervalues() ) )
+        return len(next(self.itervalues()))
 
     def next( self ):
         '''
@@ -151,8 +151,8 @@ class DataMgr( dict ):
         
         values = [self[var] for var in variables]
         
-        for ivar in xrange(len(variables)):
-            cut = cut.replace( variables[ ivar ], 'values[ %i ]' %ivar )
+        for i, var in enumerate(variables):
+            cut = cut.replace(var, 'values[ %i ]' %i)
             
         return eval(cut)
     
@@ -172,7 +172,7 @@ class DataMgr( dict ):
             if selection:
                 return np.count_nonzero(self.cutMask(selection, mathmod))
             else:
-                return len(next(self.itervalues()))
+                return len(self)
         else:
             sendErrorMsg('Attempting to get entries from an empty data manager')
 
@@ -198,7 +198,7 @@ class DataMgr( dict ):
         '''
         return len(self.keys())
 
-    def varEvents( self, variables, cuts = False, mathmod = math ):
+    def varEvents( self, variables, cuts = False, mathmod = np ):
         '''
         Return a list of lists with the values associated with < variables >. If
         an element in < variables > is a variable, it gets the list of values for
@@ -206,10 +206,10 @@ class DataMgr( dict ):
         '''
         
         if cuts:
-            entries = self.cutMask( cuts, mathmod )
+            entries = self.cutMask(cuts, mathmod)
         else:
             entries = np.ones(self.entries(), dtype = bool)
-        
+            
         fvars    = []
         truevars = []
         for v in variables:
@@ -311,9 +311,9 @@ class DataMgr( dict ):
         
         ''' Prints the values of the variables '''
         if cuts != '':
-            evtlst = self.cutIdxs( cuts, mathmod )
+            evtlst = self.cutIdxs(cuts, mathmod)
         else:
-            evtlst = xrange( len( self ) )
+            evtlst = np.arange(len(self))
 
         if evts != -1:
             i = 0
@@ -335,7 +335,7 @@ class DataMgr( dict ):
                 for var in self.getEventTuple( ievt, *variables ):
                     vout += ( form %var ).rjust( maxsize ) + ' |'
                 print vout
-            if ievt + 1 == len( evtlst ):
+            if ievt + 1 == len(evtlst):
                 print deco + '\n'
 
     def runCutEntries( self, var,
@@ -413,30 +413,34 @@ class DataMgr( dict ):
             else:
                 return ofile
     
-    def subSample( self, name = '', cuts = '', mathmod = np, evts = -1, varset = '*' ):
+    def subSample( self, name = '', cuts = '', mathmod = np, evts = None, varset = '*' ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be
         specified, as well as the variables to be copied. By default the
         entire class is copied.
-        '''
-        if evts == -1:
-            evts = xrange( 0, len( self ) )
+        ''' 
         if varset == '*':
             varset = self.keys()
         if name == '':
             name = self.name + '_SubSample'
-        if 'cuts' != '':
-            evtlst = self.cutIdxs( cuts, mathmod )
-        else:
-            evtlst = evts
-            
-        cmgr = DataMgr( name )
-        for kw in varset:
-            vlist = self[ kw ]
-            cmgr[ kw ] = [ vlist[ i ] for i in evtlst if i in evts ]
-        cmgr.Nentries = len( next( cmgr.itervalues() ) )
         
+        if evts != None:
+            evts = np.array(evts)
+        else:
+            evts = np.arange(len(self))
+            
+        if 'cuts' != '':
+            cut_lst = self.cutIdxs(cuts, mathmod)
+        else:
+            cut_lst = np.arange(len(self))
+
+        evtlst = np.intersect1d(evts, cut_lst)
+        
+        cmgr = DataMgr(name)
+        for v in varset:
+            cmgr[v] = self[v][evtlst]
+
         return cmgr
 
 

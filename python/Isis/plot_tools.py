@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/04/2017
+#//  Last update: 17/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -48,6 +48,16 @@ class CanvasStorer:
         self.dataObjs = data_objs or []
         self.infoObjs = info_objs or []
 
+    def write( self, info = True ):
+        '''
+        Write the canvas and its objects in the current file
+        '''
+        self.canvas.Write()
+        for obj in self.dataObjs:
+            obj.Write()
+        if info:
+            for obj in self.infoObjs:
+                obj.Write()
 
 class FormatListIter:
     '''
@@ -239,9 +249,15 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
     are taken from the first histogram in the list.
     '''
     if norm:
-        imax = max( h.GetMaximum()*1./h.GetSumOfWeights() for h in hlst )
-        imin = min( h.GetMinimum()*1./h.GetSumOfWeights() for h in hlst )
-        meth = rt.TH1.DrawNormalized
+        wgts = [h.GetSumOfWeights() for h in hlst]
+        if sum(wgts) != 0:
+            imax = max(h.GetMaximum()*1./w for h, w in zip(hlst, wgts) if w)
+            imin = min(h.GetMinimum()*1./w for h, w in zip(hlst, wgts) if w)
+            meth = rt.TH1.DrawNormalized
+        else:
+            imax = 1
+            imin = 0
+            meth = rt.TH1.Draw
     else:
         imax = max( h.GetMaximum() for h in hlst )
         imin = min( h.GetMinimum() for h in hlst )
@@ -673,8 +689,8 @@ def multiPlot( mgrs, variables,
         
         ''' Generates and divides the canvas '''
         nyvars, nxvars = optCanvasDivision( nvars )
-        canvas = rt.TCanvas( name, title, 300*nyvars, 300*nxvars )
-        canvas.Divide( nyvars, nxvars )
+        canvas = rt.TCanvas(name, title, 300*nyvars, 300*nxvars)
+        canvas.Divide(nyvars, nxvars)
 
         canvas_info = CanvasStorer(canvas)
         
@@ -713,14 +729,18 @@ def multiPlot( mgrs, variables,
             canvas.cd( iv + 1 )
 
             ''' This is done to reduce disk usage '''
-            totlst = [ mgr.varEvents( [ var ], cuts = cuts ) for mgr in mgrs ]
+            totlst = [mgr.varEvents([var], cuts = cuts)[0] for mgr in mgrs]
 
             ''' Extract the ranges for each variable (if any) '''
             if var in ranges.keys():
                 vmin, vmax = ranges[var]
             else:
-                vmax = max( el for lst in totlst for el in lst )
-                vmin = min( el for lst in totlst for el in lst )
+                if any(len(lst) != 0 for lst in totlst):
+                    vmax = max(el for lst in totlst for el in lst)
+                    vmin = min(el for lst in totlst for el in lst)
+                else:
+                    vmin = 0
+                    vmax = 1
 
             entries = []
             hists   = []
@@ -769,14 +789,15 @@ def optCanvasDivision( nvars ):
     '''
     Create the optimal canvas division for a given number of pads
     '''
-    nstsq = nearestSquare( nvars )
-    nstrt = int( sqrt( nvars ) )
+    nstsq = int(sqrt(nearestSquare(nvars)))
     
-    if nstsq >= nvars:
-        nxvars = nstrt
-        nyvars = nxvars
+    if nstsq**2 > nvars:
+        nxvars = nstsq
+        nyvars = nstsq
     else:
-        nxvars = nstrt
-        nyvars = nstrt + 1
+        nxvars = nstsq
+        nyvars = nstsq
+        while nxvars*nyvars < nvars:
+            nyvars += 1
         
     return nyvars, nxvars
