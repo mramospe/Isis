@@ -14,14 +14,13 @@ vars_per_plot = 8
 mgrs_per_plot = 2
 
 # List of variables to plot
-#varlst = ['var0', 'var1', 'var2']
-varlst = ['Ip1', 'Ip2', 'DOCA']
+varlst = ['var0', 'var1', 'var2']
 
-# Ranges for the variables to be displayed
-ranges = {'var0': (0, 10),
-          'var1': (0, 10),
-          'var2': (0, 10)
-      }
+# Number of bins and ranges for the variables to be displayed
+ranges = {'var0': (100, 0, 10),
+          'var1': (100, 0, 10),
+          'var2': (100, 0, 10)
+}
 
 # Additional cuts
 cuts = False

@@ -733,7 +733,7 @@ def multiPlot( mgrs, variables,
 
             ''' Extract the ranges for each variable (if any) '''
             if var in ranges.keys():
-                vmin, vmax = ranges[var]
+                rnbins, vmin, vmax = ranges[var]
             else:
                 if any(len(lst) != 0 for lst in totlst):
                     vmax = max(el for lst in totlst for el in lst)
@@ -741,6 +741,7 @@ def multiPlot( mgrs, variables,
                 else:
                     vmin = 0
                     vmax = 1
+                rnbins = nbins
 
             entries = []
             hists   = []
@@ -749,7 +750,7 @@ def multiPlot( mgrs, variables,
                 h = makeHistogram( vals,
                                    name  = hname,
                                    title = var,
-                                   nbins = nbins,
+                                   nbins = rnbins,
                                    vmin  = vmin,
                                    vmax  = vmax )
                 
