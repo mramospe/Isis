@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -31,6 +31,7 @@
 #include <Python.h>
 
 #include <map>
+#include <string>
 
 
 //_______________________________________________________________________________
@@ -43,7 +44,9 @@ namespace iboost {
   
   // Class containing the way to translate the numpy ndarray dtype objects
   // into characters. A class must save the map since now numpy functions
-  // may be called without calling "numpy::initialize" first.
+  // may be called without calling "numpy::initialize" first. Since
+  // "dtype" objects are sorted in a map by their size in bins (which makes
+  // float32 and int32 be overlapped), strings must be used.
   class DTypeParser {
 
   public:
@@ -59,29 +62,49 @@ namespace iboost {
 
       if ( !fMap.size() )
 	fMap = {
-	  {np::dtype::get_builtin< isis::Char   >(), 'B'},
-	  {np::dtype::get_builtin< isis::uChar  >(), 'b'},
-	  {np::dtype::get_builtin< isis::sInt   >(), 'S'},
-	  {np::dtype::get_builtin< isis::usInt  >(), 's'},
-	  {np::dtype::get_builtin< isis::Int    >(), 'I'},
-	  {np::dtype::get_builtin< isis::uInt   >(), 'i'},
-	  {np::dtype::get_builtin< isis::Float  >(), 'F'},
-	  {np::dtype::get_builtin< isis::Double >(), 'D'},
-	  {np::dtype::get_builtin< isis::llInt  >(), 'L'},
-	  {np::dtype::get_builtin< isis::ullInt >(), 'l'},
-	  {np::dtype::get_builtin< isis::Bool   >(), 'O'}
+	  {this->dtypeToStr< isis::Char   >(), 'B'},
+	  {this->dtypeToStr< isis::uChar  >(), 'b'},
+	  {this->dtypeToStr< isis::sInt   >(), 'S'},
+	  {this->dtypeToStr< isis::usInt  >(), 's'},
+	  {this->dtypeToStr< isis::Int    >(), 'I'},
+	  {this->dtypeToStr< isis::uInt   >(), 'i'},
+	  {this->dtypeToStr< isis::Float  >(), 'F'},
+	  {this->dtypeToStr< isis::Double >(), 'D'},
+	  {this->dtypeToStr< isis::llInt  >(), 'L'},
+	  {this->dtypeToStr< isis::ullInt >(), 'l'},
+	  {this->dtypeToStr< isis::Bool   >(), 'O'}
 	};
       
     }
 
     // Return the character associated to the given numpy type
-    inline char parse( const np::dtype &type ) { return fMap.at(type); }
+    inline char parse( const np::dtype &type ) const {
+      
+      std::string str_type = this->dtypeToStr(type);
+      
+      return fMap.at(str_type);
+    }
     
   protected:
 
     // Map with the parser information
-    std::map<np::dtype, const char> fMap;
-    
+    std::map<std::string, const char> fMap;
+
+    // Get the string related to a given dtype object
+    template<class type>
+    inline std::string dtypeToStr() const {
+      
+      np::dtype dtype = np::dtype::get_builtin<type>();
+
+      return this->dtypeToStr(dtype);
+    }
+
+    inline std::string dtypeToStr( const np::dtype &dtype ) const {
+
+      const char* str_type = py::extract<const char*>(py::str(dtype));
+
+      return str_type;
+    }
   };
 
   // Declare the class to parse from numpy-array dtype objects to characters
