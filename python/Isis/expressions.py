@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/03/2017
+#//  Last update: 20/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -194,15 +194,18 @@ class NumpyEvalExpr(EvalExpr):
                         self.comp[app] = NumpyEvalExpr(app)
                         expr = expr[op + cp + 1:]
                         break
-        
-        for name, el in sorted(self.comp.iteritems()):
 
+        ''' Reset the expression '''
+        expr = self.expr
+                    
+        for name, el in sorted(self.comp.iteritems()):
+            
             expr = expr.replace(name, el.expr)
             
             if el.expr != name:
                 while name in expr:
                     expr = expr.replace(name, el.expr)
-
+                    
         self.expr = self._process_expr(expr)
         
     def _process_expr( self, expr ):

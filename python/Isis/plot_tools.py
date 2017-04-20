@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/04/2017
+#//  Last update: 20/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -30,6 +30,7 @@ import ROOT as rt
 import itertools
 from math import sqrt
 import numpy as np
+import scipy as sc
 import sys
 
 
@@ -421,17 +422,13 @@ def makeCorrelationHist( matrix, name = '', title = None, vartitles = None ):
     statistical box is displayed neither.
     '''
     lm = len( matrix )
-    lv = len( vartitles )
-
+    
     vartitles = vartitles or []
     if vartitles != []:
-        if lm != lv:
-            sendWarningMsg('Number of titles is not the same as that of the matrix; '\
-                           'new variables will have names < Variables_# >')
-            for i in xrange( lv + 1, lm ):
-                vartitles.append( 'Variable_' + str( i ) )
+        if lm != len(vartitles):
+            sendErrorMsg('Number of titles is not the same as that of the matrix')
     else:
-        vartitles = [ 'Variable_' + str( i ) for i in xrange( lm ) ]
+        vartitles = ['Variable_' + str( i ) for i in xrange( lm )]
 
     corr_matrix = 100*np.corrcoef( matrix )
     
@@ -551,6 +548,50 @@ def makeHistogram2D( xvar, yvar,
     formatPlottable2D(hist, name, title, xtitle, ytitle)
 
     return hist
+
+
+def makeKStest( mgrA, mgrB, variables,
+                vartitles = [], usecl = True, name = '', title = '' ):
+    '''
+    Perform Kolmogorov-Smirnov tests for the two given DataMgr objects and variables. If "usecl" is set to True, the confidence level of exclusion that the two
+    samples follow the same distribution is given instead of the p-value. Returns
+    a dictionary with the values of the test statistic and p-value for each variable,
+    together with the filled histograms.
+    '''
+    results = {var: sc.stats.ks_2samp(mgrA[var], mgrB[var])
+               for var in variables}
+    
+    lm = len(variables)
+    if vartitles != []:
+        if lm != len(vartitles):
+            sendErrorMsg('Number of titles is not the same as the number of variables')
+    else:
+        vartitles = variables
+        
+    h_tstat = rt.TH1D('', '', lm, 0, lm)
+    h_pval  = rt.TH1D('', '', lm, 0, lm)
+    
+    for i, (v, t) in enumerate(zip(variables, vartitles)):
+
+        tstat, pval = results[v]
+
+        if usecl:
+            pval = (1. - pval)*100.
+            
+        h_tstat.SetBinContent(i + 1, tstat)
+        h_pval.SetBinContent(i + 1, pval)
+        
+        for h in (h_tstat, h_pval):
+            h.GetXaxis().SetBinLabel(i + 1, t)
+
+        if usecl:
+            h_pval.GetYaxis().SetRangeUser(0, 110)
+        else:
+            h_pval.GetYaxis().SetRangeUser(0, 1.1)
+
+        h_tstat.GetYaxis().SetRangeUser(0, 1.1)
+            
+    return results, h_tstat, h_pval
 
 
 class _GraphInConfig:
@@ -802,3 +843,24 @@ def optCanvasDivision( nvars ):
             nyvars += 1
         
     return nyvars, nxvars
+
+
+def superimposedPads( canvas ):
+    '''
+    Add two pads to the given canvas, both being transparent
+    '''
+    pad1 = rt.TPad('pad1', '', 0, 0, 1, 1)
+    pad2 = rt.TPad('pad2', '', 0, 0, 1, 1)
+
+    for pad in (pad1, pad2):
+        canvas.cd()
+        pad.SetLineStyle(0)
+        pad.SetFillStyle(4000)
+        pad.SetFillColor(0)
+        pad.SetFrameFillStyle(4000)
+        pad.Draw()
+
+    canvas.cd()
+        
+    return pad1, pad2
+
