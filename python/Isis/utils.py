@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/04/2017
+#//  Last update: 21/04/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -615,9 +615,9 @@ class StrNumGenerator:
         if end < 0 or start < 0:
             sendErrorMsg('Input parameters must be both positive')
             
-        self._iter     = start
-        self._maxIter  = end
-        self._maxStrLen = len( str( end ) )
+        self._iter      = start
+        self._maxIter   = end
+        self._maxStrLen = len(str(end))
 
     def __iter__( self ):
         ''' On the iterations it returns itself '''
@@ -628,10 +628,9 @@ class StrNumGenerator:
         if self._iter == self._maxIter:
             raise StopIteration
         else:
-            citer  = str( self._iter )
-            lciter = len( citer ) + 1
+            citer = str(self._iter)
             self._iter += 1
-            return ( self._maxStrLen - lciter )*'0' + citer
+            return (self._maxStrLen - len(citer))*'0' + citer
 
 
 def terminalSize():
