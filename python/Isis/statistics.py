@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/04/2017
+#//  Last update: 21/04/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -97,18 +97,39 @@ class IntegralTransformer:
 
             values, weights = zip(*sorted(zip(arg, weights)))
 
-            self._values = np.array(values)
-            self._cltve  = np.cumsum(weights)*1./sum(weights)
+            values = np.array(values)
+            cltve  = np.cumsum(weights)*1./sum(weights)
+
+            ''' Remove duplicates (needed if working with integers) '''
+            vset = set(values)
+            if len(vset) != len(values):
+                for v in vset:
+                    
+                    places = np.where(values == v)[0]
+
+                    if len(places) > 1:
+                        
+                        ip = places[0]
+                        rm = places[1:]
+
+                        cltve[ip] = cltve[rm[-1]]
+
+                        cltve  = np.delete(cltve, rm)
+                        values = np.delete(values, rm)
+                
+            self._values = values
+            self._cltve  = cltve
+                
     
     def transform( self, arg ):
         '''
-        Return the integral transformated value(s)
+        Return the integral transformated values
         '''
         return np.interp(arg, self._values, self._cltve)
 
     def deTransform( self, arg ):
         '''
-        Return the de-transformated value(s)
+        Return the de-transformated values
         '''
         return np.interp(arg, self._cltve, self._values)
 
