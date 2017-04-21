@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/04/2017
+#//  Last update: 21/04/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -296,15 +296,30 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
 
 def extractHistPoints( varlst, nbins, vmin = None, vmax = None ):
     '''
-    This function extracts the points of the given array of data which are
+    This function extracts the indexes of the given array of data which are
     supposed to be used to make a histogram
     '''
+    if len(varlst) == 0:
+        return []
     if vmin == None:
-        vmin = min( varlst )
+        vmin = min(varlst)
     if vmax == None:
-        vmax  = max( varlst )
-        vmax += ( vmax - vmin )/( 2.*nbins )
-    return [ i for i, v in enumerate( varlst ) if v >= vmin and v < vmax ]
+        vmax  = max(varlst)
+        vmax += (vmax - vmin)/(2.*nbins)
+    return [i for i, v in enumerate(varlst) if v >= vmin and v < vmax]
+
+
+def extractHistBounds( values, idxs, vmin = None, vmax = None ):
+    '''
+    Extract the histogram bounds given a list of values and the possible
+    bounds (if any). If the list is empty, bounds at (0, 1) are returned.
+    '''
+    if len(values):
+        varin = [values[i] for i in idxs]
+        vmin  = min( v for v in varin + [ vmin ] if v != None )
+        vmax  = max( v for v in varin + [ vmax ] if v != None )
+        return vmin, vmax
+    return 0, 1
 
 
 def formatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
@@ -360,18 +375,18 @@ def makeAdaptiveBinnedHist( name, minocc, values,
     histcall = histFromType( htype, 1 )
     
     ''' Calculates the array of weights '''
-    length = len( values )
+    length = len(values)
     if weights:
-        sw    = float( sum( weights ) )
-        nbins = int( sw )/minocc
+        sw    = float(sum(weights))
+        nbins = int(sw)/minocc
     else:
         weights = length*[ 1. ]
-        sw      = float( length )
+        sw      = float(length)
         nbins   = length/minocc
     
-    idxs   = extractHistPoints( values, nbins )
-    values = [ values[ i ] for i in idxs ]
-    vmax   = max( values )
+    idxs = extractHistPoints(values, nbins)
+
+    vmin, vmax = extractHistBounds(values, idxs)
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
@@ -485,10 +500,9 @@ def makeHistogram( var,
     '''
     histcall = histFromType( htype, 1 )
 
-    idxs  = extractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
-    varin = [ var[ i ] for i in idxs ]
-    vmin  = min( v for v in varin + [ vmin ] if v != None )
-    vmax  = max( v for v in varin + [ vmax ] if v != None )
+    idxs = extractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
+    
+    vmin, vmax = extractHistBounds(var, idxs, vmin = vmin, vmax = vmax)
     
     hist = histcall('', '', nbins, vmin, vmax)
     
@@ -528,13 +542,8 @@ def makeHistogram2D( xvar, yvar,
     ''' The values used are the intersection between the two lists '''
     idxs = set( xidxs ) & set( yidxs )
 
-    xvarin = [ xvar[ i ] for i in idxs ]
-    xmin   = min( v for v in xvarin + [ xmin ] if v != None )
-    xmax   = max( v for v in xvarin + [ xmax ] if v != None )
-
-    yvarin = [ yvar[ i ] for i in idxs ]
-    ymin   = min( v for v in yvarin + [ ymin ] if v != None )
-    ymax   = max( v for v in yvarin + [ ymax ] if v != None )
+    xmin, xmax = extractHistBounds(xvar, idxs, vmin = xmin, vmax = xmax)
+    ymin, ymax = extractHistBounds(yvar, idxs, vmin = ymin, vmax = ymax)
     
     hist = histcall('', '', xbins, xmin, xmax, ybins, ymin, ymax)
 
