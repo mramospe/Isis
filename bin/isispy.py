@@ -8,6 +8,13 @@
 #==============================================================
 
 
+def browser():
+    '''
+    Return a Root TBrowser object. Root has already been imported.
+    '''
+    return rt.TBrowser()
+    
+    
 def initialize():
     '''
     Initialize the environment
