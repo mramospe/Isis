@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 19/04/2017
+//  Last update: 24/04/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -100,10 +100,8 @@ namespace iboost {
     }
 
     inline std::string dtypeToStr( const np::dtype &dtype ) const {
-
-      const char* str_type = py::extract<const char*>(py::str(dtype));
-
-      return str_type;
+      
+      return py::extract<std::string>(py::str(dtype));
     }
   };
 
