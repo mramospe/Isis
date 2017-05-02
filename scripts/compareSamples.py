@@ -81,7 +81,7 @@ def genVarPlots( mgrdct, varlst, nvars, cuts ):
 
     plots = []
     for i, vset in enumerate(var_sets):
-        cst = iplt.multiPlot([mgr for mgr in mgrs.itervalues()], varlst,
+        cst = iplt.multiPlot([mgr for mgr in mgrs.itervalues()], vset,
                              cuts   = cuts,
                              norm   = True,
                              name   = 'VarCanvas_' + str(i),
