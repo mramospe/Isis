@@ -137,7 +137,7 @@ class DataMgr( dict ):
             name = self.name + '_copy'
         return DataMgr(name, self)
 
-    def cutMask( self, cut, mathmod = np ):
+    def cutMask( self, cut, mathmod = None ):
         '''
         Return the mask associated with the events passing the given cut
         '''
@@ -162,14 +162,14 @@ class DataMgr( dict ):
         else:
             return np.ones(len(self))
     
-    def cutIdxs( self, cut, mathmod = np ):
+    def cutIdxs( self, cut, mathmod = None ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
         mask = self.cutMask(cut, mathmod)
         return np.nonzero(mask)[0]
 
-    def entries( self, selection = False, mathmod = np ):
+    def entries( self, selection = False, mathmod = None ):
         '''
         Gets the number of entries of the class. If a cut selection is given, it is
         calculated the number of events that satisfy those cuts.
@@ -204,7 +204,7 @@ class DataMgr( dict ):
         '''
         return len(self.keys())
 
-    def varEvents( self, variables, cuts = False, mathmod = np ):
+    def varEvents( self, variables, cuts = False, mathmod = None ):
         '''
         Return a list of lists with the values associated with < variables >. If
         an element in < variables > is a variable, it gets the list of values for
@@ -232,7 +232,7 @@ class DataMgr( dict ):
         
         return values
 
-    def makeVariable( self, varname, arg, mathmod = np, function = False ):
+    def makeVariable( self, varname, arg, mathmod = None, function = False ):
         '''
         Makes another variable using those in the class. There are two different
         ways to do it. The first one consists on specifying the new variable name,
@@ -267,7 +267,7 @@ class DataMgr( dict ):
         for key, values in self.iteritems():
             values.append(dic[key])
 
-    def display( self, variables = None, cuts = '', mathmod = np, evts = None, prec = 3 ):
+    def display( self, variables = None, cuts = '', mathmod = None, evts = None, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -411,7 +411,7 @@ class DataMgr( dict ):
             else:
                 return ofile
     
-    def subSample( self, name = '', cuts = '', mathmod = np, evts = None, varset = '*' ):
+    def subSample( self, name = '', cuts = '', mathmod = None, evts = None, varset = '*' ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be

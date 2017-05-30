@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/04/2017
+#//  Last update: 30/05/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -27,12 +27,14 @@ import numpy
 
 class EvalExpr:
 
-    def __init__( self, expr, mathmod = math ):
+    def __init__( self, expr, mathmod = None ):
         '''
         This class allows to format a given expression in such a way that takes
         into account the mathematical functions and the logical operators. The module
         containing the mathematical functions can be specified.
         '''
+        if mathmod == None:
+            mathmod = math
 
         self.expr      = ''
         self.variables = []
@@ -59,8 +61,8 @@ class EvalExpr:
         '''
     
         truevars = []
-        fmlist   = dir( mathmod )
-        fblist   = dir( __builtin__ )
+        fmlist   = dir(mathmod)
+        fblist   = dir(__builtin__)
         mathmod  = mathmod.__name__ + '.'
     
         idx    = 0
@@ -160,13 +162,16 @@ class NumpyEvalExpr(EvalExpr):
                '^'    : 'np.logical_xor',
                'not ' : 'np.logical_not'}
     
-    def __init__( self, expr, mathmod = numpy ):
+    def __init__( self, expr, mathmod = None ):
         '''
         Build this class from an expression and the math module to be
         used. The constructor of the base class is called to do the first
         processing of the expression. Then replacements are done to
         introduce the numpy logical expressions in it.
         '''
+        if mathmod == None:
+            mathmod = numpy
+        
         EvalExpr.__init__(self, expr, mathmod)
         
         self.comp = {}
