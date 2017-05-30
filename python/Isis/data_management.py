@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/04/2017
+#//  Last update: 30/05/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -20,6 +20,7 @@
 #/////////////////////////////////////////////////////////////
 
 
+import collections
 import math
 import numpy as np
 
@@ -63,9 +64,9 @@ class DataMgr( dict ):
                 elif ftype == 'txt':
                     self.__init__( name, txtToDict( path, variables, colid ) )
                 else:
-                    sendErrorMsg('%s => Unknown input file type < %s >' %(name, ftype))
+                    sendErrorMsg('{} => Unknown input file type < {} >'.format(name, ftype))
             else:
-                sendErrorMsg('%s => The input file type must be specified' %name)
+                sendErrorMsg('{} => The input file type must be specified'.format(name))
         else:
             for kw, lst in path.iteritems():
                 self[ kw ] = np.array(lst)
@@ -75,23 +76,23 @@ class DataMgr( dict ):
         
             wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
             if wrong:
-                sendErrorMsg('%s => The lists stored in the manager '\
-                             'have different lengths' %self.name)
+                sendErrorMsg('{} => The lists stored in the manager '\
+                             'have different lengths'.format(self.name))
 
     def __add__( self, other ):
         '''
         Allows merging two objects of this class
         '''
-        mgr = DataMgr( self.name + '__' + other.name )
+        mgr = DataMgr(self.name + '__' + other.name)
         
         true_vars = set(self.keys()).intersection(other.keys())
         for var in true_vars:
-            mgr[ var ] = np.concatenate((self[ var ], other[ var ]))
+            mgr[ var ] = np.concatenate((self[var], other[var]))
         
-        no_booked = set(self.keys() + other.keys()).difference( true_vars )
+        no_booked = set(self.keys() + other.keys()).difference(true_vars)
         if no_booked:
-            sendWarningMsg('%s => The following variables are not '\
-                           'booked: %s' %(mgr.name, no_booked))
+            sendWarningMsg('{} => The following variables are not '\
+                           'booked: {}'.format(mgr.name, no_booked))
         
         return mgr
 
@@ -122,11 +123,11 @@ class DataMgr( dict ):
         Sets the new value for the iteration. If it reaches the limit the exception
         is raised.
         '''
-        if self._iter == len( self ):
+        if self._iter == len(self):
             raise StopIteration
         else:
             self._iter += 1
-            return self.getEventDict( self._iter - 1 )
+            return self.getEventDict(self._iter - 1)
             
     def copy( self, name = '' ):
         '''
@@ -134,27 +135,32 @@ class DataMgr( dict ):
         '''
         if not name:
             name = self.name + '_copy'
-        return DataMgr( name, self )
+        return DataMgr(name, self)
 
     def cutMask( self, cut, mathmod = np ):
         '''
         Return the mask associated with the events passing the given cut
         '''
-        eval_expr = NumpyEvalExpr( cut, mathmod )
+        eval_expr = NumpyEvalExpr(cut, mathmod)
         cut       = eval_expr.expr
-        variables = eval_expr.variables
-        varstoadd = [ v for v in variables if v not in self ]
+
+        if cut:
+            variables = eval_expr.variables
+            varstoadd = [v for v in variables if v not in self]
         
-        if varstoadd:
-            sendErrorMsg('Need to load additional variables to apply the cuts: %s'
-                         %varstoadd)
+            if varstoadd:
+                sendErrorMsg('Need to load additional variables to '\
+                             'apply the cuts: {}'.format(varstoadd))
         
-        values = [self[var] for var in variables]
+            values = [self[var] for var in variables]
         
-        for i, var in enumerate(variables):
-            cut = cut.replace(var, 'values[ %i ]' %i)
-            
-        return eval(cut)
+            for i, var in enumerate(variables):
+                cut = cut.replace(var, 'values[{}]'.format(i))
+
+            return eval(cut)
+
+        else:
+            return np.ones(len(self))
     
     def cutIdxs( self, cut, mathmod = np ):
         '''
@@ -188,9 +194,9 @@ class DataMgr( dict ):
         in the order specified.
         '''
         if len( args ):
-            return tuple( [ self[ var ][ ievt ] for var in args ] )
+            return tuple([self[var][ievt] for var in args])
         else:
-            return tuple( [ values[ ievt ] for var, values in self.iteritems() ] )
+            return tuple([values[ievt] for var, values in self.iteritems()])
 
     def getNvars( self ):
         '''
@@ -239,8 +245,8 @@ class DataMgr( dict ):
         expression.
         '''
         if function:
-            var_tensor = [self[v] for v in arg ]
-            lvars      = xrange( len( arg ) )
+            var_tensor = [self[v] for v in arg]
+            lvars      = xrange(len(arg))
             new_var    = function(*var_tensor)
             self[varname] = np.array(new_var)
         else:
@@ -249,9 +255,9 @@ class DataMgr( dict ):
             variables = eval_expr.variables
 
             for var in variables:
-                expr = expr.replace(var, "self['%s']" %var)
+                expr = expr.replace(var, "self['{}']".format(var))
 
-            self[ varname ] = eval(expr)
+            self[varname] = eval(expr)
 
     def newEvent( self, dic ):
         '''
@@ -259,9 +265,9 @@ class DataMgr( dict ):
         provided.
         '''
         for key, values in self.iteritems():
-            values.append( dic[ key ] )
+            values.append(dic[key])
 
-    def display( self, variables = None, cuts = '', mathmod = np, evts = -1, prec = 3 ):
+    def display( self, variables = None, cuts = '', mathmod = np, evts = None, prec = 3 ):
         '''
         Prints the information of the class as well as the values for the first 20
         events. If < evts > is introduced as an input, the number of events showed
@@ -272,12 +278,8 @@ class DataMgr( dict ):
         variables = variables or []
         
         if not self:
-            sendErrorMsg('%s => No variables booked in this manager' %self.name)
+            sendErrorMsg('{} => No variables booked in this manager'.format(self.name))
             return
-        
-        form = '%.' + str( prec ) + 'e'
-        if prec:
-            prec += 1
         
         ''' If no variables are specified all are printed '''
         if variables == []:
@@ -286,28 +288,27 @@ class DataMgr( dict ):
         
         ''' Prints the name of the manager '''
         if self.name:
-            lname = 3*len( self.name )
-            print '\n' + lname*'*' + '\n' + self.name.center( lname ) + '\n' + lname*'*'
+            ln  = 3*len(self.name)
+            out = '\n{0}\n{1:^{2}}\n{0}'
+            sep = ln*'*'
+            print out.format(sep, self.name, ln)
         
         '''
         Prints the variables. The variable < maxsize > is the maximum size of the
         numbers in the print
         '''
-        maxsize   = 7 + prec
-        vout      = ' '
+        maxsize   = 8 + prec
         shortvars = []
         for var in variables:
-            vout += var + ', '
-            if len( var ) > maxsize:
-                shortvars.append( var[ :maxsize ] + '*' )
-            else:
-                shortvars.append( var.center( maxsize ) )
-        print 'Variables:' + vout[ :-2 ]
-        vout = '| '
-        for var in shortvars:
-            vout += var.center( maxsize ) + ' |'
-        deco = len( vout )*'='
-        print deco + '\n' + vout + '\n' + deco
+            if len(var) > maxsize:
+                var = var[:maxsize] + '*'
+            shortvars.append('{0:^{1}}'.format(var, maxsize))
+            
+        print '{}: {}'.format('Variables', ', '.join(variables))
+        
+        vout = '| {} |'.format(' | '.join(shortvars))
+        deco = len(vout)*'='
+        print '{0}\n{1}\n{0}'.format(deco, vout)
         
         ''' Prints the values of the variables '''
         if cuts != '':
@@ -315,26 +316,23 @@ class DataMgr( dict ):
         else:
             evtlst = np.arange(len(self))
 
-        if evts != -1:
-            i = 0
-            for ievt in evtlst:
-                if i == evts: break
-                i += 1
-                vout = '| '
-                for var in self.getEventTuple( ievt, *variables ):
-                    vout += ( form %var ).rjust( maxsize ) + ' |'
-                print vout
-            print deco + '\n'
+        form = '{:' + str(maxsize) + '.' + str(prec) + 'e}'
+
+        buildLine = lambda ievt: '| {} |'.format(
+            ' | '.join(form.format(v)
+                       for v in self.getEventTuple(ievt, *variables)))
+        
+        if evts != None:
+            for ievt in evtlst[:evts]:
+                print buildLine(ievt)
+            print '{}\n'.format(deco)
         else:
             for ievt in evtlst:
                 if ievt and ievt % 20 == 0:
                     if raw_input(
                         '< Introduce q to exit, and any other input to continue printing >: '
                         ) == 'q': break
-                vout = '| '
-                for var in self.getEventTuple( ievt, *variables ):
-                    vout += ( form %var ).rjust( maxsize ) + ' |'
-                print vout
+                print buildLine(ievt)
             if ievt + 1 == len(evtlst):
                 print deco + '\n'
 
@@ -349,7 +347,7 @@ class DataMgr( dict ):
         from < vmin > to < vmax > in < npoints >.
         '''
         if sense not in ('>', '>=', '<', '<='):
-            sendErrorMsg('Unable to parse < %s > as a sense-like symbol')
+            sendErrorMsg('Unable to parse < {} > as a sense-like symbol'.format(sense))
             return
 
         values = self[var]
@@ -382,32 +380,32 @@ class DataMgr( dict ):
         providing a list with them.
         '''
         variables = variables or self.keys()
-        if ftype in ( 'root', 'Root', 'ROOT' ):
+        if ftype in ('root', 'Root', 'ROOT'):
             if name != '':
-                ofile = rt.TFile.Open( name, 'RECREATE' )
+                ofile = rt.TFile.Open(name, 'RECREATE')
             else:
                 ofile = False
                 name  = rt.gDirectory.GetName()
             print self.name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
-            dictToTree( self, name = tree_name, variables = variables )
-            print self.name, '=> Written', len( self ), 'entries'
+            dictToTree(self, name = tree_name, variables = variables)
+            print self.name, '=> Written', len(self), 'entries'
             if ofile and close:
                 ofile.Close()
             else:
                 return ofile
-        elif ftype in ( 'txt', 'TXT' ):
-            ofile = open( name, 'wt' )
+        elif ftype in ('txt', 'TXT'):
+            ofile = open(name, 'wt')
             print self.name, '=> Saving txt data in file <', name, '>'
             varvalues = [ self[ var ] for var in variables ]
             out = ''
             for var in variables:
                 out += var + '\t'
-            ofile.write( out[ :-1 ] + '\n' )
-            for ievt in xrange( len( self ) ):
+            ofile.write(out[ :-1 ] + '\n')
+            for ievt in xrange(len(self)):
                 out = ''
                 for var in varvalues:
-                    out += str( var[ ievt ] ) + '\t'
-                ofile.write( out[ :-1 ] + '\n' )
+                    out += str(var[ ievt ]) + '\t'
+                ofile.write(out[ :-1 ] + '\n')
             if close:
                 ofile.close()
             else:
@@ -426,7 +424,10 @@ class DataMgr( dict ):
             name = self.name + '_SubSample'
         
         if evts != None:
-            evts = np.array(evts)
+            if isinstance(evts, collections.Iterable):
+                evts = np.array(evts)
+            else:
+                evts = np.arange(evts)
         else:
             evts = np.arange(len(self))
             
@@ -457,46 +458,46 @@ def txtToDict( fname, tnames = None, colid = None ):
     tnames = tnames or []
     colid  = colid or []
     
-    ifile   = open( fname, 'rt' )
+    ifile   = open(fname, 'rt')
     line    = ifile.readline().split()
     if colid == []:
-        colid = range( len( line ) )
-    if all( isinstance( line[ i ], str ) for i in colid ):
+        colid = range(len(line))
+    if all( isinstance(line[i], str) for i in colid):
         if tnames and tnames != [ '*' ]:
-            colid = [ colid[ i ] for i in colid if line[ i ] in tnames ]
+            colid = [colid[i] for i in colid if line[i] in tnames]
         else:
-            tnames = [ line[ i ] for i in colid ]
+            tnames = [line[i] for i in colid]
         line = ifile.readline().split()
-    elif any( isinstance( line[ i ], str ) for i in colid ):
+    elif any(isinstance(line[i], str) for i in colid):
         sendErrorMsg('The first line of the input file has not the correct format')
         return
     else:
         if not tnames:
             sendErrorMsg('The names of the variables in the colid have to be specified')
             return
-        elif len( tnames ) != len( colid ):
+        elif len( tnames ) != len(colid):
             sendErrorMsg('The names of the variables and the column index must match')
             return
     convfuncs, varvalues = [], []
-    for index, icol in enumerate( colid ):
+    for index, icol in enumerate(colid):
         value = line[ icol ]
         try:
             int( value )
-            convfuncs.append( int )
+            convfuncs.append(int)
             isint = True
         except:
             try:
-                float( value )
-                convfuncs.append( float )
+                float(value)
+                convfuncs.append(float)
             except:
-                sendErrorMsg('Format for column < %s > not recognised' %i)
-        varvalues.append( [ convfuncs[ -1 ]( value ) ] )
+                sendErrorMsg('Format for column < {} > not recognised'.format(i))
+        varvalues.append([convfuncs[-1](value)])
     for line in ifile:
         line = line.split()
-        for index, icol in enumerate( colid ):
-            varvalues[ index ].append( convfuncs[ index ]( line[ icol ] ) )
+        for index, icol in enumerate(colid):
+            varvalues[index].append(convfuncs[index](line[icol]))
     ifile.close()
-    return { name: varvalues[ index ] for index, name in enumerate( tnames ) }
+    return {name: varvalues[index] for index, name in enumerate(tnames)}
 
 
 def varsInRootTree( tree = None, fname = '', tpath = '', regexps = None ):
@@ -507,21 +508,20 @@ def varsInRootTree( tree = None, fname = '', tpath = '', regexps = None ):
     regexps = regexps or []
     
     if not tree:
-        rfile = rt.TFile.Open( fname )
-        tree  = rfile.Get( tpath )
-    brnames = [ el.GetName()
-                for el in tree.GetListOfBranches() ]
+        rfile = rt.TFile.Open(fname)
+        tree  = rfile.Get(tpath)
+    brnames = [el.GetName() for el in tree.GetListOfBranches()]
     if not tree:
         rfile.Close()
     if regexps != []:
         truenames = []
         for expr in regexps:
-            addlst = StringListFilter( brnames, expr )
+            addlst = StringListFilter(brnames, expr)
             if addlst != []:
                 truenames += addlst
             else:
                 sendWarningMsg('No variables found matching '\
-                               'expression < %s >' %expr)
+                               'expression < {} >'.format(expr))
         return truenames
     else:
         return brnames
