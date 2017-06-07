@@ -24,7 +24,7 @@ cflags="@CMAKE_CXX_FLAGS@"
 
 # Paths to the include folders
 iinclude="-I@INSTALL_INCLUDE_DIR@"
-rinclude="-I@ROOT_INCLUDE_DIR@"
+rinclude="-I@ROOT_INCLUDE_DIRS@"
 
 # C++ libraries (both Root and Isis)
 rlibs="-L@ROOT_LIBRARY_DIR@ @ROOT_LIBRARIES_TO_LD@"
