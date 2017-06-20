@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 20/06/2017
 //
 // --------------------------------------------------------
 //
@@ -20,8 +20,8 @@
 ///////////////////////////////////////////////////////////
 
 
-#ifndef __UTILS__
-#define __UTILS__
+#ifndef UTILS_H
+#define UTILS_H
 
 #include "Definitions.h"
 #include "Messenger.h"
@@ -170,28 +170,6 @@ namespace isis {
     return ss.str();
   }
   
-  //_______________________________________________________________________________
-  // Interpolate the < y > value given two vectors and the associated < x > value.
-  // when dealing with integers, this function will return the integer part of
-  // the result, so no rounding will be made.
-  template<class typeA, class typeB>
-  double interpolate( const std::vector<typeA> &xvalues,
-		      const std::vector<typeB> &yvalues,
-		      const typeA &value ) {
-
-    auto it = std::lower_bound(xvalues.cbegin(), xvalues.cend(), value);
-
-    size_t pos = it - xvalues.cbegin();
-
-    switch ( pos ) {
-      
-    case 0:
-      return yvalues.front();
-      
-    default:
-      return (yvalues.at(pos - 1) + yvalues.at(pos))/2.;
-    }
-  }
 }
 
 #endif

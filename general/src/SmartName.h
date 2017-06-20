@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 20/06/2017
 //
 // --------------------------------------------------------------------------------
 //
@@ -22,8 +22,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef SMART_NAME
-#define SMART_NAME
+#ifndef SMARTNAME_H
+#define SMARTNAME_H
+
+#include "NamedObject.h"
 
 #include <string>
 #include <vector>
@@ -33,7 +35,7 @@
 
 namespace isis {
 
-  class SmartName {
+  class SmartName : public NamedObject {
 
   public:
 
@@ -49,9 +51,6 @@ namespace isis {
     // Builds the complete path to a file, given the type of the file (without the dot)
     inline std::string buildFilePath( const std::string &ext );
     
-    // Returns the current name of the class
-    inline const std::string& getName() const;
-
     // Add a string
     inline SmartName operator + ( const std::string &str ) const;
 
@@ -87,9 +86,6 @@ namespace isis {
     
   protected:
     
-    // Name being stored
-    std::string fName;
-
     // Character separating each part of the name
     char fSep;
     
@@ -101,10 +97,6 @@ namespace isis {
     return fName + "." + ext;
   }
 
-  //_______________________________________________________________________________
-  //
-  inline const std::string& SmartName::getName() const { return fName; }
-  
   //_______________________________________________________________________________
   //
   inline SmartName SmartName::operator + ( const std::string &str ) const {
