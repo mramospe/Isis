@@ -438,7 +438,7 @@ def mergeDicts( *args ):
     return rdic
 
 
-class ObjRegister:
+class ObjRegistry:
     '''
     Class to store objects and ensure they are not destructed. This register
     can also track another, so changes in the latter are also done in the first.
@@ -502,6 +502,8 @@ class ObjRegister:
         obj = objconst(*args, **kwargs)
 
         self.add(name, obj)
+
+        return obj
 
     def remove( self, name ):
         '''
