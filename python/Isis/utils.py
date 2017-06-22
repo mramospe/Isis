@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/04/2017
+#//  Last update: 22/06/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -27,8 +27,8 @@ import __builtin__
 
 def calcMinDist( lst, allow_zero = True ):
     '''
-    Calculates the minimum distance between values in an iterable object. With the
-    input parameter < allow_zero > one can prevent the function to take into
+    Calculates the minimum distance between values in an iterable object. With
+    the input parameter < allow_zero > one can prevent the function to take into
     account elements in the list with the same value.
     '''
     if allow_zero:
@@ -198,7 +198,7 @@ class EnvVar:
         pos = filter(lambda x: x.name == self.name, lst)
         
         reas_obj = []
-        removed = []
+        removed  = []
         if pos:
             if pos[0].obj != self.obj:
                 reas_obj = [pos[0]]
@@ -206,7 +206,7 @@ class EnvVar:
             removed = [self]
 
         reas_keys = []
-        added = []
+        added     = []
         for el in lst:
             if el.name != self.name:
                 added.append(el)
@@ -436,6 +436,93 @@ def mergeDicts( *args ):
         for dic in args:
             rdic[ key ] += dic[ key ]
     return rdic
+
+
+class ObjRegister:
+    '''
+    Class to store objects and ensure they are not destructed. This register
+    can also track another, so changes in the latter are also done in the first.
+    '''
+    def __init__( self, name, other = None, track = False ):
+        '''
+        Build a new register with the given name. A copy from another register
+        can be made.
+        '''
+        self.name     = name
+        self.register = {}
+        self.tracks   = []
+
+        if other != None:
+            self.update(other, track)
+
+    def __getitem__( self, name ):
+        '''
+        Get the desired object
+        '''
+        return self.register[name]
+        
+    def add( self, name, obj ):
+        '''
+        Add a new object to this class
+        '''
+        if name not in self.register:
+            
+            self.register[name] = obj
+            
+        else:
+            
+            if self[name] is obj:
+                pass
+            
+            elif self[name] == obj:
+                
+                sendWarningMsg('{} => Reference "{}" already in use, but '
+                               'objects look equivalent'
+                               .format(self.name, name))
+                self.register[name] = obj
+                
+            else:
+                
+                sendErrorMsg('{} => Reference "{}" already in use; new object '
+                             'not stored'.format(self.name, name))
+                return
+            
+        for t in self.tracks:
+            t.add(name, obj)
+
+    def build( self, name, objconst, args = None, kwargs = None ):
+        '''
+        Add a new object to this class using its constructor
+        '''
+        if args == None:
+            args = ()
+        if kwargs == None:
+            kwargs = {}
+
+        obj = objconst(*args, **kwargs)
+
+        self.add(name, obj)
+
+    def remove( self, name ):
+        '''
+        Return the desired object and remove it from the register
+        '''
+        for t in self.tracks:
+            t.remove(name)
+            
+        return self.register.pop(name)
+
+    def update( self, other, track = False ):
+        '''
+        Update the current register with the objects from another. If "track" is
+        set to "True", the other register is set to update this class after
+        any modification.
+        '''
+        if track:
+            other.tracks.append(self)
+            
+        for k, obj in other.register.iteritems():
+            self.add(k, obj)
 
 
 class PythonEnvMgr:
