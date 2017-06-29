@@ -2,22 +2,22 @@
 //
 //  General package
 //
-// --------------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 //
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 29/06/2017
 //
-// --------------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 //
 //  Description:
 //
 //  Implements the class Vector, that allows to compute and perform operations
 //  that concern three-dimensional vectors.
 //
-// --------------------------------------------------------------------------------
-///////////////////////////////////////////////////////////////////////////////////
+// ------------------------------------------------------------------------
+///////////////////////////////////////////////////////////////////////////
 
 
 #ifndef __VECTOR__
@@ -27,7 +27,7 @@
 #include <cmath>
 
 
-//_______________________________________________________________________________
+//_________________________________________________________________________
 
 namespace isis {
 
@@ -36,52 +36,99 @@ namespace isis {
   public:
     
     // Main constructor
-    Vector();
+    Vector() { };
 
     // Constructor given the three components of the vector
-    Vector( const double &x, const double &y, const double &z );
+    Vector( const double &x, const double &y, const double &z ) :
+      fX(x),
+      fY(y),
+      fZ(z) { }
 
     // Copy constructor
-    Vector( const Vector &vec );
+    Vector( const Vector &vec ) :
+      fX(vec.fX),
+      fY(vec.fY),
+      fZ(vec.fZ) { }
 
     // Destructor
-    ~Vector();
+    ~Vector() { };
     
     // Return the angle between two vectors
-    inline double angle( const Vector &vec ) const;
+    inline double angle( const Vector &vec ) const {
+
+      return std::acos(this->cosAngle(vec));
+    }
 
     // Return the cosine of the angle between two vectors
-    inline double cosAngle( const Vector &vec ) const;
+    inline double cosAngle( const Vector &vec ) const {
+
+      return this->dot(vec)/(this->mod()*vec.mod());
+    }
 
     // Return the cosine of the phi angle in the x, y, z coordinate system
-    inline double cosPhi() const;
+    inline double cosPhi() const {
+
+      return fX/std::sqrt(fX*fX + fY*fY);
+    }
 
     // Return the cosine of the theta angle in the x, y, z coordinate system
-    inline double cosTheta() const;
+    inline double cosTheta() const {
+
+      return fZ/( this->mod() );
+    }
 
     // Performs the cross product with a given vector
-    inline Vector cross( const Vector &vec ) const;
+    inline Vector cross( const Vector &vec ) const {
+
+      return Vector( fY*vec.fZ - fZ*vec.fY,
+		     fZ*vec.fX - fX*vec.fZ,
+		     fX*vec.fY - fY*vec.fX );
+    }
 
     // Computes the dot product with a given vector
-    inline double dot( const Vector &vec ) const;
+    inline double dot( const Vector &vec ) const {
+      
+      return fX*vec.fX + fY*vec.fY + fZ*vec.fZ;
+    }
 
     // Gets the longitudinal vector
-    Vector getLong( const Vector &vec ) const;
+    inline Vector getLong( const Vector &vec ) const {
+
+      Vector u{this->unitary()};
+      return (u.dot(vec))*u;
+    }
 
     // Gets the transversal vector
-    Vector getTran( const Vector &vec ) const;
+    inline Vector getTran( const Vector &vec ) const {
+
+      Vector u{this->unitary()};
+      return (vec - (u.dot(vec))*u);
+    }
 
     // Return the module of the vector
-    inline double mod() const;
+    inline double mod() const {
+
+      return std::sqrt(this->mod2());
+    }
 
     // Return the squared value of the module of the vector
-    inline double mod2() const;
+    inline double mod2() const {
+
+      return fX*fX + fY*fY + fZ*fZ;
+    }
 
     // Return the phi angle in the X, Y, Z coordinate system
-    double phi() const;
+    inline double phi() const {
+
+      double phi = std::atan2(this->sinPhi(), this->cosPhi());
+      return phi > 0 ? phi : phi + 2*M_PI;
+    }
 
     // Return the value of the transverse component
-    inline double modT() const;
+    inline double modT() const {
+
+      return std::sqrt(fX*fX + fY*fY);
+    }
 
     // Rotate the vector in the X axis
     void rotateX( const double &angle );
@@ -93,22 +140,42 @@ namespace isis {
     void rotateZ( const double &angle );
 
     // Set the X coordinate
-    inline void setX( const double &val );
+    inline void setX( const double &val ) {
+
+      fX = val;
+    }
 
     // Set the Y coordinate
-    inline void setY( const double &val );
+    inline void setY( const double &val ) {
+
+      fY = val;
+    }
 
     // Set the Z coordinate
-    inline void setZ( const double &val );
+    inline void setZ( const double &val ) {
+
+      fZ = val;
+    }
 
     // Set all the coordinates
-    inline void setXYZ( const double &x, const double &y, const double &z );
+    inline void setXYZ( const double &x, const double &y, const double &z ) {
+
+      fX = x;
+      fY = y;
+      fZ = z;
+    }
 
     // Return the sine of the phi angle in the x, y, z coordinate system
-    inline double sinPhi() const;
+    inline double sinPhi() const {
+
+      return fY/(this->modT());
+    }
 
     // Return the sine of the theta angle in the x, y, z coordinate system
-    inline double sinTheta() const;
+    inline double sinTheta() const {
+
+      return (this->modT())/(this->mod());
+    }
 
     // Return the theta angle in the X, Y, Z coordinate system
     double theta() const;
@@ -117,55 +184,128 @@ namespace isis {
     Vector unitary() const;
 
     // Return the X coordinate
-    inline double X() const;
+    inline double X() const {
+
+      return fX;
+    }
 
     // Return a pointer to the X coordinate
-    inline double* pathToX();
+    inline double* pathToX() {
+
+      return &fX;
+    }
 
     // Return the Y coordinate
-    inline double Y() const;
+    inline double Y() const {
+
+      return fY;
+    }
 
     // Return a pointer to the Y coordinate
-    inline double* pathToY();
+    inline double* pathToY() {
+
+      return &fY;
+    }
 
     // Return the Z coordinate
-    inline double Z() const;
+    inline double Z() const {
+
+      return fZ;
+    }
 
     // Return a pointer to the Y coordinate
-    inline double* pathToZ();
+    inline double* pathToZ() {
+
+      return &fZ;
+    }
 
     // Assign values using another vector
-    inline Vector& operator = ( const Vector &vec );
+    inline Vector& operator = ( const Vector &vec ) {
+
+      fX = vec.fX;
+      fY = vec.fY;
+      fZ = vec.fZ;
+      
+      return *this;
+    }
 
     // Multiply by an scalar
-    inline Vector& operator *= ( const double &val );
+    inline Vector& operator *= ( const double &val ) {
+
+      fX *= val;
+      fY *= val;
+      fZ *= val;
+      
+      return *this;
+    }
 
     // Divide by an scalar
-    inline Vector& operator /= ( const double &val );
+    inline Vector& operator /= ( const double &val ) {
+
+      fX /= val;
+      fY /= val;
+      fZ /= val;
+
+      return *this;
+    }
 
     // Add another vector
-    inline Vector& operator += ( const Vector &vec );
+    inline Vector& operator += ( const Vector &vec ) {
+
+      fX += vec.fX;
+      fY += vec.fX;
+      fZ += vec.fZ;
+    
+      return *this;
+    }
 
     // Substract another vector
-    inline Vector& operator -= ( const Vector &vec );
+    inline Vector& operator -= ( const Vector &vec ) {
+
+      fX -= vec.fX;
+      fY -= vec.fX;
+      fZ -= vec.fZ;
+    
+      return *this;
+    }
 
     // Add two vectors
-    inline Vector operator + ( const Vector &vec ) const;
+    inline Vector operator + ( const Vector &vec ) const {
+
+      return Vector(fX + vec.fX, fY + vec.fY, fZ + vec.fZ);
+    }
 
     // Substract two vectors
-    inline Vector operator - ( const Vector &vec ) const;
+    inline Vector operator - ( const Vector &vec ) const {
+
+      return Vector(fX - vec.fX, fY - vec.fY, fZ - vec.fZ);
+    }
 
     // Divide by an scalar
-    inline Vector operator / ( const double &val ) const;
+    inline Vector operator / ( const double &val ) const {
+
+      return Vector(fX/val, fY/val, fZ/val);
+    }
 
     // Multiply scalar*vector
-    inline friend Vector operator * ( const double &val , const Vector &vec );
+    inline friend Vector operator * ( const double &val , const Vector &vec ) {
+
+      return Vector(vec.fX*val, vec.fY*val, vec.fZ*val);
+    }
 
     // Multiply vector*scalar
-    inline friend Vector operator * ( const Vector &vec, const double &val  );
+    inline friend Vector operator * ( const Vector &vec, const double &val  ) {
+
+      return val*vec;
+    }
 
     // Return vector as a stream
-    inline std::ostream& operator << ( std::ostream &os );
+    inline std::ostream& operator << ( std::ostream &os ) {
+
+      os << "[ " << fX << ", " << fY << ", " << fZ << " ]";
+
+      return os;
+    }
 
   protected:
 
@@ -179,213 +319,6 @@ namespace isis {
     double fZ;
 
   };
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::angle( const Vector &vec ) const {
-    return std::acos( this->cosAngle( vec ) );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::cosAngle( const Vector &vec ) const {
-    
-    return this->dot( vec )/( this->mod()*vec.mod() );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::cosPhi() const {
-    
-    return fX/std::sqrt( fX*fX + fY*fY );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::cosTheta() const {
-    
-    return fZ/( this->mod() );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector Vector::cross( const Vector &vec ) const {
-    
-    return Vector( fY*vec.fZ - fZ*vec.fY,
-		   fZ*vec.fX - fX*vec.fZ,
-		   fX*vec.fY - fY*vec.fX );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::dot( const Vector &vec ) const {
-    
-    return fX*vec.fX + fY*vec.fY + fZ*vec.fZ;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::mod() const {
-    
-    return std::sqrt( this->mod2() );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::mod2() const {
-    
-    return fX*fX + fY*fY + fZ*fZ;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::modT() const {
-    
-    return std::sqrt( fX*fX + fY*fY );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline void Vector::setX( const double &val ) { fX = val; }
-
-  //_______________________________________________________________________________
-  //
-  inline void Vector::setY( const double &val ) { fY = val; }
-
-  //_______________________________________________________________________________
-  //
-  inline void Vector::setZ( const double &val ) { fZ = val; }
-
-  //_______________________________________________________________________________
-  //
-  inline void Vector::setXYZ( const double &x, const double &y, const double &z ) {
-    fX = x, fY = y; fZ = z;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::sinPhi() const {
-    return fY/( this->modT() );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double Vector::sinTheta() const {
-    
-    return ( this->modT() )/( this->mod() );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline double  Vector::X() const { return fX; }
-
-  //_______________________________________________________________________________
-  //
-  inline double* Vector::pathToX() { return &fX; }
-
-  //_______________________________________________________________________________
-  //
-  inline double  Vector::Y() const { return fY; }
-
-  //_______________________________________________________________________________
-  //
-  inline double* Vector::pathToY() { return &fY; }
-
-  //_______________________________________________________________________________
-  //
-  inline double  Vector::Z() const { return fZ; }
-
-  //_______________________________________________________________________________
-  //
-  inline double* Vector::pathToZ() { return &fZ; }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector& Vector::operator = ( const Vector &vec ) {
-
-    fX = vec.fX; fY = vec.fY; fZ = vec.fZ;
-    return *this;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector& Vector::operator *= ( const double &val ) {
-
-    fX *= val; fY *= val; fZ *= val;
-    
-    return *this;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector& Vector::operator /= ( const double &val ) {
-
-    fX /= val; fY /= val; fZ /= val;
-    
-    return *this;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector& Vector::operator += ( const Vector &vec ) {
-
-    fX += vec.fX; fY += vec.fX; fZ += vec.fZ;
-    
-    return *this;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector& Vector::operator -= ( const Vector &vec ) {
-
-    fX -= vec.fX; fY -= vec.fX; fZ -= vec.fZ;
-    
-    return *this;
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector Vector::operator + ( const Vector &vec ) const {
-
-    return Vector( fX + vec.fX, fY + vec.fY, fZ + vec.fZ );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector Vector::operator - ( const Vector &vec ) const {
-
-    return Vector( fX - vec.fX, fY - vec.fY, fZ - vec.fZ );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector Vector::operator / ( const double &val ) const {
-
-    return Vector( fX/val, fY/val, fZ/val );
-  }
-  
-  //_______________________________________________________________________________
-  //
-  inline Vector operator * ( const double &val , const Vector &vec ) {
-
-    return Vector( vec.fX*val, vec.fY*val, vec.fZ*val );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline Vector operator * ( const Vector &vec, const double &val  ) {
-    
-    return Vector( vec.fX*val, vec.fY*val, vec.fZ*val );
-  }
-
-  //_______________________________________________________________________________
-  //
-  inline std::ostream& Vector::operator << ( std::ostream &os ) {
-    
-    os << "[ " << fX << ", " << fY << ", " << fZ << " ]";
-    
-    return os;
-  }
 
 }
 
