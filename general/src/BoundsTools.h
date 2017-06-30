@@ -98,7 +98,7 @@ namespace isis {
   // from "first" to "last"
   template<class InputIterator, class btype>
   inline Sizes boundedFillVec( InputIterator first, InputIterator last,
-					     const std::vector<btype> &bounds ) {
+			       const std::vector<btype> &bounds ) {
 
     Sizes out(bounds.size() + 1, 0);
     while ( first != last )

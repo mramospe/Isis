@@ -59,7 +59,7 @@ namespace iboost {
 
     // Initialize the class
     inline void initialize() {
-
+      
       if ( !fMap.size() )
 	fMap = {
 	  {this->dtypeToStr< isis::Char   >(), 'B'},

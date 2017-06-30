@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 29/06/2017
+//  Last update: 30/06/2017
 //
 // ------------------------------------------------------------------------
 //
@@ -21,17 +21,19 @@
 //  operator, it will add units to the last index till the maximum is
 //  reached, when it is reset and a new unit is added to the previous one,
 //  on a recursively process. The maximum number of loops is obtained
-//  using the < GetNloops > method.
+//  using the < nloops > method.
 //
 // ------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////
 
 
-#ifndef LOOP_ARRAY
-#define LOOP_ARRAY
+#ifndef LOOPARRAY_H
+#define LOOPARRAY_H
 
+#include "Looper.h"
 #include "Utils.h"
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -40,7 +42,7 @@
 
 namespace isis {
 
-  class LoopArray {
+  class LoopArray : public Looper {
 
   public:
 
@@ -56,25 +58,39 @@ namespace isis {
       // Destructor
       ~LoopArrayIndex() { };
 
+      // Parse a given index. The given value is modified, so the iterations
+      // corresponding to this item are removed. Returns the index for this
+      // item.
+      size_t parse( size_t &idx ) const {
+
+	size_t d = Max - Min;
+	size_t v = idx % d;
+
+	idx /= d;
+	
+	return v + Min;
+      }
+
       size_t Index;
       size_t Min;
       size_t Max;
     };
 
-    // Main constructor. The number of loops must be one since as new
-    // entries are added, this number is multiplied by their range.
-    LoopArray() { };
+    // Main constructor
+    LoopArray() : Looper() { };
 
     // Copy constructor
     LoopArray( const LoopArray &other ) :
+      Looper(),
       fIndices(other.fIndices),
-      fNloops(other.fNloops),
+      fN(other.fN),
       fPos(other.fPos) { }
     
     // Constructor given the sice of the array and the maximum loop value
     LoopArray( const size_t &size, const size_t &min, const size_t &max ) :
+      Looper(),
       fIndices(size, LoopArrayIndex(min, max)),
-      fNloops(ipow(max - min, size)) { }
+      fN(ipow(max - min, size)) { }
 
     // Destructor
     virtual ~LoopArray() { };
@@ -82,8 +98,11 @@ namespace isis {
     // Adds a new index variable to the array
     inline void addIndex( const size_t &min, const size_t &max ) {
 
-      fIndices.push_back( LoopArrayIndex( min, max ) );
-      fNloops *= ( max - min );
+      fIndices.push_back(LoopArrayIndex(min, max));
+
+      size_t d = max - min;
+      
+      fN = fN != 0 ? fN*d : d;
     }
 
     // Return the vector storing the indices
@@ -92,16 +111,16 @@ namespace isis {
       return fIndices;
     }
 
-    // Gets the number of indices stored in the array
-    inline const size_t getNindices() const {
+    // Return the number of indices in this class
+    inline size_t nindices() const {
 
       return fIndices.size();
     }
 
     // Gets the number of loops that would be made using this array
-    inline const size_t getNloops() const {
+    inline size_t nloops() const override {
 
-      return fNloops;
+      return fN;
     }
 
     // Returns the current position of the array
@@ -111,14 +130,14 @@ namespace isis {
     }
 
     // This method is set to enable the pythonization of the class
-    inline void next() {
+    inline void next() override {
 
       this->operator++();
     }
 
     // Resets the values of the array to their minimums to start a new
     // iteration
-    inline void start() {
+    inline void start() override {
 
       fPos = 0;
       for ( auto it = fIndices.begin(); it != fIndices.end(); ++it )
@@ -126,9 +145,9 @@ namespace isis {
     }
 
     // Return the status of the iteration
-    inline bool status() const {
+    inline bool status() const override {
 
-      return (fPos < fNloops);
+      return (fPos < fN);
     }
 
     // Returns the position to the first element of the vector of indices
@@ -142,6 +161,23 @@ namespace isis {
     inline std::vector<LoopArrayIndex>::const_iterator cend() const {
 
       return fIndices.cend();
+    }
+
+    // Return the current values for the indices
+    inline Sizes values() const {
+
+      Sizes res(fIndices.size());
+
+      auto it = fIndices.cbegin();
+      
+      std::generate(res.begin(), res.end(),
+		    [&it] () {
+		      
+		      return (it++)->Index;
+		      
+		    });
+      
+      return res;
     }
 
     // Moves one element forward in the array. This implies to add one
@@ -179,9 +215,20 @@ namespace isis {
     }
 
     // Returns the value of the index at position < index >
-    const size_t operator[]( size_t index ) const {
+    const Sizes operator[]( size_t index ) const {
 
-      return fIndices[index].Index;
+      Sizes result(fIndices.size());
+
+      auto it = fIndices.crbegin();
+      
+      std::generate(result.rbegin(), result.rend(),
+		    [&it, &index] {
+
+		      return (it++)->parse(index);
+		      
+		    });
+	
+      return result;
     }
 
   protected:
@@ -190,7 +237,7 @@ namespace isis {
     std::vector<LoopArrayIndex> fIndices;
     
     // Number of loops to be performed
-    size_t fNloops = 1;
+    size_t fN = 0;
 
     // Current position
     size_t fPos = 0;

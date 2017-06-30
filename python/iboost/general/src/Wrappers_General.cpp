@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -51,6 +51,25 @@ namespace CutMgr {
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(makeMergedCut_Overloads,
 					 isis::CutManager::makeMergedCut,
 					 0, 1);
+}
+
+// Wrappers for the class LoopArray
+namespace LoopArray {
+
+  // Convert vector to list
+  inline py::list getItem( const isis::LoopArray &looper,
+			   const size_t &idx ) {
+
+    auto indices = looper[idx];
+    
+    return iboost::stdVecToBoostList(indices);
+  }
+
+  // Convert vector to list
+  inline py::list values( const isis::LoopArray &looper ) {
+
+    return iboost::stdVecToBoostList(looper.values());
+  }
 }
 
 // Thin functions to send messages using the class Messenger
@@ -144,13 +163,14 @@ BOOST_PYTHON_MODULE( general ) {
     .def(py::init<const size_t&, const size_t&, const size_t&>())
     .def(py::init<const isis::LoopArray&>())
     .def("addIndex"   , &isis::LoopArray::addIndex)
-    .def("getNindices", &isis::LoopArray::getNindices)
-    .def("getNloops"  , &isis::LoopArray::getNloops)
     .def("getPos"     , &isis::LoopArray::getPos)
     .def("next"       , &isis::LoopArray::next)
+    .def("nindices"   , &isis::LoopArray::nindices)
+    .def("nloops"     , &isis::LoopArray::nloops)
     .def("start"      , &isis::LoopArray::start)
     .def("status"     , &isis::LoopArray::status)
-    .def("__getitem__", &isis::LoopArray::operator[])
+    .def("values"     , &LoopArray::values)
+    .def("__getitem__", &LoopArray::getItem)
     ;
   
   // Wrappers from ProgessBar.h
