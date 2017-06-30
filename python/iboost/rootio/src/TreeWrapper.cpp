@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -164,8 +164,8 @@ namespace iboost {
     // track of the types for each variable.
     isis::TreeBuffer buffer( tree );
 
-    auto vars = boostListToStdVec<std::string>(variables);
-    auto vec_keys = boostListToStdVec<std::string>(varkeys);
+    auto vars = boostListToStdCont<std::vector, std::string>(variables);
+    auto vec_keys = boostListToStdCont<std::vector, std::string>(varkeys);
 
     std::map<std::string, BuffVarWriter*> varmap;
   

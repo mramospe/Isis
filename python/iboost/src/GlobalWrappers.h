@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -66,69 +66,75 @@ namespace iboost {
   }
 
   //_______________________________________________________________________________
-  // Transform a python list into a standard vector
-  template<class type>
-  inline std::vector<type> boostListToStdVec( py::list &lst ) {
+  // Transform a python list into a standard container
+  template<template<class ...> class cont, class type>
+  inline cont<type> boostListToStdCont( py::list &lst ) {
 
-    size_t lgth = py::len( lst );
-    std::vector<type> res( lgth );
+    size_t lgth = py::len(lst);
+    
+    cont<type> res(lgth);
 
     size_t i = 0;
-    for ( auto it = res.begin(); it != res.end(); ++it, ++i )
-      (*it) = extractFromIndex<type>(lst, i);
+    std::generate(std::begin(res), std::end(res),
+		  [&i, &lst] () {
+
+		    return extractFromIndex<type>(lst, i++);
+
+		  });
 
     return res;
   }
   
   //_______________________________________________________________________________
-  // Transform a numpy ndarray object into a standard vector
+  // Transform a numpy ndarray object into a standard container
   template<class type>
-  inline std::vector<type> numpyArrayToStdVec( const np::ndarray &array ) {
+  inline type numpyArrayToStdCont( const np::ndarray &array ) {
 
     auto lgth = py::len(array);
-    std::vector<type> result(lgth);
+    type result(lgth);
     const char data_type = iboost::DTYPE_TO_TYPE.parse(array.get_dtype());
 
-#define I_CREATE_STDVEC_FROM_NUMPYARRAY( type, result ) {		\
+#define I_CREATE_STDCONT_FROM_NUMPYARRAY( type, result ) {		\
       type *type ## _ptr = reinterpret_cast<type*>(array.get_data());	\
-      std::copy(type ## _ptr, type ## _ptr + lgth, result.begin());	\
+      std::copy(type ## _ptr, type ## _ptr + lgth, std::begin(result)); \
     }
 
     I_SWITCH_BY_DATA_TYPE(data_type, result,
-			  I_CREATE_STDVEC_FROM_NUMPYARRAY,
+			  I_CREATE_STDCONT_FROM_NUMPYARRAY,
 			  
 			  IError << "Unknown array data type" << IEndMsg;
-			  return std::vector<type>();
+			  return type();
 			  );
     
     return result;
 
-#undef I_CREATE_STDVEC_FROM_NUMPYARRAY
+#undef I_CREATE_STDCONT_FROM_NUMPYARRAY
   }
 
   //_______________________________________________________________________________
-  // Transform a standard vector into a python list
+  // Transform a standard container into a python list
   template<class type>
-  inline py::list stdVecToBoostList( const std::vector<type> &vector ) {
+  inline py::list stdContToBoostList( const type &container ) {
     
     py::list list;
-    for ( const auto &v : vector )
+    for ( const auto &v : container )
       list.append(v);
     
     return list;
   }
 
   //_______________________________________________________________________________
-  // Transform a standard vector to a numpy ndarray
-  template<class type>
-  inline np::ndarray stdVecToNumpyArray( const std::vector<type> &vector ) {
+  // Transform a standard container into a numpy ndarray
+  template<template<class ...> class cont, class type>
+  inline np::ndarray stdContToNumpyArray( const cont<type> &container ) {
     
-    long int size = vector.size();
+    long int size = container.size();
     Py_intptr_t shape[1] = {size};
 
     np::ndarray result = np::zeros(1, shape, np::dtype::get_builtin<type>());
     
-    std::copy(vector.begin(), vector.end(), reinterpret_cast<type*>(result.get_data()));
+    std::copy(std::begin(container), std::end(container),
+	      reinterpret_cast<type*>(result.get_data()));
 
     return result;
   }

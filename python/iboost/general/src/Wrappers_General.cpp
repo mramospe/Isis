@@ -60,15 +60,13 @@ namespace LoopArray {
   inline py::list getItem( const isis::LoopArray &looper,
 			   const size_t &idx ) {
 
-    auto indices = looper[idx];
-    
-    return iboost::stdVecToBoostList(indices);
+    return iboost::stdContToBoostList(looper[idx]);
   }
 
   // Convert vector to list
   inline py::list values( const isis::LoopArray &looper ) {
 
-    return iboost::stdVecToBoostList(looper.values());
+    return iboost::stdContToBoostList(looper.values());
   }
 }
 

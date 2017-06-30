@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -30,6 +30,7 @@
 #include "CLsHypothesis.h"
 #include "CLsPrior.h"
 #include "CLsResult.h"
+#include "Definitions.h"
 
 #include "TPython.h"
 
@@ -44,7 +45,7 @@ namespace CLsFact {
   inline isis::CLsResult calculateFromArray( const isis::CLsFactory &factory,
 					     const np::ndarray &array ) {
 
-    auto vector = iboost::numpyArrayToStdVec<double>( array );
+    auto vector = iboost::numpyArrayToStdCont<isis::Doubles>( array );
 
     return factory.calculate( vector );
   }
@@ -74,7 +75,7 @@ namespace CLsFact {
   inline double testStat( const isis::CLsFactory &factory,
 			  const np::ndarray &values ) {
 
-    auto vector = iboost::numpyArrayToStdVec<double>( values );
+    auto vector = iboost::numpyArrayToStdCont<isis::Doubles>( values );
 
     return factory.testStat( vector );
   }
@@ -102,7 +103,7 @@ namespace CLsHyp {
 	       isis::CLsFluctuator *fluct,
 	       isis::CLsPrior *prior ) {
 
-    auto array = iboost::numpyArrayToStdVec<double>( lst );
+    auto array = iboost::numpyArrayToStdCont<isis::Doubles>( lst );
     auto hyp   = new isis::CLsHypothesis(array, fluct, prior);
 
     return boost::shared_ptr<isis::CLsHypothesis>( hyp );
@@ -113,7 +114,7 @@ namespace CLsHyp {
   inline boost::shared_ptr<isis::CLsHypothesis>
   constructor_NoPrior( const np::ndarray &lst, isis::CLsFluctuator *fluct ) {
 
-    auto array = iboost::numpyArrayToStdVec<double>( lst );
+    auto array = iboost::numpyArrayToStdCont<isis::Doubles>( lst );
     auto hyp   = new isis::CLsHypothesis(array, fluct);
 
     return boost::shared_ptr<isis::CLsHypothesis>( hyp );
@@ -124,7 +125,7 @@ namespace CLsHyp {
   inline boost::shared_ptr<isis::CLsHypothesis>
   constructor_NoFluctNoPrior( const np::ndarray &lst ) {
 
-    auto array = iboost::numpyArrayToStdVec<double>( lst );
+    auto array = iboost::numpyArrayToStdCont<isis::Doubles>( lst );
     auto hyp   = new isis::CLsHypothesis(array);
 
     return boost::shared_ptr<isis::CLsHypothesis>( hyp );
@@ -136,7 +137,7 @@ namespace CLsHyp {
 
     auto vec = hyp.getHyp();
 
-    return iboost::stdVecToNumpyArray( vec );
+    return iboost::stdContToNumpyArray( vec );
   }
 
   //_______________________________________________________________________________
@@ -144,7 +145,7 @@ namespace CLsHyp {
   inline double poissonProb( const isis::CLsHypothesis &hyp,
 			     const np::ndarray &values ) {
 
-    auto vec = iboost::numpyArrayToStdVec<double>( values );
+    auto vec = iboost::numpyArrayToStdCont<isis::Doubles>( values );
 
     return hyp.poissonProb( vec );
   }
@@ -155,7 +156,7 @@ namespace CLsHyp {
 
     auto vec = hyp.getTSVals();
 
-    return iboost::stdVecToNumpyArray( vec );
+    return iboost::stdContToNumpyArray( vec );
   }
 
   //_______________________________________________________________________________
@@ -165,7 +166,7 @@ namespace CLsHyp {
 		      isis::CLsFluctuator *fluct = 0,
 		      isis::CLsPrior *prior = 0 ) {
 
-    auto vec = iboost::numpyArrayToStdVec<double>( lst );
+    auto vec = iboost::numpyArrayToStdCont<isis::Doubles>( lst );
 
     hyp.setHyp(vec, fluct, prior);
   }

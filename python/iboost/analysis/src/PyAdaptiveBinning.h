@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -31,6 +31,7 @@
 #include "Bin.h"
 #include "Bin1D.h"
 #include "Bin2D.h"
+#include "Definitions.h"
 
 #include "TPython.h"
 
@@ -47,14 +48,14 @@ namespace AdBin {
   //
   inline py::list getBinList( const isis::AdaptiveBinning &adbin ) {
   
-    return iboost::stdVecToBoostList( adbin.getBinList() );
+    return iboost::stdContToBoostList( adbin.getBinList() );
   }
 
   //_______________________________________________________________________________
   //
   inline PyObject* getStruct( const isis::AdaptiveBinning &adbin,
-		       const char *name = "",
-		       const char *title = "" ) {
+			      const char *name = "",
+			      const char *title = "" ) {
     
     return TPython::ObjectProxy_FromVoidPtr( adbin.getStruct(name, title),
 					     "TObject",
@@ -74,8 +75,8 @@ namespace AdBin1D {
 	       np::ndarray values,
 	       np::ndarray weights ) {
   
-    auto vec_values  = iboost::numpyArrayToStdVec<double>( values );
-    auto vec_weights = iboost::numpyArrayToStdVec<double>( weights );
+    auto vec_values  = iboost::numpyArrayToStdCont<isis::Doubles>( values );
+    auto vec_weights = iboost::numpyArrayToStdCont<isis::Doubles>( weights );
     auto adbin       = new isis::AdaptiveBinning1D(occ, vmin, vmax,
 						   vec_values, vec_weights);
   
@@ -120,9 +121,9 @@ namespace AdBin2D {
 	       np::ndarray yvalues,
 	       np::ndarray weights ) {
   
-    auto vec_xvalues = iboost::numpyArrayToStdVec<double>( xvalues );
-    auto vec_yvalues = iboost::numpyArrayToStdVec<double>( yvalues );
-    auto vec_weights = iboost::numpyArrayToStdVec<double>( weights );
+    auto vec_xvalues = iboost::numpyArrayToStdCont<isis::Doubles>( xvalues );
+    auto vec_yvalues = iboost::numpyArrayToStdCont<isis::Doubles>( yvalues );
+    auto vec_weights = iboost::numpyArrayToStdCont<isis::Doubles>( weights );
     auto adbin       = new isis::AdaptiveBinning2D(occ,
 						   xmin, xmax,
 						   ymin, ymax,
