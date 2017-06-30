@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 30/06/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ namespace isis {
       auto def = fArgs[ name ].second;
       if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
 	IError << "Input for < " << name <<
-	  " > does not match any of the possibilities: " << vectorToString( def )
+	  " > does not match any of the possibilities: " << contToString(def)
 	       << IEndMsg;
 	return;
       }

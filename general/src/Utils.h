@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/06/2017
+//  Last update: 30/06/2017
 //
 // --------------------------------------------------------
 //
@@ -28,7 +28,6 @@
 
 #include <cmath>
 #include <iostream>
-#include <vector>
 #include <string>
 #include <sstream>
 
@@ -154,16 +153,16 @@ namespace isis {
   }
 
   //_______________________________________________________________________________
-  // Returns a given vector as a string
-  template<typename type>
-  std::string vectorToString( const std::vector<type> &vector ) {
+  // Returns a given container as a string
+  template<template <class ...> class cont, class type>
+  std::string contToString( const cont<type> &container ) {
     
     std::stringstream ss;
-    if ( vector.size() ) {
-      ss << "[ " << vector[ 0 ];
-      for ( auto it = vector.begin() + 1; it != vector.end(); ++it )
+    if ( container.size() ) {
+      ss << '[' << container[ 0 ];
+      for ( auto it = std::begin(container) + 1; it != std::end(container); ++it )
 	ss << ", " << *it;
-      ss << " ]";
+      ss << ']';
     }
     else
       ss << "[]";
