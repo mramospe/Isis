@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 03/07/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -44,10 +44,10 @@ BOOST_PYTHON_MODULE( analysis ) {
   I_INIT_MODULE;
 
   // Wrapper from AdaptiveBinning.h
-  py::class_<isis::AdaptiveBinning>("AdaptiveBinning", py::init<>())
-    .def("getStruct" , &AdBin::getStruct)
-    .def("getBinList", &AdBin::getBinList)
-    .def("getNbins"  , &isis::AdaptiveBinning::getNbins)
+  py::class_<AdBin::AdaptiveBinningWrap, boost::noncopyable>("AdaptiveBinning")
+    .def("getStruct" , py::pure_virtual(&AdBin::AdaptiveBinningWrap::getStructWrap))
+    .def("getBinList", &AdBin::AdaptiveBinningWrap::getBinListWrap)
+    .def("getNbins"  , &AdBin::AdaptiveBinningWrap::getNbins)
     ;
 
   // Wrapper from AdaptiveBinning1D.h

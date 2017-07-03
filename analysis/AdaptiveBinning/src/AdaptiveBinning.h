@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 03/07/2017
 //
 // --------------------------------------------------------------------
 //
@@ -40,20 +40,30 @@ namespace isis {
   public:
 
     // Constructor
-    AdaptiveBinning();
+    AdaptiveBinning() { };
 
     // Destructor
-    virtual ~AdaptiveBinning();
+    virtual ~AdaptiveBinning() {
+
+      for ( auto it = fBinList.begin(); it != fBinList.end(); ++it )
+	delete (*it);
+    }
     
     // Method to get the a histogram with the adaptive binned structure
     virtual TObject* getStruct( const char *name = "",
-				const char *title = "" ) const;
+				const char *title = "" ) const = 0;
 
     // Return the list of bins
-    inline const std::vector<Bin*>& getBinList() const;
+    inline const std::vector<Bin*>& getBinList() const {
+
+      return fBinList;
+    }
 
     // Return the number of bins
-    inline size_t getNbins() const;
+    inline size_t getNbins() const {
+
+      return fBinList.size();
+    }
 
   protected:
     
@@ -62,16 +72,6 @@ namespace isis {
         
   };
 
-  //______________________________________________________________________________
-  //
-  const std::vector<Bin*>& AdaptiveBinning::getBinList() const {
-    
-    return fBinList;
-  }
-
-  //______________________________________________________________________________
-  //
-  inline size_t AdaptiveBinning::getNbins() const { return fBinList.size(); }
 }
 
 #endif

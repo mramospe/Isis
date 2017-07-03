@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 03/07/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -44,23 +44,31 @@ namespace np = boost::python::numpy;
 // Wrappers for the class AdaptiveBinning
 namespace AdBin {
 
-  //_______________________________________________________________________________
-  //
-  inline py::list getBinList( const isis::AdaptiveBinning &adbin ) {
-  
-    return iboost::stdContToBoostList( adbin.getBinList() );
-  }
+  struct AdaptiveBinningWrap : isis::AdaptiveBinning,
+			       py::wrapper<isis::AdaptiveBinning> {
 
-  //_______________________________________________________________________________
-  //
-  inline PyObject* getStruct( const isis::AdaptiveBinning &adbin,
-			      const char *name = "",
-			      const char *title = "" ) {
+    inline TObject* getStruct( const char *name = "",
+			       const char *title = "" ) const {
     
-    return TPython::ObjectProxy_FromVoidPtr( adbin.getStruct(name, title),
-					     "TObject",
-					     false );
-  }  
+      return this->get_override("getStruct")(name, title);
+    }
+
+    inline PyObject* getStructWrap( const isis::AdaptiveBinning1D &adbin,
+				    const char *name = "",
+				    const char *title = "" ) const {
+      
+      return TPython::ObjectProxy_FromVoidPtr( this->getStruct(name, title),
+					       "TObject",
+					       false );
+    }
+
+    inline py::list getBinListWrap() const {
+  
+      return iboost::stdContToBoostList(this->getBinList());
+    }
+    
+  };
+    
 }
 
 // Wrappers for the class AdaptiveBinning1D

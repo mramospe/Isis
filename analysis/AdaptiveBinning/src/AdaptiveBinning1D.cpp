@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 03/07/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -30,20 +30,16 @@ namespace isis {
 
   //______________________________________________________________________________
   //
-  AdaptiveBinning1D::AdaptiveBinning1D() : AdaptiveBinning() { }
-
-  //______________________________________________________________________________
-  //
   AdaptiveBinning1D::AdaptiveBinning1D( size_t  occ,
 					double  vmin,
 					double  vmax,
 					const Doubles &values,
 					const Doubles &weights ) :
     AdaptiveBinning(),
-    fMax( vmax ),
-    fMin( vmin ) {
+    fMax(vmax),
+    fMin(vmin) {
 
-    std::vector< std::pair<double, double> > data;
+    std::vector<std::pair<double, double> > data;
 
     auto itv = values.begin();
     if ( weights.size() ) {
@@ -54,7 +50,7 @@ namespace isis {
       auto itw = weights.begin();
       while( itv != values.end() ) {
 	if ( *itv >= vmin && *itv < vmax )
-	  data.push_back( std::make_pair( *itv, *itw ) );
+	  data.emplace_back(*itv, *itw);
 	++itv;
 	++itw;
       }
@@ -62,7 +58,7 @@ namespace isis {
     else {
       while( itv != values.end() ) {
 	if ( *itv >= vmin && *itv < vmax )
-	  data.push_back( std::make_pair( *itv, 1 ) );
+	  data.emplace_back(*itv, 1);
 	++itv;
       }
     }
@@ -81,9 +77,13 @@ namespace isis {
   
     // Creates the vector of bins
     fBinList = std::vector<Bin*>( nbins );
-    for ( auto it = fBinList.begin(); it != fBinList.end(); ++it )
-      (*it) = new Bin1D( fMax );
-  
+    std::generate(fBinList.begin(), fBinList.end(),
+		  [this] () {
+		    
+		    return new Bin1D(fMax);
+		    
+		  });
+    
     // Sorts the data and the weights
     std::sort( data.begin(), data.end(), [] ( std::pair<double, double> it1,
 					      std::pair<double, double> it2 ) {
@@ -95,10 +95,15 @@ namespace isis {
     double auxsw = sw, swpb = 0;
     size_t binsout = 0;
     for ( auto ib = fBinList.begin(); ib != fBinList.end(); ++ib ) {
-      swpb = auxsw/( nbins - binsout++ );
+      
+      swpb = auxsw/(nbins - binsout++);
+      
       while ( (*ib)->getSumOfWeights() < swpb && id != data.end() ) {
-	static_cast<Bin1D*>( *ib )->fill( id->first, id->second );
+	
+	static_cast<Bin1D*>(*ib)->fill(id->first, id->second);
+	
 	++id;
+	
       }
       auxsw -= (*ib)->getSumOfWeights();
     }
@@ -113,18 +118,16 @@ namespace isis {
 
   //______________________________________________________________________________
   //
-  AdaptiveBinning1D::~AdaptiveBinning1D() { }
-
-  //______________________________________________________________________________
-  //
   TH1D* AdaptiveBinning1D::getStruct( const char *name, const char *title ) const {
     
-    double *bins = new double[ fBinList.size() + 1 ];
-    for ( size_t i = 0; i < fBinList.size(); ++i )
-      bins[ i ] = static_cast<Bin1D*>( fBinList[ i ] )->fMin;
-    bins[ fBinList.size() ] = fMax;
+    double *bins = new double[fBinList.size() + 1];
     
-    TH1D *hist = new TH1D( name, title, fBinList.size(), bins );
+    for ( size_t i = 0; i < fBinList.size(); ++i )
+      bins[i] = static_cast<Bin1D*>( fBinList[i])->fMin;
+    
+    bins[fBinList.size()] = fMax;
+    
+    TH1D *hist = new TH1D(name, title, fBinList.size(), bins);
     
     delete[] bins;
     

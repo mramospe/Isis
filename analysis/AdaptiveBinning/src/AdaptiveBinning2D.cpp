@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 03/07/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -29,23 +29,19 @@ namespace isis {
 
   //______________________________________________________________________________
   //
-  AdaptiveBinning2D::AdaptiveBinning2D() : AdaptiveBinning() { }
-
-  //______________________________________________________________________________
-  //
-  AdaptiveBinning2D::AdaptiveBinning2D( size_t      min_occ,
-					double      xmin,
-					double      xmax,
-					double      ymin,
-					double      ymax,
+  AdaptiveBinning2D::AdaptiveBinning2D( size_t min_occ,
+					double xmin,
+					double xmax,
+					double ymin,
+					double ymax,
 					const Doubles &xvalues,
 					const Doubles &yvalues,
 					const Doubles &weights ) :
     AdaptiveBinning(),
-    fXmax( xmax ),
-    fXmin( xmin ),
-    fYmax( ymax ),
-    fYmin( ymin ) {
+    fXmax(xmax),
+    fXmin(xmin),
+    fYmax(ymax),
+    fYmin(ymin) {
   
     const Doubles *wData( &weights );
     if ( !wData->size() )
@@ -114,7 +110,7 @@ namespace isis {
 	  bin->fill( xvalues.at( ievt ), yvalues.at( ievt ), wData->at( ievt ) );
 	}
       
-	fBinList.push_back( bin->divide( xrange, yrange ) );
+	fBinList.emplace_back( bin->divide( xrange, yrange ) );
       }
       // Sets the new number of bins
       nbins *= 2;
@@ -143,14 +139,6 @@ namespace isis {
     // If the vector of weights has been allocated, it is destroyed
     if ( !weights.size() )
       delete wData;
-  }
-
-  //______________________________________________________________________________
-  //
-  AdaptiveBinning2D::~AdaptiveBinning2D() {
-
-    for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end(); ++it )
-      delete *it;
   }
 
   //______________________________________________________________________________

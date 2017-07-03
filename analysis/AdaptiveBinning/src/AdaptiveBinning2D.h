@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 03/07/2017
 //
 // --------------------------------------------------------------------
 //
@@ -44,7 +44,7 @@ namespace isis {
   public:
     
     // Main constructor
-    AdaptiveBinning2D();
+    AdaptiveBinning2D() : AdaptiveBinning() { };
 
     // Constructor given vectors of values
     AdaptiveBinning2D( size_t min_occ,
@@ -57,7 +57,11 @@ namespace isis {
 		       const Doubles &weights = Doubles() );
 
     // Destructor
-    ~AdaptiveBinning2D();
+    ~AdaptiveBinning2D() {
+
+      for ( auto it = fAdjBinList.begin(); it != fAdjBinList.end(); ++it )
+	delete *it;
+    }
 
     // Makes an adjusted adaptive binned histogram
     TH2Poly* getAdjStruct( const char *name = "", const char *title = "" ) const;
