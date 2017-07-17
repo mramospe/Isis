@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/05/2017
+#//  Last update: 17/07/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -516,7 +516,7 @@ def varsInRootTree( tree = None, fname = '', tpath = '', regexps = None ):
     if regexps != []:
         truenames = []
         for expr in regexps:
-            addlst = StringListFilter(brnames, expr)
+            addlst = stringListFilter(brnames, expr)
             if addlst != []:
                 truenames += addlst
             else:

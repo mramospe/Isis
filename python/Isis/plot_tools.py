@@ -614,15 +614,17 @@ class _GraphInConfig:
         '''
         self.values = np.array(values, dtype = float)
 
-        self.err = False
-        self.sym = None
+        self.err    = any((el is not False) for el in (err, errlo, errup))
+        self.sym    = None
+        self.errLo  = None
+        self.errUp  = None
+        self.errors = None
         
-        if any((el is not False) for el in (err, errlo, errup)):
+        if self.err:
 
-            self.err = True
-            
             if err:
-
+                ''' Symmetric errors '''
+                
                 self.sym = True
                 
                 if errlo or errup:
@@ -630,9 +632,12 @@ class _GraphInConfig:
                                    'will be considered')
                 
                 self.errors = np.array(err, dtype = float)
-
+                
+                self._buildAsym()
+                
             else:
-
+                ''' Asymmetric errors '''
+                
                 self.sym = False
 
                 if errlo:
@@ -646,14 +651,21 @@ class _GraphInConfig:
                     self.errUp = np.zeros(len(errlo), dtype = float)
 
                 self.errors = np.zeros(len(self.errLo), dtype = float)
-                    
 
-    def buildAsym( self ):
+        else:
+            ''' If no errors are specified, they are considered symmetric '''
+            
+            self.sym    = True
+            self.err    = False
+            self.errors = np.zeros(len(values), dtype = float)
+            
+            self._buildAsym()
+
+    def _buildAsym( self ):
         '''
-        If this class has symmetric errors attached, generates a duplicate
+        Sets the lower and upper errors to the symmetric errors
         '''
-        if self.sym:
-            self.errLo = self.errUp = self.errors
+        self.errLo = self.errUp = self.errors
 
 
 def makeScatterPlot( xvar, yvar,
@@ -693,9 +705,6 @@ def makeScatterPlot( xvar, yvar,
 
         else:
             
-            for cfg in (xconfig, yconfig):
-                cfg.buildAsym()
-
             xerrlo, xerrup = xconfig.errLo, xconfig.errUp
             yerrlo, yerrup = yconfig.errLo, yconfig.errUp
 
