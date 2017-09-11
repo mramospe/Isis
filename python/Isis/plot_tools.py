@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/04/2017
+#//  Last update: 11/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -841,7 +841,7 @@ def multiPlot( mgrs, variables,
         
         return canvas_info
     else:
-        sendErrorMsg('Any of the managers does not have access to some of the variables')
+        sendErrorMsg('Some managers do not have access to some of the variables')
         return
 
 
