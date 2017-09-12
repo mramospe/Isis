@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/07/2017
+#//  Last update: 12/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -22,7 +22,7 @@
 
 import collections
 import math
-import numpy as np
+import numpy
 
 import ROOT as rt
 
@@ -69,7 +69,7 @@ class DataMgr( dict ):
                 sendErrorMsg('{} => The input file type must be specified'.format(name))
         else:
             for kw, lst in path.iteritems():
-                self[ kw ] = np.array(lst)
+                self[ kw ] = numpy.array(lst)
                 
             self._iter = 0
             self.name  = name
@@ -87,7 +87,7 @@ class DataMgr( dict ):
         
         true_vars = set(self.keys()).intersection(other.keys())
         for var in true_vars:
-            mgr[ var ] = np.concatenate((self[var], other[var]))
+            mgr[ var ] = numpy.concatenate((self[var], other[var]))
         
         no_booked = set(self.keys() + other.keys()).difference(true_vars)
         if no_booked:
@@ -160,14 +160,14 @@ class DataMgr( dict ):
             return eval(cut)
 
         else:
-            return np.ones(len(self))
+            return numpy.ones(len(self))
     
     def cutIdxs( self, cut, mathmod = None ):
         '''
         This method allows to obtain a list with the events that satisfy the cuts given
         '''
         mask = self.cutMask(cut, mathmod)
-        return np.nonzero(mask)[0]
+        return numpy.nonzero(mask)[0]
 
     def entries( self, selection = False, mathmod = None ):
         '''
@@ -176,7 +176,7 @@ class DataMgr( dict ):
         '''
         if self.keys():
             if selection:
-                return np.count_nonzero(self.cutMask(selection, mathmod))
+                return numpy.count_nonzero(self.cutMask(selection, mathmod))
             else:
                 return len(self)
         else:
@@ -214,7 +214,7 @@ class DataMgr( dict ):
         if cuts:
             entries = self.cutMask(cuts, mathmod)
         else:
-            entries = np.ones(self.entries(), dtype = bool)
+            entries = numpy.ones(self.entries(), dtype = bool)
             
         fvars    = []
         truevars = []
@@ -245,10 +245,9 @@ class DataMgr( dict ):
         expression.
         '''
         if function:
-            var_tensor = [self[v] for v in arg]
-            lvars      = xrange(len(arg))
-            new_var    = function(*var_tensor)
-            self[varname] = np.array(new_var)
+            var_tensor    = numpy.array([self[v] for v in arg])
+            new_var       = function(var_tensor)
+            self[varname] = numpy.array(new_var)
         else:
             eval_expr = NumpyEvalExpr(arg, mathmod = mathmod)
             expr      = eval_expr.expr
@@ -256,7 +255,7 @@ class DataMgr( dict ):
 
             for var in variables:
                 expr = expr.replace(var, "self['{}']".format(var))
-
+                
             self[varname] = eval(expr)
 
     def newEvent( self, dic ):
@@ -314,7 +313,7 @@ class DataMgr( dict ):
         if cuts != '':
             evtlst = self.cutIdxs(cuts, mathmod)
         else:
-            evtlst = np.arange(len(self))
+            evtlst = numpy.arange(len(self))
 
         form = '{:' + str(maxsize) + '.' + str(prec) + 'e}'
 
@@ -357,7 +356,7 @@ class DataMgr( dict ):
         if vmax == None:
             vmax = max(values)
 
-        cuts = np.linspace(vmin, vmax, npoints, endpoint = endpoint)
+        cuts = numpy.linspace(vmin, vmax, npoints, endpoint = endpoint)
         
         var += sense
 
@@ -425,18 +424,18 @@ class DataMgr( dict ):
         
         if evts != None:
             if isinstance(evts, collections.Iterable):
-                evts = np.array(evts)
+                evts = numpy.array(evts)
             else:
-                evts = np.arange(evts)
+                evts = numpy.arange(evts)
         else:
-            evts = np.arange(len(self))
+            evts = numpy.arange(len(self))
             
         if 'cuts' != '':
             cut_lst = self.cutIdxs(cuts, mathmod)
         else:
-            cut_lst = np.arange(len(self))
+            cut_lst = numpy.arange(len(self))
 
-        evtlst = np.intersect1d(evts, cut_lst)
+        evtlst = numpy.intersect1d(evts, cut_lst)
         
         cmgr = DataMgr(name)
         for v in varset:

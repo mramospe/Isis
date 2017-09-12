@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 30/05/2017
+#//  Last update: 12/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -157,10 +157,10 @@ class NumpyEvalExpr(EvalExpr):
     Transform an expression to be evaluated using numpy ndarray objects
     '''
 
-    changes = {' and ': 'np.logical_and',
-               ' or ' : 'np.logical_or',
-               '^'    : 'np.logical_xor',
-               'not ' : 'np.logical_not'}
+    changes = {' and ': 'numpy.logical_and',
+               ' or ' : 'numpy.logical_or',
+               '^'    : 'numpy.logical_xor',
+               'not ' : 'numpy.logical_not'}
     
     def __init__( self, expr, mathmod = None ):
         '''
@@ -177,7 +177,7 @@ class NumpyEvalExpr(EvalExpr):
         self.comp = {}
 
         expr = self.expr
-
+            
         '''
         Create new expressions from those between parentheses. Needed
         since no simple-string replacement is possible here.
@@ -210,29 +210,49 @@ class NumpyEvalExpr(EvalExpr):
             if el.expr != name:
                 while name in expr:
                     expr = expr.replace(name, el.expr)
-                    
-        self.expr = self._process_expr(expr)
+        
+        ''' The numpy functions need a list as argument '''
+        poslst = []
+        pos = expr.find('numpy.')
+        while pos != -1:
+            poslst.append(pos)
+            pos = expr.find('numpy.', pos + 6)
+            
+        for p in reversed(poslst):
+            par = expr.find('(', p)
+            c = 1
+            for i, s in enumerate(expr[par + 1:]):
+                if s == '(':
+                    c += 1
+                elif s == ')':
+                    c -= 1
+                    if c == 0:
+                        break
+            i += par + 1
+            expr = '{}[{}], axis = 0{}'.format(expr[:par + 1], expr[par + 1:i], expr[i:])
+            
+        self.expr = self._process_expr(expr.strip())
         
     def _process_expr( self, expr ):
         '''
         Process one expression within this class
         '''
-        pos = { expr.find(' and ') : ' and ',
-                expr.find(' or ')  : ' or ',
-                expr.find('^')     : '^'
-        }
+        pos = [ (expr.find(' and ') , ' and '),
+                (expr.find(' or ')  , ' or '),
+                (expr.find('^')     , '^')
+                ]
 
         ''' Not is an special case, since it can be preceded by another conditional '''
         pos_not = expr.find('not ')
         while pos_not not in (-1, 0) and expr[pos_not - 1] != 0:
             pos_not = expr.find('not ', pos_not + 1)
-        pos[pos_not] = 'not '
+        pos.append((pos_not, 'not '))
         
-        for p, c in sorted(pos.iteritems()):
+        for p, c in sorted(pos):
             if p != -1:
                 
                 right_expr = expr[p + len(c):]
-                proc_expr  = self._process_expr(right_expr)
+                proc_expr  = self._process_expr(right_expr.strip())
                 
                 if c == 'not ':
                     expr = '%s(%s)' %(NumpyEvalExpr.changes[c],
