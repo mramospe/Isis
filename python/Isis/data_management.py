@@ -23,6 +23,7 @@
 import collections
 import math
 import numpy
+import pandas
 
 import ROOT as rt
 
@@ -32,128 +33,70 @@ from Isis.utils import joinDicts, mergeDicts, stringListFilter
 from Isis.expressions import NumpyEvalExpr
 
 
-class DataMgr( dict ):
+class DataMgr( pandas.DataFrame ):
     '''
     Class to manage data, specially designed to work together with Root files
     and trees
     '''
-    def __init__( self, name = '', path = None, tree = 'DecayTree', variables = None, colid = None, ftype = 'root' ):
+    def __init__( self, data = None, index = None, columns = None, dtype = None, copy = False, name = '<unnamed>' ):
         '''
-        The constructor provides the possibility of loading data from root or
-        txt files, or from dictionary-like classes:
-        
-        - name:  Name of this class.
-        - path:  If it is a string it is the path to the input file. If not
-        it is considered to be dictionary-like.
-        - ftype: Type for the input file.
-        - variables: List of variables to be booked.
-        - colid: In case of loading a txt file, it refers to the columns to be
-        added (see function < txtToDict >.
-        
-        All the constructors finally call the constructor given a
-        dictionary-like class.
+        Constructor mainly inherited from pandas.DataFrame. Also a name is stored.
         '''
-        path = path or {}
-        variables = variables or ['*']
-        colid = None or []
-        
-        if isinstance( path, str ):
-            if ftype:
-                if ftype == 'root':
-                    self.__init__( name, treeToDict( path, tree, variables ) )
-                elif ftype == 'txt':
-                    self.__init__( name, txtToDict( path, variables, colid ) )
-                else:
-                    sendErrorMsg('{} => Unknown input file type < {} >'.format(name, ftype))
-            else:
-                sendErrorMsg('{} => The input file type must be specified'.format(name))
-        else:
-            for kw, lst in path.iteritems():
-                self[ kw ] = numpy.array(lst)
-                
-            self._iter = 0
-            self.name  = name
-        
-            wrong = ( len( set( len( lst ) for lst in self.itervalues() ) ) > 1 )
-            if wrong:
-                sendErrorMsg('{} => The lists stored in the manager '\
-                             'have different lengths'.format(self.name))
+        pandas.DataFrame.__init__(self, data, index, columns, dtype, copy)
+            
+        self.name  = name
 
     def __add__( self, other ):
         '''
         Allows merging two objects of this class
         '''
-        mgr = DataMgr(self.name + '__' + other.name)
+        new_name  = self.name + '__' + other.name
         
-        true_vars = set(self.keys()).intersection(other.keys())
-        for var in true_vars:
-            mgr[ var ] = numpy.concatenate((self[var], other[var]))
-        
-        no_booked = set(self.keys() + other.keys()).difference(true_vars)
+        no_booked = set(self.columns).symmetric_difference(other.columns)
         if no_booked:
-            sendWarningMsg('{} => The following variables are not '\
+            sendWarningMsg('{} => The following variables are not being '\
                            'booked: {}'.format(mgr.name, no_booked))
+            
+        v   = list(set(self.columns).intersection(other.columns))
+        m   = pandas.DataFrame.__add__(self[v], other[v])
+        mgr = DataMgr(m, name = new_name)
         
         return mgr
-
+    
     def __iadd__( self, other ):
         '''
         Allows adding another manager variables to this class
         '''
-        if len( self ):
-            return self + other
+        if len(self):
+            self = self + other
         else:
             self = other.copy()
-
-    def __iter__( self ):
-        '''
-        Definition of the iterator
-        '''
-        self._iter = 0
-        return self
-
-    def __len__( self ):
-        '''
-        Gets the number of entries in the class
-        '''
-        return len(next(self.itervalues()))
-
-    def next( self ):
-        '''
-        Sets the new value for the iteration. If it reaches the limit the exception
-        is raised.
-        '''
-        if self._iter == len(self):
-            raise StopIteration
-        else:
-            self._iter += 1
-            return self.getEventDict(self._iter - 1)
             
-    def copy( self, name = '' ):
+    def copy( self, name = '', deep = True ):
         '''
         Returns a copy of this class
         '''
         if not name:
             name = self.name + '_copy'
-        return DataMgr(name, self)
-
+        return DataMgr(self, name = name, copy = deep)
+    
     def cutMask( self, cut, mathmod = None ):
         '''
         Return the mask associated with the events passing the given cut
         '''
         eval_expr = NumpyEvalExpr(cut, mathmod)
         cut       = eval_expr.expr
-
+        
         if cut:
             variables = eval_expr.variables
-            varstoadd = [v for v in variables if v not in self]
+            varstoadd = [v for v in variables if v not in self.columns]
         
             if varstoadd:
                 sendErrorMsg('Need to load additional variables to '\
                              'apply the cuts: {}'.format(varstoadd))
         
             values = [self[var] for var in variables]
-        
+            
             for i, var in enumerate(variables):
                 cut = cut.replace(var, 'values[{}]'.format(i))
 
@@ -182,27 +125,11 @@ class DataMgr( dict ):
         else:
             sendErrorMsg('Attempting to get entries from an empty data manager')
 
-    def getEventDict( self, ievt ):
-        '''
-        Returns a dictionary with the values of the variables at the given entry
-        '''
-        return dict((var, values[ ievt ]) for var, values in self.iteritems())
-
-    def getEventTuple( self, ievt, *args ):
-        '''
-        Gets the event at position ievt. Allows to get only the variables in < args >
-        in the order specified.
-        '''
-        if len( args ):
-            return tuple([self[var][ievt] for var in args])
-        else:
-            return tuple([values[ievt] for var, values in self.iteritems()])
-
-    def getNvars( self ):
+    def nvars( self ):
         '''
         Gets the number of variables in the class
         '''
-        return len(self.keys())
+        return len(self.columns())
 
     def varEvents( self, variables, cuts = False, mathmod = None ):
         '''
@@ -216,19 +143,18 @@ class DataMgr( dict ):
         else:
             entries = numpy.ones(self.entries(), dtype = bool)
             
-        fvars    = []
-        truevars = []
+        fvars = []
         for v in variables:
-            if v in self:
-                fvars.append( v )
+            if v in self.columns:
+                fvars.append(v)
             else:
-                sendErrorMsg('Unknown variable < %s >')
+                sendErrorMsg('Unknown variable < {} >'.format(v))
         
         fvars = list(set(fvars))
         fvars.sort()
         fvars.reverse()
         
-        values = [self[var][entries] for var in fvars]
+        values = self[fvars][entries]
         
         return values
 
@@ -245,26 +171,18 @@ class DataMgr( dict ):
         expression.
         '''
         if function:
-            var_tensor    = numpy.array([self[v] for v in arg])
+            var_tensor    = self[arg]
             new_var       = function(var_tensor)
             self[varname] = numpy.array(new_var)
         else:
             eval_expr = NumpyEvalExpr(arg, mathmod = mathmod)
             expr      = eval_expr.expr
             variables = eval_expr.variables
-
+            
             for var in variables:
                 expr = expr.replace(var, "self['{}']".format(var))
                 
             self[varname] = eval(expr)
-
-    def newEvent( self, dic ):
-        '''
-        Adds a new event to the manager. Values for all the variables have to be
-        provided.
-        '''
-        for key, values in self.iteritems():
-            values.append(dic[key])
 
     def display( self, variables = None, cuts = '', mathmod = None, evts = None, prec = 3 ):
         '''
@@ -276,13 +194,13 @@ class DataMgr( dict ):
         '''
         variables = variables or []
         
-        if not self:
+        if not self.columns:
             sendErrorMsg('{} => No variables booked in this manager'.format(self.name))
             return
         
         ''' If no variables are specified all are printed '''
         if variables == []:
-            variables = self.keys()
+            variables = list(self.columns)
             variables.sort()
         
         ''' Prints the name of the manager '''
@@ -318,8 +236,7 @@ class DataMgr( dict ):
         form = '{:' + str(maxsize) + '.' + str(prec) + 'e}'
 
         buildLine = lambda ievt: '| {} |'.format(
-            ' | '.join(form.format(v)
-                       for v in self.getEventTuple(ievt, *variables)))
+            ' | '.join(form.format(v) for v in self.iloc[ievt][variables]
         
         if evts != None:
             for ievt in evtlst[:evts]:
@@ -367,60 +284,30 @@ class DataMgr( dict ):
 
         return points
     
-    def save( self, name = '', tree_name = False, ftype = 'root', variables = None, close = True ):
+    def from_root( path, tname, columns = None, name = '<unnamed>' ):
         '''
-        Saves the given class values in a TTree. If < name > is not provided, the
-        tree will be written in the external directory (to be constructed and
-        accesible in the main program). If < close > is provided, and if its value
-        is false, this method will return the output file. If < ftype > is set to
-        'txt', then the output will be considered as a txt where the columns
-        correspond to each variable in alphabetical order. In any case the
-        variables to be stored can be specified using the keyword < variables >,
-        providing a list with them.
+        Create a DataMgr instance from a root file
         '''
-        variables = variables or self.keys()
-        if ftype in ('root', 'Root', 'ROOT'):
-            if name != '':
-                ofile = rt.TFile.Open(name, 'RECREATE')
-            else:
-                ofile = False
-                name  = rt.gDirectory.GetName()
-            print self.name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
-            dictToTree(self, name = tree_name, variables = variables)
-            print self.name, '=> Written', len(self), 'entries'
-            if ofile and close:
-                ofile.Close()
-            else:
-                return ofile
-        elif ftype in ('txt', 'TXT'):
-            ofile = open(name, 'wt')
-            print self.name, '=> Saving txt data in file <', name, '>'
-            varvalues = [ self[ var ] for var in variables ]
-            out = ''
-            for var in variables:
-                out += var + '\t'
-            ofile.write(out[ :-1 ] + '\n')
-            for ievt in xrange(len(self)):
-                out = ''
-                for var in varvalues:
-                    out += str(var[ ievt ]) + '\t'
-                ofile.write(out[ :-1 ] + '\n')
-            if close:
-                ofile.close()
-            else:
-                return ofile
-    
-    def subSample( self, name = '', cuts = '', mathmod = None, evts = None, varset = '*' ):
+        cols = columns or ['*']
+        
+        d = treeToDict(path, tname, cols)
+        
+        if not columns:
+            cols = sorted(d.keys())
+            
+        v = numpy.array(list(dic[v] for v in cols))
+        
+        return DataMgr(v, variables = cols, name = name)
+        
+    def subSample( self, name = None, cuts = '', mathmod = None, evts = None, columns = None ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be
         specified, as well as the variables to be copied. By default the
         entire class is copied.
-        ''' 
-        if varset == '*':
-            varset = self.keys()
-        if name == '':
-            name = self.name + '_SubSample'
+        '''
+        columns = columns or self.columns
+        name    = name or self.name + '_SubSample'
         
         if evts != None:
             if isinstance(evts, collections.Iterable):
@@ -437,66 +324,28 @@ class DataMgr( dict ):
 
         evtlst = numpy.intersect1d(evts, cut_lst)
         
-        cmgr = DataMgr(name)
-        for v in varset:
-            cmgr[v] = self[v][evtlst]
-
+        cmgr = DataMgr(self[columns][evtlst], name = name)
+        
         return cmgr
 
-
-def txtToDict( fname, tnames = None, colid = None ):
-    '''
-    Creates a new dictionary containing the values of the variables stored on
-    a txt file. The file path is specified in < fname >, while the names of the
-    variables are given as a list in < tnames >. As a keyword argument, the column
-    index to be read has to be given as colid = [ 1, 3, 4, ... ]. If < tnames >
-    is provided, and the first row has the names of the variables, it has
-    preference over the < colid > variable. In the case where the first row
-    does not have the names, < tnames > and < colid > must match.
-    '''
-    tnames = tnames or []
-    colid  = colid or []
-    
-    ifile   = open(fname, 'rt')
-    line    = ifile.readline().split()
-    if colid == []:
-        colid = range(len(line))
-    if all( isinstance(line[i], str) for i in colid):
-        if tnames and tnames != [ '*' ]:
-            colid = [colid[i] for i in colid if line[i] in tnames]
+    def to_root( self, name = '', tname = False, columns = None, mode = 'recreate' ):
+        '''
+        Save this instance in a Root file
+        '''
+        columns = columns or self.columns
+        
+        if name != '':
+            ofile = rt.TFile.Open(name, mode)
         else:
-            tnames = [line[i] for i in colid]
-        line = ifile.readline().split()
-    elif any(isinstance(line[i], str) for i in colid):
-        sendErrorMsg('The first line of the input file has not the correct format')
-        return
-    else:
-        if not tnames:
-            sendErrorMsg('The names of the variables in the colid have to be specified')
-            return
-        elif len( tnames ) != len(colid):
-            sendErrorMsg('The names of the variables and the column index must match')
-            return
-    convfuncs, varvalues = [], []
-    for index, icol in enumerate(colid):
-        value = line[ icol ]
-        try:
-            int( value )
-            convfuncs.append(int)
-            isint = True
-        except:
-            try:
-                float(value)
-                convfuncs.append(float)
-            except:
-                sendErrorMsg('Format for column < {} > not recognised'.format(i))
-        varvalues.append([convfuncs[-1](value)])
-    for line in ifile:
-        line = line.split()
-        for index, icol in enumerate(colid):
-            varvalues[index].append(convfuncs[index](line[icol]))
-    ifile.close()
-    return {name: varvalues[index] for index, name in enumerate(tnames)}
+            ofile = False
+            name  = rt.gDirectory.GetName()
+            
+        print self.name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
+        dictToTree(self.to_dict('series'), name = tree_name, variables = columns)
+        print self.name, '=> Written', len(self), 'entries'
+        
+        if ofile:
+            ofile.Close()
 
 
 def varsInRootTree( tree = None, fname = '', tpath = '', regexps = None ):

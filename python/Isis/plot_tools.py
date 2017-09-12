@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 11/09/2017
+#//  Last update: 12/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -562,7 +562,8 @@ def makeHistogram2D( xvar, yvar,
 def makeKStest( mgrA, mgrB, variables,
                 vartitles = [], usecl = True, name = '', title = '' ):
     '''
-    Perform Kolmogorov-Smirnov tests for the two given DataMgr objects and variables. If "usecl" is set to True, the confidence level of exclusion that the two
+    Perform Kolmogorov-Smirnov tests for the two given DataMgr objects and variables.
+    If "usecl" is set to True, the confidence level of exclusion that the two
     samples follow the same distribution is given instead of the p-value. Returns
     a dictionary with the values of the test statistic and p-value for each variable,
     together with the filled histograms.
