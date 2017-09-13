@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 12/09/2017
+#//  Last update: 13/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -23,7 +23,6 @@
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.efficiencies import calcEfficiency
 from Isis.math_ext import nearestSquare
-from Isis.utils import formatEvalExpr
 
 import ROOT as rt
 
@@ -741,11 +740,7 @@ def multiPlot( mgrs, variables,
     
     nvars = len( variables ) + 1
 
-    ''' Get the true variables associated with the given expressions '''
-    truevars = [ formatEvalExpr( var )[ 1 ] for var in variables ]
-    truevars = list( itertools.chain.from_iterable( truevars ) )
-    
-    if all( var in mgr for mgr in mgrs for var in truevars ):
+    if all( var in mgr for mgr in mgrs for var in variables ):
         
         ''' Generates and divides the canvas '''
         nyvars, nxvars = optCanvasDivision( nvars )

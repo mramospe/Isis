@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 12/09/2017
+#//  Last update: 13/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -20,260 +20,200 @@
 #/////////////////////////////////////////////////////////////
 
 
-import __builtin__
-import math
-import numpy
+from Isis.iboost.general import sendErrorMsg
+import math, inspect, numpy, re
 
 
-class EvalExpr:
-
-    def __init__( self, expr, mathmod = None ):
-        '''
-        This class allows to format a given expression in such a way that takes
-        into account the mathematical functions and the logical operators. The module
-        containing the mathematical functions can be specified.
-        '''
-        if mathmod == None:
-            mathmod = math
-
-        self.expr      = ''
-        self.variables = []
-        self.consts    = []
-        
-        proc_expr = translateCExpr( expr )
-        variables = proc_expr
-        for el in ( '==', '!=', '<=', '>=', '>', '<',
-                    'and', 'or', 'not', '(', ')',
-                    '*', '/', '+', '-',
-                    '!', ',' ):
-            variables = variables.replace( el, '|' )
-        variables = variables.replace( ' ', '' )
-    
-        ''' Splits the elements, so only the variables and the numbers remain '''
-        variables = variables.split( '|' )
-        while '' in variables:
-            variables.remove( '' )
-
-        '''
-        Iterates over the expression to find the variables and the constants in it. The use
-        of a < while > loop becomes necessary to avoid replacing multiple times the same
-        function by < module.function >.
-        '''
-    
-        truevars = []
-        fmlist   = dir(mathmod)
-        fblist   = dir(__builtin__)
-        mathmod  = mathmod.__name__ + '.'
-    
-        idx    = 0
-        length = len( variables )
-
-        while idx < length:
-        
-            el = variables[ idx ]
-
-            isfloat = False
-        
-            ''' These lines allow the management of float values given with an < e/E > '''
-            epos = el.find( 'e' )
-            Epos = el.find( 'E' )
-            dec1 = ( epos != -1 )
-            dec2 = ( Epos != -1 )
-            if ( dec1 or dec2 ) and not ( dec1 and dec2 ):
-                try:
-                    float( el )
-                    isfloat = True
-                except:
-                    ''' The number may not be a float '''
-                    if dec1:
-                        left, right = el[ :epos ], el[ epos + 1: ]
-                    else:
-                        left, right = el[ :Epos ], el[ Epos + 1: ]
-                    try:
-                        float( left )
-                        if right:
-                            sendErrorMsg('Unable to parse expression < %s >' %el)
-                            return
-                        else:
-                            try:
-                                '''
-                                The < 0 > is added since it could find a
-                                string like < 1e >
-                                '''
-                                float( variables[ idx + 1 ] + '0' )
-                            except:
-                                sendErrorMsg('Unable to parse expression; error '\
-                                             'in floating constant')
-                                return
-                        isfloat = True
-                    except:
-                        isfloat = False
-            else:
-                ''' Here it determines if the element is a number or a variable '''
-                try:
-                    float( el )
-                    isfloat = True
-                except:
-                    it = el[ 0 ]
-                    if it.isdigit() or it == '.':
-                        sendErrorMsg('Unable to parse expression < %s >' %el)
-                        return
-                    else:
-                        isfloat = False
-
-            '''
-            If it is a float it continues the loop. If it is an expression, tries
-            to find it in the builtin and math modules.
-            '''
-            if isfloat:
-                self.consts.append(el)
-                idx += 1
-            else:
-                if el in fmlist:
-                    nc = 0
-                    while el in variables:
-                        variables.remove( el )
-                        nc += 1
-                    length -= nc
-                    proc_expr = proc_expr.replace( el, mathmod + el )
-                else:
-                    idx += 1
-                    if el not in fblist:
-                        truevars.append( el )
-    
-        '''
-        Sorting the list on a reversed way is necessary to prevent missreplacement of
-        the variables
-        '''
-        truevars.sort()
-        truevars.reverse()
-
-        self.variables = truevars
-        self.expr = proc_expr
+# Global variable storing the conversion from python conditionals
+# to numpy functions
+numpy_conditionals = {' and ': 'numpy.logical_and',
+                      ' or ' : 'numpy.logical_or',
+                      '^'    : 'numpy.logical_xor',
+                      'not ' : 'numpy.logical_not'}
 
 
-class NumpyEvalExpr(EvalExpr):
+def check_parentheses( expr ):
     '''
-    Transform an expression to be evaluated using numpy ndarray objects
+    Check the open and close parentheses in the given expression
     '''
+    it = ParIter()
+    for s in expr:
+        it.signal(s)
+    return it.signal()
 
-    changes = {' and ': 'numpy.logical_and',
-               ' or ' : 'numpy.logical_or',
-               '^'    : 'numpy.logical_xor',
-               'not ' : 'numpy.logical_not'}
+        
+class ParIter:
+    '''
+    Dummy class to iterate over items inside two parentheses
+    '''
+    def __init__( self, idx = 0, obj = 0 ):
+        '''
+        The index refering to the nesting level must be given
+        '''
+        self.counter   = idx
+        self.objective = obj
+        
+    def restart( self, idx = 1 ):
+        '''
+        Build the class again
+        '''
+        self.__init__(idx)
+
+    def signal( self, char = None ):
+        '''
+        Check the given character and change the counter accordingly. Return
+        True if the objective is reached, False otherwise.
+        '''
+        if char == '(':
+            self.counter += 1
+        elif char == ')':
+            self.counter -= 1
+        
+        d = (self.counter == self.objective)
+        
+        return d
+
     
-    def __init__( self, expr, mathmod = None ):
-        '''
-        Build this class from an expression and the math module to be
-        used. The constructor of the base class is called to do the first
-        processing of the expression. Then replacements are done to
-        introduce the numpy logical expressions in it.
-        '''
-        if mathmod == None:
-            mathmod = numpy
+def parse_eval_expr( expr, mathmod = None ):
+    '''
+    Function to parse an expression and substitute the members in
+    "mathmod" by "mathmomd.<some function>".
+    '''
+    mathmod = mathmod or math
         
-        EvalExpr.__init__(self, expr, mathmod)
+    pexpr = translate_cexpr(expr)
+    mname = mathmod.__name__ + '.'
+    memb  = numpy.array(inspect.getmembers(mathmod)).T[0]
+
+    # Check the parentheses. Otherwise it may end up on an infinite loop.
+    if not check_parentheses(expr):
+        sendErrorMsg('Parentheses mismatch in expression "{}"'.format(expr))
+    
+    plst = []
+    for f in memb:
+        p = pexpr.rfind(f)
+        while p != -1:
+            if not pexpr[p - 1].isalnum():
+                # There is a space before the name
+                ip = pexpr.find('(', p)
+                if pexpr[p + len(f):ip].strip() == '':
+                    # No alphanumeric characters between the name
+                    # and the parenthesis
+                    plst.append((p, f))
+                        
+            p = pexpr.rfind(f, 0, p)
+    
+    for p, f in plst:
+        r = pexpr[p:].replace(f, mname + f, 1)
+        pexpr = pexpr[:p] + r
         
-        self.comp = {}
+    return pexpr
 
-        expr = self.expr
-            
-        '''
-        Create new expressions from those between parentheses. Needed
-        since no simple-string replacement is possible here.
-        '''
-        while len(expr):
 
-            op = expr.find('(') + 1
-            if op == 0:
-                break
-            else:
-                counter = 1
-                for cp, s in enumerate(expr[op:]):
-                    if s == '(':
-                        counter += 1
-                    elif s == ')':
-                        counter -= 1
-                    if counter == 0:
-                        app = expr[op:op + cp]
-                        self.comp[app] = NumpyEvalExpr(app)
-                        expr = expr[op + cp + 1:]
-                        break
+def numpy_parse_eval_expr( expr, mathmod = None ):
+    '''
+    Parse the given expression on a numpy-friendly way, so numpy functions
+    are applied correctly when one evaluates it
+    '''
+    mathmod = mathmod or numpy
+    
+    expr = parse_eval_expr(expr, mathmod)
+    
+    comp = {}
 
-        ''' Reset the expression '''
-        expr = self.expr
-                    
-        for name, el in sorted(self.comp.iteritems()):
-            
-            expr = expr.replace(name, el.expr)
-            
-            if el.expr != name:
-                while name in expr:
-                    expr = expr.replace(name, el.expr)
+    pexpr = expr
+    while len(pexpr):
+
+        op = pexpr.find('(') + 1
+        if op == 0:
+            break
+        else:
+            it = ParIter(1, 0)
+            for cp, s in enumerate(pexpr[op:]):
+                if it.signal(s):
+                    app = pexpr[op:op + cp]
+                    comp[app] = numpy_parse_eval_expr(app)
+                    pexpr = pexpr[op + cp + 1:]
+                    break
+    
+    for name, el in sorted(comp.iteritems()):
+        expr = expr.replace(name, el)
+        if el != name:
+            expr = expr.replace(name, el)
+    
+    # The numpy functions need a list as an argument
+    poslst = []
+    pos = expr.find('numpy.')
+    while pos != -1:
+
+        npos = pos + 6
         
-        ''' The numpy functions need a list as argument '''
-        poslst = []
-        pos = expr.find('numpy.')
-        while pos != -1:
+        p = expr.find('(', npos)
+        f = expr[npos:p]
+        
+        func = getattr(numpy, f)
+        
+        if inspect.isfunction(func):
+            # Only append if it is a function (not a "ufunc")
             poslst.append(pos)
-            pos = expr.find('numpy.', pos + 6)
             
-        for p in reversed(poslst):
-            par = expr.find('(', p)
-            c = 1
-            for i, s in enumerate(expr[par + 1:]):
-                if s == '(':
-                    c += 1
-                elif s == ')':
-                    c -= 1
-                    if c == 0:
-                        break
-            i += par + 1
-            expr = '{}[{}], axis = 0{}'.format(expr[:par + 1], expr[par + 1:i], expr[i:])
-            
-        self.expr = self._process_expr(expr.strip())
+        pos = expr.find('numpy.', npos)
         
-    def _process_expr( self, expr ):
-        '''
-        Process one expression within this class
-        '''
-        pos = [ (expr.find(' and ') , ' and '),
-                (expr.find(' or ')  , ' or '),
-                (expr.find('^')     , '^')
-                ]
+    for p in reversed(poslst):
+        par = expr.find('(', p)
+        it  = ParIter(1, 0)
+        for i, s in enumerate(expr[par + 1:]):
+            if it.signal(s):
+                break
+        i += par + 1
+        expr = '{}[{}], axis = 0{}'.format( expr[:par + 1],
+                                            expr[par + 1:i],
+                                            expr[i:] )
 
-        ''' Not is an special case, since it can be preceded by another conditional '''
-        pos_not = expr.find('not ')
-        while pos_not not in (-1, 0) and expr[pos_not - 1] != 0:
-            pos_not = expr.find('not ', pos_not + 1)
-        pos.append((pos_not, 'not '))
-        
-        for p, c in sorted(pos):
-            if p != -1:
-                
-                right_expr = expr[p + len(c):]
-                proc_expr  = self._process_expr(right_expr.strip())
-                
-                if c == 'not ':
-                    expr = '%s(%s)' %(NumpyEvalExpr.changes[c],
-                                      proc_expr)
-                else:
-                    left_expr  = expr[:p]
-                    expr = '%s(%s, %s)' %(NumpyEvalExpr.changes[c],
-                                          left_expr, proc_expr)
-                return expr
+    return numpy_process_conditionals(expr)
+
+
+def numpy_process_conditionals( expr ):
+    '''
+    Process one expression within this class
+    '''
+    pos = [ (expr.find(' and ') , ' and '),
+            (expr.find(' or ')  , ' or '),
+            (expr.find('^')     , '^') ]
+
+    expr = expr.strip()
+    
+    # Not is an special case, since it can be preceded by
+    # another conditional
+    not_pos = [m.start() for m in re.finditer('not ', expr)]
+    pos.append((not_pos[-1] if not_pos else -1, 'not '))
+    
+    for p, c in sorted(pos):
+        if p != -1:
             
-        return expr
+            left_expr  = expr[:p]
+            right_expr = expr[p + len(c):]
+            proc_expr  = numpy_process_conditionals(right_expr)
+            
+            if c == 'not ':
+                return '{}{}({})'.format( left_expr,
+                                          numpy_conditionals[c],
+                                          proc_expr )
+            else:
+                return '{}({}, {})'.format( numpy_conditionals[c],
+                                            left_expr,
+                                            proc_expr )
+    return expr
 
 
-def translateCExpr( expr ):
+def translate_cexpr( expr ):
     '''
     Translates a C expression into a python expression
     '''
-    expr = expr.replace( '&&' , ' and ' )
-    expr = expr.replace( '||' , ' or '  )
-    expr = expr.replace( 'abs', 'fabs'  )
-    expr = expr.replace( '!=', '%%%' )
-    expr = expr.replace( '!', ' not ' )
-    expr = expr.replace( '%%%', '!=' )
+    expr = expr.replace('&&' , ' and ')
+    expr = expr.replace('||' , ' or ')
+    expr = expr.replace('abs', 'fabs')
+    expr = expr.replace('!=', '%%%')
+    expr = expr.replace('!', ' not ')
+    expr = expr.replace('%%%', '!=')
     return expr

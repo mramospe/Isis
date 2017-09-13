@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 22/06/2017
+#//  Last update: 13/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -238,120 +238,6 @@ def formatTime( itime ):
         return strout[ :-1 ]
     else:
         return '0s'
-
-    
-def formatEvalExpr( expr, mathmod = math ):
-    '''
-    This function allows to format a given expression in such a way that takes
-    into account the mathematical functions and the logical operators. The module
-    containing the mathematical functions can be specified.
-    '''
-    expr = translateCExpr( expr )
-    variables = expr
-    for el in ( '==', '!=', '<=', '>=', '>', '<',
-                'and', 'or', 'not', '(', ')',
-                '*', '/', '+', '-',
-                '!', ',' ):
-        variables = variables.replace( el, '|' )
-    variables = variables.replace( ' ', '' )
-    
-    ''' Splits the elements, so only the variables and the numbers remain '''
-    variables = variables.split( '|' )
-    while '' in variables:
-        variables.remove( '' )
-
-    '''
-    Iterates over the expression to find the variables and the constants in it. The use
-    of a < while > loop becomes necessary to avoid replacing multiple times the same
-    function by < module.function >.
-    '''
-    
-    truevars = []
-    fmlist   = dir( mathmod )
-    fblist   = dir( __builtin__ )
-    mathmod  = mathmod.__name__ + '.'
-    
-    idx    = 0
-    length = len( variables )
-
-    while idx < length:
-        
-        el = variables[ idx ]
-
-        isfloat = False
-        
-        ''' These lines allow the management of float values given with an < e/E > '''
-        epos = el.find( 'e' )
-        Epos = el.find( 'E' )
-        dec1 = ( epos != -1 )
-        dec2 = ( Epos != -1 )
-        if ( dec1 or dec2 ) and not ( dec1 and dec2 ):
-            try:
-                float( el )
-                isfloat = True
-            except:
-                ''' The number may not be a float '''
-                if dec1:
-                    left, right = el[ :epos ], el[ epos + 1: ]
-                else:
-                    left, right = el[ :Epos ], el[ Epos + 1: ]
-                try:
-                    float( left )
-                    if right:
-                        sendErrorMsg('Unable to parse expression < %s >' %el)
-                        return
-                    else:
-                        try:
-                            '''
-                            The < 0 > is added since it could find a string like < 1e >
-                            '''
-                            float( variables[ idx + 1 ] + '0' )
-                        except:
-                            sendErrorMsg('Unable to parse expression; error in '\
-                                         'floating constant')
-                            return
-                    isfloat = True
-                except:
-                    isfloat = False
-        else:
-            ''' Here it determines if the element is a number or a variable '''
-            try:
-                float( el )
-                isfloat = True
-            except:
-                it = el[ 0 ]
-                if it.isdigit() or it == '.':
-                    sendErrorMsg('Unable to parse expression < %s >' %el)
-                    return
-                else:
-                    isfloat = False
-
-        '''
-        If it is a float it continues the loop. If it is an expression, tries to find it
-        in the builtin and math modules.
-        '''
-        if isfloat:
-            idx += 1
-        else:
-            if el in fmlist:
-                nc = 0
-                while el in variables:
-                    variables.remove( el )
-                    nc += 1
-                length -= nc
-                expr = expr.replace( el, mathmod + el )
-            else:
-                idx += 1
-                if el not in fblist:
-                    truevars.append( el )
-    
-    '''
-    Sorting the list on a reversed way is necessary to prevent missreplacement of
-    the variables
-    '''
-    truevars.sort()
-    truevars.reverse()
-    return expr, truevars
 
 
 def joinDicts( *args ):
