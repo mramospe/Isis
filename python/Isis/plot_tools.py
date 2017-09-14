@@ -272,8 +272,8 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
         tit = get_ax(hlst[0]).GetTitle()
         get_ax(hformat).SetTitle(tit)
     
-    hformat.SetBinContent( 1, imin )
-    hformat.GetYaxis().SetRangeUser( imin, imax + offset )
+    hformat.SetBinContent(1, imin)
+    hformat.GetYaxis().SetRangeUser(imin, imax + offset)
     hformat.Draw()
     
     drawopt += 'SAME'
@@ -293,31 +293,34 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
     return outhlst
 
 
-def extractHistPoints( varlst, nbins, vmin = None, vmax = None ):
+def extractHistPoints( arr, nbins, vmin = None, vmax = None ):
     '''
     This function extracts the indexes of the given array of data which are
     supposed to be used to make a histogram
     '''
-    if len(varlst) == 0:
+    if len(arr) == 0:
         return []
     if vmin == None:
-        vmin = min(varlst)
+        vmin = arr.min()
     if vmax == None:
-        vmax  = max(varlst)
+        vmax = arr.max()
         vmax += (vmax - vmin)/(2.*nbins)
-    return [i for i, v in enumerate(varlst) if v >= vmin and v < vmax]
+    return np.logical_and(arr >= vmin, arr < vmax)
 
 
-def extractHistBounds( values, idxs, vmin = None, vmax = None ):
+def extractHistBounds( arr, vmin = None, vmax = None ):
     '''
     Extract the histogram bounds given a list of values and the possible
     bounds (if any). If the list is empty, bounds at (0, 1) are returned.
     '''
-    if len(values):
-        varin = [values[i] for i in idxs]
-        vmin  = min( v for v in varin + [ vmin ] if v != None )
-        vmax  = max( v for v in varin + [ vmax ] if v != None )
-        return vmin, vmax
+    if vmin:
+        arr = np.append(arr, vmin)
+    if vmax:
+        arr = np.append(arr, vmax)
+    
+    if len(arr):
+        return arr.min(), arr.max()
+    
     return 0, 1
 
 
@@ -325,8 +328,7 @@ def formatPlottable2D( obj, name = '', title = None, xtitle = '', ytitle = '' ):
     '''
     Set name, main title and titles for each axis of a 2D object
     '''
-    if title == None:
-        title = name
+    title = title or name
 
     obj.SetNameTitle(name, title)
 
@@ -371,7 +373,7 @@ def makeAdaptiveBinnedHist( name, minocc, values,
     This function creates a 1-D adaptive binning histogram given a name, the
     minimum occupancy value and a list. Adding a list of weights is also possible.
     '''
-    histcall = histFromType( htype, 1 )
+    histcall = histFromType(htype, 1)
     
     ''' Calculates the array of weights '''
     length = len(values)
@@ -379,13 +381,13 @@ def makeAdaptiveBinnedHist( name, minocc, values,
         sw    = float(sum(weights))
         nbins = int(sw)/minocc
     else:
-        weights = length*[ 1. ]
+        weights = length*[1.]
         sw      = float(length)
         nbins   = length/minocc
     
     idxs = extractHistPoints(values, nbins)
 
-    vmin, vmax = extractHistBounds(values, idxs)
+    vmin, vmax = extractHistBounds(values[idxs])
     
     ''' If the occupancy requested is too big, an error message is displayed '''
     if nbins == 0:
@@ -394,33 +396,33 @@ def makeAdaptiveBinnedHist( name, minocc, values,
     '''
     Creates a list with the values and the weights joint and sorts it by the values
     '''
-    values = zip( values, weights )
+    values = zip(values, weights)
     values.sort()
     
     ''' Fills the bins with the data '''
-    binlist = tuple( [ vmax, 0 ] for i in xrange( nbins ) )
+    binlist = tuple([vmax, 0] for i in xrange(nbins))
     idat, swpb = 0, 0
-    for idf, ib in enumerate( binlist ):
-        swpb = sw/( nbins - idf )
-        while ib[ 1 ] < swpb and idat < length:
-            val, wgt = values[ idat ]
-            if val < ib[ 0 ]:
-                ib[ 0 ] = val
-            ib[ 1 ] += wgt
+    for idf, ib in enumerate(binlist):
+        swpb = sw/(nbins - idf)
+        while ib[1] < swpb and idat < length:
+            val, wgt = values[idat]
+            if val < ib[0]:
+                ib[0] = val
+            ib[1] += wgt
             idat += 1
-        sw -= ib[ 1 ]
+        sw -= ib[1]
     while idat < length:
-        binlist[ -1 ][ 0 ], binlist[ -1 ][ 1 ] = values[ idat ]
+        binlist[-1][0], binlist[-1][1] = values[idat]
         idat += 1
 
     '''
     To create the Root histogram, an array of doubles has to be created, with the
     minimum value for the bins
     '''
-    bins = np.array(( nbins + 1 )*[ 0. ], dtype = float)
-    for i, ib in enumerate( binlist ):
-        bins[ i ] = ib[ 0 ]
-    bins[ -1 ] = vmax
+    bins = np.array((nbins + 1)*[0.], dtype = float)
+    for i, ib in enumerate(binlist):
+        bins[i] = ib[0]
+    bins[-1] = vmax
     
     hist = histcall('', '', nbins, bins)
 
@@ -471,13 +473,13 @@ def makeCumulative( hist, name = '', norm = False, title = None ):
     the maximum value will be one.
     '''
     chist = hist.Clone()
-    cumulative = chist.GetBinContent( 1 )
-    for i in xrange( 2, hist.GetNbinsX() + 1 ):
-        cumulative += hist.GetBinContent( i )
-        chist.SetBinContent( i, cumulative )
-        chist.SetBinError( i, sqrt( cumulative ) )
+    cumulative = chist.GetBinContent(1)
+    for i in xrange(2, hist.GetNbinsX() + 1):
+        cumulative += hist.GetBinContent(i)
+        chist.SetBinContent(i, cumulative)
+        chist.SetBinError(i, sqrt(cumulative))
     if norm:
-        chist.Scale( 1./chist.GetMaximum() )
+        chist.Scale(1./chist.GetMaximum())
     formatPlottable2D(hist, name, title)
     return chist
 
@@ -497,20 +499,20 @@ def makeHistogram( var,
     drawn, but it can be set with the < ytitle > option. For values of type int,
     the histogram will be of type double.
     '''
-    histcall = histFromType( htype, 1 )
+    histcall = histFromType(htype, 1)
 
-    idxs = extractHistPoints( var, nbins, vmin = vmin, vmax = vmax )
+    idxs = extractHistPoints(var, nbins, vmin = vmin, vmax = vmax)
     
-    vmin, vmax = extractHistBounds(var, idxs, vmin = vmin, vmax = vmax)
+    vmin, vmax = extractHistBounds(var[idxs], vmin = vmin, vmax = vmax)
     
     hist = histcall('', '', nbins, vmin, vmax)
     
     if wvar:
-        for el, w in zip( var, wvar ):
-            hist.Fill( el, w )
+        for el, w in zip(var, wvar):
+            hist.Fill(el, w)
     else:
         for el in var:
-            hist.Fill( el )
+            hist.Fill(el)
     
     formatPlottable2D(hist, name, title, xtitle, ytitle)
             
@@ -533,25 +535,25 @@ def makeHistogram2D( xvar, yvar,
     '''
     Creates a 2-dimensional histogram given two lists
     '''
-    histcall = histFromType( htype, 2 )
+    histcall = histFromType(htype, 2)
     
-    xidxs = extractHistPoints( xvar, xbins, vmin = xmin, vmax = xmax )
-    yidxs = extractHistPoints( yvar, ybins, vmin = ymin, vmax = ymax )
+    xidxs = extractHistPoints(xvar, xbins, vmin = xmin, vmax = xmax)
+    yidxs = extractHistPoints(yvar, ybins, vmin = ymin, vmax = ymax)
 
     ''' The values used are the intersection between the two lists '''
     idxs = set( xidxs ) & set( yidxs )
 
-    xmin, xmax = extractHistBounds(xvar, idxs, vmin = xmin, vmax = xmax)
-    ymin, ymax = extractHistBounds(yvar, idxs, vmin = ymin, vmax = ymax)
+    xmin, xmax = extractHistBounds(xvar[idxs], vmin = xmin, vmax = xmax)
+    ymin, ymax = extractHistBounds(yvar[idxs], vmin = ymin, vmax = ymax)
     
     hist = histcall('', '', xbins, xmin, xmax, ybins, ymin, ymax)
 
     if wvar:
-        for x, y, w in zip( xvar, yvar, wvar ):
+        for x, y, w in zip(xvar, yvar, wvar):
             hist.Fill( x, y, w )
     else:
-        for x, y in zip( xvar, yvar ):
-            hist.Fill( x, y )
+        for x, y in zip(xvar, yvar):
+            hist.Fill(x, y)
 
     formatPlottable2D(hist, name, title, xtitle, ytitle)
 
@@ -734,9 +736,7 @@ def multiPlot( mgrs, variables,
     '''
     ranges = ranges or {}
     flist  = flist or FormatList()
-    
-    if title == None:
-        title = name
+    title  = title or name
     
     nvars = len(variables) + 1
 

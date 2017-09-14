@@ -25,76 +25,14 @@ import os, fcntl, math, struct, termios, sys
 import __builtin__
 
 
-def calcMinDist( lst, allow_zero = True ):
-    '''
-    Calculates the minimum distance between values in an iterable object. With
-    the input parameter < allow_zero > one can prevent the function to take into
-    account elements in the list with the same value.
-    '''
-    if allow_zero:
-        lst = sorted( lst )
-    else:
-        lst = sorted( set( lst ) )
-    lst = [ abs( lst[ i - 1 ] - lst[ i ] ) for i in xrange( 1, len( lst ) ) ]
-    return min( lst )
-
-
-def checkDeviation( value, sigma, exp, name = '', sens = 1, verbose = True ):
-    '''
-    Check if the given value is more far from its expectation than the given
-    number of allowed std. dev. (set by < sens >).
-    '''
-    nsigma = abs( value - exp )/float( sigma )
-
-    status = True
-    if nsigma > 1:
-        status = False
-
-        if verbose:
-            part = 'is away from its expectation by %.2f std. dev.' % nsigma
-            if name:
-                sendWarningMsg('Parameter < %s > %s' %(name, part))
-            else:
-                sendWarningMsg('Input parameter ' + part)
-
-    return status
-
-
-def combinedRange( *args ):
-    '''
-    Returns the minimum and maximum values for the combined range for all the
-    given lists
-    '''
-    minlst = min( min( lst ) for lst in args )
-    maxlst = max( max( lst ) for lst in args )
-    return minlst, maxlst
-
-
-def convertArgs( conv, args, slc = slice(0, None) ):
-    '''
-    Return a new list with the arguments at position < slc > converted to floats
-    '''
-    new_args = list(args)
-    if isinstance(slc, slice):
-        islc = range(*slc.indices(len(args)))
-    else:
-        islc = slc
-        
-    for i, el in enumerate(new_args):
-        if i in islc:
-            new_args[i] = conv(el)
-
-    return new_args
-
-
 def dl2ld( dic ):
     '''
     Given a dictionary of lists, it returns a list of dictionaries
     '''
-    firstkw = dic.keys()[ 0 ]
-    length  = len( dic[ firstkw ] )
-    return [ { kw: vals[ i ] for kw, vals in dic.iteritems() }
-             for i in xrange( length ) ]
+    firstkw = dic.keys()[0]
+    length  = len(dic[firstkw])
+    return [{kw: vals[i] for kw, vals in dic.iteritems()}
+             for i in xrange(length)]
 
 
 class EnvTracker:
@@ -155,7 +93,7 @@ class EnvTracker:
             '* Variables removed from the %s scope' %self.title,
             '* Variables taking ownership of those removed in the %s scope' %self.title,
             '* Variables which have changed their value in the %s scope' %self.title
-        ]
+       ]
         
         for out, lst in zip(msgs, chgs):
             if lst:
@@ -220,108 +158,32 @@ class EnvVar:
         
 def formatTime( itime ):
     '''
-    Displays the given time in the format [ w, d, h, min, s ]. If one of the
+    Displays the given time in the format [w, d, h, min, s]. If one of the
     quantities is zero, it is not displayed.
     '''
-    conv  = [ 60, 60, 24, 7 ]
-    vlist = [ 's', 'min', 'h', 'd', 'w' ]
-    vals  = { 's': itime, 'min': 0, 'h': 0, 'd': 0, 'w': 0 }
-    for cval, nunit, ounit in zip( conv, vlist[ 1: ], vlist[ :-1 ] ):
-        vals[ nunit ], vals[ ounit ] = divmod( int( vals[ ounit ] ), cval )
+    conv  = [60, 60, 24, 7]
+    vlist = ['s', 'min', 'h', 'd', 'w']
+    vals  = {'s': itime, 'min': 0, 'h': 0, 'd': 0, 'w': 0}
+    for cval, nunit, ounit in zip(conv, vlist[1:], vlist[:-1]):
+        vals[nunit], vals[ounit] = divmod(int(vals[ounit]), cval)
     vlist.reverse()
     strout = ''
     for kw in vlist:
-        val = vals[ kw ]
+        val = vals[kw]
         if val:
-            strout += str( vals[ kw ] ) + kw + ' '
+            strout += str(vals[kw]) + kw + ' '
     if strout:
-        return strout[ :-1 ]
+        return strout[:-1]
     else:
         return '0s'
-
-
-def joinDicts( *args ):
-    '''
-    Joins dictionaries with different keys into one. If some of them have the
-    same key, this one is not considered and not added to the final dictionary.
-    '''
-    rdict = {}
-    for dic in args:
-        for key in dic:
-            if key in rdict:
-                del rdict[ key ]
-                sendWarningMsg('Key < %s > already in dictionary. Not considered.' %key)
-            else:
-                rdict[ key ] = dic[ key ]
-    return rdict
 
 
 def ld2dl( lst ):
     '''
     Given a list of dictionaries, it returns a dictionary of lists
     '''
-    keys = lst[ 0 ].keys()
-    return { kw: [ el[ kw ] for el in lst ] for kw in keys }
-
-
-def makeSubList( lst, vmin = None, vmax = None, **kwargs ):
-    '''
-    This function generates a sublist from that given, with its values between
-    < vmin > and < vmax >. If < nbr > is set to True, no value equal or greater
-    than that of < vmax > will be considered. If set to False, the values that are
-    equal to it will also be considered. By default the output list is given
-    sorted, and this behaviour is managed trough the < sort > variable.
-    '''
-    if 'sort' in kwargs: sort = kwargs[ 'sort' ]
-    else: sort = True
-    if 'nbr' in kwargs: nbr = kwargs[ 'nbr' ]
-    else: nbr = True
-    order = zip( lst, xrange( len( lst ) ) )
-    order.sort()
-    cplst = [ fst for fst, sec in order ]
-    order = [ sec for fst, sec in order ]
-    lgth = len( cplst )
-    imin, imax = 0, lgth
-    if vmin != None:
-        i = 0
-        while i < lgth and cplst[ i ] < vmin:
-            i += 1
-        imin = i
-    if vmax != None:
-        i = -1
-        while i < lgth and cplst[ i ] > vmax:
-            i -= 1
-        if nbr and cplst[ i ] == vmax:
-            i -= 1
-        if i != -1:
-            imax = i + 1
-    if sort:
-        return cplst[ imin:imax ]
-    else:
-        order = order[ imin:imax ]
-        order.sort()
-        return cplst.__class__( lst[ el ] for el in order )
-
-
-def mergeDicts( *args ):
-    '''
-    This function merges the values from various dictionaries into one. Only the
-    variables that appear in all the dictionaries are considered.
-    '''
-    kvars = args[ 0 ].keys()
-    for dic in args[ 1: ]:
-        keys = dic.keys()
-        for key in kvars:
-            if key not in keys:
-                sendWarningMsg('Key < %s > does not appear in all dictionaries; '\
-                               'not merged' %key)
-                kvars.remove( key )
-    rdic = {}
-    for key in kvars:
-        rdic[ key ] = []
-        for dic in args:
-            rdic[ key ] += dic[ key ]
-    return rdic
+    keys = lst[0].keys()
+    return {kw: [el[kw] for el in lst] for kw in keys}
 
 
 class ObjRegistry:
@@ -428,8 +290,8 @@ class PythonEnvMgr:
         possible existing one.
         '''
 
-        addbot = kwargs.get( 'addbot', True )
-        ovrwrt = kwargs.get( 'overwrite', False )
+        addbot = kwargs.get('addbot', True)
+        ovrwrt = kwargs.get('overwrite', False)
 
         self.ifile = filename
         
@@ -438,8 +300,8 @@ class PythonEnvMgr:
         else:
             self.mode = 'wt+'
 
-        if ovrwrt or not os.path.isfile( filename ):
-            f = open( filename, 'wt' )
+        if ovrwrt or not os.path.isfile(filename):
+            f = open(filename, 'wt')
             print 'Created new python file: <', filename, '>'
             f.close()
         else:
@@ -450,12 +312,12 @@ class PythonEnvMgr:
         Internal function to create the string to be added to the output file
         '''
         outstr = ''
-        maxlen = max( len(str( it )) for it in dic )
+        maxlen = max(len(str(it)) for it in dic)
         srtkws = dic.keys()
         srtkws.sort()
         for kw in srtkws:
-            whtsp   = ( maxlen - len( kw ) )*' '
-            outstr += '\t' + kw + whtsp + ' = ' + str( dic[ kw ] ) + '\n'
+            whtsp   = (maxlen - len(kw))*' '
+            outstr += '\t' + kw + whtsp + ' = ' + str(dic[kw]) + '\n'
         return outstr
     
     def readEnv( self, name, **kwargs ):
@@ -463,21 +325,21 @@ class PythonEnvMgr:
         Reads the asigned file. By default the class is returned, but it can
         be given as a dictionary if specified in **kwargs.
         '''
-        removepath = kwargs.get( 'rmpath', True )
-        returndict = kwargs.get( 'retdict', False )
+        removepath = kwargs.get('rmpath', True)
+        returndict = kwargs.get('retdict', False)
 
-        pathtofile = self.ifile.name().split( '/' )[ :-1 ]
+        pathtofile = self.ifile.name().split('/')[:-1]
         if pathtofile not in sys.path:
-            sys.path.append( pathtofile )
+            sys.path.append(pathtofile)
 
-        mod = getattr( __import__( self.ifile.name ), name )
+        mod = getattr(__import__(self.ifile.name), name)
 
         if removepath:
-            del sys.path[ -1 ]
+            del sys.path[-1]
         
         if returndict:
-            return { kw: el for kw, el in mod.__dict__.iteritems()
-                     if not kw.startswith( '__' ) }
+            return {kw: el for kw, el in mod.__dict__.iteritems()
+                    if not kw.startswith('__')}
         else:
             return mod
 
@@ -486,14 +348,14 @@ class PythonEnvMgr:
         Method to save a set of values inside a class called < name > in the file
         attached to this class.
         '''
-        ofile = open( self.ifile, self.mode )
+        ofile = open(self.ifile, self.mode)
         
-        ofile.seek( 0 )
+        ofile.seek(0)
         lines = ofile.readlines()
-        ofile.seek( 0 )
+        ofile.seek(0)
         clname = 'class ' + name + ':\n'
 
-        if any( line.startswith( name ) for line in lines ):
+        if any(line.startswith(name) for line in lines):
             sendWarningMsg('Overwriting in < %s >; a variable called < %s > '\
                            'already exists' %(ofile.name, name))
 
@@ -503,39 +365,26 @@ class PythonEnvMgr:
                            'file < %s >' %(name, ofile.name))
         
             ofile.truncate()
-            start = lines.index( clname )
+            start = lines.index(clname)
             end   = start + 1
         
-            length = len( lines )
-            while end != length and lines[ end ].startswith( '\t' ):
+            length = len(lines)
+            while end != length and lines[end].startswith('\t'):
                 end += 1
         
-            for line in lines[ :start ]:
-                ofile.write( line )
+            for line in lines[:start]:
+                ofile.write(line)
         
-            ostr = self._make_env_str( kwargs )
-            ofile.write( clname + ostr )
+            ostr = self._make_env_str(kwargs)
+            ofile.write(clname + ostr)
             
-            for line in lines[ end: ]:
-                ofile.write( line )
+            for line in lines[end:]:
+                ofile.write(line)
         else:
-            ostr = self._make_env_str( kwargs )
-            ofile.write( clname + ostr )
+            ostr = self._make_env_str(kwargs)
+            ofile.write(clname + ostr)
 
         ofile.close()
-
-
-def sharedRange( *args ):
-    '''
-    Returns the minimum and maximum values for the shared range among lists. If
-    there is no shared range < False > is returned.
-    '''
-    minlst = max( min( lst ) for lst in args )
-    maxlst = min( max( lst ) for lst in args )
-    if maxlst > minlst:
-        return minlst, maxlst
-    else:
-        return False
 
 
 def stringListFilter( lst, pattern ):
@@ -543,30 +392,30 @@ def stringListFilter( lst, pattern ):
     Given a list and a pattern ( with elements separated by '*' symbols ) it
     returns another list with those that satisfy it.
     '''
-    pattern = pattern.split( '*' )
-    checkstart = not pattern[  0 ] == ''
-    checkend   = not pattern[ -1 ] == ''
+    pattern = pattern.split('*')
+    checkstart = not pattern[ 0] == ''
+    checkend   = not pattern[-1] == ''
     while '' in pattern:
-        del pattern[ pattern.index( '' ) ]
+        del pattern[pattern.index('')]
     output = []
     for el in lst:
         add = True
         if checkstart:
-            if not el.startswith( pattern[ 0 ] ):
+            if not el.startswith(pattern[0]):
                 add = False
         if checkend:
-            if not el.endswith( pattern[ -1 ] ):
+            if not el.endswith(pattern[-1]):
                 add = False
         if add:
             pos = 0
             for pt in pattern:
-                newpos = el.find( pt )
+                newpos = el.find(pt)
                 if newpos == -1 or newpos < pos:
                     add = False
                     break
                 pos = newpos
             if add:
-                output.append( el )
+                output.append(el)
     return output
 
 
@@ -614,31 +463,19 @@ def terminalSize():
     '''
     def gwinsz( fd ):
         try:
-            cr = struct.unpack( 'hh', fcntl.ioctl( fd, termios.TIOCGWINSZ, '1234' ) )
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
         except:
             return
         return cr
-    cr = gwinsz( 0 ) or gwinsz( 1 ) or gwinsz( 2 )
+    cr = gwinsz(0) or gwinsz(1) or gwinsz(2)
     if not cr:
         try:
-            fd = os.open( os.ctermid(), os.O_RDONLY )
-            cr = gwinsz( fd )
-            os.close( fd )
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = gwinsz(fd)
+            os.close(fd)
         except:
             pass
     if not cr:
-        cr = ( os.environ.get( 'LINES', 25 ), os.environ.get( 'COLUMNS', 80 ) )
-    return int( cr[ 0 ] ), int( cr[ 1 ] )
+        cr = (os.environ.get('LINES', 25), os.environ.get('COLUMNS', 80))
+    return int(cr[0]), int(cr[1])
 
-
-def translateCExpr( expr ):
-    '''
-    Translates a C expression into a python expression
-    '''
-    expr = expr.replace( '&&' , ' and ' )
-    expr = expr.replace( '||' , ' or '  )
-    expr = expr.replace( 'abs', 'fabs'  )
-    expr = expr.replace( '!=', '%%%' )
-    expr = expr.replace( '!', ' not ' )
-    expr = expr.replace( '%%%', '!=' )
-    return expr
