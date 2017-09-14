@@ -59,7 +59,7 @@ def genCorrPlots( mgrdct, varlst, nmgrs = 1, vartitles = [], cuts = False ):
             canvas.cd(i + 1)
             
             name   = mgr.name + '_CorrHist'
-            matrix = mgr.varEvents(varlst, cuts = cuts)
+            matrix = mgr.subsample(columns = varlst, cuts = cuts).as_matrix().T
             chist  = iplt.makeCorrelationHist(matrix, name = name, vartitles = vartitles)
             
             chist.Draw()
@@ -100,7 +100,7 @@ def loadData( paths ):
         
         fpath, tpath = inputs
         
-        mgrs[mgrname] = DataMgr(mgrname, fpath, tpath, variables = varlst)
+        mgrs[mgrname] = DataMgr.from_root(fpath, tpath, columns = varlst, name = mgrname)
         
     return mgrs
 
