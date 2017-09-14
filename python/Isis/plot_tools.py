@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/09/2017
+#//  Last update: 14/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -26,11 +26,11 @@ from Isis.math_ext import nearestSquare
 
 import ROOT as rt
 
-import itertools
+import itertools, sys
 from math import sqrt
 import numpy as np
 import scipy as sc
-import sys
+from Isis.data_management import DataMgr
 
 
 class CanvasStorer:
@@ -259,14 +259,14 @@ def drawHistograms( hlst, drawopt = '', norm = True, title = 'List of histograms
             imin = 0
             meth = rt.TH1.Draw
     else:
-        imax = max( h.GetMaximum() for h in hlst )
-        imin = min( h.GetMinimum() for h in hlst )
+        imax = max(h.GetMaximum() for h in hlst)
+        imin = min(h.GetMinimum() for h in hlst)
         meth = rt.TH1.Draw
     
-    offset  = ( imax + imin )/10.
-    vmin    = min( h.GetXaxis().GetXmin() for h in hlst )
-    vmax    = max( h.GetXaxis().GetXmax() for h in hlst )
-    hformat = hlst[0].__class__( '', title, 1, vmin, vmax )
+    offset  = (imax + imin)/10.
+    vmin    = min(h.GetXaxis().GetXmin() for h in hlst)
+    vmax    = max(h.GetXaxis().GetXmax() for h in hlst)
+    hformat = hlst[0].__class__('', title, 1, vmin, vmax)
 
     for get_ax in (rt.TH1.GetXaxis, rt.TH1.GetYaxis):
         tit = get_ax(hlst[0]).GetTitle()
@@ -435,31 +435,31 @@ def makeCorrelationHist( matrix, name = '', title = None, vartitles = None ):
     in color, without palette, and with the contents written inside each bin. No
     statistical box is displayed neither.
     '''
-    lm = len( matrix )
+    lm = len(matrix)
     
     vartitles = vartitles or []
     if vartitles != []:
         if lm != len(vartitles):
             sendErrorMsg('Number of titles is not the same as that of the matrix')
     else:
-        vartitles = ['Variable_' + str( i ) for i in xrange( lm )]
+        vartitles = ['Variable_' + str(i) for i in xrange(lm)]
 
-    corr_matrix = 100*np.corrcoef( matrix )
+    corr_matrix = 100*np.corrcoef(matrix)
     
     hist = rt.TH2D('', '', lm, 0, lm, lm, 0, lm)
-    for i, row in enumerate( corr_matrix ):
-        for j, el in enumerate( row ):
-            hist.SetBinContent( i + 1, j + 1, int( el ) )
-    for i, tit in enumerate( vartitles ):
-        hist.GetXaxis().SetBinLabel( i + 1, tit )
-        hist.GetYaxis().SetBinLabel( i + 1, tit )
+    for i, row in enumerate(corr_matrix):
+        for j, el in enumerate(row):
+            hist.SetBinContent(i + 1, j + 1, int(el))
+    for i, tit in enumerate(vartitles):
+        hist.GetXaxis().SetBinLabel(i + 1, tit)
+        hist.GetYaxis().SetBinLabel(i + 1, tit)
 
     formatPlottable2D(hist, name, title, '', '')
     
-    hist.GetXaxis().SetTickLength( 0 )
-    hist.GetYaxis().SetTickLength( 0 )
-    hist.SetOption( 'COLTEXT' )
-    hist.SetStats( False )
+    hist.GetXaxis().SetTickLength(0)
+    hist.GetYaxis().SetTickLength(0)
+    hist.SetOption('COLTEXT')
+    hist.SetStats(False)
     
     return hist
 
@@ -738,9 +738,9 @@ def multiPlot( mgrs, variables,
     if title == None:
         title = name
     
-    nvars = len( variables ) + 1
+    nvars = len(variables) + 1
 
-    if all( var in mgr for mgr in mgrs for var in variables ):
+    if all(var in mgr for mgr in mgrs for var in variables):
         
         ''' Generates and divides the canvas '''
         nyvars, nxvars = optCanvasDivision( nvars )
@@ -749,12 +749,12 @@ def multiPlot( mgrs, variables,
 
         canvas_info = CanvasStorer(canvas)
         
-        nmgrs = len( mgrs )
+        nmgrs = len(mgrs)
         ''' If cuts are specified it calculates the true managers '''
         if cuts:
-            for i, mgr in enumerate( mgrs ):
-                mgr, mgr.name = mgr.subSample( cuts = cuts ), mgr.name
-        
+            for i, mgr in enumerate(mgrs):
+                mgrs[i] = mgr.subsample(cuts = cuts, name = mgr.name)
+                
         ''' Disables the stat box of the histograms '''
         rt.gStyle.SetOptStat( 0 )
         
@@ -779,20 +779,22 @@ def multiPlot( mgrs, variables,
             canvas_info.infoObjs += [rlegend, rtxtinf]
         
         ''' Generates and draws the histograms '''
-        for iv, var in enumerate( variables ):
+        for iv, var in enumerate(variables):
             
-            canvas.cd( iv + 1 )
-
+            canvas.cd(iv + 1)
+            
             ''' This is done to reduce disk usage '''
-            totlst = [mgr.varEvents([var], cuts = cuts)[0] for mgr in mgrs]
-
+            tot = np.array([m.subsample(columns = [var],
+                                        cuts = cuts).values.T[0]
+                            for m in mgrs])
+            
             ''' Extract the ranges for each variable (if any) '''
             if var in ranges.keys():
                 rnbins, vmin, vmax = ranges[var]
             else:
-                if any(len(lst) != 0 for lst in totlst):
-                    vmax = max(el for lst in totlst for el in lst)
-                    vmin = min(el for lst in totlst for el in lst)
+                if any(len(m) != 0 for m in tot):
+                    vmax = tot.max()
+                    vmin = tot.min()
                 else:
                     vmin = 0
                     vmax = 1
@@ -800,7 +802,7 @@ def multiPlot( mgrs, variables,
 
             entries = []
             hists   = []
-            for im, ( mgr, vals ) in enumerate( zip( mgrs, totlst ) ):
+            for im, (mgr, vals) in enumerate(zip(mgrs, tot)):
                 hname = mgr.name + '_' + var
                 h = makeHistogram( vals,
                                    name  = hname,

@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/09/2017
+#//  Last update: 14/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -60,7 +60,7 @@ class DataMgr( pandas.DataFrame ):
             
         v   = list(set(self.columns).intersection(other.columns))
         m   = pandas.DataFrame.__add__(self[v], other[v])
-        mgr = DataMgr(m, name = new_name)
+        mgr = DataMgr(data = m, name = new_name)
         
         return mgr
     
@@ -110,8 +110,11 @@ class DataMgr( pandas.DataFrame ):
         This method allows to obtain a list with the events that satisfy
         the cuts given
         '''
-        mask = self.evaluate(cut, mathmod)
-        return numpy.nonzero(mask)[0]
+        if cut.strip():
+            mask = self.evaluate(cut, mathmod)
+            return numpy.nonzero(mask)[0]
+        else:
+            return numpy.array(self.index)
 
     def entries( self, selection = False, mathmod = None ):
         '''
@@ -194,10 +197,7 @@ class DataMgr( pandas.DataFrame ):
         print '{0}\n{1}\n{0}'.format(deco, vout)
         
         # Prints the values of the variables
-        if cuts != '':
-            evtlst = self.cutidxs(cuts, mathmod)
-        else:
-            evtlst = numpy.arange(len(self))
+        evtlst = self.cutidxs(cuts, mathmod)
 
         form = '{:' + str(maxsize) + '.' + str(prec) + 'e}'
 
@@ -219,6 +219,7 @@ class DataMgr( pandas.DataFrame ):
             if ievt + 1 == len(evtlst):
                 print deco + '\n'
         
+    @staticmethod
     def from_root( path, tname, columns = None, name = '<unnamed>' ):
         '''
         Create a DataMgr instance from a root file
@@ -230,9 +231,9 @@ class DataMgr( pandas.DataFrame ):
         if not columns:
             cols = sorted(d.keys())
             
-        v = numpy.array(list(dic[v] for v in cols))
+        v = numpy.array(list(d[v] for v in cols)).T
         
-        return DataMgr(data = v, variables = cols, name = name)
+        return DataMgr(data = v, columns = cols, name = name)
                        
     def run_cut( self, var,
                  sense    = '>',
@@ -266,7 +267,7 @@ class DataMgr( pandas.DataFrame ):
         
         return points
         
-    def subsample( self, name = None, cuts = '', mathmod = None, evts = None, columns = None ):
+    def subsample( self, cuts = '', mathmod = None, evts = None, columns = None, name = None ):
         '''
         Returns a copy of this class satisfying the given requirements. A set
         of cuts can be specified. The range of the events to be copied can be
@@ -280,18 +281,15 @@ class DataMgr( pandas.DataFrame ):
             if isinstance(evts, collections.Iterable):
                 evts = numpy.array(evts)
             else:
-                evts = numpy.arange(evts)
+                evts = self.index[:evts]
         else:
-            evts = numpy.arange(len(self))
+            evts = self.index
             
-        if 'cuts' != '':
-            cut_lst = self.cutidxs(cuts, mathmod)
-        else:
-            cut_lst = numpy.arange(len(self))
+        cut_lst = self.cutidxs(cuts, mathmod)
         
         evtlst = numpy.intersect1d(evts, cut_lst)
         
-        cmgr = DataMgr(data = self[columns][evtlst], name = name)
+        cmgr = DataMgr(data = self[columns].iloc[evtlst], name = name)
         
         return cmgr
 
