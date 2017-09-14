@@ -29,7 +29,7 @@ import ROOT as rt
 
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iboost.rootio import treeToDict, dictToTree
-from Isis.utils import stringListFilter
+from Isis.utils import string_list_filter
 from Isis.expressions import numpy_parse_eval_expr
 
 
@@ -329,7 +329,7 @@ def vars_in_root_tree( tree = None, fname = '', tpath = '', regexps = None ):
     if regexps != []:
         truenames = []
         for expr in regexps:
-            addlst = stringListFilter(brnames, expr)
+            addlst = string_list_filter(brnames, expr)
             if addlst != []:
                 truenames += addlst
             else:

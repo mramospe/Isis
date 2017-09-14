@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 17/04/2017
+#//  Last update: 14/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -38,7 +38,7 @@ def decompose( number ):
     return result
 
 
-def greaterComDiv( *args ):
+def gcd( *args ):
     '''
     Calculates the greater common divisor of a set of numbers
     '''
@@ -48,7 +48,7 @@ def greaterComDiv( *args ):
     return cnt
 
 
-def isPrime( number ):
+def is_prime( number ):
     '''
     Checks if the given number is a prime number
     '''
@@ -61,7 +61,7 @@ def isPrime( number ):
         return False
 
 
-def isSquare( number ):
+def is_square( number ):
     '''
     Checks if the given number is a pure square number
     '''
@@ -74,7 +74,7 @@ def isSquare( number ):
         return False
 
 
-def leastComMult( *args ):
+def lcm( *args ):
     '''
     Calculates the least common multiple of a set of numbers
     '''
@@ -84,7 +84,7 @@ def leastComMult( *args ):
     return cnt
 
 
-def nearestSquare( number ):
+def nearest_square( number ):
     '''
     Calculates the nearest perfect square number to the one given
     '''
@@ -95,10 +95,3 @@ def nearestSquare( number ):
         return int(round(lowsqrt))
     else:
         return int(round(upsqrt))
-
-
-def sumQuad( *values ):
-    '''
-    Sum the input values in quadrature
-    '''
-    return sum(v**2 for v in values)

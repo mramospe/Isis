@@ -7,7 +7,7 @@
 
 from Isis.iboost.analysis import ( CLsFactory, CLsFluctuator,
                                    CLsHypothesis, CLsPrior, CLsResult )
-from Isis.statistics import poissonUncert
+from Isis.statistics import poisson_uncert
 
 import numpy as np
 import ROOT as rt
@@ -66,7 +66,7 @@ class AsymmFluct(CLsFluctuator):
         self.sdif  = []
         
         for m in self.means:
-            sig_sy, sig_lo, sig_hi = poissonUncert(int(m))
+            sig_sy, sig_lo, sig_hi = poisson_uncert(int(m))
             self.ssum.append( sig_hi + sig_lo )
             self.sdif.append( sig_hi - sig_lo )
 

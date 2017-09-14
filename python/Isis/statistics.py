@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/04/2017
+#//  Last update: 14/09/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -23,8 +23,8 @@
 import ROOT as rt
 
 from Isis.iboost.general import sendWarningMsg
-from Isis.decorators import decoInputArgs
-from Isis.root_utils import extractHistValues
+from Isis.decorators import deco_input_args
+from Isis.root_utils import hist_values
 
 from math import sqrt
 import numpy as np
@@ -33,8 +33,8 @@ from scipy.special import betainc
 from scipy.stats import beta
 
 
-@decoInputArgs(float, kvars = ['cl', 'prec'])
-def binomialUncert( N, k, cl = 0.683, prec = 0.01 ):
+@deco_input_args(float, kvars = ['cl', 'prec'])
+def binomial_uncert( N, k, cl = 0.683, prec = 0.01 ):
     '''
     Calculate the frequentist uncertainties associated with an observation of < k >
     events in < N >. The confidence level and precision for the results may be
@@ -87,7 +87,7 @@ class IntegralTransformer:
             if weights:
                 sendWarningMsg('Using a TH1 object; input weights ignored')
             
-            centers, values, widths = extractHistValues(arg)
+            centers, values, widths = hist_values(arg)
 
             self.__init__(centers, values)
             
@@ -127,15 +127,15 @@ class IntegralTransformer:
         '''
         return np.interp(arg, self._values, self._cltve)
 
-    def deTransform( self, arg ):
+    def detransform( self, arg ):
         '''
         Return the de-transformated values
         '''
         return np.interp(arg, self._cltve, self._values)
 
 
-@decoInputArgs(float, slc = [], kvars = ['cl', 'prec'])
-def poissonUncert( mean, cl = 0.683, prec = 0.01 ):
+@deco_input_args(float, slc = [], kvars = ['cl', 'prec'])
+def poisson_uncert( mean, cl = 0.683, prec = 0.01 ):
     '''
     Calculate the frequentist poisson uncertainties for a given integer value. The
     confidence level may be provided. Also the precision required in the outcoming

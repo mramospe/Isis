@@ -24,7 +24,7 @@ import ROOT as rt
 
 #_______________________________________________________________________________
 # This function extracts the values from a TGraph object into two lists
-def extractGraphValues( graph ):
+def graph_values( graph ):
     
     xbin = rt.Double( 0. )
     ybin = rt.Double( 0. )
@@ -43,7 +43,7 @@ def extractGraphValues( graph ):
 # Function to extract bin centers, values and widths from a Root histogram. If
 # the dimension is 2, then centers and widths contain both x and y coordinates.
 # The result is given completely splitted.
-def extractHistValues( hist ):
+def hist_values( hist ):
 
     if isinstance( hist, rt.TH2 ):
         axis = [ hist.GetXaxis(), hist.GetYaxis() ]

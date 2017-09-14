@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 13/09/2017
+#//  Last update: 14/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -51,7 +51,7 @@ class EnvTracker:
         self.title = title
         self.update()
 
-    def _filterKeys( self ):
+    def _filter_keys( self ):
         '''
         Defines the keys that are considered to be tracked
         '''
@@ -66,7 +66,7 @@ class EnvTracker:
         '''
         Return the variables added, removed and with a different assignment
         '''
-        new_env_vars = [EnvVar(kw, self._env[kw]) for kw in self._filterKeys()]
+        new_env_vars = [EnvVar(kw, self._env[kw]) for kw in self._filter_keys()]
 
         added, removed, reas_keys, reas_objs = self._envVars[0].check(new_env_vars)
 
@@ -113,7 +113,7 @@ class EnvTracker:
         '''
         Update the keys of the environment
         '''
-        self._envVars = [EnvVar(kw, self._env[kw]) for kw in self._filterKeys()]
+        self._envVars = [EnvVar(kw, self._env[kw]) for kw in self._filter_keys()]
 
 
 class EnvVar:
@@ -156,7 +156,7 @@ class EnvVar:
         return added, removed, reas_keys, reas_obj
 
         
-def formatTime( itime ):
+def format_time( itime ):
     '''
     Displays the given time in the format [w, d, h, min, s]. If one of the
     quantities is zero, it is not displayed.
@@ -320,7 +320,7 @@ class PythonEnvMgr:
             outstr += '\t' + kw + whtsp + ' = ' + str(dic[kw]) + '\n'
         return outstr
     
-    def readEnv( self, name, **kwargs ):
+    def read( self, name, **kwargs ):
         '''
         Reads the asigned file. By default the class is returned, but it can
         be given as a dictionary if specified in **kwargs.
@@ -343,7 +343,7 @@ class PythonEnvMgr:
         else:
             return mod
 
-    def saveEnv( self, name, **kwargs ):
+    def save( self, name, **kwargs ):
         '''
         Method to save a set of values inside a class called < name > in the file
         attached to this class.
@@ -387,7 +387,7 @@ class PythonEnvMgr:
         ofile.close()
 
 
-def stringListFilter( lst, pattern ):
+def string_list_filter( lst, pattern ):
     '''
     Given a list and a pattern ( with elements separated by '*' symbols ) it
     returns another list with those that satisfy it.
@@ -457,7 +457,7 @@ class StrNumGenerator:
             return (self._maxStrLen - len(citer))*'0' + citer
 
 
-def terminalSize():
+def terminal_size():
     '''
     Returns the values of the height and width of the terminal
     '''

@@ -60,7 +60,7 @@ def genCorrPlots( mgrdct, varlst, nmgrs = 1, vartitles = [], cuts = False ):
             
             name   = mgr.name + '_CorrHist'
             matrix = mgr.subsample(columns = varlst, cuts = cuts).as_matrix().T
-            chist  = iplt.makeCorrelationHist(matrix, name = name, vartitles = vartitles)
+            chist  = iplt.corr_hist(matrix, name = name, vartitles = vartitles)
             
             chist.Draw()
             
@@ -81,7 +81,7 @@ def genVarPlots( mgrdct, varlst, nvars, cuts ):
 
     plots = []
     for i, vset in enumerate(var_sets):
-        cst = iplt.multiPlot([mgr for mgr in mgrs.itervalues()], vset,
+        cst = iplt.multiplot([mgr for mgr in mgrs.itervalues()], vset,
                              cuts   = cuts,
                              norm   = True,
                              name   = 'VarCanvas_' + str(i),

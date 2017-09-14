@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 10/04/2017
+#//  Last update: 14/09/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -21,10 +21,10 @@
 
 
 import time
-from Isis.utils import convertArgs, formatTime, terminalSize
+from Isis.utils import format_time, terminal_size
 
 
-class decoArgBase:
+class DecoArgBase:
     '''
     Base decorator to call a function modifying its arguments
     '''
@@ -41,7 +41,7 @@ class decoArgBase:
         return self.func(*args, **kwargs)
 
 
-def decoClassMethod( func ):
+def deco_class_meth( func ):
     '''
     Thin second-order decorator designed to be used with class methods
     '''
@@ -51,7 +51,7 @@ def decoClassMethod( func ):
     return wrapper
 
 
-class _decoInputArgs( decoArgBase ):
+class _DecoInputArgs( DecoArgBase ):
     '''
     Base decorator to apply a function < conv > to each argument based on the
     slice < slc >. The keyword arguments can also be parsed as a list in < kvars >
@@ -60,7 +60,7 @@ class _decoInputArgs( decoArgBase ):
         '''
         Call base class and set the number of arguments to convert
         '''
-        decoArgBase.__init__(self, func)
+        DecoArgBase.__init__(self, func)
         self.conv  = conv
         self.kvars = kvars
         self.slc   = slc
@@ -69,7 +69,7 @@ class _decoInputArgs( decoArgBase ):
         '''
         Convert arguments with indices < self.slc > and call function
         '''
-        func_args = convertArgs(self.conv, args, self.slc)
+        func_args = map(self.conv, np.array(args)[self.slc])
 
         if self.kvars:
             common = set(self.kvars).intersection(kwargs.keys())
@@ -81,20 +81,20 @@ class _decoInputArgs( decoArgBase ):
         return self.func(*func_args, **kwargs)
 
 
-def decoInputArgs( conv, slc = slice(0, None), kvars = None ):
+def deco_input_args( conv, slc = slice(0, None), kvars = None ):
     '''
-    Function to extend the functionality of the class < _decoInputArgs > as a
+    Function to extend the functionality of the class < _DecoInputArgs > as a
     decorator
     '''
     kvars = kvars or []
     
     def wrapper( func ):
-        return _decoInputArgs(conv, func, slc, kvars)
+        return _DecoInputArgs(conv, func, slc, kvars)
         
     return wrapper
 
 
-def trackTime( function ):
+def track_time( function ):
     '''
     This decorator displays the time information about a particular job, together
     with some separators
@@ -113,7 +113,7 @@ def trackTime( function ):
             gmtstr = time.strftime( "%H:%M:%S", gmtime )
 
         ''' Gets the terminal size and creates the separator '''
-        (height, width) = terminalSize()
+        (height, width) = terminal_size()
         separator = width*"*"
 
         ''' Displays the initial information '''
@@ -139,7 +139,7 @@ def trackTime( function ):
         msg = lctstr + " (LOCAL) " + gmtstr + " (UTC)"
         print separator
         print ("TRACKED JOB FINISHED (Time elapsed: %s)"
-               % formatTime( etime - stime ) ).center( width )
+               % format_time( etime - stime ) ).center( width )
         print separator
         print msg.center( width )
         print separator
