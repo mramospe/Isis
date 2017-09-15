@@ -20,7 +20,7 @@
 #//////////////////////////////////////////////////////////
 
 
-import ROOT as rt
+import iroot as rt
 
 from Isis.iboost.general import sendWarningMsg
 from Isis.decorators import deco_input_args

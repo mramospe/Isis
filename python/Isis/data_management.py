@@ -25,7 +25,7 @@ import math
 import numpy
 import pandas
 
-import ROOT as rt
+import iroot as rt
 
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iboost.rootio import treeToDict, dictToTree

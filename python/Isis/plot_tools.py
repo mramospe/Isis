@@ -24,7 +24,7 @@ from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.efficiencies import efficiency
 from Isis.math_ext import nearest_square
 
-import ROOT as rt
+import iroot as rt
 
 import itertools, sys
 from math import sqrt
@@ -200,24 +200,24 @@ def divide_hists( hN, hK, asym = True, name = '', title = None, xtitle = '', yti
     '''
     nbins   = hN.GetNbinsX()
     tprg    = (1, nbins + 1)
-    centers = [hN.GetBinCenter(i) for i in xrange(*tprg)]
-    swidth  = [hN.GetBinWidth(i) for i in xrange(*tprg)]
+    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)], dtype = float)
+    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)], dtype = float)
     
     nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
     nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
-
-    eff     = []
-    seff    = []
-    seff_lw = []
-    seff_up = []
+    
+    eff     = np.zeros(nbins, dtype = float)
+    seff    = np.zeros(nbins, dtype = float)
+    seff_lw = np.zeros(nbins, dtype = float)
+    seff_up = np.zeros(nbins, dtype = float)
 
     for nn, nk in zip(nN, nK):
         p, s_sy, s_lw, s_up = efficiency(nn, nk)
-        eff.append(p)
-        seff.append(s_sy)
-        seff_lw.append(s_lw)
-        seff_up.append(s_up)
-
+        eff[i]     = p
+        seff[i]    = s_sy
+        seff_lw[i] = s_lw
+        seff_up[i] = s_up
+        
     if not asym:
         ''' If specified, the symmetric error is used '''
         seff_lw = seff_up = seff
@@ -225,12 +225,6 @@ def divide_hists( hN, hK, asym = True, name = '', title = None, xtitle = '', yti
     '''
     Build the graph
     '''
-    centers = np.array(centers, dtype = float)
-    eff     = np.array(eff    , dtype = float)
-    swidth  = np.array(swidth , dtype = float)
-    seff_lw = np.array(seff_lw, dtype = float)
-    seff_up = np.array(seff_up, dtype = float)
-    
     graph = rt.TGraphAsymmErrors(nbins,
                                  centers, eff,
                                  swidth, swidth,
@@ -312,13 +306,13 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     '''
     title = title if title else name
     
-    xmin = min(map(lambda h: h.GetXaxis().GetXmin(), hlst))
-    xmax = max(map(lambda h: h.GetXaxis().GetXmax(), hlst))
-
-    ymin = np.array([h.GetMinimum() for h in hlst])
-    ymax = np.array([h.GetMaximum() for h in hlst])
+    xmin = np.fromfunction(lambda h: h.GetXaxis().GetXmin(), hlst).min()
+    xmax = np.fromfunction(lambda h: h.GetXaxis().GetXmax(), hlst).max()
+    
+    ymin = np.fromfunction(lambda h: h.GetMinimum(), hlst).min()
+    ymax = np.fromfunction(lambda h: h.GetMaximum(), hlst).max()
     if norm:
-        wgts = np.array([h.GetSumOfWeights() for h in hlst])
+        wgts = np.fromfunction(lambda h: h.GetSumOfWeights(), hlst)
         ymin /= wgts
         ymax /= wgts
 
