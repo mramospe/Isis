@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 14/09/2017
+#//  Last update: 15/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -306,13 +306,13 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     '''
     title = title if title else name
     
-    xmin = np.fromfunction(lambda h: h.GetXaxis().GetXmin(), hlst).min()
-    xmax = np.fromfunction(lambda h: h.GetXaxis().GetXmax(), hlst).max()
+    xmin = np.fromiter((h.GetXaxis().GetXmin() for h in hlst), float).min()
+    xmax = np.fromiter((h.GetXaxis().GetXmax() for h in hlst), float).max()
     
-    ymin = np.fromfunction(lambda h: h.GetMinimum(), hlst).min()
-    ymax = np.fromfunction(lambda h: h.GetMaximum(), hlst).max()
+    ymin = np.fromiter((h.GetMinimum() for h in hlst), float).min()
+    ymax = np.fromiter((h.GetMaximum() for h in hlst), float).max()
     if norm:
-        wgts = np.fromfunction(lambda h: h.GetSumOfWeights(), hlst)
+        wgts = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
         ymin /= wgts
         ymax /= wgts
 
@@ -320,12 +320,12 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     ymax = max(ymax)
     ymax += 0.1*(ymax - ymin)
     
-    hform = hlst[0].__class__(name, title, 1, xmin, xmax)
+    hform = hlst[0].__class__(name, title, hlst[0].GetNbinsX(), xmin, xmax)
     
     hform.GetXaxis().SetTitle(hlst[0].GetXaxis().GetTitle())
     hform.GetYaxis().SetTitle(hlst[0].GetYaxis().GetTitle())
-    
-    hform.SetBinContent(1, 0)
+
+    hform.SetLineColor(0)
     hform.SetLineStyle(0)
     
     hform.GetYaxis().SetRangeUser(ymin, ymax)
