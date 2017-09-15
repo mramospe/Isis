@@ -8,7 +8,7 @@
 from Isis.plot_tools import draw_hists, hist, scatter_plot
 
 import numpy as np
-import ROOT as rt
+import iroot as rt
 
 class CLsStepList:
     '''

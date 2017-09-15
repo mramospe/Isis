@@ -5,7 +5,7 @@
 from Isis.data_management import DataMgr
 import Isis.plot_tools as iplt
 import Isis.utils as utils
-import ROOT as rt
+import iroot as rt
 
 # Maximum number of variables displayed per canvas, so "npads = maxVars + 1"
 vars_per_plot = 8
