@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/09/2017
 //
 // -------------------------------------------------------
 //
@@ -39,16 +39,18 @@ namespace isis {
   // the number of branches appended.
   size_t getBranchNames( Strings &vector,
 			 TTree *inputTree,
-			 const std::string &expr = "" );
+			 const std::string &regex = ""
+			 );
 
   // Appends to the given vector all the titles of the branches in a tree. Returns
   // the number of branches appended.
   size_t getBranchTitles( Strings &vector,
 			  TTree *inputTree,
-			  const std::string &expr = "" );
+			  const std::string &regex = ""
+			  );
 
   // Gets the number of variables in a tree whose name contains a given keyword
-  size_t getNvarsWithExpr( TTree *inputTree, const std::string &expr );
+  size_t getNvarsWithExpr( TTree *inputTree, const std::string &regex );
 
   // Returns the number of variables of a given type
   size_t getNvarsWithType( TTree *inputTree, const char &type );

@@ -29,6 +29,11 @@ set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11 -pthread -Wno-unused-local-typedefs")
 set(libsuffix .so)
 
 #----------------------------------------------------------------------------
+# Ask for the boost libraries
+find_package(Boost 1.63 REQUIRED COMPONENTS python numpy regex)
+include_directories(${Boost_INCLUDE_DIRS})
+
+#----------------------------------------------------------------------------
 # Ask for the Root package, with the given set of libraries
 set(ROOT_LIB_SET
   Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics
@@ -176,7 +181,7 @@ if(BUILD_EXAMPLES)
       string(REPLACE ${INSTALL_EXAMPLES_DIR}/ "" compfile ${compfile})
       add_executable(${compfile} ${file})
       add_dependencies(${compfile} ${PROJECT_LIBRARIES})
-      target_link_libraries(${compfile} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
+      target_link_libraries(${compfile} ${PROJECT_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
     endforeach()
   else()
     message("-- The examples will not be built")

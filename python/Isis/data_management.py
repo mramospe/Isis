@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 14/09/2017
+#//  Last update: 18/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -220,13 +220,13 @@ class DataMgr( pandas.DataFrame ):
                 print deco + '\n'
         
     @staticmethod
-    def from_root( path, tname, columns = None, name = '<unnamed>' ):
+    def from_root( path, tname, columns = None, name = '<unnamed>', cuts = '', regex = False ):
         '''
         Create a DataMgr instance from a root file
         '''
         cols = columns or ['*']
         
-        d = treeToDict(path, tname, cols)
+        d = treeToDict(path, tname, cols, cuts, regex)
         
         if not columns:
             cols = sorted(d.keys())

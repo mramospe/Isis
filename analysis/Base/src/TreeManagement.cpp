@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/09/2017
 //
 // ------------------------------------------------------
 /////////////////////////////////////////////////////////
@@ -36,18 +36,19 @@ namespace isis {
   //
   size_t getBranchNames( Strings &vector,
 			 TTree *inputTree,
-			 const std::string &expr ) {
-  
+			 const std::string &regex
+			 ) {
+    
     TObjArray *brList = inputTree->GetListOfBranches();
-    Strings brVector( brList->GetEntries() );
-    for ( int ibr = 0; ibr < brList->GetEntries(); ++ibr )
-      brVector[ ibr ] = brList->At( ibr )->GetName();
-  
+    Strings brVector(brList->GetEntries());
+    for ( int i = 0; i < brList->GetEntries(); ++i )
+      brVector[i] = brList->At(i)->GetName();
+    
     size_t n = vector.size();
-    if ( expr.size() )
-      stringVectorFilter( vector, brVector, expr );
+    if ( regex.size() )
+      stringVectorFilter(vector, brVector, regex);
     else
-      vector.insert( vector.end(), brVector.begin(), brVector.end() );
+      vector.insert(vector.end(), brVector.begin(), brVector.end());
   
     return vector.size() - n;
   }
@@ -56,28 +57,28 @@ namespace isis {
   //
   size_t getBranchTitles( Strings &vector,
 			  TTree *inputTree,
-			  const std::string &expr ) {
+			  const std::string &regex ) {
   
     TObjArray *brList = inputTree->GetListOfBranches();
-    Strings brVector( brList->GetEntries() );
-    for ( int ibr = 0; ibr < brList->GetEntries(); ++ibr )
-      brVector[ ibr ] = brList->At( ibr )->GetTitle();
+    Strings brVector(brList->GetEntries());
+    for ( int i = 0; i < brList->GetEntries(); ++i )
+      brVector[i] = brList->At(i)->GetTitle();
 
     size_t n = vector.size();
-    if ( expr.size() )
-      stringVectorFilter( vector, brVector, expr );
+    if ( regex.size() )
+      stringVectorFilter(vector, brVector, regex);
     else
-      vector.insert( vector.end(), brVector.begin(), brVector.end() );
+      vector.insert(vector.end(), brVector.begin(), brVector.end());
 
     return vector.size() - n;
   }
 
   //_______________________________________________________________________________
   //
-  size_t getNvarsWithExpr( TTree *inputTree, const std::string &expr ) {
+  size_t getNvarsWithExpr( TTree *inputTree, const std::string &regex ) {
   
     Strings vector;
-    getBranchNames( vector, inputTree, expr );
+    getBranchNames(vector, inputTree, regex);
     return vector.size();
   }
 
@@ -87,9 +88,9 @@ namespace isis {
   
     TObjArray *brList = inputTree->GetListOfBranches();
     std::string title;
-    size_t      counter( 0 );
-    for ( int ibr = 0; ibr < brList->GetEntries(); ++ibr ) {
-      title = brList->At( ibr )->GetTitle();
+    size_t      counter(0);
+    for ( int i = 0; i < brList->GetEntries(); ++i ) {
+      title = brList->At(i)->GetTitle();
       if ( title.back() == type )
 	++counter;
     }
@@ -104,9 +105,9 @@ namespace isis {
   
     TObjArray *brList = inputTree->GetListOfBranches();
     std::string title;
-    size_t      counter( 0 );
+    size_t      counter(0);
     for ( auto it = vector.begin(); it != vector.end(); ++it ) {
-      title = brList->FindObject( it->c_str() )->GetTitle();
+      title = brList->FindObject(it->c_str())->GetTitle();
       if ( title.back() == type )
 	++counter;
     }
@@ -118,15 +119,15 @@ namespace isis {
   char getVarType( TTree *inputTree, const std::string &var ) {
   
     TObjArray *brList = inputTree->GetListOfBranches();
-    TObject *obj = brList->FindObject( var.c_str() );
+    TObject *obj = brList->FindObject(var.c_str());
     
     if ( !obj )
       IError << "Unable to get branch with name < " << var << " >" << IEndMsg;
     
     std::string type = obj->GetTitle();
-    type.replace( 0, var.length(), "" );
+    type.replace(0, var.length(), "");
     
-    return type[ 1 ];
+    return type[1];
   }
 
 }

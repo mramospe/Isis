@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 18/09/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -54,12 +54,13 @@ namespace iboost {
   //_______________________________________________________________________________
   //
   py::dict treeToBoostDict( std::string fpath,
-				    std::string tpath,
-				    py::object &vars,
-				    std::string cuts ) {
+			    std::string tpath,
+			    py::object &vars,
+			    std::string cuts,
+			    bool use_regex ) {
   
-    TFile *ifile = TFile::Open( fpath.c_str() );
-    TTree *itree = static_cast<TTree*>(isis::getSafeObject( ifile, tpath ));
+    TFile *ifile = TFile::Open(fpath.c_str());
+    TTree *itree = static_cast<TTree*>(isis::getSafeObject(ifile, tpath));
 
     // Extracts the list of events to be used
     itree->Draw(">>evtlist", cuts.c_str());
@@ -69,17 +70,23 @@ namespace iboost {
   
     itree->SetBranchStatus("*", 0);
   
-    isis::TreeBuffer buffer( itree );
-    const py::ssize_t nvars = py::len( vars );
+    isis::TreeBuffer buffer(itree);
+    const py::ssize_t nvars = py::len(vars);
     std::map<std::string, BuffVarWriter*> outmap;
     for ( py::ssize_t i = 0; i < nvars; ++i ) {
 
       auto var = extractFromIndex<std::string>(vars, i);
 
-      // Get the variables from the given expressions
       isis::Strings brnames;
-      size_t nadded = isis::getBranchNames(brnames, itree, var);
-      if ( !nadded )
+      
+      if ( use_regex )
+	// Get the variables from the given expressions
+	isis::getBranchNames(brnames, itree, var);
+      else
+	if ( itree->GetBranch(var.c_str()) )
+	    brnames.push_back(var);
+      
+      if ( !brnames.size() )
 	IWarning << "No variables have been found following expression < "
 		 << var << " >" << IEndMsg;
 
@@ -204,9 +211,9 @@ namespace iboost {
   //_______________________________________________________________________________
   //
   np::ndarray treeToNumpyArray( std::string fpath,
-					std::string tpath,
-					std::string var,
-					std::string cuts ) {
+				std::string tpath,
+				std::string var,
+				std::string cuts ) {
     py::list varlist;
     varlist.append(var);
     py::dict dict = treeToBoostDict(fpath, tpath, varlist, cuts);

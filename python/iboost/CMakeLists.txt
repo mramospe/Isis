@@ -4,7 +4,6 @@ set(PKG_NAME iboost)
 
 #----------------------------------------------------------------------------
 # Look for the Boost and python libraries
-find_package(Boost 1.63 REQUIRED COMPONENTS python numpy)
 find_package(PythonLibs REQUIRED)
 
 #----------------------------------------------------------------------------

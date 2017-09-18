@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/09/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -52,7 +52,8 @@ namespace iboost {
   py::dict treeToBoostDict( std::string fpath,
 			    std::string tpath,
 			    py::object &vars,
-			    std::string cuts = std::string() );
+			    std::string cuts = std::string(),
+			    bool use_regex = false );
   
   // Write a python dictionary to a Root tree. Since in python there are only four
   // numeric types: bool, int, long and float; only the associated c++ types

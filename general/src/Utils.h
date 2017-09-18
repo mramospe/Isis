@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 18/09/2017
 //
 // --------------------------------------------------------
 //
@@ -62,11 +62,11 @@ namespace isis {
 		    const std::string &expr );
 
   // Filters the entries in the given vector following the rules imposed by the
-  // input variable < expr >. The strings that pass the filter are attached to the
+  // input variable < regex >. The strings that pass the filter are attached to the
   // output vector.
   void stringVectorFilter( Strings &output,
 			   const Strings &input,
-			   const std::string &expr );
+			   const std::string &regex );
 
   // Trims the given string using < trexpr >. All the elements that match this
   // expression in the front and back of < str > will be removed.

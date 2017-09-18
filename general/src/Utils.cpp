@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/09/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -16,6 +16,8 @@
 #include "Definitions.h"
 #include "Messenger.h"
 #include "Utils.h"
+
+#include <boost/regex.hpp>
 
 #include <algorithm>
 
@@ -131,61 +133,13 @@ namespace isis {
   //
   void stringVectorFilter( Strings &output,
 			   const Strings &input,
-			   const std::string &expr ) {
+			   const std::string &regex ) {
 
-    // Splits the input string using the character < * >
-    Strings splitVec;
-    splitString( splitVec, expr, "*" );
-
-    // Defines two boolean variables that determine if the first or the last word
-    // provided in the expression must be checked
-    bool
-      checkstart = true,
-      checkend   = true;
-    if ( splitVec.front() == std::string() )
-      checkstart = false;
-    if ( splitVec.back() == std::string() )
-      checkend = false;
-
-    // The splitted vector will have empty values in the first and last entries depending
-    // if the < * > symbol is placed in the expression extremes, so they must be removed
-    splitVec.assign( splitVec.begin() + !checkstart, splitVec.end() - !checkend );
-  
-    // Adds each string to the new vector if they satisfy the requirements imposed
-    // by < expr >
-    for ( auto it = input.begin(); it != input.end(); ++it ) {
+    boost::regex re(regex);
     
-      size_t
-	prevPos = 0,
-	nextPos = 0;
-
-      bool cond1 = true, cond2 = true;
-
-      // If the start or the end does not coincide with the expected, the condition
-      // variable is set to < false >, so it does not enter into the following loop
-      if ( checkstart )
-	if ( it -> find( splitVec.front() ) != 0 )
-	  cond1 = false;
-      if ( checkend ) {
-	size_t pos = (it -> size() - splitVec.back().size());
-	if ( it -> rfind( splitVec.back() ) != pos )
-	  cond1 = false;
-      }
-    
-      for ( auto itkw = splitVec.begin(); itkw != splitVec.end() && cond1 && cond2; ++itkw ) {
-
-	nextPos = it -> find( *itkw );
-      
-	cond1 = (nextPos >= prevPos);
-	cond2 = (nextPos != std::string::npos);
-
-	prevPos = nextPos;
-      }
-
-      // Only if the iterator has reached the end the string is saved
-      if ( cond1 && cond2 )
-	output.push_back( *it );
-    }
+    for ( const auto &s : input )
+      if ( boost::regex_match(s, re) )
+	output.push_back(s);
   }
 
   //_______________________________________________________________________________

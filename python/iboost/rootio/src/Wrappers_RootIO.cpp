@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/09/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -39,7 +39,7 @@ namespace ib = iboost;
 //_______________________________________________________________________________
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(treeToBoostDict_Overloads,
-				ib::treeToBoostDict, 3, 4);
+				ib::treeToBoostDict, 3, 5);
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(treeToNumpyArray_Overloads,
 				ib::treeToNumpyArray, 3, 4);
