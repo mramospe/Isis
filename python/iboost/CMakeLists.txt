@@ -9,7 +9,7 @@ find_package(PythonLibs REQUIRED)
 #----------------------------------------------------------------------------
 # Set of libraries linked to those created here
 set(BOOSTPY_LIBS
-  ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES})
+  ${PROJECT_LIBRARIES} ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Function to compile each of the boost packages
