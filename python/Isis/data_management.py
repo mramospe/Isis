@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 18/09/2017
+#//  Last update: 19/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -293,11 +293,11 @@ class DataMgr( pandas.DataFrame ):
         
         return cmgr
 
-    def to_root( self, name = '', tname = False, columns = None, mode = 'recreate' ):
+    def to_root( self, name = '', tname = False, columns = None, mode = 'recreate', use_regex = False ):
         '''
         Save this instance in a Root file
         '''
-        columns = columns or self.columns
+        columns = columns or list(self.columns)
         
         if name != '':
             ofile = rt.TFile.Open(name, mode)
@@ -305,8 +305,10 @@ class DataMgr( pandas.DataFrame ):
             ofile = False
             name  = rt.gDirectory.GetName()
             
-        print self.name, '=> Saving tree with name <', tree_name, '> in <', name, '>'
-        dictToTree(self.to_dict('series'), name = tree_name, variables = columns)
+        print self.name, '=> Saving tree with name <', tname, '> in <', name, '>'
+        dct = {k: s.values for k, s in self.to_dict('series').iteritems()}
+        
+        dictToTree(dct, name = tname, variables = columns, use_regex = use_regex)
         print self.name, '=> Written', len(self), 'entries'
         
         if ofile:

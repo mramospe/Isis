@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/09/2017
+//  Last update: 19/09/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -131,33 +131,36 @@ namespace iboost {
   py::object boostDictToTree( py::tuple args, py::dict kwargs ) {
 
     checkArgs(args, 1);
-    checkKwargs(kwargs, {"name", "tree", "variables"});
+    checkKwargs(kwargs, {"name", "tree", "variables", "use_regex"});
   
     py::dict vardict = extractFromIndex<py::dict>(args, 0);
     py::list varkeys = vardict.keys();
 
     // Get the tree name or the given tree
     TTree *tree = 0;
-    if ( kwargs.has_key( py::object("tree") ) ) {
+    if ( kwargs.has_key(py::object("tree")) ) {
 
       py::object el = kwargs["tree"];
 
       TObject *treeproxy =
-	(TObject*) TPython::ObjectProxy_AsVoidPtr( el.ptr() );
+	(TObject*) TPython::ObjectProxy_AsVoidPtr(el.ptr());
       
-      tree = dynamic_cast<TTree*>( treeproxy );
+      tree = dynamic_cast<TTree*>(treeproxy);
     }
     std::string tname;
     if ( kwargs.has_key("name") )
-      tname = py::extract<std::string>( kwargs["name"] );
+      tname = py::extract<std::string>(kwargs["name"]);
     py::list variables;
     if ( kwargs.has_key("variables") ) {
-      variables = py::extract<py::list>( kwargs["variables"] );
-      if ( !py::len( variables ) )
+      variables = py::extract<py::list>(kwargs["variables"]);
+      if ( !py::len(variables) )
 	variables = varkeys;
     }
     else
       variables = varkeys;
+    bool use_regex = false;
+    if ( kwargs.has_key("use_regex") )
+      use_regex = py::extract<bool>(kwargs["use_regex"]);
   
     // Warning message if both the tree and tree name are provided
     if ( !tree ) {
@@ -169,7 +172,7 @@ namespace iboost {
   
     // Prepare the variables to iterate with. The vector keeps
     // track of the types for each variable.
-    isis::TreeBuffer buffer( tree );
+    isis::TreeBuffer buffer(tree);
 
     auto vars = boostListToStdCont<std::vector, std::string>(variables);
     auto vec_keys = boostListToStdCont<std::vector, std::string>(varkeys);
@@ -180,8 +183,11 @@ namespace iboost {
 
       // Get the variables from the given expressions
       isis::Strings brnames;
-      isis::stringVectorFilter(brnames, vec_keys, exp);
-
+      if ( use_regex )
+	isis::stringVectorFilter(brnames, vec_keys, exp);
+      else
+	brnames.push_back(exp);
+      
       for ( const auto &br : brnames )
 	varmap[br] =
 	  new BuffVarWriter( buffer, br,
@@ -213,10 +219,11 @@ namespace iboost {
   np::ndarray treeToNumpyArray( std::string fpath,
 				std::string tpath,
 				std::string var,
-				std::string cuts ) {
+				std::string cuts,
+				bool use_regex ) {
     py::list varlist;
     varlist.append(var);
-    py::dict dict = treeToBoostDict(fpath, tpath, varlist, cuts);
+    py::dict dict = treeToBoostDict(fpath, tpath, varlist, cuts, use_regex);
     return py::extract<np::ndarray>(dict[var]);
   }
 
@@ -233,7 +240,7 @@ namespace iboost {
     py::dict dict;
     dict[var] = values;
   
-    return boostDictToTree(py::make_tuple( dict ), kwargs);
+    return boostDictToTree(py::make_tuple(dict), kwargs);
   }
 
 }

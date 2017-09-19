@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/09/2017
+//  Last update: 19/09/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -66,7 +66,8 @@ namespace iboost {
   np::ndarray treeToNumpyArray( std::string fpath,
 				std::string tpath,
 				std::string var,
-				std::string cuts = std::string() );
+				std::string cuts = std::string(),
+				bool use_regex = false );
   
   // Create/update a Root tree adding a variable with the given list of values. To
   // see the possible < kwargs > arguments see < BoostDictToTree >.
