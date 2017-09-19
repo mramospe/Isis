@@ -42,7 +42,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(treeToBoostDict_Overloads,
 				ib::treeToBoostDict, 3, 5);
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(treeToNumpyArray_Overloads,
-				ib::treeToNumpyArray, 3, 4);
+				ib::treeToNumpyArray, 3, 5);
 
 // Definition of the python module
 BOOST_PYTHON_MODULE( rootio ) {
