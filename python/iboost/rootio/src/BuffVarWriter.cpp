@@ -7,18 +7,19 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 20/09/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
 #include "BuffVarWriter.h"
 #include "GlobalWrappers.h"
 #include "InitModule.h"
+#include "NumpyConverters.h"
+
+#include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
 
 #include "TreeBuffer.h"
 #include "Definitions.h"
@@ -39,32 +40,15 @@ namespace iboost {
 
   //_______________________________________________________________________________
   //
-  inline np::ndarray numpyArrayConstructor( const long int &lgth,
-					    isis::BufferVariable *var) {
-    
-    Py_intptr_t shape[1] = {lgth};
-
-#define I_CREATE_ZEROS( type, shape )				\
-    return np::zeros(1, shape, np::dtype::get_builtin<type>());
-    
-    I_SWITCH_BY_DATA_TYPE(var->getType(), shape, I_CREATE_ZEROS,
-			  
-			  return np::array(py::list());
-			  );
-#undef I_CREATE_ZEROS
-  }
-
-  //_______________________________________________________________________________
-  //
-  BuffVarWriter::BuffVarWriter( const size_t &nentries,
-				isis::BufferVariable *var ) :
-    fVar( var ), fArray(numpyArrayConstructor(nentries, var)) { }
+  BuffVarWriter::BuffVarWriter( isis::BufferVariable *var,
+				const np::ndarray &array ) :
+    fVar(var), fArray(array) { }
 
   //_______________________________________________________________________________
   //
   BuffVarWriter::BuffVarWriter( isis::TreeBuffer &buffer,
 				const std::string &name,
-				np::ndarray array ) :
+				const np::ndarray &array ) :
     fArray(array) {
 
     const char type = DTYPE_TO_TYPE.parse(fArray.get_dtype());
@@ -78,13 +62,13 @@ namespace iboost {
 
   //_______________________________________________________________________________
   //
-  void BuffVarWriter::appendToArray(const size_t &idx) {
+  void BuffVarWriter::appendToArray( const size_t &idx, const size_t &n ) {
 
-#define I_BUFFVARWRITER_SET_ARRAY_VALUE( type, ptr ) {		\
-      type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
-      type val = 0;						\
-      fVar->extractValue(val);					\
-      *type ## _ptr = val;					\
+#define I_BUFFVARWRITER_SET_ARRAY_VALUE( type, ptr ) {			\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr) + n*idx;	\
+      type val = 0;							\
+      fVar->extractValue(val);						\
+      *type ## _ptr = val;						\
     }
     
     I_BUFFVARWRITER_SELFOP(I_BUFFVARWRITER_SET_ARRAY_VALUE);
@@ -94,11 +78,11 @@ namespace iboost {
 
   //_______________________________________________________________________________
   //
-  void BuffVarWriter::appendToVar(const size_t &idx) {
+  void BuffVarWriter::appendToVar( const size_t &idx, const size_t &n ) {
 
-#define I_BUFFVARWRITER_GET_ARRAY_VALUE( type, ptr ) {		\
-      type* type ## _ptr = reinterpret_cast<type*>(ptr) + idx;	\
-      fVar->setValue(*type ## _ptr);				\
+#define I_BUFFVARWRITER_GET_ARRAY_VALUE( type, ptr ) {			\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr) + n*idx;	\
+      fVar->setValue(*type ## _ptr);					\
     }
     
     I_BUFFVARWRITER_SELFOP(I_BUFFVARWRITER_GET_ARRAY_VALUE);

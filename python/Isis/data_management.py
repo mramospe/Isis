@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 19/09/2017
+#//  Last update: 20/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -28,7 +28,7 @@ import pandas
 import iroot as rt
 
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
-from Isis.iboost.rootio import treeToDict, dictToTree
+from Isis.iboost.rootio import treeToArray, arrayToTree
 from Isis.utils import string_list_filter
 from Isis.expressions import numpy_parse_eval_expr
 
@@ -226,12 +226,7 @@ class DataMgr( pandas.DataFrame ):
         '''
         cols = columns or ['*']
         
-        d = treeToDict(path, tname, cols, cuts, regex)
-        
-        if not columns:
-            cols = sorted(d.keys())
-            
-        v = numpy.array(list(d[v] for v in cols)).T
+        v = treeToArray(path, tname, cols, cuts, regex)
         
         return DataMgr(data = v, columns = cols, name = name)
                        
@@ -306,9 +301,10 @@ class DataMgr( pandas.DataFrame ):
             name  = rt.gDirectory.GetName()
             
         print self.name, '=> Saving tree with name <', tname, '> in <', name, '>'
-        dct = {k: s.values for k, s in self.to_dict('series').iteritems()}
+
+        v = self.to_records(index = False)
         
-        dictToTree(dct, name = tname, variables = columns, use_regex = use_regex)
+        arrayToTree(v, name = tname, variables = columns, use_regex = use_regex)
         print self.name, '=> Written', len(self), 'entries'
         
         if ofile:

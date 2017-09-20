@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/09/2017
+//  Last update: 20/09/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -38,9 +38,6 @@ namespace ib = iboost;
 
 //_______________________________________________________________________________
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(treeToBoostDict_Overloads,
-				ib::treeToBoostDict, 3, 5);
-
 BOOST_PYTHON_FUNCTION_OVERLOADS(treeToNumpyArray_Overloads,
 				ib::treeToNumpyArray, 3, 5);
 
@@ -50,9 +47,7 @@ BOOST_PYTHON_MODULE( rootio ) {
   // Initialize python and numpy (to prevent a segmentation fault)
   I_INIT_MODULE;
   
-  py::def("treeToDict", ib::treeToBoostDict, treeToBoostDict_Overloads());
-  py::def("dictToTree", py::raw_function(ib::boostDictToTree, 2));
-  py::def("treeToList", ib::treeToNumpyArray, treeToNumpyArray_Overloads());
-  py::def("listToTree", py::raw_function(ib::numpyArrayToTree, 2));
+  py::def("treeToArray", ib::treeToNumpyArray, treeToNumpyArray_Overloads());
+  py::def("arrayToTree", py::raw_function(ib::numpyArrayToTree, 2));
   
 }
