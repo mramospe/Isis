@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 20/09/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace iboost {
   //_______________________________________________________________________________
   // The dtype to character type parser is initialized calling the empty
   // constructor
-  DTypeParser DTYPE_TO_TYPE;
+  DTypeParser NUMPY_TYPE_CONVERTER;
   
   //_______________________________________________________________________________
   //

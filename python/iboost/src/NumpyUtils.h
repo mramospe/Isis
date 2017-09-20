@@ -48,18 +48,7 @@ namespace {
 namespace iboost {
 
   //_______________________________________________________________________
-  // Define the way to transform a root type char to a numpy dtype object
-  inline np::dtype root_to_numpy_type( const char &tp ) {
-
-#define I_ROOT_TO_NUMPY_TYPE(var, ptr) return np::dtype::get_builtin<var>();
-    
-    I_SWITCH_BY_DATA_TYPE(tp, NULL, I_ROOT_TO_NUMPY_TYPE, return np::dtype::get_builtin<bool>());
-
-#undef I_ROOT_TO_NUMPY_TYPE
-  }
-
-  //_______________________________________________________________________
-  // Returnt the keys of the given structured array
+  // Return the keys of the given structured array
   inline py::list struct_array_keys( const np::ndarray &arr ) {
 
     py::list keys;
@@ -81,7 +70,7 @@ namespace iboost {
 
     py::list dtypes;
     for ( const auto &el : buffer.getMap() ) {
-      auto t = root_to_numpy_type(el.second->getType());
+      auto t = NUMPY_TYPE_CONVERTER.parse_root_type(el.second->getType());
       dtypes.append(py::make_tuple(el.first, t));
     }
     

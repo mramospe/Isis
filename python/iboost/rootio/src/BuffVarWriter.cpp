@@ -16,7 +16,7 @@
 #include "BuffVarWriter.h"
 #include "GlobalWrappers.h"
 #include "InitModule.h"
-#include "NumpyConverters.h"
+#include "NumpyUtils.h"
 
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
@@ -51,7 +51,7 @@ namespace iboost {
 				const np::ndarray &array ) :
     fArray(array) {
 
-    const char type = DTYPE_TO_TYPE.parse(fArray.get_dtype());
+    const char type = NUMPY_TYPE_CONVERTER.parse_numpy_type(fArray.get_dtype());
     
     fVar = buffer.createVariable(name, type);
   }

@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 20/09/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -92,7 +92,7 @@ namespace iboost {
 
     auto lgth = py::len(array);
     type result(lgth);
-    const char data_type = iboost::DTYPE_TO_TYPE.parse(array.get_dtype());
+    const char data_type = iboost::NUMPY_TYPE_CONVERTER.parse_numpy_type(array.get_dtype());
 
 #define I_CREATE_STDCONT_FROM_NUMPYARRAY( type, result ) {		\
       type *type ## _ptr = reinterpret_cast<type*>(array.get_data());	\

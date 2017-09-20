@@ -1,23 +1,23 @@
-//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 //
 //  Python wrappers
 //
-// -------------------------------------------------------------------------------
+// -----------------------------------------------------------------------
 //
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 24/04/2017
+//  Last update: 20/09/2017
 //
-// -------------------------------------------------------------------------------
+// -----------------------------------------------------------------------
 //
 //  Description:
 //
-//  Define a class to parse numpy array dtype objects into a character, and a
-//  macro to initialize python modules.
+//  Define a class to parse numpy array dtype objects into a character,
+//  and a macro to initialize python modules.
 //
-// -------------------------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////////
 
 
 #ifndef INIT_MODULE
@@ -34,7 +34,7 @@
 #include <string>
 
 
-//_______________________________________________________________________________
+//________________________________________________________________________
 
 namespace iboost {
 
@@ -76,13 +76,27 @@ namespace iboost {
 	};
       
     }
-
+    
     // Return the character associated to the given numpy type
-    inline char parse( const np::dtype &type ) const {
+    inline char parse_numpy_type( const np::dtype &type ) const {
       
       std::string str_type = this->dtypeToStr(type);
       
       return fMap.at(str_type);
+    }
+
+    // Return the dtype object associated with the given character
+    inline np::dtype parse_root_type( const char &t ) const {
+
+#define I_ROOT_TO_NUMPY_TYPE(var, ptr) return np::dtype::get_builtin<var>();
+    
+      I_SWITCH_BY_DATA_TYPE(t, NULL,
+			    I_ROOT_TO_NUMPY_TYPE,
+			    
+			    return np::dtype::get_builtin<bool>()
+			    );
+
+#undef I_ROOT_TO_NUMPY_TYPE
     }
     
   protected:
@@ -107,15 +121,15 @@ namespace iboost {
 
   // Declare the class to parse from numpy-array dtype objects to characters
   // with the information of the value type
-  extern DTypeParser DTYPE_TO_TYPE;
+  extern DTypeParser NUMPY_TYPE_CONVERTER;
   
 }
 
-//_______________________________________________________________________________
+//________________________________________________________________________
 // This is the macro which may be called to initialize a module
 #define I_INIT_MODULE				\
   Py_Initialize();				\
   np::initialize();				\
-  iboost::DTYPE_TO_TYPE.initialize();
+  iboost::NUMPY_TYPE_CONVERTER.initialize();
 
 #endif
