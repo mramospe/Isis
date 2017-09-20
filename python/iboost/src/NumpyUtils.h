@@ -22,9 +22,7 @@
 #define NUMPY_CONVERTERS_H
 
 #include <Python.h>
-
-#include <numpy/ndarraytypes.h>
-
+#include <numpy/ndarrayobject.h>
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
 #include <boost/python/numpy/dtype.hpp>

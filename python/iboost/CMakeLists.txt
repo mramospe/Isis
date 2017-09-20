@@ -5,6 +5,7 @@ set(PKG_NAME iboost)
 #----------------------------------------------------------------------------
 # Look for the Boost and python libraries
 find_package(PythonLibs REQUIRED)
+include(${PROJECT_SOURCE_DIR}/cmake/FindNumPy.cmake)
 
 #----------------------------------------------------------------------------
 # Set of libraries linked to those created here
@@ -17,6 +18,7 @@ function(build_boost_package libname)
   file(GLOB source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
   include_directories(${INSTALL_INCLUDE_DIR})
   include_directories(${PYTHON_INCLUDE_DIRS})
+  include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
   include_directories(${Boost_INCLUDE_DIRS})
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
   set(${PKG_NAME} ${BOOST_OUTPUT_LIBRARY_DIR}/${libname})
