@@ -20,17 +20,16 @@
 #////////////////////////////////////////////////////////////////
 
 
-from Isis.iboost.general import sendErrorMsg, sendWarningMsg
+from Isis.data_management import DataMgr
 from Isis.efficiencies import efficiency
+from Isis.iboost.general import sendErrorMsg, sendWarningMsg
+from Isis.iroot import ROOT as rt
 from Isis.math_ext import nearest_square
-
-import iroot as rt
 
 import itertools, sys
 from math import sqrt
 import numpy as np
 import scipy as sc
-from Isis.data_management import DataMgr
 
 
 class CanvasStorer:

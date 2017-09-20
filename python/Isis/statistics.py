@@ -20,10 +20,9 @@
 #//////////////////////////////////////////////////////////
 
 
-import iroot as rt
-
-from Isis.iboost.general import sendWarningMsg
 from Isis.decorators import deco_input_args
+from Isis.iboost.general import sendWarningMsg
+from Isis.iroot import ROOT as rt
 from Isis.root_utils import hist_values
 
 from math import sqrt

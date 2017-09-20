@@ -25,12 +25,11 @@ import math
 import numpy
 import pandas
 
-import iroot as rt
-
+from Isis.expressions import numpy_parse_eval_expr
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iboost.rootio import treeToArray, arrayToTree
+from Isis.iroot import ROOT as rt
 from Isis.utils import string_list_filter
-from Isis.expressions import numpy_parse_eval_expr
 
 
 class DataMgr( pandas.DataFrame ):

@@ -7,10 +7,10 @@
 
 from Isis.iboost.analysis import ( CLsFactory, CLsFluctuator,
                                    CLsHypothesis, CLsPrior, CLsResult )
+from Isis.iroot import ROOT as rt
 from Isis.statistics import poisson_uncert
 
 import numpy as np
-import iroot as rt
 
 from CLsMuScanPlotUtils import *
 

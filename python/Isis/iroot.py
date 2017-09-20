@@ -23,5 +23,3 @@
 import ROOT
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-
-from ROOT import *
