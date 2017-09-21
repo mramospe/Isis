@@ -52,11 +52,11 @@ namespace iboost {
     ~BuffVarWriter();
 
     // Appends the current value stored in the BufferVariable object to the
-    // numpy ndarray, considering that there are "n" variables
+    // numpy ndarray, where "n" is the size of the row
     void appendToArray( const size_t &idx, const size_t &n );
 
-    // Append the value in the position "idx" to the BufferVariable object
-    // considering that there are "n" variables
+    // Append the value in the position "idx" to the BufferVariable object,
+    // where "n" is the size of the row
     void appendToVar( const size_t &idx, const size_t &n );
 
   protected:

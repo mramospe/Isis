@@ -65,7 +65,7 @@ namespace iboost {
   void BuffVarWriter::appendToArray( const size_t &idx, const size_t &n ) {
 
 #define I_BUFFVARWRITER_SET_ARRAY_VALUE( type, ptr ) {			\
-      type* type ## _ptr = reinterpret_cast<type*>(ptr) + n*idx;	\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr + n*idx);	\
       type val = 0;							\
       fVar->extractValue(val);						\
       *type ## _ptr = val;						\
@@ -81,7 +81,7 @@ namespace iboost {
   void BuffVarWriter::appendToVar( const size_t &idx, const size_t &n ) {
 
 #define I_BUFFVARWRITER_GET_ARRAY_VALUE( type, ptr ) {			\
-      type* type ## _ptr = reinterpret_cast<type*>(ptr) + n*idx;	\
+      type* type ## _ptr = reinterpret_cast<type*>(ptr + n*idx);	\
       fVar->setValue(*type ## _ptr);					\
     }
     

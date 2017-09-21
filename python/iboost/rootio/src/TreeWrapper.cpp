@@ -59,7 +59,7 @@ namespace iboost {
 				py::object &vars,
 				std::string cuts,
 				bool use_regex ) {
-
+    
     // Open the Root file and access the tree
     TFile *ifile = TFile::Open(fpath.c_str());
     TTree *itree = static_cast<TTree*>(isis::getSafeObject(ifile, tpath));
@@ -104,6 +104,7 @@ namespace iboost {
     
     // Make the output array
     auto output = void_ndarray(evtlist->GetN(), buffer);
+    const int nbytes = output.get_dtype().get_itemsize();
     
     // Build the writers
     std::vector<BuffVarWriter*> outvec;
@@ -123,7 +124,7 @@ namespace iboost {
       itree->GetEntry(ievt);
       
       for ( auto &el : outvec )
-	el->appendToArray(i, n);
+	el->appendToArray(i, nbytes);
     }
 
     // The branches are enabled again
@@ -140,7 +141,7 @@ namespace iboost {
   //_______________________________________________________________
   //
   py::object numpyArrayToTree( py::tuple args, py::dict kwargs ) {
-
+    
     checkArgs(args, 1);
     checkKwargs(kwargs, {"name", "tree", "variables", "use_regex"});
     
@@ -162,7 +163,7 @@ namespace iboost {
     std::string tname;
     if ( kwargs.has_key("name") )
       tname = py::extract<std::string>(kwargs["name"]);
-
+    
     // Get the list of variables to work with
     py::list variables;
     if ( kwargs.has_key("variables") ) {
@@ -213,13 +214,13 @@ namespace iboost {
     
     // Loop over all the events in the array, the whole number of variables
     // in the input array must be used to access correctly to the data
-    py::ssize_t nvals = py::len(vartup);
-    py::ssize_t nkeys = py::len(varkeys);
+    const py::ssize_t nvals = py::len(vartup);
+    const int nbytes = vartup.get_dtype().get_itemsize();
     for ( py::ssize_t ievt = 0; ievt < nvals; ++ievt ) {
 
       // Loop over all the variables in the array
       for ( auto &v : varvec )
-	v->appendToVar(ievt, nkeys);
+	v->appendToVar(ievt, nbytes);
       
       tree->Fill();
     }
