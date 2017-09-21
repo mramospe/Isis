@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/09/2017
+//  Last update: 21/09/2017
 //
 // ----------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ namespace iboost {
     
     // Build the writers
     std::vector<BuffVarWriter*> outvec;
-    size_t n = brnames.size();
+    const size_t n = brnames.size();
     outvec.reserve(n);
     for ( const auto el: buffer.getMap() ) {
 
@@ -204,21 +204,23 @@ namespace iboost {
     }
 
     std::vector<BuffVarWriter*> varvec;
-    varvec.reserve(brnames.size());
+    const size_t n = brnames.size();
+    varvec.reserve(n);
     for ( const auto &br : brnames )
       varvec.push_back(new BuffVarWriter( buffer, br,
 					  py::extract<np::ndarray>(vartup[br]))
 		       );
     
-    // Loop over all the events in the dictionary
+    // Loop over all the events in the array, the whole number of variables
+    // in the input array must be used to access correctly to the data
     py::ssize_t nvals = py::len(vartup);
+    py::ssize_t nkeys = py::len(varkeys);
     for ( py::ssize_t ievt = 0; ievt < nvals; ++ievt ) {
 
-      // Loop over all the variables in the dictionary
-      const size_t n = varvec.size();
+      // Loop over all the variables in the array
       for ( auto &v : varvec )
-	v->appendToVar(ievt, n);
-    
+	v->appendToVar(ievt, nkeys);
+      
       tree->Fill();
     }
     tree->AutoSave();
