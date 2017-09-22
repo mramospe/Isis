@@ -13,10 +13,10 @@
 /////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "Messenger.h"
-#include "TreeManagement.h"
-#include "Utils.h"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "TreeManagement.hpp"
+#include "Utils.hpp"
 
 #include "TBranch.h"
 #include "TDirectory.h"

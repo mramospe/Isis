@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "SmartName.h"
-#include "Utils.h"
+#include "Definitions.hpp"
+#include "SmartName.hpp"
+#include "Utils.hpp"
 
 #include <algorithm>
 #include <vector>

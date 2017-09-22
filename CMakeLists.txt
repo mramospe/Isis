@@ -95,7 +95,7 @@ function(build_package libname deps)
   
   set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
   
-  file(GLOB files ${SOURCE_DIR}/*.h)
+  file(GLOB files ${SOURCE_DIR}/*.hpp)
   set(headers)
   foreach(file ${files})
     configure_file(${file} ${INSTALL_INCLUDE_DIR})

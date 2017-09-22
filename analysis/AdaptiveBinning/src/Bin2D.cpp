@@ -13,8 +13,8 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#include "Bin2D.h"
-#include "Definitions.h"
+#include "Bin2D.hpp"
+#include "Definitions.hpp"
 
 #include <algorithm>
 

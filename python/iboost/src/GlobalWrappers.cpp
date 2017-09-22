@@ -13,8 +13,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include "GlobalWrappers.h"
-#include "Messenger.h"
+#include "GlobalWrappers.hpp"
+#include "Messenger.hpp"
 
 #include <boost/python/numpy.hpp>
 #include <boost/python.hpp>

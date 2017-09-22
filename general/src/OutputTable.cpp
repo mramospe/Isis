@@ -13,10 +13,10 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "Messenger.h"
-#include "OutputTable.h"
-#include "Utils.h"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "OutputTable.hpp"
+#include "Utils.hpp"
 
 #include <iomanip>
 #include <limits>

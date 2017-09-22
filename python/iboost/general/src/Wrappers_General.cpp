@@ -24,14 +24,14 @@
 #include <boost/python/numpy.hpp>
 #include <boost/python/scope.hpp>
 
-#include "CutManager.h"
-#include "Definitions.h"
-#include "GlobalWrappers.h"
-#include "InitModule.h"
-#include "Messenger.h"
-#include "MessengerConfig.h"
-#include "LoopArray.h"
-#include "ProgressBar.h"
+#include "CutManager.hpp"
+#include "Definitions.hpp"
+#include "GlobalWrappers.hpp"
+#include "InitModule.hpp"
+#include "Messenger.hpp"
+#include "MessengerConfig.hpp"
+#include "LoopArray.hpp"
+#include "ProgressBar.hpp"
 
 #include <string>
 
@@ -103,7 +103,7 @@ BOOST_PYTHON_MODULE( general ) {
   // Initialize python and numpy (to prevent a segmentation fault)
   I_INIT_MODULE;
   
-  // Wrappers from CutManager.h
+  // Wrappers from CutManager.hpp
   py::class_<isis::CutManager>("CutManager", py::init<const std::string&>())
     .def(py::init<const isis::CutManager&>())
     .def("bookCut"      , &isis::CutManager::bookCut, CutMgr::bookCut_Overloads())
@@ -117,10 +117,10 @@ BOOST_PYTHON_MODULE( general ) {
     .def("__getitem__"  , &isis::CutManager::operator[])
     ;
 
-  // Wrappers from Definitions.h
+  // Wrappers from Definitions.hpp
   py::scope().attr("ISIS_VERSION") = ISIS_VERSION;
   
-  // Wrappers from GlobalMessenger.h
+  // Wrappers from GlobalMessenger.hpp
   py::def("sendFormattedMsg", &Msg::sendFormattedMsg, Msg::sendFormattedMsg_Overloads());
   py::def("sendMsg"         , &Msg::sendMsg);
   py::def("sendErrorMsg"    , &Msg::sendErrorMsg);
@@ -156,7 +156,7 @@ BOOST_PYTHON_MODULE( general ) {
       ;
   }
 
-  // Wrappers from LoopArray.h
+  // Wrappers from LoopArray.hpp
   py::class_<isis::LoopArray>("LoopArray", py::init<>())
     .def(py::init<const size_t&, const size_t&, const size_t&>())
     .def(py::init<const isis::LoopArray&>())

@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#include "AdaptiveBinning2D.h"
-#include "Definitions.h"
-#include "Messenger.h"
+#include "AdaptiveBinning2D.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
 
 #include "TLeaf.h"
 

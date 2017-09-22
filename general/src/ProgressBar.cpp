@@ -13,7 +13,7 @@
 ///////////////////////////////////////////////////////////////////
 
 
-#include "ProgressBar.h"
+#include "ProgressBar.hpp"
 
 #include <iostream>
 #include <sstream>

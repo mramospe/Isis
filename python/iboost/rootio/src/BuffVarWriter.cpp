@@ -13,17 +13,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include "BuffVarWriter.h"
-#include "GlobalWrappers.h"
-#include "InitModule.h"
-#include "NumpyUtils.h"
+#include "BuffVarWriter.hpp"
+#include "GlobalWrappers.hpp"
+#include "InitModule.hpp"
+#include "NumpyUtils.hpp"
 
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
 
-#include "TreeBuffer.h"
-#include "Definitions.h"
-#include "ValueTypeDef.h"
+#include "TreeBuffer.hpp"
+#include "Definitions.hpp"
+#include "ValueTypeDef.hpp"
 
 #include <iostream>
 

@@ -13,8 +13,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "ClusterCenterOfMass.h"
-#include "Definitions.h"
+#include "ClusterCenterOfMass.hpp"
+#include "Definitions.hpp"
 
 
 //_______________________________________________________________________________

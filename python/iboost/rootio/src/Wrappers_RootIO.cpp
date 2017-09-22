@@ -20,9 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include "GlobalWrappers.h"
-#include "InitModule.h"
-#include "TreeWrapper.h"
+#include "GlobalWrappers.hpp"
+#include "InitModule.hpp"
+#include "TreeWrapper.hpp"
 
 #include <boost/python.hpp>
 #include <boost/python/dict.hpp>

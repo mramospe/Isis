@@ -13,9 +13,9 @@
 ////////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "Messenger.h"
-#include "MessengerConfig.h"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "MessengerConfig.hpp"
 
 #include <iostream>
 

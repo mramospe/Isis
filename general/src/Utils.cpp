@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "Messenger.h"
-#include "Utils.h"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "Utils.hpp"
 
 #include <boost/regex.hpp>
 
