@@ -308,15 +308,15 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     xmin = np.fromiter((h.GetXaxis().GetXmin() for h in hlst), float).min()
     xmax = np.fromiter((h.GetXaxis().GetXmax() for h in hlst), float).max()
     
-    ymin = np.fromiter((h.GetMinimum() for h in hlst), float).min()
-    ymax = np.fromiter((h.GetMaximum() for h in hlst), float).max()
+    ymin = np.fromiter((h.GetMinimum() for h in hlst), float)
+    ymax = np.fromiter((h.GetMaximum() for h in hlst), float)
     if norm:
         wgts = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
         ymin /= wgts
         ymax /= wgts
 
-    ymin = min(ymin)
-    ymax = max(ymax)
+    ymin = ymin.min()
+    ymax = ymax.max()
     ymax += 0.1*(ymax - ymin)
     
     hform = hlst[0].__class__(name, title, hlst[0].GetNbinsX(), xmin, xmax)
@@ -327,7 +327,8 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     hform.SetLineColor(0)
     hform.SetLineStyle(0)
     
-    hform.GetYaxis().SetRangeUser(ymin, ymax)
+    hform.SetMinimum(ymin)
+    hform.SetMaximum(ymax)
 
     return hform
 
@@ -767,11 +768,11 @@ def multiplot( mgrs, variables,
             for im, (mgr, vals) in enumerate(zip(mgrs, tot)):
                 hname = mgr.name + '_' + var
                 h = hist( vals,
-                                   name  = hname,
-                                   title = var,
-                                   nbins = rnbins,
-                                   vmin  = vmin,
-                                   vmax  = vmax )
+                          name  = hname,
+                          title = var,
+                          nbins = rnbins,
+                          vmin  = vmin,
+                          vmax  = vmax )
                 
                 entries.append(h.GetEntries())
                 hists.append( h )
