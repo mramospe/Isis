@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////////////
 
 
-#include "GlobalWrappers.h"
-#include "NumpyUtils.h"
-#include "TreeWrapper.h"
+#include "GlobalWrappers.hpp"
+#include "NumpyUtils.hpp"
+#include "TreeWrapper.hpp"
 
 #include <Python.h>
 #include <boost/python/dict.hpp>
@@ -26,13 +26,13 @@
 #include <boost/python/object_operators.hpp>
 #include <boost/python/tuple.hpp>
 
-#include "BufferVariable.h"
-#include "Definitions.h"
-#include "Messenger.h"
-#include "RootUtils.h"
-#include "TreeBuffer.h"
-#include "TreeManagement.h"
-#include "Utils.h"
+#include "BufferVariable.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "RootUtils.hpp"
+#include "TreeBuffer.hpp"
+#include "TreeManagement.hpp"
+#include "Utils.hpp"
 
 #include "TBranch.h"
 #include "TDirectory.h"

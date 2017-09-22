@@ -2,7 +2,7 @@
 //  Progress bar example  //
 ////////////////////////////
 
-#include "ProgressBar.h"
+#include "ProgressBar.hpp"
 
 #include <iostream>
 

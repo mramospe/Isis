@@ -24,11 +24,11 @@
 #include <boost/python/list.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "GlobalWrappers.h"
-#include "InitModule.h"
-#include "PyAdaptiveBinning.h"
-#include "PyAnalysisBase.h"
-#include "PyStatistics.h"
+#include "GlobalWrappers.hpp"
+#include "InitModule.hpp"
+#include "PyAdaptiveBinning.hpp"
+#include "PyAnalysisBase.hpp"
+#include "PyStatistics.hpp"
 
 #include <string>
 
@@ -43,14 +43,14 @@ BOOST_PYTHON_MODULE( analysis ) {
   // Initialize python and numpy (to prevent a segmentation fault)
   I_INIT_MODULE;
 
-  // Wrapper from AdaptiveBinning.h
+  // Wrapper from AdaptiveBinning.hpp
   py::class_<AdBin::AdaptiveBinningWrap, boost::noncopyable>("AdaptiveBinning")
     .def("getStruct" , py::pure_virtual(&AdBin::AdaptiveBinningWrap::getStructWrap))
     .def("getBinList", &AdBin::AdaptiveBinningWrap::getBinListWrap)
     .def("getNbins"  , &AdBin::AdaptiveBinningWrap::getNbins)
     ;
 
-  // Wrapper from AdaptiveBinning1D.h
+  // Wrapper from AdaptiveBinning1D.hpp
   py::class_<isis::AdaptiveBinning1D, py::bases<isis::AdaptiveBinning> >
     ("AdaptiveBinning1D", py::no_init)
     .def("__init__"     , py::make_constructor(&AdBin1D::constructor))
@@ -60,7 +60,7 @@ BOOST_PYTHON_MODULE( analysis ) {
     .def_readonly("Min" , &isis::AdaptiveBinning1D::getMin)
     ;
 
-  // Wrapper from AdaptiveBinning2D.h
+  // Wrapper from AdaptiveBinning2D.hpp
   py::class_<isis::AdaptiveBinning2D, py::bases<isis::AdaptiveBinning> >
     ("AdaptiveBinning2D", py::no_init)
     .def("__init__"     , py::make_constructor(&AdBin2D::constructor))
@@ -73,18 +73,18 @@ BOOST_PYTHON_MODULE( analysis ) {
     .def_readonly("Ymin", &isis::AdaptiveBinning2D::getYmin)
     ;
 
-  // Wrapper from Bin.h. This class is meant to be used in read-only mode.
+  // Wrapper from Bin.hpp. This class is meant to be used in read-only mode.
   py::class_<isis::Bin>("Bin", py::no_init)
     .def("getEntries"     , &isis::Bin::getEntries)
     .def("getSumOfWeights", &isis::Bin::getSumOfWeights)
     ;
 
-  // Wrapper from Bin1D.h. This class is meant to be used in read-only mode.
+  // Wrapper from Bin1D.hpp. This class is meant to be used in read-only mode.
   py::class_<isis::Bin1D, py::bases<isis::Bin> >("Bin1D", py::no_init)
     .def_readonly("Min", &isis::Bin1D::getMin)
     ;
 
-  // Wrapper from Bin2D.h. This class is meant to be used in read-only mode.
+  // Wrapper from Bin2D.hpp. This class is meant to be used in read-only mode.
   py::class_<isis::Bin2D, py::bases<isis::Bin> >("Bin2D", py::no_init)
     .def_readonly("Xmax", &isis::Bin2D::getXmax)
     .def_readonly("Xmin", &isis::Bin2D::getXmin)

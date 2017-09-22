@@ -13,10 +13,10 @@
 ////////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "Messenger.h"
-#include "Utils.h"
-#include "VarWeighter.h"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "Utils.hpp"
+#include "VarWeighter.hpp"
 
 #include "TBranch.h"
 #include "TDirectory.h"

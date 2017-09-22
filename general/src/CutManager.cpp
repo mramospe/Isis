@@ -13,9 +13,9 @@
 ///////////////////////////////////////////////////////////
 
 
-#include "CutManager.h"
-#include "Definitions.h"
-#include "Messenger.h"
+#include "CutManager.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
 
 #include <algorithm>
 #include <cstring>

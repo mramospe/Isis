@@ -2,8 +2,8 @@
 //  Example to make adaptive binning histograms  //
 ///////////////////////////////////////////////////
 
-#include "AdaptiveBinning2D.h"
-#include "Definitions.h"
+#include "AdaptiveBinning2D.hpp"
+#include "Definitions.hpp"
 
 #include "TFile.h"
 #include "TTree.h"

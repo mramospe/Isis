@@ -13,10 +13,10 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#include "ConfigParser.h"
-#include "Definitions.h"
-#include "Messenger.h"
-#include "Utils.h"
+#include "ConfigParser.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "Utils.hpp"
 
 #include <algorithm>
 

@@ -13,13 +13,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "CLsFactory.h"
-#include "CLsFluctuator.h"
-#include "CLsHypothesis.h"
-#include "CLsPrior.h"
-#include "Definitions.h"
-#include "Messenger.h"
-#include "MessengerConfig.h"
+#include "CLsFactory.hpp"
+#include "CLsFluctuator.hpp"
+#include "CLsHypothesis.hpp"
+#include "CLsPrior.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "MessengerConfig.hpp"
 
 #include "TMath.h"
 #include "TRandom3.h"

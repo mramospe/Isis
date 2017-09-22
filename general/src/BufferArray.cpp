@@ -13,9 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Definitions.h"
-#include "BufferArray.h"
-#include "Messenger.h"
+#include "Definitions.hpp"
+#include "BufferArray.hpp"
+#include "Messenger.hpp"
 
 #include <iostream>
 

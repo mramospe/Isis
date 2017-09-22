@@ -13,10 +13,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "ClusterFactory.h"
-#include "Definitions.h"
-#include "Messenger.h"
-#include "Utils.h"
+#include "ClusterFactory.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "Utils.hpp"
 
 #include <algorithm>
 #include <cstdlib>

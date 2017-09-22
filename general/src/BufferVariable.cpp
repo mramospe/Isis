@@ -13,10 +13,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#include "BufferVariable.h"
-#include "Definitions.h"
-#include "Messenger.h"
-#include "ValueTypeDef.h"
+#include "BufferVariable.hpp"
+#include "Definitions.hpp"
+#include "Messenger.hpp"
+#include "ValueTypeDef.hpp"
 
 
 //_______________________________________________________________________________

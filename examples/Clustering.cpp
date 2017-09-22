@@ -2,8 +2,8 @@
 // Example of cluster generation (related script ClusterPlot.py) //
 ///////////////////////////////////////////////////////////////////
 
-#include "ClusterFactory.h"
-#include "Definitions.h"
+#include "ClusterFactory.hpp"
+#include "Definitions.hpp"
 
 #include "TDirectory.h"
 #include "TFile.h"

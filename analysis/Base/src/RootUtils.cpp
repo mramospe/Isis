@@ -13,8 +13,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Messenger.h"
-#include "RootUtils.h"
+#include "Messenger.hpp"
+#include "RootUtils.hpp"
 
 #include "TFile.h"
 #include "TObject.h"
