@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/09/2017
+#//  Last update: 26/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -243,7 +243,7 @@ def draw_hists( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     are taken from the first histogram in the list.
     '''
     if norm:
-        meth = rt.TH1.DrawNormalized
+        meth = lambda h, d: rt.TH1.DrawNormalized(h, d, norm)
     else:
         meth = rt.TH1.Draw
     
@@ -256,7 +256,7 @@ def draw_hists( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     
     for h in hlst:
 
-        hdr = meth( h, drawopt )
+        hdr = meth(h, drawopt)
 
         if hdr:
             hdr.SetDirectory(0)
@@ -311,9 +311,9 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     ymin = np.fromiter((h.GetMinimum() for h in hlst), float)
     ymax = np.fromiter((h.GetMaximum() for h in hlst), float)
     if norm:
-        wgts = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
-        ymin /= wgts
-        ymax /= wgts
+        wgts  = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
+        ymin *= norm/wgts
+        ymax *= norm/wgts
     
     ymin = ymin.min()
     ymax = ymax.max()
