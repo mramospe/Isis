@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 20/09/2017
+#//  Last update: 21/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -80,9 +80,7 @@ class DataMgr( pandas.DataFrame ):
 
         m = pandas.DataFrame.copy(self, **kwargs)
         
-        m.name = name
-        
-        return m
+        return DataMgr(m, name = name)
     
     def evaluate( self, expr, mathmod = None ):
         '''

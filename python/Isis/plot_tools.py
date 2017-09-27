@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 15/09/2017
+#//  Last update: 26/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -93,9 +93,9 @@ class FormatListIter:
         '''
         Returns the members of this class in a tuple
         '''
-        return tuple(el for el in (self.color, self.lineSt,
-                                   self.markSt, self.fillSt)
-                     if el != None )
+        return tuple( el for el in (self.color, self.lineSt,
+                                    self.markSt, self.fillSt)
+                      if el != None )
 
 
 class FormatList:
@@ -243,7 +243,7 @@ def draw_hists( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     are taken from the first histogram in the list.
     '''
     if norm:
-        meth = rt.TH1.DrawNormalized
+        meth = lambda h, d: rt.TH1.DrawNormalized(h, d, norm)
     else:
         meth = rt.TH1.Draw
     
@@ -256,7 +256,7 @@ def draw_hists( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
     
     for h in hlst:
 
-        hdr = meth( h, drawopt )
+        hdr = meth(h, drawopt)
 
         if hdr:
             hdr.SetDirectory(0)
@@ -286,16 +286,16 @@ def hist_bounds( arr, vmin = None, vmax = None ):
     '''
     Extract the histogram bounds given a list of values and the possible
     bounds (if any). If the list is empty, bounds at (0, 1) are returned.
+    This is necessary to handle format histograms. If no maximum is
+    provided, a small offset is applied.
     '''
-    if vmin:
-        arr = np.append(arr, vmin)
-    if vmax:
-        arr = np.append(arr, vmax)
+    if arr.size == 0:
+        return 0, 1
     
-    if len(arr):
-        return arr.min(), arr.max()
-    
-    return 0, 1
+    vmin = vmin if vmin != None else arr.min()
+    vmax = vmax if vmax != None else 1.01*arr.max()
+        
+    return vmin, vmax
 
 
 def hist_format( hlst, name = '', title = None, norm = True ):
@@ -308,15 +308,15 @@ def hist_format( hlst, name = '', title = None, norm = True ):
     xmin = np.fromiter((h.GetXaxis().GetXmin() for h in hlst), float).min()
     xmax = np.fromiter((h.GetXaxis().GetXmax() for h in hlst), float).max()
     
-    ymin = np.fromiter((h.GetMinimum() for h in hlst), float).min()
-    ymax = np.fromiter((h.GetMaximum() for h in hlst), float).max()
+    ymin = np.fromiter((h.GetMinimum() for h in hlst), float)
+    ymax = np.fromiter((h.GetMaximum() for h in hlst), float)
     if norm:
-        wgts = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
-        ymin /= wgts
-        ymax /= wgts
-
-    ymin = min(ymin)
-    ymax = max(ymax)
+        wgts  = np.fromiter((h.GetSumOfWeights() for h in hlst), float)
+        ymin *= norm/wgts
+        ymax *= norm/wgts
+    
+    ymin = ymin.min()
+    ymax = ymax.max()
     ymax += 0.1*(ymax - ymin)
     
     hform = hlst[0].__class__(name, title, hlst[0].GetNbinsX(), xmin, xmax)
@@ -500,7 +500,7 @@ def hist( var,
           title  = None,
           vmin   = None,
           vmax   = None,
-          wvar   = False,
+          wvar   = None,
           xtitle = '',
           ytitle = '' ):
     '''
@@ -509,10 +509,8 @@ def hist( var,
     the histogram will be of type double.
     '''
     histcall = hist_ctor_from_type(htype, 1)
-
-    idxs = hist_points(var, nbins, vmin = vmin, vmax = vmax)
     
-    vmin, vmax = hist_bounds(var[idxs], vmin = vmin, vmax = vmax)
+    vmin, vmax = hist_bounds(var, vmin = vmin, vmax = vmax)
     
     hist = histcall('', '', nbins, vmin, vmax)
     
@@ -524,7 +522,7 @@ def hist( var,
             hist.Fill(el)
     
     format_plottable_2d(hist, name, title, xtitle, ytitle)
-            
+    
     return hist
 
 
@@ -532,7 +530,7 @@ def hist2d( xvar, yvar,
             name   = '',
             htype  = 'double',
             title  = None,
-            wvar   = False,
+            wvar   = None,
             xbins  = 100,
             xmax   = None,
             xmin   = None,
@@ -546,14 +544,8 @@ def hist2d( xvar, yvar,
     '''
     histcall = hist_ctor_from_type(htype, 2)
     
-    xidxs = hist_points(xvar, xbins, vmin = xmin, vmax = xmax)
-    yidxs = hist_points(yvar, ybins, vmin = ymin, vmax = ymax)
-
-    ''' The values used are the intersection between the two lists '''
-    idxs = set( xidxs ) & set( yidxs )
-
-    xmin, xmax = hist_bounds(xvar[idxs], vmin = xmin, vmax = xmax)
-    ymin, ymax = hist_bounds(yvar[idxs], vmin = ymin, vmax = ymax)
+    xmin, xmax = hist_bounds(xvar, vmin = xmin, vmax = xmax)
+    ymin, ymax = hist_bounds(yvar, vmin = ymin, vmax = ymax)
     
     hist = histcall('', '', xbins, xmin, xmax, ybins, ymin, ymax)
 
@@ -680,15 +672,15 @@ class _GraphInConfig:
 
 
 def multiplot( mgrs, variables,
-                cuts   = False,
-                errors = False,
-                flist  = None,
-                legend = True,
-                name   = 'canvas',
-                nbins  = 100,
-                norm   = True,
-                ranges = None,
-                title  = None ):
+               cuts   = False,
+               errors = False,
+               flist  = None,
+               legend = True,
+               name   = 'canvas',
+               nbins  = 100,
+               norm   = True,
+               ranges = None,
+               title  = None ):
     '''
     This function plots in the same canvas the distributions of the given
     variables from different "DataMgr" classes. Different options can also
@@ -727,16 +719,16 @@ def multiplot( mgrs, variables,
             text_size = 0.075
             
             rlegend = rt.TLegend(*pave_dim)
-            rlegend.SetHeader( '#bf{-- Legend --}' )
-            rlegend.SetTextAlign( 22 )
+            rlegend.SetHeader('#bf{-- Legend --}')
+            rlegend.SetTextAlign(22)
             rlegend.SetTextSize(text_size)
-            rlegend.SetFillColor( 15 )
+            rlegend.SetFillColor(15)
             
             rtxtinf = rt.TPaveText(*pave_dim)
-            rtxtinf.AddText( '-- Number of entries --' )
+            rtxtinf.AddText( '-- Number of entries --')
             rtxtinf.SetTextSize(text_size)
-            rtxtinf.SetFillColor( 42 )
-            rtxtinf.SetShadowColor( 0 )
+            rtxtinf.SetFillColor(42)
+            rtxtinf.SetShadowColor(0)
 
             canvas_info.infoObjs += [rlegend, rtxtinf]
         
@@ -746,37 +738,35 @@ def multiplot( mgrs, variables,
             canvas.cd(iv + 1)
             
             ''' This is done to reduce disk usage '''
-            tot = np.array([m.subsample(columns = [var],
-                                        cuts = cuts).values.T[0]
-                            for m in mgrs])
+            tot = np.array([m[var].values.T for m in mgrs])
             
             ''' Extract the ranges for each variable (if any) '''
             if var in ranges.keys():
                 rnbins, vmin, vmax = ranges[var]
             else:
                 if any(len(m) != 0 for m in tot):
-                    vmax = tot.max()
                     vmin = tot.min()
+                    vmax = tot.max()
                 else:
                     vmin = 0
                     vmax = 1
                 rnbins = nbins
-
+            
             entries = []
             hists   = []
             for im, (mgr, vals) in enumerate(zip(mgrs, tot)):
                 hname = mgr.name + '_' + var
                 h = hist( vals,
-                                   name  = hname,
-                                   title = var,
-                                   nbins = rnbins,
-                                   vmin  = vmin,
-                                   vmax  = vmax )
+                          name  = hname,
+                          title = var,
+                          nbins = rnbins,
+                          vmin  = vmin,
+                          vmax  = vmax )
                 
                 entries.append(h.GetEntries())
-                hists.append( h )
+                hists.append(h)
                 
-                flist[ im ].apply( h )
+                flist[im].apply(h)
 
                 h.GetXaxis().SetTitle(var)
                 
@@ -786,16 +776,16 @@ def multiplot( mgrs, variables,
             if legend and iv == 0:
                 ''' In the first iteration add the entries to the legend '''
                 for mgr, h, sw in zip(mgrs, hists[1:], entries):
-                    rlegend.AddEntry( h, '#bf{' + mgr.name + '}', 'L' )
-                    rtxtinf.AddText( mgr.name + ': %i' % sw )
+                    rlegend.AddEntry(h, '#bf{{{}}}'.format(mgr.name), 'L')
+                    rtxtinf.AddText('{}: {}'.format(mgr.name, sw))
                     
             canvas_info.dataObjs += hists
             
         if legend:
-            pad = canvas.cd( nvars )
-            pad.Divide( 2, 1 )
-            pad.cd( 1 ); rlegend.Draw()
-            pad.cd( 2 ); rtxtinf.Draw()
+            pad = canvas.cd(nvars)
+            pad.Divide(2, 1)
+            pad.cd(1); rlegend.Draw()
+            pad.cd(2); rtxtinf.Draw()
             
         canvas.Update()
         
