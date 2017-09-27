@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 14/09/2017
+#//  Last update: 27/09/2017
 #//
 #// ----------------------------------------------------------------------------
 #//
@@ -20,7 +20,7 @@
 #///////////////////////////////////////////////////////////////////////////////
 
 
-import time
+import numpy, time
 from Isis.utils import format_time, terminal_size
 
 
@@ -43,7 +43,8 @@ class DecoArgBase:
 
 def deco_class_meth( func ):
     '''
-    Thin second-order decorator designed to be used with class methods
+    Thin second-order decorator designed to be used with class
+    methods
     '''
     def wrapper( self, *args, **kwargs ):
         return func( self, *args, **kwargs )
@@ -53,8 +54,9 @@ def deco_class_meth( func ):
 
 class _DecoInputArgs( DecoArgBase ):
     '''
-    Base decorator to apply a function < conv > to each argument based on the
-    slice < slc >. The keyword arguments can also be parsed as a list in < kvars >
+    Base decorator to apply a function < conv > to each argument
+    based on "slc", that can be either a set of indices or a mask.
+    The keyword arguments can also be parsed as a list in "kvars".
     '''
     def __init__( self, conv, func, slc, kvars ):
         '''
@@ -67,24 +69,31 @@ class _DecoInputArgs( DecoArgBase ):
         
     def __call__( self, *args, **kwargs ):
         '''
-        Convert arguments with indices < self.slc > and call function
+        Convert arguments with indices/mask "self.slc" and call
+        function
         '''
-        func_args = map(self.conv, np.array(args)[self.slc])
-
+        la = len(args)
+        if self.slc:
+            sel = [(i in self.slc) for i in xrange(la)]
+        else:
+            sel = numpy.ones(la, dtype = bool)
+            
+        fargs = [self.conv(el) if c else el for c, el in zip(sel, args)]
+        
         if self.kvars:
-            common = set(self.kvars).intersection(kwargs.keys())
-            values = [kwargs[kw] for kw in common]
-            values = convertArgs(self.conv, values)
-            for kw, v in zip(self.kvars, values):
+            com = set(self.kvars).intersection(kwargs.keys())
+            vals = [kwargs[kw] for kw in com]
+            vals = map(self.conv, vals)
+            for kw, v in zip(self.kvars, vals):
                 kwargs[kw] = v
 
-        return self.func(*func_args, **kwargs)
+        return self.func(*fargs, **kwargs)
 
 
-def deco_input_args( conv, slc = slice(0, None), kvars = None ):
+def deco_input_args( conv, slc = None, kvars = None ):
     '''
-    Function to extend the functionality of the class < _DecoInputArgs > as a
-    decorator
+    Function to extend the functionality of the class
+    < _DecoInputArgs > as a decorator
     '''
     kvars = kvars or []
     

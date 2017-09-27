@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 14/09/2017
+#//  Last update: 27/09/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -30,44 +30,6 @@ import numpy as np
 import numbers
 from scipy.special import betainc
 from scipy.stats import beta
-
-
-@deco_input_args(float, kvars = ['cl', 'prec'])
-def binomial_uncert( N, k, cl = 0.683, prec = 0.01 ):
-    '''
-    Calculate the frequentist uncertainties associated with an observation of < k >
-    events in < N >. The confidence level and precision for the results may be
-    provided.
-    '''
-    p = k/N
-
-    d = N - k
-    
-    s_sy = beta.std(k + 1, d + 1)
-    
-    nsteps = int(1./prec)
-
-    vmin = p - 2*s_sy
-    vmax = p + 2*s_sy
-
-    if vmin < 0:
-        vmin = 0
-
-    lw_lst = np.linspace(vmin, p, nsteps)
-    up_lst = np.linspace(vmax, p, nsteps)
-
-    lw_probs = map(lambda x: betainc(k + 1, d + 1, x), lw_lst)
-    up_probs = map(lambda x: 1. - betainc(k + 1, d + 1, x), up_lst)
-    
-    pb = (1. - cl)/2.
-
-    p_lw = np.interp(pb, lw_probs, lw_lst)
-    p_up = np.interp(pb, up_probs, up_lst)
-
-    s_lw = p - p_lw
-    s_up = p_up - p
-
-    return s_sy, s_lw, s_up
 
 
 class IntegralTransformer:
