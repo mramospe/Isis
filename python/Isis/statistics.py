@@ -29,6 +29,14 @@ import numpy as np
 import scipy.stats as st
 
 
+class defaults:
+    '''
+    Define default values of the functions in this module
+    '''
+    disc = False
+    cl   = st.chi2(1).cdf(1) # 1 sigma
+
+
 class IntegralTransformer:
     '''
     Class to do integral transformations. The transformation is performed so the
@@ -93,9 +101,9 @@ class IntegralTransformer:
 
 
 @deco_input_args(float, slc = range(1), kvars = ['cl'])
-def bayes_asy_poisson_uncert( n, cl = 0.683, disc = True ):
+def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = default.disc ):
     '''
-    Return the assymmetric poisson uncertainty of having "n"
+    Return the asymmetric poisson uncertainty of having "n"
     events. If "disc" is set to true, the integer version
     will be used ("n" must be an integer), while if false,
     the gamma function is used instead.
@@ -114,7 +122,7 @@ def bayes_asy_poisson_uncert( n, cl = 0.683, disc = True ):
 
 
 @deco_input_args(float, kvars = ['cl'])
-def bayes_asy_eff( N, k, cl = 0.683, disc = True ):
+def bayes_asy_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
     '''
     Return the efficiency and asymmetric uncertainties of having
     "k" elements in "N".
@@ -133,8 +141,19 @@ def bayes_asy_eff( N, k, cl = 0.683, disc = True ):
     return p, p - lw, up - p
 
 
+def bayes_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
+    '''
+    Return the efficiency and the symmetric and asymmetric
+    uncertainties. The values returned are float.
+    '''
+    eff, s_sy = bayes_sym_eff(N, k, disc = disc)
+    eff, s_lw, s_up = bayes_asy_eff(N, k, disc = disc)
+
+    return eff, s_sy, s_lw, s_up
+
+
 @deco_input_args(float, slc = range(2))
-def bayes_sym_eff( N, k, disc = True ):
+def bayes_sym_eff( N, k, disc = defaults.disc ):
     '''
     Return the efficiency and symmetric uncertainty of having
     "k" elements in "N".
@@ -149,3 +168,4 @@ def bayes_sym_eff( N, k, disc = True ):
         s = pdf.std()
 
     return p, s
+

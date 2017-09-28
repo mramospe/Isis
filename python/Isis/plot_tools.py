@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 26/09/2017
+#//  Last update: 28/09/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -21,7 +21,7 @@
 
 
 from Isis.data_management import DataMgr
-from Isis.efficiencies import efficiency
+from Isis.efficiencies import bayes_std_eff
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iroot import ROOT as rt
 from Isis.math_ext import nearest_square
@@ -211,7 +211,7 @@ def divide_hists( hN, hK, asym = True, name = '', title = None, xtitle = '', yti
     seff_up = np.zeros(nbins, dtype = float)
 
     for nn, nk in zip(nN, nK):
-        p, s_sy, s_lw, s_up = efficiency(nn, nk)
+        p, s_sy, s_lw, s_up = bayes_std_eff(nn, nk)
         eff[i]     = p
         seff[i]    = s_sy
         seff_lw[i] = s_lw

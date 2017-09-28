@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 21/09/2017
+#//  Last update: 28/09/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -20,27 +20,25 @@
 #/////////////////////////////////////////////////////////////
 
 
-import collections
-import math
-import numpy
-import pandas
-
 from Isis.expressions import numpy_parse_eval_expr
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iboost.rootio import treeToArray, arrayToTree
 from Isis.iroot import ROOT as rt
 from Isis.utils import string_list_filter
+from Isis.statistics import bayes_std_eff
+
+import collections, math, numpy, pandas
 
 
 class DataMgr( pandas.DataFrame ):
     '''
-    Class to manage data, specially designed to work together with Root files
-    and trees
+    Class to manage data, specially designed to work together
+    with Root files and trees
     '''
     def __init__( self, name = '<unnamed>', **kwargs ):
         '''
-        Constructor mainly inherited from pandas.DataFrame. Also a name
-        is stored.
+        Constructor mainly inherited from pandas.DataFrame. In
+        addition, a name is stored.
         '''
         pandas.DataFrame.__init__(self, **kwargs)
         
@@ -113,31 +111,40 @@ class DataMgr( pandas.DataFrame ):
         else:
             return numpy.array(self.index)
 
-    def entries( self, selection = False, mathmod = None ):
+    def eff( self, cut, mathmod = None, **kwargs ):
         '''
-        Gets the number of entries of the class. If a cut selection is
-        given, it is calculated the number of events that satisfy those cuts.
+        Calculate the efficiency for a given cut. For more
+        information about the returned values, see "bayes_std_eff".
         '''
-        if self.keys():
-            if selection:
-                return numpy.count_nonzero(self.cut_mask(selection, mathmod))
-            else:
-                return len(self)
+        k = self.entries(cut, mathmod)
+        n = len(self)
+        return bayes_std_eff(n, k, **kwargs)
+        
+    def entries( self, cuts = '', mathmod = None ):
+        '''
+        Gets the number of entries of the class. If a cut
+        selection is given, it is calculated the number of
+        events that satisfy those cuts.
+        '''
+        if cuts:
+            return numpy.count_nonzero(self.evaluate(cuts, mathmod))
         else:
-            sendErrorMsg('Attempting to get entries from an empty data manager')
+            return len(self)
 
     def make_var( self, name, arg, function = False, mathmod = None ):
         '''
-        Makes another variable using those in the class. There are two
-        different ways to do it. The first one consists on specifying the
-        new variable name, the name of the variables used by the function
-        (ordered in a list) and the function itself. The computation of
-        the new variable is going to be performed passing the variables to
-        the function as normal entries ( *args, where args is the list of
-        values ). The second method consists on specifying only the name
-        of the variable and an expression in < arg >. The values will be
-        processed then for each entry taking into account the value
-        obtained when evaluating the expression.
+        Makes another variable using those in the class. There
+        are two different ways to do it. The first one consists
+        on specifying the new variable name, the name of the
+        variables used by the function (ordered in a list) and
+        the function itself. The computation of the new variable
+        is going to be performed passing the variables to the
+        function as normal entries (*args, where args is the
+        list of values). The second method consists on specifying
+        only the name of the variable and an expression in "arg".
+        The values will be processed then for each entry taking
+        into account the value obtained when evaluating the
+        expression.
         '''
         if function:
             v = numpy.array(function(self[arg]))
@@ -153,17 +160,18 @@ class DataMgr( pandas.DataFrame ):
 
     def display( self, variables = None, cuts = '', mathmod = None, evts = None, prec = 3 ):
         '''
-        Prints the information of the class as well as the values for the
-        first 20 events. If < evts > is introduced as an input, the number
-        of events showed would be that specified by the user. If < cut > is
-        specified only will be showed the events that statisfy the given
-        cut. If < prec > is given, the number of decimal points it sets to
-        this value.
+        Prints the information of the class as well as the values
+        for the first 20 events. If "evts" is introduced as an
+        input, the number of events showed would be that specified
+        by the user. If "cut" is specified only will be showed
+        the events that statisfy the given cut. If "prec" is
+        given, the number of decimal points it sets to this value.
         '''
         variables = variables or []
         
         if not self.columns:
-            sendErrorMsg('{} => No variables booked in this manager'.format(self.name))
+            sendErrorMsg('{} => No variables booked in this '\
+                         'manager'.format(self.name))
             return
         
         # If no variables are specified all are printed
@@ -178,8 +186,8 @@ class DataMgr( pandas.DataFrame ):
             sep = ln*'*'
             print out.format(sep, self.name, ln)
         
-        # Prints the variables. The variable < maxsize > is the maximum size
-        # of the numbers in the print
+        # Prints the variables. The variable "maxsize" is the
+        # maximum size of the numbers in the print
         maxsize   = 8 + prec
         shortvars = []
         for var in variables:
@@ -210,8 +218,9 @@ class DataMgr( pandas.DataFrame ):
             for ievt in evtlst:
                 if ievt and ievt % 20 == 0:
                     if raw_input(
-                        '< Introduce q to exit, and any other input to continue printing >: '
-                        ) == 'q': break
+                        '< Introduce q to exit, and any other '\
+                            'input to continue printing >: '
+                    ) == 'q': break
                 print buildLine(ievt)
             if ievt + 1 == len(evtlst):
                 print deco + '\n'
@@ -234,11 +243,12 @@ class DataMgr( pandas.DataFrame ):
                  vmax     = None,
                  endpoint = True ):
         '''
-        Return a list with the numbers of elements satisfying a given cut,
-        running from < vmin > to < vmax > in < npoints >.
+        Return a list with the numbers of elements satisfying a
+        given cut, running from "vmin" to "vmax" in "npoints".
         '''
         if sense not in ('>', '>=', '<', '<='):
-            sendErrorMsg('Unable to parse < {} > as a sense-like symbol'.format(sense))
+            sendErrorMsg('Unable to parse "{}" as a sense-like '\
+                         'symbol'.format(sense))
             return
 
         values = self[var]
@@ -261,10 +271,11 @@ class DataMgr( pandas.DataFrame ):
         
     def subsample( self, cuts = '', mathmod = None, evts = None, columns = None, name = None ):
         '''
-        Returns a copy of this class satisfying the given requirements. A set
-        of cuts can be specified. The range of the events to be copied can be
-        specified, as well as the variables to be copied. By default the
-        entire class is copied.
+        Returns a copy of this class satisfying the given
+        requirements. A set of cuts can be specified. The range
+        of the events to be copied can be specified, as well as
+        the variables to be copied. By default the entire class
+        is copied.
         '''
         columns = columns or self.columns
         name    = name or self.name + '_subsample'
@@ -297,7 +308,8 @@ class DataMgr( pandas.DataFrame ):
             ofile = False
             name  = rt.gDirectory.GetName()
             
-        print self.name, '=> Saving tree with name <', tname, '> in <', name, '>'
+        print '{} => Saving tree with name "{}" in '\
+            '"{}"'.format(self.name, tname, name)
 
         v = self.to_records(index = False)
         
@@ -310,8 +322,8 @@ class DataMgr( pandas.DataFrame ):
 
 def vars_in_root_tree( tree = None, fname = '', tpath = '', regexps = None ):
     '''
-    Return variables in a tree. If < regexps > are provided, only variables
-    matching it will be returned.
+    Return variables in a tree. If "regexps" are provided, only
+    variables matching it will be returned.
     '''
     regexps = regexps or []
     
@@ -329,7 +341,7 @@ def vars_in_root_tree( tree = None, fname = '', tpath = '', regexps = None ):
                 truenames += addlst
             else:
                 sendWarningMsg('No variables found matching '\
-                               'expression < {} >'.format(expr))
+                               'expression "{}"'.format(expr))
         return truenames
     else:
         return brnames
