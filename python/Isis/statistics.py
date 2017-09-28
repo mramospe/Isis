@@ -101,7 +101,7 @@ class IntegralTransformer:
 
 
 @deco_input_args(float, slc = range(1), kvars = ['cl'])
-def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = default.disc ):
+def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = defaults.disc ):
     '''
     Return the asymmetric poisson uncertainty of having "n"
     events. If "disc" is set to true, the integer version
