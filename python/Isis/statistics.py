@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 28/09/2017
+#//  Last update: 29/09/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -27,6 +27,7 @@ from Isis.root_utils import hist_values
 
 import numpy as np
 import scipy.stats as st
+from scipy.interpolate import interp1d
 
 
 class defaults:
@@ -91,13 +92,13 @@ class IntegralTransformer:
         '''
         Return the integral transformated values
         '''
-        return np.interp(arg, self._values, self._cltve)
+        return interp1d(self._values, self._cltve)(arg)
 
     def detransform( self, arg ):
         '''
         Return the de-transformated values
         '''
-        return np.interp(arg, self._cltve, self._values)
+        return interp1d(self._cltve, self._values)(arg)
 
 
 @deco_input_args(float, slc = range(1), kvars = ['cl'])
@@ -108,15 +109,31 @@ def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = defaults.disc ):
     will be used ("n" must be an integer), while if false,
     the gamma function is used instead.
     '''
+    pdf = st.poisson(n)
+    m   = pdf.mean()
+    
     if disc:
-        pdf = st.poisson
+        lw, up = pdf.interval(cl)
     else:
-        pdf = st.gamma
-    
-    p = pdf(n)
-    m = p.mean()
-    
-    lw, up = p.interval(cl)
+        s = pdf.std()
+
+        lb = m - 5*s
+        if lb < 0:
+            lb = 0
+        rb = m + 5*s
+        
+        larr = np.linspace(m, lb, 10)
+        rarr = np.linspace(m, rb, 10)
+
+        mv = pdf.pmf(m)/2.
+        mc = pdf.cdf(m)
+        lv = mc + mv - pdf.cdf(larr)
+        rv = pdf.cdf(rarr) - mc + mv
+
+        p = cl/2.
+        
+        lw = interp1d(lv, larr)(p)
+        up = interp1d(rv, rarr)(p)
     
     return m - lw, up - m
 
@@ -131,9 +148,11 @@ def bayes_asy_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
     
     if disc:
         pdf = st.binom(N, p)
+        # The binomial distribution works with "k"
         lw, up = np.array(pdf.interval(cl))/N
     else:
         pdf = st.beta(k + 1, N - k + 1)
+        # The beta distribution works directly with "p"
         lw, up = pdf.interval(cl)
     
     m = pdf.mean()
