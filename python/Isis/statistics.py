@@ -191,13 +191,12 @@ def bayes_sym_eff( N, k, disc = config.disc ):
 
 
 @deco_input_args(float, slc = [1, 2], kvars = ['cl', 'prec'])
-def freq_poisson_uncert( mean, cl = 0.683, prec = 0.01 ):
+def freq_poisson_uncert( mean, cl = config.cl, prec = 0.01 ):
     '''
     Calculate the frequentist poisson uncertainties for a given
     integer value. The confidence level may be provided. Also the
     precision required in the outcoming uncertainties.
     '''
-    
     s_sy = sqrt(mean)
     
     if mean != 0:
@@ -210,7 +209,7 @@ def freq_poisson_uncert( mean, cl = 0.683, prec = 0.01 ):
     pb = (1. - cl)/2.
     
     if mean != 0:
-        ''' Adding the value at < mean > is necessary '''
+        ''' Adding the value at "mean" is necessary '''
         lw_mean_lst = np.linspace(mean - 2*stp, mean, nsteps)
         lw_probs    = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
                           lw_mean_lst)
