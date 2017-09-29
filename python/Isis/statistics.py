@@ -25,6 +25,7 @@ from Isis.iboost.general import sendWarningMsg
 from Isis.iroot import ROOT as rt
 from Isis.root_utils import hist_values
 
+from math import sqrt
 import numpy as np
 import scipy.stats as st
 from scipy.interpolate import interp1d
@@ -188,3 +189,40 @@ def bayes_sym_eff( N, k, disc = config.disc ):
 
     return p, s
 
+
+@deco_input_args(float, slc = [1, 2], kvars = ['cl', 'prec'])
+def freq_poisson_uncert( mean, cl = 0.683, prec = 0.01 ):
+    '''
+    Calculate the frequentist poisson uncertainties for a given
+    integer value. The confidence level may be provided. Also the
+    precision required in the outcoming uncertainties.
+    '''
+    
+    s_sy = sqrt(mean)
+    
+    if mean != 0:
+        stp = s_sy
+    else:
+        stp = 2.
+
+    nsteps = int(2*stp/prec)
+    
+    pb = (1. - cl)/2.
+    
+    if mean != 0:
+        ''' Adding the value at < mean > is necessary '''
+        lw_mean_lst = np.linspace(mean - 2*stp, mean, nsteps)
+        lw_probs    = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
+                          lw_mean_lst)
+        mean_lw = interp1d(lw_probs, lw_mean_lst)(pb)
+        s_lw    = mean - mean_lw
+    else:
+        s_lw = 0.
+    
+    up_mean_lst = np.linspace(mean + 2*stp, mean, nsteps)
+    up_probs    = map(lambda x: rt.Math.poisson_cdf(mean, x), up_mean_lst)
+    mean_up     = interp1d(up_probs, up_mean_lst)(pb)
+
+    s_up = mean_up - mean
+    
+    return s_lw, s_up
