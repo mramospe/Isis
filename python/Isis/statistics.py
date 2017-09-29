@@ -30,12 +30,13 @@ import scipy.stats as st
 from scipy.interpolate import interp1d
 
 
-class defaults:
+class config:
     '''
     Define default values of the functions in this module
     '''
-    disc = False
-    cl   = st.chi2(1).cdf(1) # 1 sigma
+    disc   = False
+    cl     = st.chi2(1).cdf(1) # 1 sigma
+    nsigma = 5
 
 
 class IntegralTransformer:
@@ -102,12 +103,11 @@ class IntegralTransformer:
 
 
 @deco_input_args(float, slc = range(1), kvars = ['cl'])
-def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = defaults.disc ):
+def bayes_asy_poisson_uncert( n, cl = config.cl, disc = config.disc, nsigma = config.nsigma ):
     '''
     Return the asymmetric poisson uncertainty of having "n"
-    events. If "disc" is set to true, the integer version
-    will be used ("n" must be an integer), while if false,
-    the gamma function is used instead.
+    events (must be an integer). If "disc" is set to true, the
+    integer interval will be returned.
     '''
     pdf = st.poisson(n)
     m   = pdf.mean()
@@ -117,29 +117,29 @@ def bayes_asy_poisson_uncert( n, cl = defaults.cl, disc = defaults.disc ):
     else:
         s = pdf.std()
 
-        lb = m - 5*s
+        lb = round(m - nsigma*s)
         if lb < 0:
             lb = 0
-        rb = m + 5*s
+        rb = round(m + nsigma*s)
         
-        larr = np.linspace(m, lb, 10)
-        rarr = np.linspace(m, rb, 10)
-
-        mv = pdf.pmf(m)/2.
-        mc = pdf.cdf(m)
-        lv = mc + mv - pdf.cdf(larr)
-        rv = pdf.cdf(rarr) - mc + mv
-
-        p = cl/2.
+        larr = np.linspace(lb, m, num = m - lb, endpoint = False)
+        rarr = np.linspace(rb, m, num = rb - m, endpoint = False)
         
+        pm = pdf.pmf(m)
+        cm = pdf.cdf(m)
+        lv = cm - pm - pdf.cdf(larr)
+        rv = pdf.cdf(rarr) - cm
+        
+        p = (cl - pm)/2.
+
         lw = interp1d(lv, larr)(p)
         up = interp1d(rv, rarr)(p)
-    
+        
     return m - lw, up - m
 
 
 @deco_input_args(float, kvars = ['cl'])
-def bayes_asy_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
+def bayes_asy_eff( N, k, cl = config.cl, disc = config.disc ):
     '''
     Return the efficiency and asymmetric uncertainties of having
     "k" elements in "N".
@@ -160,7 +160,7 @@ def bayes_asy_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
     return p, p - lw, up - p
 
 
-def bayes_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
+def bayes_eff( N, k, cl = config.cl, disc = config.disc ):
     '''
     Return the efficiency and the symmetric and asymmetric
     uncertainties. The values returned are float.
@@ -172,7 +172,7 @@ def bayes_eff( N, k, cl = defaults.cl, disc = defaults.disc ):
 
 
 @deco_input_args(float, slc = range(2))
-def bayes_sym_eff( N, k, disc = defaults.disc ):
+def bayes_sym_eff( N, k, disc = config.disc ):
     '''
     Return the efficiency and symmetric uncertainty of having
     "k" elements in "N".
