@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 28/09/2017
+#//  Last update: 02/10/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -190,48 +190,6 @@ class FormatList:
                 return lst
         else:
             return
-
-
-def divide_hists( hN, hK, asym = True, name = '', title = None, xtitle = '', ytitle = '' ):
-    '''
-    Divide two histograms < hK/hN >. By default, asymmetric errors are
-    considered. Returns a TGraphAsymmErrors instance.
-    '''
-    nbins   = hN.GetNbinsX()
-    tprg    = (1, nbins + 1)
-    centers = np.array([hN.GetBinCenter(i) for i in xrange(*tprg)], dtype = float)
-    swidth  = np.array([hN.GetBinWidth(i) for i in xrange(*tprg)], dtype = float)
-    
-    nN = [hN.GetBinContent(i) for i in xrange(*tprg)]
-    nK = [hK.GetBinContent(i) for i in xrange(*tprg)]
-    
-    eff     = np.zeros(nbins, dtype = float)
-    seff    = np.zeros(nbins, dtype = float)
-    seff_lw = np.zeros(nbins, dtype = float)
-    seff_up = np.zeros(nbins, dtype = float)
-
-    for nn, nk in zip(nN, nK):
-        p, s_sy, s_lw, s_up = bayes_std_eff(nn, nk)
-        eff[i]     = p
-        seff[i]    = s_sy
-        seff_lw[i] = s_lw
-        seff_up[i] = s_up
-        
-    if not asym:
-        ''' If specified, the symmetric error is used '''
-        seff_lw = seff_up = seff
-
-    '''
-    Build the graph
-    '''
-    graph = rt.TGraphAsymmErrors(nbins,
-                                 centers, eff,
-                                 swidth, swidth,
-                                 seff_lw, seff_up)
-    
-    format_plottable_2d(graph, name, title, xtitle, ytitle)
-    
-    return graph
 
 
 def draw_hists( hlst, drawopt = '', norm = True, title = 'List of histograms' ):
