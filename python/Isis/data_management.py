@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 28/09/2017
+#//  Last update: 02/10/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -25,7 +25,7 @@ from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iboost.rootio import treeToArray, arrayToTree
 from Isis.iroot import ROOT as rt
 from Isis.utils import string_list_filter
-from Isis.statistics import bayes_std_eff
+from Isis.statistics import freq_eff
 
 import collections, math, numpy, pandas
 
@@ -114,11 +114,11 @@ class DataMgr( pandas.DataFrame ):
     def eff( self, cut, mathmod = None, **kwargs ):
         '''
         Calculate the efficiency for a given cut. For more
-        information about the returned values, see "bayes_std_eff".
+        information about the returned values, see "freq_eff".
         '''
         k = self.entries(cut, mathmod)
         n = len(self)
-        return bayes_std_eff(n, k, **kwargs)
+        return freq_eff(n, k, **kwargs)
         
     def entries( self, cuts = '', mathmod = None ):
         '''

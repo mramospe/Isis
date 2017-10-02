@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 29/09/2017
+#//  Last update: 02/10/2017
 #//
 #// -------------------------------------------------------
 #//
@@ -35,9 +35,10 @@ class config:
     '''
     Define default values of the functions in this module
     '''
-    disc   = False
-    cl     = st.chi2(1).cdf(1) # 1 sigma
-    nsigma = 5
+    cl   = st.chi2(1).cdf(1) # 1 sigma
+    disc = False
+    nsig = 5
+    prec = 0.01
 
 
 class IntegralTransformer:
@@ -104,7 +105,7 @@ class IntegralTransformer:
 
 
 @deco_input_args(float, slc = range(1), kvars = ['cl'])
-def bayes_asy_poisson_uncert( n, cl = config.cl, disc = config.disc, nsigma = config.nsigma ):
+def bayes_asy_poisson_uncert( n, cl = config.cl, disc = config.disc, nsig = config.nsig ):
     '''
     Return the asymmetric poisson uncertainty of having "n"
     events (must be an integer). If "disc" is set to true, the
@@ -118,10 +119,10 @@ def bayes_asy_poisson_uncert( n, cl = config.cl, disc = config.disc, nsigma = co
     else:
         s = pdf.std()
 
-        lb = round(m - nsigma*s)
+        lb = round(m - nsig*s)
         if lb < 0:
             lb = 0
-        rb = round(m + nsigma*s)
+        rb = round(m + nsig*s)
         
         larr = np.linspace(lb, m, num = m - lb, endpoint = False)
         rarr = np.linspace(rb, m, num = rb - m, endpoint = False)
@@ -190,8 +191,52 @@ def bayes_sym_eff( N, k, disc = config.disc ):
     return p, s
 
 
+@deco_input_args(float, kvars = ['cl', 'prec'])
+def freq_eff( N, k, cl = config.cl, prec = config.prec, nsig = config.nsig ):
+    '''
+    Return the frequentist efficiency of having "k" events
+    in "N". The confidence level and the precision can be
+    provided.
+    '''
+    p = k/N
+
+    s_k = nsig*sqrt(k)
+    s_N = nsig*sqrt(N)
+
+    n_k = int(s_k/prec)
+    n_N = int(s_N/prec)
+
+    # Create the grid
+    m_k = k - s_k
+    v_k = np.linspace(m_k if m_k > 0 else 0, k + s_k, n_k)
+    m_N = N - s_N
+    v_N = np.linspace(m_N if m_N > 0 else 1, N + s_N, n_N)
+    
+    g_k, g_N = np.meshgrid(v_k, v_N)
+    
+    cond = (g_N >= g_k)
+    g_k  = g_k[cond]
+    g_N  = g_N[cond]
+    g_p  = g_k/g_N
+    
+    pdf = st.beta(g_k + 1, g_N - g_k + 1)
+    int_p = pdf.cdf(p) - pdf.cdf(pdf.mean())
+    
+    c = cl/2.
+
+    # Positive values correspond to the left
+    lc = (int_p > 0)
+    lw = interp1d(int_p[lc], g_p[lc])(c)
+    
+    # Negative values correspond to the right
+    rc = (int_p <= 0)
+    up = interp1d(-1*int_p[rc], g_p[rc])(c)
+    
+    return p, p - lw, up - p
+
+
 @deco_input_args(float, slc = [1, 2], kvars = ['cl', 'prec'])
-def freq_poisson_uncert( mean, cl = config.cl, prec = 0.01 ):
+def freq_poisson_uncert( mean, cl = config.cl, prec = config.prec, nsig = config.nsig ):
     '''
     Calculate the frequentist poisson uncertainties for a given
     integer value. The confidence level may be provided. Also the
@@ -200,17 +245,17 @@ def freq_poisson_uncert( mean, cl = config.cl, prec = 0.01 ):
     s_sy = sqrt(mean)
     
     if mean != 0:
-        stp = s_sy
+        stp = nsig*s_sy
     else:
-        stp = 2.
+        stp = 2.*nsig
 
-    nsteps = int(2*stp/prec)
+    nsteps = int(stp/prec)
     
     pb = (1. - cl)/2.
     
     if mean != 0:
         ''' Adding the value at "mean" is necessary '''
-        lw_mean_lst = np.linspace(mean - 2*stp, mean, nsteps)
+        lw_mean_lst = np.linspace(mean - stp, mean, nsteps)
         lw_probs    = map(lambda x: rt.Math.poisson_cdf_c(mean, x) + rt.Math.poisson_pdf(mean, x),
                           lw_mean_lst)
         mean_lw = interp1d(lw_probs, lw_mean_lst)(pb)
@@ -218,7 +263,7 @@ def freq_poisson_uncert( mean, cl = config.cl, prec = 0.01 ):
     else:
         s_lw = 0.
     
-    up_mean_lst = np.linspace(mean + 2*stp, mean, nsteps)
+    up_mean_lst = np.linspace(mean + stp, mean, nsteps)
     up_probs    = map(lambda x: rt.Math.poisson_cdf(mean, x), up_mean_lst)
     mean_up     = interp1d(up_probs, up_mean_lst)(pb)
 
