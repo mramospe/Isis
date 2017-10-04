@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/10/2017
+#//  Last update: 04/10/2017
 #//
 #// -------------------------------------------------------------
 #//
@@ -21,7 +21,6 @@
 
 
 from Isis.data_management import DataMgr
-from Isis.efficiencies import bayes_std_eff
 from Isis.iboost.general import sendErrorMsg, sendWarningMsg
 from Isis.iroot import ROOT as rt
 from Isis.math_ext import nearest_square
