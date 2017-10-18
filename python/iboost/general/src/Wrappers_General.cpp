@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 18/10/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -130,9 +130,13 @@ BOOST_PYTHON_MODULE( general ) {
   { // ANSIFormat scope
     class ANSIFormatNSP { };
     py::scope ANSIFormat = py::class_<ANSIFormatNSP>("ANSIFormat")
-      .def_readwrite("ErrorColor"  , &isis::ANSIFormat::ErrorColor)
-      .def_readwrite("InfoColor"   , &isis::ANSIFormat::InfoColor)
-      .def_readwrite("WarningColor", &isis::ANSIFormat::WarningColor)
+      .def_readwrite("ErrorColor"    , &isis::ANSIFormat::ErrorColor)
+      .def_readwrite("InfoColor"     , &isis::ANSIFormat::InfoColor)
+      .def_readwrite("WarningColor"  , &isis::ANSIFormat::WarningColor)
+      .def_readwrite("ErrorPrefix"   , &isis::ANSIFormat::ErrorPrefix)
+      .def_readwrite("InfoPrefix"    , &isis::ANSIFormat::InfoPrefix)
+      .def_readwrite("MsgPrefix"     , &isis::ANSIFormat::MsgPrefix)
+      .def_readwrite("WarningPrefix" , &isis::ANSIFormat::WarningPrefix)
       ;
   
     py::enum_<isis::ANSIFormat::Colors>("Colors")
