@@ -23,13 +23,16 @@ Return information about the Isis configuration:
 cflags="@CMAKE_CXX_FLAGS@"
 
 # Paths to the include folders
+binclude="-I@Boost_INCLUDE_DIRS@"
 iinclude="-I@INSTALL_INCLUDE_DIR@"
 rinclude="-I@ROOT_INCLUDE_DIRS@"
+ainclude="$binclude $rinclude $iinclude"
 
 # C++ libraries (both Root and Isis)
+blibs="-L@Boost_LIBRARY_DIRS@ @BOOST_LIBRARIES_TO_LD@"
 rlibs="-L@ROOT_LIBRARY_DIR@ @ROOT_LIBRARIES_TO_LD@"
 ilibs="-L@INSTALL_LIB_DIR@ @PROJECT_LIBRARIES_TO_LD@"
-alibs="$rlibs $ilibs"
+alibs="$blibs $rlibs $ilibs"
 
 out=""
 
@@ -47,7 +50,7 @@ do
 	    shift
 	    ;;
 	--incdirs)
-	    out="$out $rinclude $iinclude"
+	    out="$out $ainclude"
 	    shift
 	    ;;
 	--libs)

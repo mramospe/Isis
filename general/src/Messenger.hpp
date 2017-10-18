@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/10/2017
 //
 // ---------------------------------------------------------
 //
@@ -69,5 +69,13 @@ namespace isis {
   }
 
 }
+
+//_______________________________________________________________________________
+// Definition of the objects to display the basic types of messages
+#define IBegMsg  isis::Messenger("--- "     , std::cout, isis::ANSIFormat::aNoColor)
+#define IError   isis::Messenger("ERROR: "  , std::cerr, isis::ANSIFormat::ErrorColor)
+#define IInfo    isis::Messenger("INFO: "   , std::cout, isis::ANSIFormat::InfoColor)
+#define IWarning isis::Messenger("WARNING: ", std::cout, isis::ANSIFormat::WarningColor)
+#define IEndMsg  isis::endMsgLine
 
 #endif

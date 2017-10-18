@@ -30,7 +30,8 @@ set(libsuffix .so)
 
 #----------------------------------------------------------------------------
 # Ask for the boost libraries
-find_package(Boost 1.63 REQUIRED COMPONENTS python numpy regex)
+set(BOOST_LIB_SET python numpy regex)
+find_package(Boost 1.63 REQUIRED COMPONENTS ${BOOST_LIB_SET})
 include_directories(${Boost_INCLUDE_DIRS})
 
 #----------------------------------------------------------------------------
@@ -40,6 +41,10 @@ set(ROOT_LIB_SET
   MathCore Thread EG Html Minuit PyROOT)
 find_package(ROOT REQUIRED COMPONENTS ${ROOT_LIB_SET})
 include_directories(${ROOT_INCLUDE_DIRS})
+
+#----------------------------------------------------------------------------
+# Link these libraries to the project libraries
+set(EXTERNAL_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Set the installation directories
@@ -110,6 +115,8 @@ function(build_package libname deps)
   if(deps)
     add_dependencies(${libname} ${deps})
   endif()
+  target_link_libraries(${libname} ${PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES})
+  
   set_target_properties(${libname} PROPERTIES PUBLIC_HEADER "${headers}")
   
   set(PROJECT_LIBRARIES ${PROJECT_LIBRARIES} ${libname} PARENT_SCOPE)
@@ -158,6 +165,7 @@ function(format_lib_list var prefix)
   set(${var} "${list}" PARENT_SCOPE)
 endfunction(format_lib_list)
 
+format_lib_list(BOOST_LIBRARIES_TO_LD "-lboost_" ${BOOST_LIB_SET})
 format_lib_list(ROOT_LIBRARIES_TO_LD "-l" ${ROOT_LIB_SET})
 format_lib_list(PROJECT_LIBRARIES_TO_LD "-l" ${PROJECT_LIBRARIES})
 
@@ -181,7 +189,7 @@ if(BUILD_EXAMPLES)
       string(REPLACE ${INSTALL_EXAMPLES_DIR}/ "" compfile ${compfile})
       add_executable(${compfile} ${file})
       add_dependencies(${compfile} ${PROJECT_LIBRARIES})
-      target_link_libraries(${compfile} ${PROJECT_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
+      target_link_libraries(${compfile} ${PROJECT_LIBRARIES} ${EXTERNAL_LIBRARIES})
     endforeach()
   else()
     message("-- The examples will not be built")
