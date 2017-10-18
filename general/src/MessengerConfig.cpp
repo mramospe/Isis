@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/10/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -34,17 +34,20 @@ namespace isis {
   int ANSIFormat::ErrorColor   = aRed;
   int ANSIFormat::InfoColor    = aGreen;
   int ANSIFormat::WarningColor = aYellow;
+  
+  std::string ANSIFormat::ErrorPrefix   = "ERROR: ";
+  std::string ANSIFormat::InfoPrefix    = "INFO: ";
+  std::string ANSIFormat::MsgPrefix     = "--- ";
+  std::string ANSIFormat::WarningPrefix = "WARNING: ";
 
   //_______________________________________________________________________________
   //
   bool applyColor( const std::ostream &os ) {
 
-    if ( &os == &std::cout )
-      return ANSIFormat::ColoredStdOut;
-    else if ( &os == &std::cerr )
+    if ( &os == &std::cerr )
       return ANSIFormat::ColoredStdErr;
     else
-      return false;
+      return ANSIFormat::ColoredStdOut;
   }
 
   //_______________________________________________________________________________

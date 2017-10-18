@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 18/10/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -21,16 +21,41 @@
 //_______________________________________________________________________________
 
 namespace isis {
+  
+  //_______________________________________________________________________________
+  //
+  Messenger::Messenger( const short unsigned int &st, std::ostream *os ) {
+
+    switch ( st ) {
+      
+    case ( StatusCode::Msg ):
+      this->build(ANSIFormat::MsgPrefix, os ? *os : std::cout, ANSIFormat::aNoColor);
+      break;
+    case ( StatusCode::Info ):
+      this->build(ANSIFormat::InfoPrefix, os ? *os : std::cout, ANSIFormat::InfoColor);
+      break;
+    case ( StatusCode::Warning ):
+      this->build(ANSIFormat::WarningPrefix, os ? *os : std::cout, ANSIFormat::WarningColor);
+      break;
+    case ( StatusCode::Error ):
+      this->build(ANSIFormat::ErrorPrefix, os ? *os : std::cerr, ANSIFormat::ErrorColor);
+      break;
+    default:
+      IError << "Unknown status code \"" << st << "\"" << IEndMsg;
+      break;
+    }
+  }
 
   //_______________________________________________________________________________
   //
-  Messenger::Messenger( const std::string &start,
-			std::ostream &os,
-			const int &fgcol,
-			const int &bgcol,
-			const int &sty ) :
-    fOStream( &os ) {
+  void Messenger::build( const std::string &start,
+			 std::ostream &os,
+			 const int &fgcol,
+			 const int &bgcol,
+			 const int &sty ) {
 
+    fOStream = &os;
+    
     // Check if color must be applied
     if ( applyColor(os) ) {
     
@@ -67,9 +92,5 @@ namespace isis {
 
     *fOStream << start;
   }
-
-  //_______________________________________________________________________________
-  //
-  Messenger::~Messenger() { }
 
 }

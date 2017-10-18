@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////
 
 
-#ifndef __MESSENGER__
-#define __MESSENGER__
+#ifndef MESSENGER_HPP
+#define MESSENGER_HPP
 
 #include "MessengerConfig.hpp"
 
@@ -41,14 +41,20 @@ namespace isis {
 
     // Constructor given the start message, the output stream and the
     // configuration colors and style
-    Messenger(const std::string &start,
-	      std::ostream &os,
-	      const int &fgcol = ANSIFormat::aNoColor,
-	      const int &bgcol = ANSIFormat::aNoColor,
-	      const int &sty = ANSIFormat::aNoStyle);
+    Messenger( const std::string &start,
+	       std::ostream &os,
+	       const int &fgcol = ANSIFormat::aNoColor,
+	       const int &bgcol = ANSIFormat::aNoColor,
+	       const int &sty = ANSIFormat::aNoStyle ) {
+      
+      this->build(start, os, fgcol, bgcol, sty);
+    }
+
+    // Constructor given a status code
+    Messenger( const short unsigned int &st, std::ostream *os = 0 );
     
     // Destructor
-    ~Messenger();
+    ~Messenger() { }
 
     // Send object to the output stream
     template<class type>
@@ -59,6 +65,15 @@ namespace isis {
     // Output stream
     std::ostream *fOStream;
 
+  private:
+
+    // Build the object
+    void build( const std::string &start,
+		std::ostream &os,
+		const int &fgcol,
+		const int &bgcol = ANSIFormat::aNoColor,
+		const int &sty = ANSIFormat::aNoStyle );
+    
   };
 
   // Stream operator
@@ -72,10 +87,10 @@ namespace isis {
 
 //_______________________________________________________________________________
 // Definition of the objects to display the basic types of messages
-#define IBegMsg  isis::Messenger("--- "     , std::cout, isis::ANSIFormat::aNoColor)
-#define IError   isis::Messenger("ERROR: "  , std::cerr, isis::ANSIFormat::ErrorColor)
-#define IInfo    isis::Messenger("INFO: "   , std::cout, isis::ANSIFormat::InfoColor)
-#define IWarning isis::Messenger("WARNING: ", std::cout, isis::ANSIFormat::WarningColor)
+#define IBegMsg  isis::Messenger(isis::StatusCode::Msg)
+#define IError   isis::Messenger(isis::StatusCode::Error)
+#define IInfo    isis::Messenger(isis::StatusCode::Info)
+#define IWarning isis::Messenger(isis::StatusCode::Warning)
 #define IEndMsg  isis::endMsgLine
 
 #endif
