@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/10/2017
+//  Last update: 19/10/2017
 //
 // ---------------------------------------------------------
 //
@@ -87,10 +87,10 @@ namespace isis {
 
 //_______________________________________________________________________________
 // Definition of the objects to display the basic types of messages
-#define IBegMsg  isis::Messenger(isis::StatusCode::Msg)
-#define IError   isis::Messenger(isis::StatusCode::Error)
-#define IInfo    isis::Messenger(isis::StatusCode::Info)
-#define IWarning isis::Messenger(isis::StatusCode::Warning)
+#define IBegMsg  isis::Messenger(isis::MsgCode::Msg)
+#define IError   isis::Messenger(isis::MsgCode::Error)
+#define IInfo    isis::Messenger(isis::MsgCode::Info)
+#define IWarning isis::Messenger(isis::MsgCode::Warning)
 #define IEndMsg  isis::endMsgLine
 
 #endif

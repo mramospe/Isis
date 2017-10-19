@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/10/2017
+//  Last update: 19/10/2017
 //
 // ---------------------------------------------------------
 //
@@ -43,7 +43,7 @@ namespace isis {
   public:
 
     // Constructor given the string to be printed and the status code
-    BaseException( const std::string &info, const StatusCode &st ) {
+    BaseException( const std::string &info, const MsgCode &st ) {
 
       std::stringstream ss;
       Messenger msg(st, &ss);
@@ -84,7 +84,7 @@ namespace isis {
   public:
 
     // Constructor given the invalid argument and the status code
-    InvalidArgument( const std::string &arg, const StatusCode &st ) :
+    InvalidArgument( const std::string &arg, const MsgCode &st ) :
       BaseException(std::string{"Invalid argument \""} + arg + std::string{"\""}, st) { }
   };
   

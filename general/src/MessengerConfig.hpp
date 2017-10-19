@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/10/2017
+//  Last update: 19/10/2017
 //
 // ---------------------------------------------------------
 //
@@ -71,7 +71,7 @@ namespace isis {
   }
 
   // Status code of a message
-  enum StatusCode { Msg, Info, Warning, Error };
+  enum MsgCode { Msg, Info, Warning, Error };
   
   // Function to check whether color must be applied or not
   bool applyColor( const std::ostream &os );

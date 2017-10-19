@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/10/2017
+//  Last update: 19/10/2017
 //
 // ---------------------------------------------------------
 ////////////////////////////////////////////////////////////
@@ -28,16 +28,16 @@ namespace isis {
 
     switch ( st ) {
       
-    case ( StatusCode::Msg ):
+    case ( MsgCode::Msg ):
       this->build(ANSIFormat::MsgPrefix, os ? *os : std::cout, ANSIFormat::aNoColor);
       break;
-    case ( StatusCode::Info ):
+    case ( MsgCode::Info ):
       this->build(ANSIFormat::InfoPrefix, os ? *os : std::cout, ANSIFormat::InfoColor);
       break;
-    case ( StatusCode::Warning ):
+    case ( MsgCode::Warning ):
       this->build(ANSIFormat::WarningPrefix, os ? *os : std::cout, ANSIFormat::WarningColor);
       break;
-    case ( StatusCode::Error ):
+    case ( MsgCode::Error ):
       this->build(ANSIFormat::ErrorPrefix, os ? *os : std::cerr, ANSIFormat::ErrorColor);
       break;
     default:
