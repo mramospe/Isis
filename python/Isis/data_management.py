@@ -7,7 +7,7 @@
 #//  AUTHOR: Miguel Ramos Pernas
 #//  e-mail: miguel.ramos.pernas@cern.ch
 #//
-#//  Last update: 02/10/2017
+#//  Last update: 19/10/2017
 #//
 #// ----------------------------------------------------------
 #//
@@ -147,7 +147,7 @@ class DataMgr( pandas.DataFrame ):
         expression.
         '''
         if function:
-            v = numpy.array(function(self[arg]))
+            v = function(*self.as_matrix(arg).T)
         else:
             v = self.evaluate(arg, mathmod)
         self[name] = v
@@ -169,7 +169,7 @@ class DataMgr( pandas.DataFrame ):
         '''
         variables = variables or []
         
-        if not self.columns:
+        if not self.nvars():
             sendErrorMsg('{} => No variables booked in this '\
                          'manager'.format(self.name))
             return
@@ -230,11 +230,11 @@ class DataMgr( pandas.DataFrame ):
         '''
         Create a DataMgr instance from a root file
         '''
-        cols = columns or ['*']
+        cols = columns or []
         
         v = treeToArray(path, tname, cols, cuts, regex)
         
-        return DataMgr(data = v, columns = cols, name = name)
+        return DataMgr(data = v, columns = v.dtype.names, name = name), v
                        
     def run_cut( self, var,
                  sense    = '>',
@@ -296,7 +296,7 @@ class DataMgr( pandas.DataFrame ):
         
         return cmgr
 
-    def to_root( self, name = '', tname = False, columns = None, mode = 'recreate', use_regex = False ):
+    def to_root( self, name = '', tname = False, columns = None, mode = 'recreate', regex = False ):
         '''
         Save this instance in a Root file
         '''
@@ -313,7 +313,7 @@ class DataMgr( pandas.DataFrame ):
 
         v = self.to_records(index = False)
         
-        arrayToTree(v, name = tname, variables = columns, use_regex = use_regex)
+        arrayToTree(v, name = tname, variables = columns, use_regex = regex)
         print self.name, '=> Written', len(self), 'entries'
         
         if ofile:

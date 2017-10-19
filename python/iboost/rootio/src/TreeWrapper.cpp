@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 21/09/2017
+//  Last update: 19/10/2017
 //
 // ----------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////
@@ -70,27 +70,30 @@ namespace iboost {
 
     // Get the branch names to be used
     itree->SetBranchStatus("*", 0);
-
+    
     isis::Strings brnames;
     const py::ssize_t nvars = py::len(vars);
-    for ( py::ssize_t i = 0; i < nvars; ++i ) {
+    if ( !nvars )
+      isis::getBranchNames(brnames, itree);
+    else
+      for ( py::ssize_t i = 0; i < nvars; ++i ) {
 
-      auto var = extractFromIndex<std::string>(vars, i);
+	auto var = extractFromIndex<std::string>(vars, i);
 
-      bool s = true;
-      if ( use_regex )
-	s = isis::getBranchNames(brnames, itree, var);
-      else {
-	if ( itree->GetBranch(var.c_str()) )
+	bool s = true;
+	if ( use_regex )
+	  s = isis::getBranchNames(brnames, itree, var);
+	else {
+	  if ( itree->GetBranch(var.c_str()) )
 	    brnames.push_back(var);
-	else
-	  s = false;
-      }
+	  else
+	    s = false;
+	}
       
-      if ( !s )
-	IWarning << "No variables have been found following expression < "
-		 << var << " >" << IEndMsg;
-    }
+	if ( !s )
+	  IWarning << "No variables have been found following expression < "
+		   << var << " >" << IEndMsg;
+      }
     
     // Do not swap these two lines, since the path must be set after the
     // variable is enabled
