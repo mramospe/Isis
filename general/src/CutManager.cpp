@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@
 
 #include "CutManager.hpp"
 #include "Definitions.hpp"
+#include "Exceptions.hpp"
 #include "Messenger.hpp"
 
 #include <algorithm>
@@ -57,14 +58,14 @@ namespace isis {
   //
   std::string CutManager::bookCut( const std::string &key, const bool &print ) {
     if ( fCuts.find( key ) != fCuts.end() ) {
-      IWarning << "Cut with name < " << key << " > already booked" << IEndMsg;
+      IWarning << "Cut with name \"" << key << "\" already booked" << IEndMsg;
       return "";
     }
     std::string cut = this->getCut( key );
     if ( cut.size() ) {
       fCuts.insert( std::make_pair( key, cut ) );
       if ( print )
-	IBegMsg << "Booked new cut < " << key << " >: " << fCuts[ key ] << IEndMsg;
+	IBegMsg << "Booked new cut \"" << key << "\": " << fCuts[ key ] << IEndMsg;
     }
     return cut;
   }
@@ -112,12 +113,9 @@ namespace isis {
 		mismatch = true;
 	    }
 	  
-	    if ( mismatch ) {
-	      IError <<
-		"Mismatched < $ > symbol when scanning cut < "
-		     << key << " >" << IEndMsg;
-	      return std::string();
-	    }
+	    if ( mismatch )
+	      throw BaseException("Mismatched \"$\" symbol when scanning cut \"" +
+				  key + "\"");
 
 	    // Replaces the cut name by its value
 	    fpos  = (*fFile).tellg();
@@ -130,10 +128,8 @@ namespace isis {
 	}
       }
 
-      if ( (*fFile).eof() && cond ) {
-	IError << "Cut with name < " << key << " > does not exist." << IEndMsg;
-	return 0;
-      }
+      if ( (*fFile).eof() && cond )
+	throw BaseException("Cut with name \"" + key + "\" does not exist.");
     }
     // Changes the name of the conditionals in the cuts set
     for ( StrMap::iterator it = fOptions.begin();
@@ -161,17 +157,16 @@ namespace isis {
     if ( fFile.use_count() == 1 && (*fFile).is_open() )
       (*fFile).close();
     (*fFile).open( file_path.c_str() );
-    if ( !(*fFile) ) {
-      IError << "File < " << file_path << " > does not exist" << IEndMsg;
-      return;
-    }
+    if ( !(*fFile) )
+      throw BaseException("File \"" + file_path + "\" does not exist");
+
     std::string line, str;
     size_t nl = 0, pos, newpos;
     while ( std::getline( (*fFile), line ) ) {
       ++nl;
       if ( line.size() )
 	if ( line.front() != '#' ) {
-	  if ( ( pos = line.find( '=' ) ) != std::string::npos ) {
+	  if ( ( pos = line.find('=') ) != std::string::npos ) {
 
 	    // Checks whether the cut name is free of whitespaces
 	    str = line.substr( 0, pos );
@@ -179,27 +174,26 @@ namespace isis {
 	      str.erase( str.begin() );
 	    while ( str.back() == ' ' )
 	      str.erase( str.end() - 1 );
-	    if ( str.find( ' ' ) != std::string::npos ) {
-	      IError << "The cut defined in line < " << nl <<
-		" > has whitespaces on its name" << IEndMsg;
-	      return;
-	    }
+	    if ( str.find( ' ' ) != std::string::npos )
+	      throw BaseException("The cut defined in line \"" +
+				  std::to_string(nl) +
+				  "\" has whitespaces on its name");
 
-	    // Checks the matching of the < $ > symbols in the expression
-	    while ( ( pos = line.find( '$', ++pos ) ) != std::string::npos ) {
-	      newpos = line.find( '$', ++pos );
+	    // Checks the matching of the "$" symbols in the expression
+	    while ( ( pos = line.find('$', ++pos) ) != std::string::npos ) {
+	      newpos = line.find('$', ++pos );
 	      str    = line.substr( pos, newpos - pos );
 	      if ( newpos == std::string::npos ||
-		   str.find( ' ' ) != std::string::npos ) {
-		IError << "Mismatched < $ > symbol in line < " << nl << " >" << IEndMsg;
-		return;
-	      }
+		   str.find(' ') != std::string::npos )
+		throw BaseException("Mismatched \"$\" symbol in line \"" +
+				    std::to_string(nl) + "\"");
+	      
 	      pos = newpos + 1;
 	    }
 	  }
 	  else
-	    IWarning<< "Line number < " << nl <<
-	      " > not a cut line; must be commented (starting by #)" << IEndMsg;
+	    IWarning<< "Line number \"" << nl <<
+	      "\" not a cut line; must be commented (starting by #)" << IEndMsg;
 	}
     }
     (*fFile).clear();

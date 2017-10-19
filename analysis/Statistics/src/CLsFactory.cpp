@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -16,8 +16,7 @@
 #include "CLsFactory.hpp"
 #include "CLsResult.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
-#include "MessengerConfig.hpp"
+#include "Exceptions.hpp"
 #include "Utils.hpp"
 
 #include "TMath.h"
@@ -65,7 +64,7 @@ namespace isis {
   void CLsFactory::generate( const size_t &n ) {
 
     if ( fNullHyp->getHyp().size() != fSigHyp->getHyp().size() )
-      IError << "Input hypotheses do not have the same sizes" << IEndMsg;
+      throw BaseException("Input hypotheses do not have the same sizes");
     
     fNullHyp->generate(n);
 

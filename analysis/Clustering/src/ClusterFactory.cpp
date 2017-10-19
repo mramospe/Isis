@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 
 #include "ClusterFactory.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "Utils.hpp"
 
 #include <algorithm>
@@ -445,10 +445,8 @@ namespace isis {
   void ClusterFactory::setClusterWeights( const int &index,
 					  const Doubles &wgts ) {
     
-    if ( wgts.size() != fVarNorm.size() ) {
-      IError << "The length of the weights must match the number of variables" << IEndMsg;
-      return;
-    }
+    if ( wgts.size() != fVarNorm.size() )
+      throw BaseException("The length of the weights must match the number of variables");
     
     if ( index > 0 )
       fClusterWeights[ index ] = wgts;

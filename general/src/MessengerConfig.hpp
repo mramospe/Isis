@@ -70,7 +70,7 @@ namespace isis {
     extern std::string WarningPrefix;
   }
 
-  // Status code of a message
+  // Message codes
   enum MsgCode { Msg, Info, Warning, Error };
   
   // Function to check whether color must be applied or not

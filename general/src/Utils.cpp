@@ -7,14 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/09/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------
 ///////////////////////////////////////////////////////////
 
 
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "Utils.hpp"
 
 #include <boost/regex.hpp>
@@ -95,11 +95,8 @@ namespace isis {
 	  " > not known; check the input options." << IEndMsg;
     
       // Checks if the option given has whitespaces or not
-      if ( opt.find( ' ' ) != std::string::npos ) {
-	IError << "Option < " << name << 
-	  " > has whitespaces on its value" << IEndMsg;
-	return;
-      }
+      if ( opt.find( ' ' ) != std::string::npos )
+	throw BaseException("Option \"" + name + "\" has whitespaces on its value");
     }
   }
 

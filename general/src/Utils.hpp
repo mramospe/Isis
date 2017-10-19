@@ -24,6 +24,7 @@
 #define UTILS_H
 
 #include "Definitions.hpp"
+#include "Exceptions.hpp"
 #include "Messenger.hpp"
 
 #include <cmath>
@@ -104,12 +105,12 @@ namespace isis {
   template<typename type>
   void parseOpt( std::string opts, const std::string &var, type &value ) {
 
-    size_t endpos, pos, varpos = opts.find( var );
+    size_t endpos, pos, varpos = opts.find(var);
 
     // If the variable is not found an error is displayed
     if ( varpos == std::string::npos ) {
-      IError << "Could not parse option < " << var <<
-	" >. Key not found." << IEndMsg;
+      IWarning << "Could not parse option \"" << var <<
+	"\". Key not found." << IEndMsg;
       return;
     }
   
@@ -117,7 +118,7 @@ namespace isis {
     if ( varpos == std::string::npos )
       endpos = opts.size();
     else
-      endpos = opts.find( ':', varpos );
+      endpos = opts.find(':', varpos);
     
     // If no < = > symbol is found, it is considered that the variable is boolean. The
     // static_cast call is needed to allow taking strings as values at compilation time.
@@ -140,11 +141,9 @@ namespace isis {
     trimString( opts );
 
     // If the string to be parsed has whitespaces, an error is sent
-    if ( opts.find( ' ' ) != std::string::npos ) {
-      IError << "The value to assign to < " << var <<
-	" > has whitespaces; remove them." << IEndMsg;
-      return;
-    }
+    if ( opts.find( ' ' ) != std::string::npos )
+      throw BaseException("The value to assign to \"" + var +
+			  "\" has whitespaces; remove them.");
   
     // The string is converted to a stream and the value for the given variable
     // is set to its result

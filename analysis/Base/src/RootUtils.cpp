@@ -7,13 +7,13 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "RootUtils.hpp"
 
 #include "TFile.h"
@@ -32,10 +32,8 @@ namespace isis {
     TObject *obj = ifile->Get(path.c_str());
 
     if ( !obj )
-      IError <<
-	"Unable to get object < " << path << " > from file: " << ifile->GetName()
-				  << IEndMsg;
-
+      throw NotFound("object", path);
+    
     return obj;
   }
 

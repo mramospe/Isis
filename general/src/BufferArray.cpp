@@ -7,15 +7,15 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // -----------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////
 
 
 #include "Definitions.hpp"
+#include "Exceptions.hpp"
 #include "BufferArray.hpp"
-#include "Messenger.hpp"
 
 #include <iostream>
 
@@ -53,7 +53,7 @@ namespace isis {
 					    const char &type ) {
 
     if ( fVarMap.count( name ) )
-      IError << "Variable with name < " << name << " > already booked" << IEndMsg;
+      throw BaseException("Variable with name \"" + name + "\" already booked");
     else {
       BufferVariable *var = new BuffVar( type );
       fVarMap[ name ] = var;

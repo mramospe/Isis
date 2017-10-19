@@ -7,14 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 18/09/2017
+//  Last update: 19/10/2017
 //
 // ------------------------------------------------------
 /////////////////////////////////////////////////////////
 
 
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "TreeManagement.hpp"
 #include "Utils.hpp"
 
@@ -122,7 +122,7 @@ namespace isis {
     TObject *obj = brList->FindObject(var.c_str());
     
     if ( !obj )
-      IError << "Unable to get branch with name < " << var << " >" << IEndMsg;
+      throw NotFound("branch", var);
     
     std::string type = obj->GetTitle();
     type.replace(0, var.length(), "");

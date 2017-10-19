@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 30/06/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 
 #include "ConfigParser.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "Utils.hpp"
 
 #include <algorithm>
@@ -47,10 +47,8 @@ namespace isis {
     case 'S':
       break;
     default:
-      IError <<
-	"Unknown type for variable < " << name << " > (" << type << ')'
-				       << IEndMsg;
-      return;
+      throw BaseException("Unknown type for variable \"" + name + "\" (" +
+			  std::string(1, type) + ')');
     }
 
     fArgs[ name ] = std::make_pair( std::string(), poss );
@@ -70,12 +68,10 @@ namespace isis {
     // An error is displayed if the number of parameters in the main function is not
     // equal to that in the class
     const size_t &gsize = fArgs.size();
-    if ( gsize != truenargs ) {
-      IError <<
-	"Incorrect number of input parameters (" << truenargs << '/' << gsize << ')'
-						 << IEndMsg;
-      return;
-    }
+    if ( gsize != truenargs )
+      throw BaseException("Incorrect number of input parameters (" +
+			  std::to_string(truenargs) +
+			  '/' + std::to_string(gsize) + ')');
 
     bool status = true;
     for ( auto it = fVariables.begin(); status && it != fVariables.end(); ++it ) {
@@ -97,19 +93,17 @@ namespace isis {
       }
     
       auto def = fArgs[ name ].second;
-      if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() ) {
-	IError << "Input for < " << name <<
-	  " > does not match any of the possibilities: " << contToString(def)
-	       << IEndMsg;
-	return;
-      }
+      if ( def.size() && std::find( def.begin(), def.end(), arg ) == def.end() )
+	throw BaseException("Input for \"" + name +
+			    "\" does not match any of the possibilities: " +
+			    contToString(def));
       else
 	fArgs[ name ].first = arg;
 
       // An error is displayed when an argument can not be parsed
       if ( !status )
-	IError << "Unable to parse argument " << pos << ": < "
-	       << name << " > (" << type << ')' << IEndMsg;
+	throw BaseException("Unable to parse argument " + std::to_string(pos) +
+			    ": \"" + name + "\" (" + std::string(1, type) + ')');
     }
   }
 

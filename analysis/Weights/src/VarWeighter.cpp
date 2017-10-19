@@ -7,14 +7,14 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // ---------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////
 
 
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "Utils.hpp"
 #include "VarWeighter.hpp"
 
@@ -130,12 +130,9 @@ namespace isis {
       waddress = new float;
       saddress = new float;
     }
-    else {
-      IError <<
-	"Wrong variable type for the branch of weights < " <<
-	type << " > ( F/D )" << IEndMsg;
-      return;
-    }
+    else
+      throw BaseException("Wrong variable type for the branch of weights \"" +
+			  std::string(1, type) + "\" ( F/D )");
 
     // Creates the new branches
     std::cout << "Created output branches:" << std::endl;

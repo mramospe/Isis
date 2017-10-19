@@ -42,8 +42,8 @@ namespace isis {
 
   public:
 
-    // Constructor given the string to be printed and the status code
-    BaseException( const std::string &info, const MsgCode &st ) {
+    // Constructor given the string to be printed and the message code
+    BaseException( const std::string &info, const MsgCode &st = MsgCode::Error ) {
 
       std::stringstream ss;
       Messenger msg(st, &ss);
@@ -83,9 +83,22 @@ namespace isis {
 
   public:
 
-    // Constructor given the invalid argument and the status code
-    InvalidArgument( const std::string &arg, const MsgCode &st ) :
+    // Constructor given the invalid argument and the message code
+    InvalidArgument( const std::string &arg, const MsgCode &st = MsgCode::Error ) :
       BaseException(std::string{"Invalid argument \""} + arg + std::string{"\""}, st) { }
+  };
+
+    //_______________________________________________________________________________
+  // Represent an exception to be thrown when an object could not be found
+  class NotFound : public BaseException {
+
+  public:
+
+    // Constructor given the object name, the argument and the message code
+    NotFound( const std::string &objname, const std::string &arg, const MsgCode &st = MsgCode::Error ) :
+      BaseException(std::string{"Unable to find "} + objname +
+		    std::string{"\""} + arg + std::string{"\""}, st) { }
+    
   };
   
 }

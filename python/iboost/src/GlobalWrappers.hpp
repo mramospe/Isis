@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/09/2017
+//  Last update: 19/10/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -23,8 +23,8 @@
 #define GLOBAL_WRAPPERS
 
 #include "Definitions.hpp"
+#include "Exceptions.hpp"
 #include "InitModule.hpp"
-#include "Messenger.hpp"
 
 #include <boost/python.hpp>
 #include <boost/python/dict.hpp>
@@ -102,8 +102,7 @@ namespace iboost {
     I_SWITCH_BY_DATA_TYPE(data_type, result,
 			  I_CREATE_STDCONT_FROM_NUMPYARRAY,
 			  
-			  IError << "Unknown array data type" << IEndMsg;
-			  return type();
+			  throw isis::BaseException("Unknown array data type");
 			  );
     
     return result;

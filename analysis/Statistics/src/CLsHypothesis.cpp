@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -18,8 +18,7 @@
 #include "CLsHypothesis.hpp"
 #include "CLsPrior.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
-#include "MessengerConfig.hpp"
+#include "Exceptions.hpp"
 
 #include "TMath.h"
 #include "TRandom3.h"
@@ -81,7 +80,7 @@ namespace isis {
       
     }
     else
-      IError << "CLs factory is not set" << IEndMsg;
+      throw BaseException("CLs factory is not set");
   }
 
   //_______________________________________________________________________________
@@ -132,12 +131,11 @@ namespace isis {
       break;
       
     case CLsHypTypes::aNone:
-      IError << "Hypothesis type is not set" << IEndMsg;
-      return 0;
+      throw BaseException("Hypothesis type is not set");
       
     default:
-      IError << "Unknown hypothesis type < " << fType << " >" << IEndMsg;
-      return 0;
+      throw BaseException("Unknown hypothesis type \"" +
+			  std::to_string(fType) + "\"");
     }
 
     return n/fTSVals.size();

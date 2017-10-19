@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 03/07/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 
 #include "AdaptiveBinning2D.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 
 #include "TLeaf.h"
 
@@ -91,7 +91,7 @@ namespace isis {
       nbins    = 1;
   
     if ( max_iter == 0 )
-      IError << "Minimum occupancy is so big, decrease it." << IEndMsg;
+      throw BaseException("Minimum occupancy is so big, decrease it.");
 
     double
       xrange( *std::max_element( xvalues.begin(), xvalues.end() ) -

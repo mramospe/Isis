@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 03/07/2017
+//  Last update: 19/10/2017
 //
 // --------------------------------------------------------------------
 ///////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 
 #include "AdaptiveBinning1D.hpp"
 #include "Definitions.hpp"
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 
 #include "TLeaf.h"
 
@@ -44,9 +44,8 @@ namespace isis {
     auto itv = values.begin();
     if ( weights.size() ) {
       if ( values.size() != weights.size() )
-	IError <<
-	  "The lengths of the vectors containing the values and the weights do no match"
-	       << IEndMsg;
+	throw BaseException("The lengths of the vectors containing the values "\
+			    "and the weights do no match");
       auto itw = weights.begin();
       while( itv != values.end() ) {
 	if ( *itv >= vmin && *itv < vmax )
@@ -73,7 +72,7 @@ namespace isis {
   
     // If the number of bins is zero an error is displayed
     if ( nbins == 0 )
-      IError << "Occupancy requested is too big: " << occ << IEndMsg;
+      throw BaseException("Occupancy requested is too big: " + std::to_string(occ));
   
     // Creates the vector of bins
     fBinList = std::vector<Bin*>( nbins );

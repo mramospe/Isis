@@ -14,6 +14,7 @@
 
 
 #include "Definitions.hpp"
+#include "Exceptions.hpp"
 #include "Messenger.hpp"
 #include "MessengerConfig.hpp"
 
@@ -41,8 +42,7 @@ namespace isis {
       this->build(ANSIFormat::ErrorPrefix, os ? *os : std::cerr, ANSIFormat::ErrorColor);
       break;
     default:
-      IError << "Unknown status code \"" << st << "\"" << IEndMsg;
-      break;
+      throw BaseException("Unknown message code \"" + std::to_string(st) + "\"");
     }
   }
 

@@ -7,12 +7,13 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 20/09/2017
+//  Last update: 19/10/2017
 //
 // -------------------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Exceptions.hpp"
 #include "GlobalWrappers.hpp"
 #include "Messenger.hpp"
 
@@ -49,10 +50,8 @@ namespace iboost {
     
       py::object list  = dict[ keys[ i ] ];
     
-      if ( py::len( list ) != length ) {
-	IError << "Lists in dictionary do not have the same length" << IEndMsg;
-	return 0;
-      }
+      if ( py::len( list ) != length )
+	throw isis::BaseException("Lists in dictionary do not have the same length");
     }
   
     return length;
@@ -65,7 +64,9 @@ namespace iboost {
   
     py::ssize_t n = py::len( args );
     if ( n != nargs )
-      IError << "Incorrect number of arguments " << n << " (" << nargs << ")" << IEndMsg;
+      throw isis::BaseException("Incorrect number of arguments " +
+				std::to_string(n) +
+				" (" + std::to_string(nargs) + ")");
   }
 
   //_______________________________________________________________________________

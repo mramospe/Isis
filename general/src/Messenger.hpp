@@ -50,7 +50,7 @@ namespace isis {
       this->build(start, os, fgcol, bgcol, sty);
     }
 
-    // Constructor given a status code
+    // Constructor given a message code
     Messenger( const short unsigned int &st, std::ostream *os = 0 );
     
     // Destructor

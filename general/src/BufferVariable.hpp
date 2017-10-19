@@ -7,7 +7,7 @@
 //  AUTHOR: Miguel Ramos Pernas
 //  e-mail: miguel.ramos.pernas@cern.ch
 //
-//  Last update: 10/04/2017
+//  Last update: 19/10/2017
 //
 // -------------------------------------------------------------------------------
 //
@@ -28,7 +28,7 @@
 #include <iostream>
 #include <string>
 
-#include "Messenger.hpp"
+#include "Exceptions.hpp"
 #include "ValueTypeDef.hpp"
 
 
@@ -92,8 +92,8 @@ namespace isis {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_GET_PTR_VALUE,
 			  
-			  IError << "The type of the buffer variable "
-			  "has not been specified yet" << IEndMsg;
+			  throw BaseException("The type of the buffer variable "
+					      "has not been specified yet");
 			  );
   }
 
@@ -121,8 +121,8 @@ namespace isis {
     
     I_SWITCH_BY_DATA_TYPE(fType, fPath, I_SET_PTR_VALUE,
 			  
-			  IError << "The type of the buffer variable "
-			  "has not been specified yet" << IEndMsg;
+			  throw BaseException("The type of the buffer variable "
+					      "has not been specified yet");
 			  );
   }
   
