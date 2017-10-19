@@ -97,7 +97,7 @@ namespace isis {
     // Constructor given the object name, the argument and the message code
     NotFound( const std::string &objname, const std::string &arg, const MsgCode &st = MsgCode::Error ) :
       BaseException(std::string{"Unable to find "} + objname +
-		    std::string{"\""} + arg + std::string{"\""}, st) { }
+		    std::string{" \""} + arg + std::string{"\""}, st) { }
     
   };
   
