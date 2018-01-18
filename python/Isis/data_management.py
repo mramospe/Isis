@@ -234,8 +234,8 @@ class DataMgr( pandas.DataFrame ):
         
         v = treeToArray(path, tname, cols, cuts, regex)
         
-        return DataMgr(data = v, columns = v.dtype.names, name = name), v
-                       
+        return DataMgr(data = v, columns = v.dtype.names, name = name)
+    
     def run_cut( self, var,
                  sense    = '>',
                  npoints  = 100,

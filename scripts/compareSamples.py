@@ -49,7 +49,7 @@ def genCorrPlots( mgrdct, varlst, nmgrs = 1, vartitles = [], cuts = False ):
 
         name   = 'CorrCanvas_' + str(i)
         canvas = rt.TCanvas(name, name)
-        nyvars, nxvars = iplt.optCanvasDivision(len(mset))
+        nyvars, nxvars = iplt.opt_canvas_div(len(mset))
         canvas.Divide(nyvars, nxvars)
 
         cst = iplt.CanvasStorer(canvas, [], [])
